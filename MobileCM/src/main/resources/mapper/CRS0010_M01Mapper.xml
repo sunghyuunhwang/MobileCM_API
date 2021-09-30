@@ -1,0 +1,1290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.CRS0010_M01Mapper">
+
+<select id="selectIsEmpty" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">				
+	SELECT TOP 1
+	       A.PLM_NO DATA1 
+	  FROM TC_PLANMST A WITH (NOLOCK)
+	 WHERE 1 = 1
+	 	<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(plm_no)">
+            AND PLM_NO = #{plm_no}
+        </if>
+</select>
+
+<update id="updateAsResultRemark" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_PLANMST
+	   SET MOB_REMARK = #{remark}
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update> 
+
+<update id="updateAsResult" parameterType="java.util.HashMap">
+<![CDATA[
+	UPDATE TA_PLANDTL
+    SET MOB_STD = 'C13Y',
+	    MOB_USEYN = CASE B.MOB_NOTUSEQTY WHEN 0 THEN 'Y' ELSE 'N' END,
+		MOB_NOTUSEQTY = B.MOB_NOTUSEQTY,
+	    USR_ID = #{usr_id},
+		SYS_DT = GETDATE()
+	FROM TA_PLANDTL A, (
+	                    SELECT a.data COM_PLDSEC,
+							b.data ORD_SSEQ,
+							CONVERT(INT, c.data) MOB_NOTUSEQTY
+		                FROM dbo.fnSplit(#{com_pldsec_arr}) a, dbo.fnSplit(#{ord_sseq_arr}) b, dbo.fnSplit(#{pld_fqty_arr}) c
+						WHERE a.seqno = b.seqno
+						AND a.seqno = c.seqno ) B
+	WHERE A.PLM_NO =  #{plm_no}
+    AND A.COM_PLDSEC = B.COM_PLDSEC
+	AND A.ORD_SSEQ = B.ORD_SSEQ
+	
+]]>
+</update>
+	
+<update id="updateAsResult_" parameterType="java.util.HashMap">
+<![CDATA[
+	UPDATE TA_PLANDTL
+    SET MOB_STD = 'C13Y',
+	    MOB_USEYN = 'Y',
+	    MOB_REMARK = '미사용 수량:' + B.MOB_NOTUSEQTY,
+		MOB_NOTUSEQTY = CONVERT(INT, B.MOB_NOTUSEQTY),
+	    USR_ID = #{user_id},
+		SYS_DT = GETDATE()
+	FROM TA_PLANDTL A, (
+	                    SELECT a.data COM_PLDSEC,
+							b.data ORD_SSEQ,
+							c.data MOB_NOTUSEQTY
+		                FROM dbo.fnSplit(#{com_pldsec_arr}) a, dbo.fnSplit(#{ord_sseq_arr}) b, dbo.fnSplit(#{pld_fqty_arr}) c
+						WHERE a.seqno = b.seqno
+						AND a.seqno = c.seqno ) B
+	WHERE A.PLM_NO =  #{plm_no}
+    AND A.COM_PLDSEC = B.COM_PLDSEC
+	AND A.ORD_SSEQ = B.ORD_SSEQ
+	
+]]>
+</update>
+	
+<select id="getSignDt" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[				
+	SELECT CONVERT(CHAR(8), SIGN_DT, 112) DATA1
+	FROM TC_RESMST WITH (NOLOCK)
+	WHERE REM_DT = #{REM_DT}
+	AND REM_SEQ = #{REM_SEQ}
+]]>
+</select>
+ 
+<update id="updateSignDt" parameterType="java.util.HashMap">
+<![CDATA[
+	UPDATE tc_resmst
+	SET sign_dt = getdate()
+	WHERE rem_dt = #{REM_DT}
+	AND rem_seq = #{REM_SEQ}
+]]>
+</update>
+
+<select id="selectTcSignContent" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[				
+	SELECT A.COM_SEQ DATA1,
+	       A.SIGN_CONTENT DATA2 
+	  FROM TC_SIGNCONTENT A WITH (NOLOCK)
+	 WHERE A.COM_AGSEC = #{COM_AGSEC} /*'C02I'*/
+	   AND A.COM_BRAND = #{COM_BRAND} /*'T60I01'*/
+	   AND A.COM_SSEC = #{COM_SSEC} /*'C18A'*/
+	 ORDER BY A.COM_SEQ
+]]>
+</select>
+ 
+<insert id="insertTcStiReq" parameterType="java.util.HashMap">
+<![CDATA[
+		INSERT INTO TC_STIREQ (
+		       PLM_NO, SET_CD, COL_SCD, ITM_CD, COL_CD, REQ_QTY, STI_CD, REQ_RMK, END_YN, USR_CD, SYS_DT )
+		SELECT PLM_NO, SET_CD, COL_SCD, ITM_CD, COL_CD, SUM(PLD_FQTY) REQ_QTY, #{STI_CD} STI_CD, '.' REQ_RMK, 'N' END_YN, #{USR_CD} USR_CD, GETDATE() SYS_DT
+		  FROM TC_PLANDTL
+		 WHERE PLM_NO = #{PLM_NO}
+		 GROUP BY PLM_NO, SET_CD, COL_SCD, ITM_CD, COL_CD
+]]>
+</insert>
+
+<update id="modyfyTcPlandtlSuspense_U_" parameterType="java.util.HashMap">
+<![CDATA[
+		/* CRS0010.modyfyTcPlandtlSuspense_U 2018.01.26 |주요한| 시공결과 미결처리 */
+		UPDATE TC_PLANDTL SET
+			 MOB_STD = 'C13N'
+			,COM_UNDSEC = #{COM_UNDSEC} /* 미결사유구분 */
+			,PLD_RCDT = CASE ISNULL(#{PLD_RCDT}, '') WHEN '' THEN PLD_RCDT ELSE #{PLD_RCDT} END /* 재시공요청일 */
+			,PLD_RASDT = CASE ISNULL(#{PLD_RASDT}, '') WHEN '' THEN PLD_RASDT ELSE #{PLD_RASDT} END /* AS요청일 */
+			,PLD_RMK = #{PLD_RMK} /* 비고 */
+			,COM_RDSEC = 'C13N' /* 결과구분 */
+			,USR_CD = #{USER_CD}
+			,PLD_FQTY = CONVERT(numeric(5,0), #{PLD_FQTY}) /* 확정수량 */
+		    ,SYS_DT = GETDATE()
+		    ,MOB_REMARK = #{MOB_REMARK}
+		WHERE 1=1
+		AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		AND COM_PLDSEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+		AND ORD_SSEQ = CAST( #{ORD_SSEQ} AS VARCHAR)
+		AND ORD_ISEQ = CAST( #{ORD_ISEQ} AS VARCHAR)
+		AND ITM_CD = CAST( #{ITM_CD} AS VARCHAR)
+]]>
+</update>
+
+<update id="modyfyTcPlandtlSuspense_U" parameterType="java.util.HashMap">
+		/* CRS0010.modyfyTcPlandtlSuspense_U 2018.01.26 |주요한| 시공결과 미결처리 */
+		UPDATE TC_PLANDTL SET
+		    MOB_STD = 'C13N'
+		    ,COM_UNDSEC = #{COM_UNDSEC} /* 미결사유구분 */
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_RCDT)">
+			,PLD_RCDT = #{PLD_RCDT} /* 재시공요청일 */
+		</if>
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_RASDT)">
+			,PLD_RASDT = #{PLD_RASDT} /* AS요청일 */
+		</if>
+			,PLD_RMK = #{PLD_RMK} /* 비고 */
+			,COM_RDSEC = 'C13N' /* 결과구분 */
+			,USR_CD = #{USER_CD}
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_FQTY)">
+			,PLD_FQTY = #{PLD_FQTY}/* 확정수량 */
+		</if>
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_CFAMT)">
+			,PLD_CFAMT = #{PLD_CFAMT} /* */
+		</if>
+		,MOB_REMARK = #{MOB_REMARK}
+		,SYS_DT = GETDATE()
+		WHERE 1=1
+		AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		AND COM_PLDSEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+		AND ORD_SSEQ = CAST( #{ORD_SSEQ} AS VARCHAR)
+		AND ORD_ISEQ = CAST( #{ORD_ISEQ} AS VARCHAR)
+		AND ITM_CD = CAST( #{ITM_CD} AS VARCHAR)
+</update>
+
+<delete id="modyfyTcActlist_D" parameterType="java.util.HashMap">
+<![CDATA[
+		/* CRS0010.modyfyTcActlist_D 2018.02.02 |주요한| 일괄 정산 테이블 삭제 */
+		DELETE FROM TC_ACTLIST
+		WHERE 1=1
+		AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+]]>
+</delete>
+
+<update id="TcplanmstAllCalculate" parameterType="java.util.HashMap">
+<![CDATA[
+		/* CRS0010.TcplanmstAllCalculate 2018.01.26 |주요한| 시공결과 일괄 정산처리 */
+		UPDATE TC_PLANMST SET
+		COM_PLMFG = #{COM_PLMFG_AFT}
+		,USR_CD = #{USER_ID}
+		,SYS_DT = GETDATE()
+		WHERE 1=1
+		AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+]]>
+</update>
+
+<select id="retrievesTcActinf_0000" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesTcActinf_0000 2018.02.02 |주요한| 지급계정코드,지급율구함 */
+<![CDATA[				
+	SELECT 
+			 ISNULL(ACI_RATEAMT,0) AS ACL_RATEAMT_D
+			,ISNULL(COM_VFSEC,0) AS  COM_VFSEC_D
+			,ISNULL(COM_VTSEC,0) AS COM_VTSEC_D
+	  FROM TC_ACTINF WITH (NOLOCK)
+	 WHERE 1=1
+	   AND COM_ACD = CAST( #{COM_ACD} AS VARCHAR)
+	   AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+	   AND COM_SVND  = CAST( #{COM_SVND} AS VARCHAR)
+	   AND COM_DPSEC ='C07D'
+	   AND ACI_AYN ='Y'
+]]>
+</select>
+
+<select id="retrieveTcPlandtlEtcSum" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<![CDATA[	
+		/* CSC0010_SQL.retrieveTcPlandtlEtcSum 2018.01.09 |주요한|*/
+		SELECT
+		SUM(ISNULL(D.PLD_CFAMT,0)) AS TOTAL_SUM_PLD_CFAMT_P
+		,ISNULL((SELECT SUM(PLD_CFAMT) FROM TC_PLANDTL WITH (NOLOCK) WHERE 1=1
+														 AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+												   		 AND COM_PLDSEC = D.COM_PLDSEC
+		),'0') AS TOTAL_SUM_PLD_CFAMT_D
+		,ISNULL(D.COM_ACD, '') AS COM_ACD
+		,ISNULL(D.COM_SVND , 'C21B') AS COM_SVND
+		,ISNULL(D.COM_VFSEC, '') AS COM_VFSEC_P
+		,ISNULL(D.COM_VTSEC, '') AS COM_VTSEC_P
+		,D.PLM_NO
+		,ISNULL(D.COM_PLDSEC, '') AS COM_PLDSEC
+		FROM TC_PLANDTL D WITH (NOLOCK)
+		WHERE D.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+	  AND D.COM_PLDSEC <>'C090' 
+	  AND D.COM_PLDSEC <>'C091' 
+	  AND D.COM_PLDSEC <>'C092' 
+	  AND D.COM_PLDSEC <>'C093' 
+	  AND D.COM_PLDSEC <>'C094' 
+	  AND D.COM_PLDSEC <>'C095' 
+	  AND D.COM_PLDSEC <>'C096' 
+	  AND D.COM_PLDSEC <>'C0930' 
+	  AND D.COM_PLDSEC <>'C09A' /*2018.04.30 |주요한| 폐기장코드 추가 */
+
+		GROUP BY D.COM_ACD, D.COM_SVND, D.COM_VFSEC, D.COM_VTSEC, D.PLM_NO,
+		D.COM_PLDSEC
+]]>
+</select>
+
+<select id="retrieveTcPlandtlPldsecSum" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CSC0010_SQL.retrieveTcPlandtlPldsecSum 2018.01.09 |주요한|*/
+<![CDATA[
+		SELECT
+		/* 2018.07.24  퍼시스는 매장경유 일 때, 공장도가에 요율이 곱해지는 것으로 공장도가 금액 쿼리 추가 */
+		(CASE WHEN A.COM_PLDSEC = 'C094' OR A.COM_PLDSEC = 'C09A' THEN
+		SUM(A.PLD_CFAMT) 
+		ELSE FLOOR((SELECT ISNULL(SUM(KK.SUM_PLD_AMT ),0) FROM (SELECT
+		CASE WHEN BB.COM_UNDSEC IN('C52B02', 'C52C01', 'C52C02') THEN ISNULL((BB.PLD_EQTY * AA.IOP_MNFCST),0) ELSE 
+		ISNULL((BB.PLD_FQTY * AA.IOP_MNFCST),0) END AS SUM_PLD_AMT  FROM
+		TT_ITMCOP AA WITH (NOLOCK) JOIN TC_PLANDTL BB WITH (NOLOCK) ON 1=1
+		AND AA.ITM_CD = BB.ITM_CD
+		AND AA.COL_CD = BB.COL_CD
+		AND BB.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		AND BB.COM_PLDSEC = A.COM_PLDSEC
+		AND AA.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+		WHERE CDX_CD = 'C02' AND CCD_CD = CAST( 'C02F' AS VARCHAR)				   				
+		AND ( BB.COM_RDSEC ='C13Y' OR (BB.COM_RDSEC ='C13N' AND BB.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01' , 'C52C02')) OR (BB.COM_RDSEC ='C13N' AND BB.PLD_EQTY != BB.PLD_FQTY))				   				
+		)) KK))
+		END) AS TOTAL_SUM_MNF_AMT /* 공장도가*/
+		,(CASE WHEN A.COM_PLDSEC = 'C094' OR A.COM_PLDSEC = 'C09A' THEN
+		SUM(A.PLD_CFAMT)
+		/*2018.05.24 |주요한| 통합테스트 정산시 오류 ISNULL 처리 추가*/
+		/*ELSE FLOOR((SELECT SUM(KK.SUM_PLD_AMT ) FROM (SELECT */ 
+		ELSE FLOOR((SELECT ISNULL(SUM(KK.SUM_PLD_AMT ),0) FROM (SELECT
+		CASE WHEN BB.COM_UNDSEC IN('C52B02', 'C52C01', 'C52C02') THEN ISNULL((BB.PLD_EQTY * AA.ITM_CONSTCST),0) ELSE 
+		ISNULL((BB.PLD_FQTY * AA.ITM_CONSTCST),0) END AS SUM_PLD_AMT  FROM
+		TT_ITMCOP AA WITH (NOLOCK) JOIN TC_PLANDTL BB WITH (NOLOCK) ON 1=1
+		AND AA.ITM_CD = BB.ITM_CD
+		AND AA.COL_CD = BB.COL_CD
+		AND BB.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		AND BB.COM_PLDSEC = A.COM_PLDSEC
+		AND AA.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+		WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{COM_AGSEC} AS VARCHAR)						   				
+		AND ( BB.COM_RDSEC ='C13Y' OR (BB.COM_RDSEC ='C13N' AND BB.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01', 'C52C02')) OR (BB.COM_RDSEC ='C13N' AND BB.PLD_EQTY != BB.PLD_FQTY))				   				
+		)) KK))
+		END) AS TOTAL_SUM_PLD_AMT /* 예상시공비 */
+		,ISNULL(FLOOR((SELECT ROUND(SUM(EE.PLD_CFAMT * CC.TRI_PRATE),0) FROM TC_TRINF CC WITH (NOLOCK)
+		JOIN TC_TRSEC DD WITH (NOLOCK) ON 1=1
+		AND CC.TRS_SEC = DD.TRS_SEC
+		JOIN TC_PLANDTL EE ON 1=1
+		AND EE.COM_PLDSEC = A.COM_PLDSEC
+		AND EE.PLM_NO = A.PLM_NO
+		AND CC.TRS_SEC = EE.trs_sec_2
+		AND (CC.TRI_ICD = EE.ITM_CD OR CC.TRI_ICD_O = EE.ITM_CD)
+		AND EE.COM_PLDSEC = DD.GUBUN						   				
+		AND ( EE.COM_RDSEC ='C13Y' OR (EE.COM_RDSEC ='C13N' AND EE.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01', 'C52C02')) )				   				
+		)),0) AS TOTAL_SUM_TRI_AMT_D /* 분해설치,폐기장 예상시공비*요율*/
+		,ISNULL(FLOOR((SELECT ROUND(SUM(EE.PLD_CFAMT * CC.TRI_DRATE),0) FROM
+		TC_TRINF CC WITH (NOLOCK)
+		JOIN TC_TRSEC DD WITH (NOLOCK) ON 1=1
+		AND CC.TRS_SEC = DD.TRS_SEC
+		JOIN TC_PLANDTL EE ON 1=1
+		AND EE.COM_PLDSEC = A.COM_PLDSEC
+		AND EE.PLM_NO = A.PLM_NO
+		AND CC.TRS_SEC = EE.trs_sec_2
+		AND (CC.TRI_ICD = EE.ITM_CD OR CC.TRI_ICD_O = EE.ITM_CD)
+		AND EE.COM_PLDSEC = DD.GUBUN						   				
+		AND ( EE.COM_RDSEC ='C13Y' OR (EE.COM_RDSEC ='C13N' AND EE.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01', 'C52C02')) )				   				
+		)),0) AS TOTAL_SUM_TRI_AMT_P /* 분해설치,폐기장 예상시공비*요율*/
+		,A.PLM_NO /* 시공번호 */
+		,A.COM_PLDSEC /* 시공의뢰구분 */
+		FROM TC_PLANDTL A WITH (NOLOCK)
+		WHERE 1=1
+		AND A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		AND COM_PLDSEC IN ('C090','C096','C092','C094','CO9A')
+		/*2018.05.10 |주요한| 통합테스트 0인 금액 조회를 위한 조건 로직 제외 */
+		/*AND ( A.COM_RDSEC ='C13Y' OR (A.COM_RDSEC ='C13N' AND A.COM_UNDSEC IN
+		('C52B02', 'C52011', 'C52C01')) ) */
+
+		GROUP BY A.PLM_NO,A.COM_PLDSEC
+]]>
+</select>
+
+<select id="retrievesTcActinf_C096" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesTcActinf_C096 2018.02.02 |주요한| 지급계정코드,지급율구함 */
+<![CDATA[				
+	SELECT 	TOP 1 
+			 ISNULL(A.COM_ACD,'') 		AS COM_ACD_P
+			,ISNULL(A.ACI_RATEAMT,0) 	AS ACI_RATEAMT_P
+			,ISNULL(A.COM_CESEC,'') 	AS COM_CESEC
+			,ISNULL(A.COM_RASEC,'') 	AS COM_RASEC_P
+			,ISNULL((CASE WHEN (#{COM_AGSEC} = 'C02V' AND #{COM_PLDSEC} = 'C096') THEN (SELECT ISNULL(COM_ACD,'') FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			 																		 						   AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+         																			 						   AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+					          																			 	   AND COM_VFSEC ='C2402' /* 업체FROM구분:바로스 */
+								 																			   AND COM_ACD   ='C01061' /* 정산세부항목코드 : 반품회수 */
+					          																			 	   AND COM_VTSEC ='C2507'  /* 업체TO구분 : 본비비 */
+					          																			 	   AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+					          																			 	   AND ACI_AYN ='Y')   
+				   WHEN (#{COM_AGSEC} != 'C02V' AND #{COM_PLDSEC} !='C096') THEN (SELECT ISNULL(COM_ACD,'') FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+									   																		    AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+									 																		    AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+																											    AND COM_VFSEC = CAST( 'C2402' AS VARCHAR)
+																											    AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+																											    AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+																											    AND ACI_AYN ='Y')   
+			END),'') AS COM_ACD_D
+			,ISNULL((CASE WHEN (#{COM_AGSEC} = 'C02V' AND #{COM_PLDSEC} = 'C096') THEN (SELECT ISNULL(ACI_RATEAMT,0) FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			 																		 							   AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          																			 							   AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+						          																			 	   AND COM_VFSEC ='C2402' /* 업체FROM구분:바로스 */
+									 																			   AND COM_ACD   ='C01061' /* 정산세부항목코드 : 반품회수 */
+						          																			 	   AND COM_VTSEC ='C2507'  /* 업체TO구분 : 본비비 */
+						          																			 	   AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+						          																				   AND ACI_AYN ='Y')
+				   WHEN (#{COM_AGSEC} != 'C02V' AND #{COM_PLDSEC} !='C096') THEN (SELECT ISNULL(ACI_RATEAMT,0) FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			   																		  								AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+			 																		  								AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+																					  								AND COM_VFSEC = CAST( 'C2402' AS VARCHAR)
+																											    	AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+																											    	AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+																					  								AND ACI_AYN ='Y')   
+			END),0) AS ACI_RATEAMT_D
+			,ISNULL((CASE WHEN (#{COM_AGSEC} = 'C02V' AND #{COM_PLDSEC} = 'C096') THEN (SELECT ISNULL(COM_RASEC,'') FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+										 																		 AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+							          																			 AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+							          																			 AND COM_VFSEC ='C2402' /* 업체FROM구분:바로스 */
+										 																		 AND COM_ACD   ='C01061' /* 정산세부항목코드 : 반품회수 */
+							          																			 AND COM_VTSEC ='C2507'  /* 업체TO구분 : 본비비 */
+							          																			 AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+							          																			 AND ACI_AYN ='Y')
+				   WHEN (#{COM_AGSEC} != 'C02V' AND #{COM_PLDSEC} !='C096') THEN (SELECT ISNULL(COM_RASEC,'') FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			   																		  							  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+										 																		  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+																												  AND COM_VFSEC = CAST( 'C2402' AS VARCHAR)
+																											      AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+																											      AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+																												  AND ACI_AYN ='Y')   
+			END),'') AS COM_RASEC_D
+			
+	  FROM TC_ACTINF A WITH (NOLOCK)
+			   WHERE 1=1
+			   	 AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+			 	 AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+				 AND COM_VFSEC = CAST( 'C2402' AS VARCHAR)
+				 AND COM_VTSEC ='C2501' /* 업체TO구분 : 대리점 */
+				 AND COM_DPSEC ='C07P' /* 청구지급구분 : 청구 */
+				 AND ACI_AYN ='Y'
+]]>
+</select>
+
+<select id="retrievesC096RelayAmt" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesC096RelayAmt 2018.03.23 |주요한| 매장경유 (전달) 인경우 금액 */
+<![CDATA[				
+	SELECT 
+			 SUM(A.PLD_FQTY) * 2000 AS AMT
+	  FROM (SELECT 
+					DISTINCT 
+					 SET_CD
+					,COL_SCD
+					,PLD_FQTY
+			  FROM TC_PLANDTL WITH (NOLOCK)
+			 WHERE COM_PLDSEC = 'C096'
+			   AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+	       ) A
+]]>
+</select>
+
+
+<select id="retrievesC096List" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesC096List 2018.03.23 |주요한| 일룸일경우 반품회수 */
+<![CDATA[				
+	SELECT 	TOP 1 
+			 A.COM_ACD AS COM_ACD_P
+			,A.ACI_RATEAMT AS ACI_RATEAMT_P
+			,A.COM_CESEC AS COM_CESEC
+			,A.COM_RASEC AS COM_RASEC_P
+			,(SELECT COM_ACD FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+									   																		    AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+									 																		    AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+																											    AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+																											    AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+																											    AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+																											    AND ACI_AYN ='Y')   
+			AS COM_ACD_D
+			,(SELECT ACI_RATEAMT FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			   																		  								AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+			 																		  								AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+																					  								AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+																					  								AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+																					  								AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+																					  								AND ACI_AYN ='Y')   
+			AS ACI_RATEAMT_D
+			,(SELECT COM_RASEC FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			   																		  							  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+										 																		  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+																												  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+																												  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+																												  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+																												  AND ACI_AYN ='Y')   
+			AS COM_RASEC_D
+	  FROM TC_ACTINF A WITH (NOLOCK)
+			   WHERE 1=1
+			   	 AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+			 	 AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+				 AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+				 AND COM_VTSEC ='C2501' /* 업체TO구분 : 대리점 */
+				 AND COM_DPSEC ='C07P' /* 청구지급구분 : 청구 */
+				 AND ACI_AYN ='Y'
+]]>
+</select>
+
+<select id="retrievesC092PassList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesC092PassList 2018.03.23 |주요한| 매장경유비용 매1회 실행 */
+<![CDATA[				
+	SELECT 	TOP 1 
+			 A.COM_ACD AS COM_ACD_P
+			,A.ACI_RATEAMT AS ACI_RATEAMT_P
+			,A.COM_RASEC AS COM_RASEC_P
+			,A.COM_CESEC AS COM_CESEC
+			,(SELECT COM_ACD FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+											  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          									  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+          									  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	  										  AND COM_ACD   ='C01021' /* 정산세부항목코드 : 매장경유(매1회) */
+          									  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+          									  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+          									  AND ACI_AYN ='Y'
+			) AS COM_ACD_D	
+			,(SELECT ACI_RATEAMT FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+												  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          										  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+          										  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	  											  AND COM_ACD   ='C01021' /* 정산세부항목코드 : 매장경유(매1회) */
+          										  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+          										  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+          										  AND ACI_AYN ='Y'
+			) AS ACI_RATEAMT_D
+			,(SELECT COM_RASEC FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+												  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          										  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+          										  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	  											  AND COM_ACD   ='C01021' /* 정산세부항목코드 : 매장경유(매1회) */
+          										  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+          										  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+          										  AND ACI_AYN ='Y'
+			) AS COM_RASEC_D
+	  FROM TC_ACTINF A WITH (NOLOCK)
+	 WHERE 1=1 	  
+	   AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+	   AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+	   AND COM_ACD   ='C01021' /* 정산세부항목코드 : 매장경유(매1회) */
+	   AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	   AND COM_VTSEC ='C2501' /* 업체TO구분 : 시공팀 */
+	   AND COM_DPSEC ='C07P' /* 청구지급구분 : 지급 */
+	   AND ACI_AYN ='Y'	
+]]>
+</select>
+
+<select id="retrievesC092RelayAmt" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesC092RelayAmt 2018.03.23 |주요한| 매장경유 (전달) 인경우 금액 */
+<![CDATA[				
+	SELECT 
+			 SUM(A.PLD_FQTY) * 2000 AS AMT
+	  FROM (SELECT 
+					DISTINCT 
+					 SET_CD
+					,COL_SCD
+					,PLD_FQTY
+			  FROM TC_PLANDTL WITH (NOLOCK)
+			 WHERE COM_PLDSEC IN ('C091', 'C092', 'C093', 'C095', 'C0930', 'C0931')
+			   AND PLM_NO = CAST( #PLM_NO# AS VARCHAR)
+	       ) A
+]]>
+</select>
+
+
+<select id="retrievesTcActinf_C092" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesTcActinf_C092 2018.02.02 |주요한| 지급계정코드,지급율구함 */
+<![CDATA[				
+	SELECT 	TOP 1 
+			 A.COM_ACD AS COM_ACD_P
+			,A.ACI_RATEAMT AS ACI_RATEAMT_P
+			,A.COM_CESEC AS COM_CESEC
+			,A.COM_RASEC AS COM_RASEC_P
+			,(SELECT COM_ACD FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+											  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          									  AND COM_AGSEC =CAST( #{COM_AGSEC} AS VARCHAR)
+          									  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	  										  AND COM_ACD   ='C01022' /* 정산세부항목코드 : 매장경유(청) */
+          									  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+          									  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+          									  AND ACI_AYN ='Y'
+			) AS COM_ACD_D	
+			,(SELECT ACI_RATEAMT FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+												  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          										  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+          										  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	  											  AND COM_ACD   ='C01022' /* 정산세부항목코드 : 매장경유(청) */
+          										  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+          										  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+          										  AND ACI_AYN ='Y'
+			) AS ACI_RATEAMT_D
+			,(SELECT COM_RASEC FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+												  AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+          										  AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+          										  AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	  											  AND COM_ACD   ='C01022' /* 정산세부항목코드 : 매장경유(청) */
+          										  AND COM_VTSEC ='C2505' /* 업체TO구분 : 대리점 */
+          										  AND COM_DPSEC ='C07D' /* 청구지급구분 : 청구 */
+          										  AND ACI_AYN ='Y'
+			) AS COM_RASEC_D
+	  FROM TC_ACTINF A WITH (NOLOCK)
+	 WHERE 1=1 	  
+	   AND COM_ASEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+	   AND COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+	   AND COM_ACD   ='C01022' /* 정산세부항목코드 : 매장경유(청) */
+	   AND COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	   AND COM_VTSEC ='C2501' /* 업체TO구분 : 시공팀 */
+	   AND COM_DPSEC ='C07P' /* 청구지급구분 : 지급 */
+	   AND ACI_AYN ='Y'	
+]]>
+</select>
+
+<insert id="modyfyTcActlistP_I" parameterType="java.util.HashMap">
+		/* CRS0010.modyfyTcActlistP_I 2018.02.02 |주요한| 일괄 정산 테이블 저장 */
+<![CDATA[
+		INSERT INTO TC_ACTLIST
+		(
+		PLM_NO
+		,COM_ASEC
+		,COM_ACD
+		,COM_SVND
+		,COM_AGSEC
+		,COM_DPSEC
+		,ACL_VFROM
+		,ACL_VTO
+		,COM_VFSEC
+		,COM_VTSEC
+		,ACL_AMT
+		,COM_SCD
+		,COM_CTSEC
+		,PLM_CDT
+		,ACL_DT
+		,ACL_CMPYN
+		,ACL_RMK
+		,USR_CD
+		,SYS_DT
+		,COM_CESEC
+		,COM_BRAND
+		)
+		VALUES
+		(
+		#{PLM_NO} /* 시공구분 */
+		,#{COM_PLDSEC} /* 정산항목구분 */
+		,#{COM_ACD_P} /* 정산세부항목코드 */
+		,#{COM_SVND} /* 서비스업체 */
+		,#{COM_AGSEC} /* 대행사구분 */
+		,'C07P' /* 청구지급구분 */
+		,#{ACL_VFROM} /* 업체FROM */
+		,#{ACL_VTO} /* 업체TOD */
+		,#{COM_VFSEC} /* 업체FROM구분 */
+		,#{COM_VTSEC} /* 업체TOD구분 */
+		, case when ( select count(*)
+		from tc_stinf WITH (NOLOCK)
+		where sti_cd = #{ACL_VTO}
+		and amt_ex = 'C60010'
+		/*2018.06.01 |주요한| 황석현대리님 요청 일룸일경우 로직안타게끔 수정 */
+		AND #{COM_AGSEC} != 'C02I') > 0
+		then 0 else ROUND(#{ACL_AMT_P},0) end /* 정산비용금액 */
+		,#{COM_SCD} /* 서비스센터코드 */
+		,#{COM_CTSEC} /* 시공팀구분 */
+		,#{PLM_CDT} /* 시공일ㅈ바 */
+		,CONVERT(CHAR(8), GETDATE(), 112) /* 정산일자 */
+		,'N' /* 대리점확인유무 */
+		,#{ACL_RMK_P} /* 비고 */
+		,#{USER_ID} /* */
+		,GETDATE() /* */
+		,#{COM_CESEC} /* 시공비용구분 */
+		,#{COM_BRAND} /* 브랜드번호 */
+		)
+]]>
+</insert>
+
+<select id="retrievesC090RelayAmt" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesC090RelayAmt 2018.03.23 |주요한| 일반 (전달) 인경우 금액 */
+<![CDATA[				
+	SELECT 
+			 ISNULL(SUM(A.PLD_FQTY), 0) * 2000 AS AMT
+	  FROM (SELECT 
+					DISTINCT 
+					 SET_CD
+					,COL_SCD
+					/*2018.05.28 |주요한| ISNULL 처리*/
+					,ISNULL(PLD_FQTY,0) AS PLD_FQTY
+			  FROM TC_PLANDTL WITH (NOLOCK)
+			 WHERE COM_PLDSEC = 'C090'
+			   AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+	       ) A
+]]>
+</select>
+
+<insert id="modyfyTcActlistD_I" parameterType="java.util.HashMap">
+		/* CRS0010.modyfyTcActlistD_I 2018.02.02 |주요한| 일괄 정산 테이블 저장 */
+<![CDATA[		
+		INSERT INTO TC_ACTLIST
+		(
+		PLM_NO
+		,COM_ASEC
+		,COM_ACD
+		,COM_SVND
+		,COM_AGSEC
+		,COM_DPSEC
+		,ACL_VFROM
+		,ACL_VTO
+		,COM_VFSEC
+		,COM_VTSEC
+		,ACL_AMT
+		,COM_SCD
+		,COM_CTSEC
+		,PLM_CDT
+		,ACL_DT
+		,ACL_CMPYN
+		,ACL_RMK
+		,USR_CD
+		,SYS_DT
+		,COM_CESEC
+		,COM_BRAND
+		)
+		VALUES
+		(
+		#{PLM_NO} /* 시공구분 */
+		,#{COM_PLDSEC} /* 정산항목구분 */
+		,#{COM_ACD_D} /* 정산세부항목코드 */
+		,#{COM_SVND} /* 서비스업체 */
+		,#{COM_AGSEC} /* 대행사구분 */
+		,'C07D' /* 청구지급구분 */
+		,#{ACL_VFROM} /* 업체FROM */
+		,#{ACL_VTO} /* 업체TOD */
+		,#{COM_VFSEC} /* 업체FROM구분 */
+		,#{COM_VTSEC} /* 업체TOD구분 */
+		, case when ( select count(*)
+		from tc_stinf WITH (NOLOCK)
+		where sti_cd = #{ACL_VTO}
+		and amt_ex = 'C60010' 
+		/*2018.06.01 |주요한| 황석현대리님 요청 일룸일경우 로직안타게끔 수정 */
+		AND #{COM_AGSEC} != 'C02I') > 0
+		then 0 else ROUND(#{ACL_AMT_D},0) end /* 정산비용금액 */
+		,#{COM_SCD} /* 서비스센터코드 */
+		,#{COM_CTSEC} /* 시공팀구분 */
+		,#{PLM_CDT} /* 시공일ㅈ바 */
+		,CONVERT(CHAR(8), GETDATE(), 112) /* 정산일자 */
+		,'N' /* 대리점확인유무 */
+		,#{ACL_RMK_D} /* 비고 */
+		,#{USER_ID} /* */
+		,GETDATE() /* */
+		,#{COM_CESEC} /* 시공비용구분 */
+		,#{COM_BRAND} /* 브랜드번호 */
+		)
+]]>
+</insert>
+
+<select id="retrievesTcActinf_C090" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CRS0010.retrievesTcActinf_C090 2018.02.02 |주요한| 지급계정코드,지급율구함 */
+<![CDATA[				
+	SELECT 	TOP 1 
+			 ISNULL(A.COM_ACD,'') AS COM_ACD_P
+			,ISNULL(ROUND(A.ACI_RATEAMT, 3),'0') AS ACI_RATEAMT_P
+			,ISNULL(A.COM_CESEC,'') AS COM_CESEC
+			,ISNULL((SELECT TOP 1 COM_ACD FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+			                  		AND COM_ASEC 	= 'C090'
+							 		AND COM_AGSEC 	= CAST( #{COM_AGSEC} AS VARCHAR)
+									AND COM_VFSEC 	= CAST( #{COM_VFSEC} AS VARCHAR)
+									AND COM_VTSEC 	= CAST( #{COM_VTSEC} AS VARCHAR)
+									AND COM_DPSEC 	= 'C07D' /* 청구지급구분 : 청구 */
+									AND COM_RASEC 	= 'C12R' /* 요율금액구분 : 요율 */
+								    AND ACI_AYN 	='Y'
+			),'') AS COM_ACD_D	
+			,ISNULL((SELECT TOP 1 ROUND(ACI_RATEAMT, 3) FROM TC_ACTINF WITH (NOLOCK) WHERE 1=1
+				                  	 	 AND COM_ASEC 	= 'C090'
+								 		 AND COM_AGSEC 	= CAST( #{COM_AGSEC} AS VARCHAR)
+										 AND COM_VFSEC 	= CAST( #{COM_VFSEC} AS VARCHAR)
+										 AND COM_VTSEC 	= CAST( #{COM_VTSEC} AS VARCHAR)
+										 AND COM_DPSEC 	= 'C07D' /* 청구지급구분 : 청구 */
+										 AND COM_RASEC 	= 'C12R' /* 요율금액구분 : 요율 */
+									     AND ACI_AYN 	='Y'
+			),'0') AS ACI_RATEAMT_D	
+	  FROM TC_ACTINF A WITH (NOLOCK)
+	 WHERE 1=1
+	   AND A.COM_ASEC = 'C090'
+	   AND A.COM_AGSEC = CAST( #{COM_AGSEC} AS VARCHAR)
+	   AND A.COM_VFSEC = CAST( #{COM_VFSEC} AS VARCHAR)
+	   AND A.COM_VTSEC ='C2501' /* 업체TO구분 : 시공팀 */
+	   AND A.COM_DPSEC ='C07P' /* 청구지급구분 : 지급 */
+	   AND A.COM_RASEC ='C12R' /* 요율금액구분 : 요율 */
+	   
+]]>
+</select>
+
+<select id="retrieveC02I_Sum" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CSC0010_SQL.retrieveC02I_Sum 2018.08.10 수정, 회사가 일룸일때 일반 정산 SUM */
+		/*회사 일룸일 때, 미결일 때, 사유가 AS 및 상차후반품이면 시공비 지급이 되어야 함*/
+<![CDATA[		
+	SELECT 
+			 FLOOR(AAA.C090_LD_AMT) AS C090_LD_AMT
+			,FLOOR(BBB.C090_LD_AMT2) AS C090_LD_AMT2
+			,FLOOR(CCC.C090_LD_STOCK1) AS C090_LD_STOCK1
+			,FLOOR(DDD.C090_LD_STOCK2) AS C090_LD_STOCK2
+			,FLOOR(EEE.C092_LD_AMT)+FLOOR(FFF.C092_LD_AMT2) AS C092_LD_AMT
+			,FLOOR(GGG.C096_LD_AMT)+FLOOR(HHH.C096_LD_AMT2) AS C096_LD_AMT
+   	        ,ISNULL(FLOOR((SELECT ROUND(SUM(EE.PLD_CFAMT * CC.TRI_DRATE),0) FROM TC_TRINF CC WITH (NOLOCK)
+				       												  JOIN TC_TRSEC DD WITH (NOLOCK) ON 1=1 
+																		    		  AND CC.TRS_SEC = DD.TRS_SEC
+																	  JOIN TC_PLANDTL EE WITH (NOLOCK) ON 1=1
+																						AND EE.COM_PLDSEC = 'C094'
+																						AND EE.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+																						AND CC.TRS_SEC = EE.trs_sec_2
+																						AND (CC.TRI_ICD = EE.ITM_CD OR CC.TRI_ICD_O = EE.ITM_CD)
+																						AND EE.COM_PLDSEC = DD.GUBUN 
+																						AND ( EE.COM_RDSEC ='C13Y' OR (EE.COM_RDSEC ='C13N' AND EE.COM_UNDSEC IN ('C52011', 'C52C01')) )
+			)),'0') AS C094_LD_AMT_P													/* 분해설치 예상시공비*요율*/
+   	        ,ISNULL(FLOOR((SELECT ROUND(SUM(EE.PLD_CFAMT * CC.TRI_DRATE),0) FROM TC_TRINF CC WITH (NOLOCK)
+				       												  JOIN TC_TRSEC DD WITH (NOLOCK) ON 1=1 
+																		    		  AND CC.TRS_SEC = DD.TRS_SEC
+																	  JOIN TC_PLANDTL EE WITH (NOLOCK) ON 1=1
+																						AND EE.COM_PLDSEC = 'C09A'
+																						AND EE.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+																						AND CC.TRS_SEC = EE.trs_sec_2
+																						AND (CC.TRI_ICD = EE.ITM_CD OR CC.TRI_ICD_O = EE.ITM_CD)
+																						AND EE.COM_PLDSEC = DD.GUBUN 
+																						AND ( EE.COM_RDSEC ='C13Y' OR (EE.COM_RDSEC ='C13N' AND EE.COM_UNDSEC IN ('C52011', 'C52C01')) )
+			)),'0') AS C09A_LD_AMT_P													/* 폐기장 예상시공비*요율*/
+			,ISNULL(FLOOR((SELECT ROUND(SUM(EE.PLD_CFAMT * CC.TRI_PRATE),0) FROM TC_TRINF CC WITH (NOLOCK)
+				       												  JOIN TC_TRSEC DD WITH (NOLOCK) ON 1=1 
+																		    		  AND CC.TRS_SEC = DD.TRS_SEC
+																	  JOIN TC_PLANDTL EE WITH (NOLOCK) ON 1=1
+																						AND EE.COM_PLDSEC = 'C094'
+																	  					AND EE.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+																						AND CC.TRS_SEC = EE.trs_sec_2
+																						AND (CC.TRI_ICD = EE.ITM_CD OR CC.TRI_ICD_O = EE.ITM_CD)
+																						AND EE.COM_PLDSEC = DD.GUBUN 
+																						AND ( EE.COM_RDSEC ='C13Y' OR (EE.COM_RDSEC ='C13N' AND EE.COM_UNDSEC IN ('C52011', 'C52C01')) )
+			)),'0') AS C094_LD_AMT_D													/* 분해설치 예상시공비*요율*/
+   	        ,ISNULL(FLOOR((SELECT ROUND(SUM(EE.PLD_CFAMT * CC.TRI_PRATE),0) FROM TC_TRINF CC WITH (NOLOCK)
+				       												  JOIN TC_TRSEC DD WITH (NOLOCK) ON 1=1 
+																		    		  AND CC.TRS_SEC = DD.TRS_SEC
+																	  JOIN TC_PLANDTL EE WITH (NOLOCK) ON 1=1
+																						AND EE.COM_PLDSEC = 'C09A'
+																						AND EE.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+																						AND CC.TRS_SEC = EE.trs_sec_2
+																						AND (CC.TRI_ICD = EE.ITM_CD OR CC.TRI_ICD_O = EE.ITM_CD)
+																						AND EE.COM_PLDSEC = DD.GUBUN
+																						AND ( EE.COM_RDSEC ='C13Y' OR (EE.COM_RDSEC ='C13N' AND EE.COM_UNDSEC IN ('C52011', 'C52C01')) ) 
+			)),'0') AS C09A_LD_AMT_D													/* 폐기장 예상시공비*요율*/
+	  FROM (
+			SELECT  
+					 ISNULL(SUM(ISNULL(A.PLD_FQTY,0) * ISNULL(B.ITM_CONSTCST,0)),0) AS C090_LD_AMT   /* 시공비용으로 정산 */
+		      FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+		     WHERE 1=1
+			   AND A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		       AND A.ITM_CD = B.ITM_CD
+		       AND A.COL_CD = B.COL_CD
+		       AND B.COM_CMP = 'T01I'
+		       AND A.ITM_CD NOT IN ( 'HX04EXT', 'EXTRA-4')
+		       AND ( A.COM_RDSEC ='C13Y'  
+				 	OR (A.COM_RDSEC ='C13N' AND (A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01') ))
+				 	OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY) 
+			   )
+			   AND (A.COM_UNDSEC NOT IN ('C52005','C52006','C52011','C52C01','C52B02')
+					OR A.COM_UNDSEC IS NULL)
+		       AND COM_PLDSEC = 'C090'		
+		   ) AAA,
+		   (
+			SELECT  
+					 ISNULL(SUM(ISNULL(A.PLD_EQTY,0) * ISNULL(B.ITM_CONSTCST,0)),0) AS C090_LD_AMT2
+			  FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			 WHERE 1=1
+			   AND A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			   AND A.ITM_CD = B.ITM_CD
+			   AND A.COL_CD = B.COL_CD
+			   AND B.COM_CMP = 'T01I'
+			   AND A.ITM_CD NOT IN ( 'HX04EXT', 'EXTRA-4')
+			   AND ( A.COM_RDSEC ='C13Y' 
+					OR (A.COM_RDSEC ='C13N' AND (A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01') )) 
+					OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY) 
+			   )
+			   AND A.COM_UNDSEC IN ('C52005','C52006','C52011','C52C01','C52B02')
+			   AND COM_PLDSEC = 'C090'      		
+		   ) BBB,
+		   (
+		
+			SELECT  
+					 ISNULL(SUM(ISNULL(A.PLD_FQTY,0) * ISNULL(B.ITM_CONSTCST,0)),0) AS C090_LD_STOCK1    /* 시공비용으로 정산 */
+			  FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			 WHERE 1=1
+			   AND A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			   AND A.ITM_CD = B.ITM_CD
+			   AND A.COL_CD = B.COL_CD
+			   AND B.COM_CMP = 'T01I'
+			   AND A.ITM_CD NOT IN ('EXTRA-4')
+			   AND A.ITM_CD IN ( 'HW00E15EE', 'HW00E10EE', 'HW00E25EE')
+			   AND ( A.COM_RDSEC ='C13Y' 
+					OR  (A.COM_RDSEC ='C13N' AND (A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01') ))
+			   		OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY) 
+			   )
+			   AND (A.COM_UNDSEC NOT IN ('C52005','C52006','C52011','C52C01','C52B02')
+					OR A.COM_UNDSEC IS NULL)
+			   AND COM_PLDSEC = 'C090'	
+		   ) CCC,			   
+		   (
+			SELECT  
+					 ISNULL(SUM(ISNULL(A.PLD_EQTY,0) * ISNULL(B.ITM_CONSTCST,0)),0) AS C090_LD_STOCK2
+			  FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			 WHERE 1=1
+			   AND A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			   AND A.ITM_CD = B.ITM_CD
+			   AND A.COL_CD = B.COL_CD
+			   AND A.ITM_CD NOT IN ('EXTRA-4')
+			   AND B.COM_CMP = 'T01I'
+			   AND A.ITM_CD IN ( 'HW00E15EE', 'HW00E10EE', 'HW00E25EE')
+			   AND ( A.COM_RDSEC ='C13Y' 
+					OR (A.COM_RDSEC ='C13N' AND (A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01') )) 
+					OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY) 
+			   )
+			   AND A.COM_UNDSEC IN ('C52005','C52006','C52011','C52C01','C52B02')
+			   AND COM_PLDSEC = 'C090'  	
+		   ) DDD,
+		   (
+		   	 SELECT ISNULL(SUM(ISNULL(A.PLD_FQTY,0) * ISNULL(B.ITM_CONSTCST,0)), 0) AS C092_LD_AMT
+			   FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			  WHERE A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			    AND A.ITM_CD = B.ITM_CD
+			    AND A.COL_CD = B.COL_CD
+			    AND B.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+					   					       WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{COM_AGSEC} AS VARCHAR))
+			    AND ( A.COM_RDSEC ='C13Y' OR (A.COM_RDSEC ='C13N' AND A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01'))
+			    	  OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY)
+			    )
+			    AND (A.COM_UNDSEC NOT IN ('C52005','C52006','C52011','C52C01','C52B02')
+					  OR A.COM_UNDSEC IS NULL)
+			    AND A.COM_PLDSEC = 'C092'
+		   ) EEE,
+		   ( 
+		   	 SELECT ISNULL(SUM(ISNULL(A.PLD_EQTY,0) * ISNULL(B.ITM_CONSTCST,0)), 0) AS C092_LD_AMT2
+			   FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			  WHERE A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			    AND A.ITM_CD = B.ITM_CD
+			    AND A.COL_CD = B.COL_CD
+			    AND B.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+					   					       WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{COM_AGSEC} AS VARCHAR))
+			    AND ( A.COM_RDSEC ='C13Y' OR (A.COM_RDSEC ='C13N' AND A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01'))
+			    	  OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY)
+			    )
+			    AND A.COM_UNDSEC IN ('C52005','C52006','C52011','C52C01','C52B02')
+			    AND A.COM_PLDSEC = 'C092'
+		   ) FFF,
+		   (
+		      SELECT ISNULL(SUM(ISNULL(A.PLD_FQTY,0) * ISNULL(B.ITM_CONSTCST,0)),0) AS C096_LD_AMT
+			    FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			   WHERE A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			     AND A.ITM_CD = B.ITM_CD
+			     AND A.COL_CD = B.COL_CD
+			     AND B.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+										        WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{COM_AGSEC} AS VARCHAR))
+			     AND ( A.COM_RDSEC ='C13Y' OR (A.COM_RDSEC ='C13N' AND A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01'))
+			    	  OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY)
+			     )
+			     AND (A.COM_UNDSEC NOT IN ('C52005','C52006','C52011','C52C01','C52B02')
+					  OR A.COM_UNDSEC IS NULL)
+			     AND A.COM_PLDSEC = 'C096'
+		   ) GGG,
+		   (
+		      SELECT ISNULL(SUM(ISNULL(A.PLD_EQTY,0) * ISNULL(B.ITM_CONSTCST,0)),0) AS C096_LD_AMT2
+			    FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH (NOLOCK)
+			   WHERE A.PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+			     AND A.ITM_CD = B.ITM_CD
+			     AND A.COL_CD = B.COL_CD
+			     AND B.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+										        WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{COM_AGSEC} AS VARCHAR))
+			     AND ( A.COM_RDSEC ='C13Y' OR (A.COM_RDSEC ='C13N' AND A.COM_UNDSEC IN ('C52B02', 'C52011', 'C52C01'))
+			    	  OR (A.COM_RDSEC ='C13N' AND A.PLD_EQTY != A.PLD_FQTY)
+			     )
+			     AND A.COM_UNDSEC IN ('C52005','C52006','C52011','C52C01','C52B02')
+			     AND A.COM_PLDSEC = 'C096'
+		   ) HHH
+]]>
+</select>
+
+<select id="retrievePldsecCountList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+<![CDATA[
+		/* CRS0010.retrievePldsecCountList 2018.05.05 |주요한| 정산시 실제 com_pldsec건당 갯수를 카운트 */
+				
+	SELECT 
+			 (SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND AA.COM_PLDSEC = 'C090' ) AS C090_COUNT
+			,(SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND AA.COM_PLDSEC = 'C092' ) AS C092_COUNT
+			,(SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND AA.COM_PLDSEC = 'C096' ) AS C096_COUNT
+			,(SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND AA.COM_PLDSEC = 'C094' ) AS C094_COUNT
+			,(SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND AA.COM_PLDSEC = 'C094' ) AS C095_COUNT
+			,(SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND AA.COM_PLDSEC = 'C09A' ) AS C09A_COUNT
+			,(SELECT COUNT(*) FROM TC_PLANDTL AA WHERE 1=1 AND AA.PLM_NO = A.PLM_NO AND COM_PLDSEC <>'C090' 
+																					AND COM_PLDSEC <>'C091' 
+																					AND COM_PLDSEC <>'C092' 
+																				    AND COM_PLDSEC <>'C093' 
+																					AND COM_PLDSEC <>'C094' 
+																					AND COM_PLDSEC <>'C096' 
+																					AND COM_PLDSEC <>'C0930' 
+																					AND COM_PLDSEC <>'C09A'  ) AS ETC_COUNT
+	  FROM TC_PLANMST A WITH(NOLOCK)
+	 WHERE 1=1
+	   AND A.PLM_NO = #{PLM_NO} 	   	
+]]>
+</select>
+
+<select id="retrieveTcPlanmstComPlmfg" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+		SELECT ISNULL(RTRIM(COM_PLMFG),'') AS DATA1
+		  FROM TC_PLANMST WITH(NOLOCK)
+		 WHERE 1=1
+		   AND PLM_NO = #{plm_no}
+]]>
+</select>
+ 	
+<select id="getActCnt" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	/* CRS0010.getActCnt */
+	SELECT ISNULL(COUNT(PLM_NO), 0) AS VALUE1
+	  FROM TC_ACTLIST WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</select>
+	
+<update id="modyfyTcPlanMstComple" parameterType="java.util.HashMap">
+<![CDATA[	
+	/* CRS0010.modyfyTcPlanMstComple 2018.01.26 |주요한| 시공결과 정보 완결처리 */
+	UPDATE TC_PLANMST SET
+	MOB_REMARK = ISNULL(MOB_REMARK, '') + ' ' + ISNULL(CONVERT(VARCHAR(8000), #{mob_remark}), '')
+	,COM_RMFG = #{com_rmfg_aft}
+	,COM_PLMFG = #{com_plmfg_aft}
+	,USR_CD = #{usr_id}
+	,SYS_DT = GETDATE()
+	WHERE 1=1
+	AND PLM_NO = #{plm_no}
+]]>	
+</update>
+
+<select id="retrievesTcPlandtlCompleChk" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+<![CDATA[
+	/* CRS0010.retrievesTcPlandtlCompleChk 2018.01.18 |주요한| 시공결과세부내용 미결 갯수 체크*/
+	SELECT
+	(SELECT COUNT(COM_RDSEC) FROM TC_PLANDTL WITH (NOLOCK)
+	WHERE 1=1 AND COM_RDSEC = 'C13N'
+	AND PLM_NO = #{plm_no}
+	AND COM_PLDSEC IN ('C090','C092','C096','C094','C09A')
+	) AS C13N_COUNT
+	,(SELECT COUNT(COM_RDSEC) FROM TC_PLANDTL WITH (NOLOCK)
+	WHERE 1=1
+	AND COM_RDSEC = 'C13W'
+	AND PLM_NO = #{plm_no}
+	AND COM_PLDSEC IN ('C090','C092','C096','C094','C09A')
+	) AS C13W_COUNT
+	FROM TC_PLANDTL WITH (NOLOCK)
+	WHERE 1=1
+	AND PLM_NO = #{plm_no}
+	AND COM_PLDSEC IN ('C090','C092','C096','C094','C09A')
+	GROUP BY PLM_NO
+]]>
+</select>
+
+<update id="modyfyTcplanmstAllComplete" parameterType="java.util.HashMap">
+<![CDATA[
+	/* CRS0010.modyfyTcplanmstAllComplete 2018.01.26 |주요한| 시공결과 일괄 결과완결,미결처리 */
+	UPDATE TC_PLANDTL SET
+	COM_RDSEC = #{com_rdsec_aft}
+	,MOB_STD = 'C13Y'
+	,USR_CD = #{usr_id}
+	,SYS_DT = GETDATE()
+	,COM_UNDSEC = NULL
+	,PLD_RCDT = NULL
+	,PLD_RASDT = NULL
+	,PLD_RMK = NULL
+	WHERE 1=1
+	AND PLM_NO = #{plm_no}
+	AND COM_PLDSEC IN ('C090','C092','C096','C094','C095','C09A')
+	AND ( COM_RDSEC != 'C13N' OR COM_RDSEC IS NULL )
+]]>
+</update>
+
+<select id="retrieveTcPlandtlList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList1">
+<![CDATA[
+	SELECT 
+			(CASE WHEN A.COM_PLDSEC = 'C090' THEN '일반'
+			   	  WHEN A.COM_PLDSEC = 'C096' THEN '반품회수'
+			      WHEN A.COM_PLDSEC = 'C092' THEN '매장경유'
+			      WHEN A.COM_PLDSEC = 'C095' THEN '샘플회수'
+	    	END) AS GUBUN_NM 									/* 구분 */
+		   ,A.SET_CD											/* 세트코드 */
+		   ,A.COL_SCD											/* 세트컬러 */
+		   ,A.ITM_CD											/* 단품코드 */
+		   ,(SELECT AA.ITM_NM FROM TT_ITMMST AA WITH (NOLOCK) WHERE 1=1 AND A.ITM_CD = AA.ITM_CD AND A.COL_CD = AA.COL_CD) AS ITM_NM	/* 단품명 */
+		   ,A.COL_CD   											/* 단품컬러 */ 
+		   ,A.COM_STKSEC										/* 재고구분 */
+		   ,A.PLD_FAMT											/* 공장도가 */
+		   ,A.PLD_EQTY											/* 요청수량 */
+		   ,A.PLD_FQTY											/* 확정수량 */
+		   ,ISNULL(A.PLD_FQTY * A.PLD_FAMT , 0) AS SUM_PLD_AMT	/* 예상금액 */
+		   ,(CASE WHEN (A.COM_UNDSEC = 'C52B02' or A.COM_UNDSEC = 'C52C01' or A.COM_UNDSEC = 'C52C02') THEN  ISNULL((SELECT ISNULL(A.PLD_EQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																		   WHERE 1=1
+																			 AND A.ITM_CD = DD.ITM_CD
+																		     AND A.COL_CD = DD.COL_CD
+																		     AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																						   					 WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{com_agsec} AS VARCHAR))		  
+		   ),0)
+																			ELSE  ISNULL((SELECT ISNULL(A.PLD_FQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																		   WHERE 1=1
+																			 AND A.ITM_CD = DD.ITM_CD
+																		     AND A.COL_CD = DD.COL_CD
+																		     AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																						   					 WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{com_agsec} AS VARCHAR))		  
+		   ),0) END) AS PLD_CRAMT										/* 예상시공비 */
+		   ,A.COM_RDSEC											/* 결과구분 */
+		   ,A.PLM_NO											/* 시공번호 */
+		   ,A.COM_PLDSEC										/* 구분코드 */
+		   ,'0' AS CHK
+		   ,'0' AS COMPLE_CHK									/* 완결  */
+		   ,'0' AS SUSPEN_CHK									/* 미결  */	
+		   ,A.ORD_SSEQ											/* 좌수 */
+		   ,A.ORD_ISEQ	  										/* 순번 */ 
+		   ,C.ORM_GGUBUN										/* 현장,소액 구분 */
+		   , CASE WHEN A.BMT_SGRADE = 'Y' THEN '1' ELSE '0' END  AS DELAY_CHK									/* 지연여부 */
+	  FROM TC_PLANDTL A WITH (NOLOCK)
+	  JOIN TC_PLANMST B WITH (NOLOCK) ON 1=1
+     				   AND A.PLM_NO = B.PLM_NO
+      JOIN TO_ORDMAS C WITH (NOLOCK) ON 1=1
+      				  AND B.ORM_NO = C.ORM_NO
+	 WHERE 1=1
+		AND A.PLM_NO = CAST( #{plm_no} AS VARCHAR)
+		ORDER BY A.COM_PLDSEC ASC
+
+]]>
+</select>
+
+<select id="retrievesTcPlandtlList_1" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList1">
+		/* CRS0010.retrievesTcPlandtlList_1 2018.01.17 |주요한| 일반,매장경유,반품회수, 샘플회수 인 경우
+		*/	
+	SELECT 
+			(CASE WHEN A.COM_PLDSEC = 'C090' THEN '일반'
+			   	  WHEN A.COM_PLDSEC = 'C096' THEN '반품회수'
+			      WHEN A.COM_PLDSEC = 'C092' THEN '매장경유'
+			      WHEN A.COM_PLDSEC = 'C095' THEN '샘플회수'
+	    	END) AS GUBUN_NM 									/* 구분 */
+		   ,A.SET_CD											/* 세트코드 */
+		   ,A.COL_SCD											/* 세트컬러 */
+		   ,A.ITM_CD											/* 단품코드 */
+		   ,(SELECT AA.ITM_NM FROM TT_ITMMST AA WITH (NOLOCK) WHERE 1=1 AND A.ITM_CD = AA.ITM_CD AND A.COL_CD = AA.COL_CD) AS ITM_NM	/* 단품명 */
+		   ,A.COL_CD   											/* 단품컬러 */ 
+		   ,A.COM_STKSEC										/* 재고구분 */
+		   ,A.PLD_FAMT											/* 공장도가 */
+		   ,A.PLD_EQTY											/* 요청수량 */
+		   ,G.DATA PLD_FQTY										/* 확정수량 */
+		   ,ISNULL(A.PLD_FQTY * A.PLD_FAMT , 0) AS SUM_PLD_AMT	/* 예상금액 */
+		   ,(CASE WHEN (A.COM_UNDSEC = 'C52B02' or A.COM_UNDSEC = 'C52C01' or A.COM_UNDSEC = 'C52C02') THEN  ISNULL((SELECT ISNULL(A.PLD_EQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																		   WHERE 1=1
+																			 AND A.ITM_CD = DD.ITM_CD
+																		     AND A.COL_CD = DD.COL_CD
+																		     AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																						   					 WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{com_agsec} AS VARCHAR))		  
+		   ),0)
+																			ELSE  ISNULL((SELECT ISNULL(A.PLD_FQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																		   WHERE 1=1
+																			 AND A.ITM_CD = DD.ITM_CD
+																		     AND A.COL_CD = DD.COL_CD
+																		     AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																						   					 WHERE CDX_CD = 'C02' AND CCD_CD = CAST( #{com_agsec} AS VARCHAR))		  
+		   ),0) END) AS PLD_CRAMT										/* 예상시공비 */
+		   ,A.COM_RDSEC											/* 결과구분 */
+		   ,A.PLM_NO											/* 시공번호 */
+		   ,A.COM_PLDSEC										/* 구분코드 */
+		   ,'1' AS CHK
+		   ,'0' AS COMPLE_CHK									/* 완결  */
+		   ,'1' AS SUSPEN_CHK									/* 미결  */	
+		   ,A.ORD_SSEQ											/* 좌수 */
+		   ,A.ORD_ISEQ	  										/* 순번 */ 
+		   ,C.ORM_GGUBUN										/* 현장,소액 구분 */
+		   ,CASE WHEN A.BMT_SGRADE = 'Y' THEN '1' ELSE '0' END  AS DELAY_CHK									/* 지연여부 */
+		   ,H.DATA AS MOB_REMARK	   
+	  FROM dbo.fnSplit(#{com_pldsec_arr}) D, dbo.fnSplit(#{ord_sseq_arr}) E, dbo.fnSplit(#{ord_iseq_arr}) F, dbo.fnSplit(#{pld_fqty_arr}) G, dbo.fnSplit2(#{ord_rmk_arr}) H, dbo.fnSplit2(#{com_pldsec_gbn_arr}) I,	   
+	        TC_PLANDTL A WITH (NOLOCK) JOIN TC_PLANMST B WITH (NOLOCK) ON 1=1 AND A.PLM_NO = B.PLM_NO
+                                      JOIN TO_ORDMAS C WITH (NOLOCK) ON 1=1 AND B.ORM_NO = C.ORM_NO
+	 WHERE D.SEQNO = E.SEQNO
+	   AND D.SEQNO = F.SEQNO
+	   AND D.SEQNO = G.SEQNO
+	   AND D.SEQNO = H.SEQNO
+	   AND D.SEQNO = I.SEQNO
+	   AND A.COM_PLDSEC = D.DATA
+	   AND A.ORD_SSEQ = E.DATA
+	   AND A.ORD_ISEQ = F.DATA
+	   AND A.PLM_NO = #{plm_no}
+	   AND A.COM_PLDSEC IN
+	   <foreach collection="code_list" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+       </foreach>
+	   AND I.DATA = #{com_pldsec_gbn}
+		ORDER BY A.COM_PLDSEC ASC
+</select>
+
+<select id="retrievesTcPlandtlList_2" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList2">
+		/* CRS0010.retrievesTcPlandtlList_2 2018.01.17 |주요한| 분해설치/폐기장 인 경우 */	
+	SELECT 
+			(SELECT CC.TRS_SNM FROM TC_TRSEC CC WITH (NOLOCK) WHERE 1=1 AND A.trs_sec_2 = CC.TRS_SEC) AS TRS_SNM	/* 분해설치구분 */
+		   
+		   ,A.ITM_CD												/* 분해설치품목 */
+		   ,(SELECT TRI_INM FROM TC_TRINF AA WITH (NOLOCK) WHERE 1=1 AND AA.TRS_SEC = A.trs_sec_2 AND AA.TRI_ICD = A.ITM_CD) AS TRI_INM
+		   ,(CASE WHEN A.COM_PLDSEC = 'C094' THEN '분해설치'
+			   	  WHEN A.COM_PLDSEC = 'C09A' THEN '폐기물'
+	    	END) AS GUBUN_NM 										/* 구분 */
+		   ,A.PLD_FAMT												/* 비용단가 */
+		   ,A.PLD_EQTY												/* 요청수량 */
+		   ,G.DATA PLD_FQTY												/* 확정수량 */
+		   ,ISNULL(A.PLD_CRAMT , 0) AS SUM_PLD_AMT_PRE	/* 예상비용 */
+		   ,ISNULL(A.PLD_CFAMT , 0) AS SUM_PLD_AMT_CON	/* 확정비용 */
+		   ,A.COM_RDSEC												/* 결과구분 */
+		   ,A.PLM_NO												/* 시공번호 */
+		   ,'1' AS CHK
+		   ,'0' AS COMPLE_CHK										/* 완결  */
+		   ,'1' AS SUSPEN_CHK										/* 미결  */
+		   ,A.trs_sec_2
+		   ,A.COM_PLDSEC											/* 구분코드 */
+		   ,ORD_SSEQ												/* 좌수 */
+		   ,ORD_ISEQ	  											/* 순번 */
+		   ,H.DATA AS MOB_REMARK
+	  FROM dbo.fnSplit(#{com_pldsec_arr}) D, dbo.fnSplit(#{ord_sseq_arr}) E, dbo.fnSplit(#{ord_iseq_arr}) F, dbo.fnSplit(#{pld_fqty_arr}) G, dbo.fnSplit2(#{ord_rmk_arr}) H, dbo.fnSplit2(#{com_pldsec_gbn_arr}) I, TC_PLANDTL A WITH (NOLOCK)
+	 WHERE D.SEQNO = E.SEQNO
+	   AND D.SEQNO = F.SEQNO
+	   AND D.SEQNO = G.SEQNO
+	   AND D.SEQNO = H.SEQNO
+	   AND D.SEQNO = I.SEQNO
+	   AND A.COM_PLDSEC = D.DATA
+	   AND A.ORD_SSEQ = E.DATA
+	   AND A.ORD_ISEQ = F.DATA
+	   AND A.PLM_NO = #{plm_no}
+	   AND A.COM_PLDSEC IN
+	   <foreach collection="code_list" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+       </foreach>		
+	   AND I.DATA = #{com_pldsec_gbn}
+</select>
+
+<select id="retrievesTcPlandtlList_3" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList3">
+<![CDATA[
+		/* CRS0010.retrievesTcPlandtlList_3 2018.01.17 |주요한| 기타추가비용 인 경우 */
+		SELECT
+		 A.COM_ACD /* 정산세부항목코드 */
+		,A.PLD_FAMT /* 확정비용 */
+		,A.PLD_FQTY /* 확정수량 */
+		,A.PLD_CFAMT AS SUM_PLD_CFAMT /* 합계 */
+		,A.PLD_RMK /* 비고 */
+		,'0' AS CHK
+		,A.ORD_SSEQ /* 좌수 */
+		,A.ORD_ISEQ /* 순번 */
+		,A.COM_PLDSEC /* 정산구분*/
+		,(SELECT ISNULL(COM_RMFG,'C13W') FROM TC_PLANMST AA WITH (NOLOCK) WHERE 1=1 AND A.PLM_NO = AA.PLM_NO) AS COM_RMFG /* 결과구분 추가 */
+		,'' AS COM_VFSEC
+		,'' AS COM_VTSEC
+		FROM dbo.fnSplit(#{com_pldseq_arr}) D, dbo.fnSplit(#{ord_sseq_arr}) E, dbo.fnSplit(#{ord_iseq_arr}) F, TC_PLANDTL A WITH (NOLOCK)
+		WHERE D.SEQNO = E.SEQNO
+	   AND D.SEQNO = F.SEQNO
+	   AND A.COM_PLDSEC = D.DATA
+	   AND A.ORD_SSEQ = E.DATA
+	   AND A.ORD_ISEQ = F.DATA
+	   AND PLM_NO = #{plm_no}
+	  AND COM_PLDSEC <>'C090' 
+	  AND COM_PLDSEC <>'C091' 
+	  AND COM_PLDSEC <>'C092' 
+	  AND COM_PLDSEC <>'C093' 
+	  AND COM_PLDSEC <>'C094' 
+	  AND COM_PLDSEC <>'C095' 
+	  AND COM_PLDSEC <>'C096' 
+	  AND COM_PLDSEC <>'C0930' 
+	  AND COM_PLDSEC <>'C09A' 
+ 	ORDER BY ORD_ISEQ
+]]>
+</select>
+
+<select id="retrievesTcPlanmstList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlanmstList">
+<![CDATA[
+	SELECT 
+			 A.PLM_NO							/* 시공번호 */
+			,A.PLM_CDT							/* 시공예정일 */
+			,A.PLM_PTM							/* 요청시간 */
+			,ISNULL(A.PLM_FTM, '') AS PLM_FTM	/* 확정시간 */
+			,(CASE WHEN (SELECT 
+			                    COUNT(CC.COM_PLDSEC) 
+			               FROM TC_PLANDTL CC WITH (NOLOCK) WHERE 1=1
+							AND A.PLM_NO = CC.PLM_NO 
+							AND CC.COM_PLDSEC IN ('C096','C092','C094','C09A')) > 0 
+				   THEN 'Y'  
+				   ELSE 'N' 
+			END) AS COM_PLDSEC_ETC				/* 기타시공유무 */
+			,ISNULL(A.COM_AGSEC, '') AS COM_AGSEC	/* 회사코드 */
+			,A.COM_BRAND     					/* 브랜드코드 */
+			,A.AGT_CD							/* 대리점코드 */
+			,(SELECT VND_NM FROM TT_VENDOR AA WITH (NOLOCK) WHERE A.AGT_CD = AA.VND_CD) AS VND_NM		/* 대리점명 */
+			,A.STI_CD							/* 시공팀코드 */
+			,(SELECT STI_NM FROM TC_STINF BB WITH (NOLOCK) WHERE 1=1 AND BB.STI_CD = A.STI_CD AND BB.COM_SCD = A.COM_SCD AND BB.COM_CTSEC = B.COM_CTSEC) AS STI_NM /* 시공팀명 */
+			,ISNULL(B.ORM_AMT,0) AS ORM_AMT		/* 수주금액 */
+			,A.ORM_NO							/* 수주번호 */
+			,ISNULL(A.ORM_NM, '') AS ORM_NM		/* 수주건명 */
+			,ISNULL(A.ORM_GADDR, '') AS ORM_GADDR	/* 고객주소 */
+			,ISNULL(A.ADDR_DTL, '') AS ADDR_DTL
+			,ISNULL(A.COM_RMFG,'C13W') AS COM_RMFG   				/* 결과 */
+			,ISNULL(A.COM_PLMFG, '') AS COM_PLMFG					/* 상태 */
+			,(CASE WHEN B.SIGN_DT = '' THEN '' 
+			       WHEN B.SIGN_DT IS NULL THEN '' 
+			       ELSE 'Y' 
+			END) AS SIGN_YN											/* 서명 */
+			,CASE WHEN ( SELECT COUNT(*) FROM TE_CLAIMFILE WITH (NOLOCK) WHERE CLAIM_NO = A.PLM_NO AND FILE_TYPE IN ('X', 'Y', 'Z') ) > 0 THEN 'Y' ELSE '' END AS FILE_YN /* 파일 */
+			,ISNULL(C.ING_KND,'X') AS MOBILE		/* mob */		
+			,ISNULL(C.FAIL_KND,'') AS MOBILE2		/* m미결 */		
+			,ISNULL(C.FAIL_KND2,'') AS MOBILE4		/* m미결2 */
+			,ISNULL(A.PLM_RMK, '') AS PLM_RMK		/* 특기사항 */
+			,(SELECT SUM(ISNULL((PLD_EQTY*PLD_FAMT),0) + ISNULL(PLD_CFAMT,0))  FROM TC_PLANDTL WITH (NOLOCK)
+																			  WHERE 1=1 
+																			    AND PLM_NO = A.PLM_NO 
+																			    AND COM_PLDSEC IN ('C090','C096','C092','C094','CO9A')  
+			) AS TOTAL_SUM_PLD_AMT 					/* 시공 TOTAL 확정비용 */
+			,ISNULL(D.BELONG_CMP, '') AS BELONG_CMP	/* 서비스업체 */
+			,B.COM_CTSEC							/* 시공팀구분 */
+			,B.REM_DT								/* 서명호출용 */
+			,B.REM_SEQ								/* 서명호출용 */
+			,A.COM_SCD								/* 서비스센터코드 */
+			,(CASE WHEN A.OMI_YN = 'Y' THEN 'Y'
+				  					  ELSE 'N'
+			END) AS OMI_YN 							/*누락 2018.03.19 컬럼추가 */
+			,(SELECT ORM_ATTR FROM TO_ORDMAS WITH (NOLOCK) WHERE 1=1 AND ORM_NO = A.ORM_NO) AS ORM_ATTR /* 전달건 구분 */
+			,(SELECT COUNT(COM_UNPSEC) FROM TC_PLANDTL WITH (NOLOCK) WHERE 1=1 AND PLM_NO = A.PLM_NO AND COM_UNPSEC LIKE 'C23%') AS COM_UNPSEC_CNT	/* 미결처리 count */
+			,(SELECT ISNULL(MED_YN, '') FROM TT_MONTHEND WITH (NOLOCK) WHERE 1=1 
+											   AND WHS_CD = 'CCC' AND COM_PART = 'T2604' AND MED_YM = LEFT(A.PLM_CDT,6)
+											   AND COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK) where CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC)
+			) AS MED_YN		/*월마감 YN*/
+			,(SELECT ISNULL(ORM_GGUBUN,'') FROM TO_ORDMAS WITH (NOLOCK) WHERE ORM_NO = A.ORM_NO) AS ORM_GGUBUN		/* 정산시 현장[Y] 소액[N] 구분 */
+			
+			,'0' AS CHK
+	  FROM TC_PLANMST A WITH (NOLOCK)
+	  JOIN TC_RESMST B ON 1=1
+			 	      AND B.PLM_NO      = A.PLM_NO				
+				      AND B.ORM_NO      = A.ORM_NO				
+				      AND B.REM_DT      = A.PLM_CDT
+				      AND B.SCHDIV_YN = CAST( 'Y' AS VARCHAR)				
+				      AND B.COM_RFG = CAST( 'C142' AS VARCHAR)
+ LEFT JOIN TC_MOBRST C ON 1=1
+				      AND C.PLM_NO = A.PLM_NO
+				      AND C.RPT_SEQ = CAST( '01' AS VARCHAR)
+				      AND C.COM_SSEC = CAST( 'C18C' AS VARCHAR)
+	  JOIN TC_STINF  D ON 1=1
+	      			 AND A.STI_CD = D.STI_CD	
+	  JOIN TC_SCDINF E ON 1=1
+	      			  AND A.COM_SCD = E.COM_SCD     
+	 WHERE 1=1
+	   AND ( (A.COM_CTSEC IN ('C06M','C06L' )  AND A.COM_SCD =D.COM_SCD )				
+	       OR (A.COM_CTSEC ='C06F' AND E.SCD_MCD =E.COM_SCD ) 
+	       )
+	   AND A.COM_PLMFG>='C102'
+	   AND A.PLM_NO = #{plm_no}
+		ORDER BY A.PLM_CDT ASC,A.PLM_PTM ASC, A.PLM_NO ASC
+]]>
+</select>
+
+</mapper>

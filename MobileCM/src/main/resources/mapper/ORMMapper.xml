@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ORMMapper">
+    <select id="getORMList" parameterType="HashMap" resultType="HashMap">        
+   select
+ltrim(rtrim(a.rem_dt))+'-'+ltrim(rtrim(a.rem_seq)) as 'order_id',
+a.orm_nm,
+( case a.com_ssec when 'C18C' then (select orm_gaddr from to_ordmas where orm_no = a.orm_no )
+else (select b.CTM_ADDR from ta_rptreq B where SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) end ) as 'orm_gaddr'
+
+
+from tc_resmst a, tc_stinf b
+where a.com_scd = 'C16YA'
+and a.rem_dt = #{date} 
+and b.k_sti_cd = 'YA142'
+and a.com_agsec = 'C02I'
+and a.sti_cd = b.sti_cd
+    </select>
+</mapper>

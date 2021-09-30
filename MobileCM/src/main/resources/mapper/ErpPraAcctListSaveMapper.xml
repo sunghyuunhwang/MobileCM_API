@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ErpPraAcctListSaveMapper">
+
+<update id="modifyRptEnddt_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_result">
+<![CDATA[
+    UPDATE TA_RPTREQ
+       SET RPT_ENDDT = #{pld_rcdt}
+	      ,USR_ID = #{usr_cd}
+		  ,SYS_DT = GETDATE()
+	 WHERE RPT_NO = #{rpt_no}
+       AND RPT_SEQ = #{rpt_seq}
+]]>
+</update>
+    
+<insert id="modifyTcResDtl_I" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_result">
+<![CDATA[  
+    INSERT INTO TC_RESDTL
+	           (REM_DT,
+	            REM_SEQ,
+	            RED_CELNO,
+	            RED_CELTM,
+	            USR_CD,
+	            SYS_DT,
+	            REM_TMFYN)
+		VALUES (#{pld_rcdt},
+	            #{new_rem_seq},
+	            '0001',
+	            #{rem_ftm},
+	            #{usr_cd},
+	            GETDATE(),
+	            #{rem_tmfyn})
+]]>
+</insert>
+
+<update id="modifyTaPlanMst_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_complmfg">
+<![CDATA[
+    UPDATE TA_PLANMST
+	   SET COM_PLMFG = #{com_plmfg},
+	   	   ORM_RDT = #{orm_rdt},
+	       PLM_CDT = #{plm_cdt},
+	       USR_ID = #{usr_id},
+		   SYS_DT = GETDATE()
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+    
+<select id="selectRePlanMstInfo" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_planMst">
+<![CDATA[		
+	SELECT LTRIM(RTRIM(RPT_NO)) AS RPT_NO
+	      ,LTRIM(RTRIM(RPT_SEQ)) AS RPT_SEQ
+	      ,LTRIM(RTRIM(CTM_NM)) AS CTM_NM
+	      ,LTRIM(RTRIM(AGT_CD)) AS AGT_CD
+	      ,LTRIM(RTRIM(CTM_ZIP)) AS CTM_ZIP
+	      ,LTRIM(RTRIM(CTM_CD)) AS CTM_CD
+	      ,LTRIM(RTRIM(STI_CD)) AS STI_CD
+	      ,LTRIM(RTRIM(SAC_CD)) AS SAC_CD
+	      ,LTRIM(RTRIM(COM_CTSEC)) AS COM_CTSEC
+	      ,LTRIM(RTRIM(COM_SCD)) AS COM_SCD
+	      ,'' AS ORM_ADT
+	      ,'' AS COM_AGSEC
+	  FROM TA_PLANMST with (nolock)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</select>
+    
+<select id="selectRemCasyn"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+	SELECT REM_CASYN AS DATA1
+	  FROM TC_RESMST with (nolock)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</select>
+
+<select id="selectRemCasyn_"  parameterType="HashMap" resultType="java.lang.String">
+<![CDATA[		
+	SELECT REM_CASYN AS DATA1
+	  FROM TC_RESMST with (nolock)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</select>
+    
+<select id="selectNotFinishList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_list2">
+<![CDATA[		
+	SELECT D.BMT_ITEM
+	      ,D.COL_CD
+	      ,ISNULL(D.PLD_FAMT, 0) AS PLD_FAMT
+	      ,( CASE
+	            WHEN D.PLD_EQTY = D.PLD_FQTY THEN D.PLD_FQTY
+	            ELSE D.PLD_EQTY - D.PLD_FQTY
+	         END ) AS PLD_EQTY
+	      ,ISNULL(D.PLD_CRAMT, 0) AS PLD_CRAMT
+	      ,D.PLM_NO
+	      ,D.COM_PLDSEC
+	      ,D.ORD_SSEQ
+	      ,D.USR_ID
+	      ,D.SYS_DT
+	      ,D.BMT_ITEM AS ITM_NM
+	      ,D.COM_RDSEC
+	      ,D.COM_UNDSEC
+	      ,D.COM_UNPSEC
+	      ,D.PLD_RCDT
+	      ,ISNULL(D.PLD_FQTY, 0) AS PLD_FQTY
+	      ,ISNULL(D.PLD_CFAMT, 0) AS PLD_CFAMT
+	      ,'0' CHK
+	      ,D.PLD_RMK
+	      ,D.COM_UNDSEC1
+	      ,D.COM_UNDSEC2
+	      ,A.BMT_NM
+	  FROM TA_PLANDTL D with (nolock)
+	      ,TT_BOMMST A with (nolock)
+	 WHERE D.BMT_ITEM = A.BMT_ITEM
+	   AND D.COL_CD = A.COL_CD
+	   AND D.PLM_NO = #{plm_no}
+	   AND D.COM_PLDSEC IN ( 'A6800' )
+	   AND D.COM_RDSEC = 'C13N'
+	 ORDER BY 
+	       D.ORD_SSEQ 
+]]>
+</select>
+
+<update id="modifyAllsetPlanDtl_U" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_PLANDTL
+	   SET MOB_STD = 'C13N',
+			 MOB_NFINISHED = #{com_unmsec},
+			 MOB_NQTY = PLD_FQTY,
+			 MOB_REMARK = (SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = #{com_unmsec}) + ' 재일정날짜 : ' + #{rptq_dt},
+			 MOB_USEYN = 'N',
+			 MOB_NOTUSEQTY = PLD_FQTY
+	WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+
+<update id="modifyAsReqRemark" parameterType="HashMap">
+<![CDATA[
+
+	UPDATE TA_RPTREQ SET RPT_DESC = '변경날짜 : ' + #{rptq_dt} + ' 연기사유 : ' + ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = #{com_unmsec} ) + ' 비고 : ' + #{remark} +'    ' + RPT_DESC 
+	  FROM TA_RPTREQ
+	 WHERE RPT_NO = #{rpt_no}
+	   AND RPT_SEQ = #{rpt_seq}
+	
+
+]]>
+</update>
+
+    
+<update id="modifyAllsetPlanMst_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_allset">
+<![CDATA[
+    UPDATE TA_PLANMST
+	   SET COM_PLMFG = #{com_plmfg},
+       	   COM_UNMSEC = #{com_unmsec},
+       	   COM_RMFG = #{com_rmfg},
+	       USR_ID = #{usr_id},
+		   SYS_DT = GETDATE()
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+    
+<update id="modifyTcResMst_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_result">
+<![CDATA[
+    UPDATE TC_RESMST
+	   SET PLM_NO = #{new_plm_no}
+	      ,ORM_NO = #{orm_no}
+	      ,PRJ_CD = #{prj_cd}
+	      ,REM_PTM = #{rem_ptm}
+	      ,REM_PTM_2 =  (SELECT REF_3 FROM TT_COMCD WHERE CDX_CD = 'C41' AND CCD_CD = #{rem_ptm})
+	      ,REM_FTM = #{rem_ftm}
+	      ,REM_FTM_2 =  (SELECT REF_3 FROM TT_COMCD WHERE CDX_CD = 'C41' AND CCD_CD = #{rem_ftm})
+	      ,REM_TMFYN = #{rem_tmfyn}
+	      ,REM_NTM = #{rem_ntm}
+	      ,PLM_ETM = #{plm_etm}
+	      ,PLM_FIXEDT = #{plm_fixedt}
+	      ,COM_AGSEC = #{com_agsec}
+	      ,COM_SSEC = #{com_ssec}
+	      ,STI_CD = #{sti_cd}
+	      ,COM_CTSEC = #{com_ctsec}
+	      ,ORM_AMT = #{orm_amt}
+	      ,ORM_PURCST = #{orm_purcst}
+	      ,ORM_NM = #{orm_nm}
+	      ,REM_CLAMT = #{rem_clamt}
+	      ,COM_SCD = #{com_scd}
+	      ,STM_NO = #{stm_no}
+	      ,AGT_CD = #{agt_cd}
+	      ,COM_RFG = #{com_rfg}
+	      ,REM_ASNO = #{rem_asno}
+	      ,REM_RMK = #{rem_rmk}
+	      ,USR_CD = #{usr_cd}
+	      ,SYS_DT = GETDATE()
+	      ,ZIP_CD = #{zip_cd}
+	      ,REM_EXTYN = #{rem_extyn}
+	      ,REM_CASYN = #{rem_casyn}
+	      ,REM_CSEC = #{rem_csec}
+	      ,REM_DT = #{pld_rcdt}
+	      ,REM_SEQ = #{new_rem_seq}
+	 WHERE REM_DT = #{rem_dt}
+	   AND REM_SEQ = #{rem_seq}
+	   AND PLM_NO = #{plm_no}
+	   AND COM_SSEC = 'C18A'
+]]>
+</update>
+
+<select id="executeFaAseqrem" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	DECLARE @RET_CODE NVARCHAR(300)
+	execute DBO.PRA_FA_ASEQREM;1 @P_COM_AGSEC = #{com_agsec}, @P_COM_SSEC = #{com_ssec}, @P_COM_YMD = #{com_ymd}, @P_COM_GUBUN = #{com_gubun}
+	                           , @P_USER_ID = #{usr_id}, @RET_CODE = @RET_CODE OUTPUT
+	SELECT @RET_CODE DATA1
+]]>
+</select>
+    
+<select id="selectResMstCnt" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+    SELECT COUNT(*) AS VALUE1
+	  FROM TC_RESMST with (nolock)
+	 WHERE REM_DT = #{rem_dt}
+	   AND ORM_NO = #{rpt_no} + #{rpt_seq}
+	   AND COM_SSEC = 'C18A'
+]]>
+</select>
+
+
+
+
+
+<delete id="modifyTaPlanDtl_D" parameterType="HashMap">
+<![CDATA[    
+    DELETE FROM TA_PLANDTL
+ 	 WHERE PLM_NO = #{plm_no}
+]]>
+</delete>
+    
+
+<update id="modifyPlmPno_U" parameterType="HashMap">
+<![CDATA[
+    UPDATE TA_PLANMST
+	   SET PLM_PNO = #{plm_no},
+	       USR_ID = #{user_id},
+		   SYS_DT = GETDATE()
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+    
+<insert id="selectInsertPlanDtl_I" parameterType="HashMap">
+<![CDATA[ 
+    INSERT INTO TA_PLANDTL
+	           (PLM_NO,
+	            COM_PLDSEC,
+	            ORD_SSEQ,
+	            BMT_ITEM,
+	            COL_CD,
+	            PLD_EQTY,
+	            PLD_FQTY,
+	            PLD_FAMT,
+	            PLD_CRAMT,
+	            PLD_CFAMT,
+	            PLD_CUSAMT,
+	            COM_RDSEC,
+	            COM_UNDSEC,
+	            COM_UNPSEC,
+	            PLD_RCDT,
+	            PLD_RMK,
+	            USR_ID,
+	            SYS_DT,
+	            PLD_CSEC)
+		 SELECT #{lSzplmNo}
+			   ,COM_PLDSEC
+			   ,ORD_SSEQ
+			   ,BMT_ITEM
+			   ,COL_CD
+			   ,CASE
+					WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY
+				ELSE PLD_EQTY - PLD_FQTY
+				END
+			   ,CASE
+					WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY
+				ELSE PLD_EQTY - PLD_FQTY
+				END
+			   ,PLD_FAMT
+			   ,CASE
+					WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY * PLD_FAMT
+				ELSE ( PLD_EQTY - PLD_FQTY ) * PLD_FAMT
+				END
+			   ,CASE
+					WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY * PLD_FAMT
+		        ELSE ( PLD_EQTY - PLD_FQTY ) * PLD_FAMT
+				END
+			   ,PLD_CUSAMT
+			   ,'C13W'
+			   ,NULL
+			   ,NULL
+			   ,NULL
+			   ,PLD_RMK
+	           ,#{user_id}
+               ,GETDATE()
+			   ,'Y'
+		   FROM TA_PLANDTL
+		  WHERE PLM_NO = #{plm_no}
+			AND COM_PLDSEC = 'A6800'
+			AND COM_RDSEC = 'C13N'
+			AND PLD_RCDT > ''
+]]>
+</insert>
+
+<insert id="selectInsertPlanMst_I" parameterType="HashMap">
+<![CDATA[ 
+    INSERT INTO TA_PLANMST
+	           (PLM_NO,
+	            RPT_NO,
+	            RPT_SEQ,
+	            COM_SCD,
+	            COM_AGSEC,
+				COM_BRAND,
+	            AGT_CD,
+	            COM_CTSEC,
+	            STI_CD,
+				TOWN_CD,
+	            STM_NO,
+	            SAC_CD,
+	            ORM_ORDDT,
+	            ORM_RDT,
+	            PLM_CDT,
+	            CTM_CD,
+	            CTM_NM,
+	            CTM_ONM,
+	            CTM_DNM,
+	            CTM_TEL,
+	            CTM_HP,
+	            PLM_PTM,
+				PLM_PTM_GUBUN,
+	            PLM_FTM,
+				PLM_FTM_GUBUN,
+	            COM_PLMFG,
+	            CTM_ZIP,
+	            CTM_ADDR,
+	            PLM_RMK,
+	            COM_RMFG,
+	            COM_UNMSEC,
+	            USR_ID,
+	            SYS_DT,
+	            PLM_RCSEC,
+	            PLM_PNO,
+	            PLM_CSEC)
+		 SELECT #{lSzplmNo}
+			   ,RPT_NO
+			   ,RPT_SEQ
+			   ,COM_SCD
+			   ,COM_AGSEC
+			   ,COM_BRAND
+			   ,AGT_CD
+			   ,COM_CTSEC
+			   ,STI_CD
+			   ,TOWN_CD
+			   ,STM_NO
+			   ,SAC_CD
+			   ,ORM_ORDDT
+			   ,ORM_RDT
+			   ,NULL
+			   ,CTM_CD
+			   ,CTM_NM
+			   ,CTM_ONM
+			   ,CTM_DNM
+			   ,CTM_TEL
+			   ,CTM_HP
+			   ,PLM_PTM
+			   ,PLM_PTM_GUBUN
+			   ,PLM_FTM
+			   ,PLM_FTM_GUBUN
+			   ,'C101'
+			   ,CTM_ZIP
+			   ,CTM_ADDR
+			   ,PLM_RMK
+			   ,NULL
+			   ,NULL
+	           ,#{user_id}
+               ,GETDATE()
+			   ,'2'
+			   ,#{plm_no}
+			   ,'Y'
+		  FROM TA_PLANMST
+		 WHERE PLM_NO = #{plm_no}
+]]>
+</insert>
+
+    
+<select id="selectNewSeq" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+    	SELECT ISNULL(MAX(SEQ_NO), 0) + 1 AS VALUE1
+		  FROM TC_SEQNOINF 
+		 WHERE COM_AGSEC = #{com_agsec}		/* 대행사구분 */
+		   AND COM_NOSEC = #{com_nosec}      /* 번호구분 */
+		   /*AND SEQ_SETDT = CONVERT(NVARCHAR(50), GETDATE(), 112)*/      /* 부여일자 */
+		   AND SEQ_SETDT = #{seq_setdt}      /* 부여일자 */		   
+]]>
+</select>
+
+<insert id="modifySeqnoinf" parameterType="HashMap">
+<![CDATA[
+    MERGE INTO TC_SEQNOINF SI
+    	 USING (SELECT #{com_agsec} AS COM_AGSEC
+    	              ,#{seq_setdt} AS SEQ_SETDT) A
+       		ON SI.COM_AGSEC = A.COM_AGSEC
+       	   AND SI.SEQ_SETDT = A.SEQ_SETDT
+       	   AND SI.COM_NOSEC = #{com_nosec}
+          WHEN MATCHED THEN
+            UPDATE 
+               SET SEQ_NO = #{seq_no}
+          WHEN NOT MATCHED THEN
+		    INSERT
+		      	  (COM_AGSEC
+		      	  ,COM_NOSEC
+		      	  ,SEQ_SETDT
+		      	  ,SEQ_NO
+		      	  ,USR_CD
+		      	  ,SYS_DT
+		          )    
+			VALUES(#{com_agsec}
+			      ,#{com_nosec}
+			      ,#{seq_setdt}
+			      ,#{seq_no}
+			      ,#{user_id}
+			      ,GETDATE()
+			      );
+]]>
+</insert>
+    
+<select id="selectPlmPno" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+	SELECT PLM_PNO AS DATA1
+	  FROM TA_PLANMST WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+	   AND PLM_RCSEC = '1'
+]]>
+</select>
+
+<select id="selectResetMstList" parameterType="HashMap" resultType="java.util.HashMap">
+<![CDATA[		
+	SELECT D.BMT_ITEM
+	      ,D.COL_CD
+	      ,ISNULL(D.PLD_FAMT, 0) AS PLD_FAMT
+	      ,( CASE
+	            WHEN D.PLD_EQTY = D.PLD_FQTY THEN D.PLD_FQTY
+	            ELSE D.PLD_EQTY - D.PLD_FQTY
+	         END ) AS PLD_EQTY
+	      ,ISNULL(D.PLD_CRAMT, 0) AS PLD_CRAMT
+	      ,D.PLM_NO
+	      ,D.COM_PLDSEC
+	      ,D.ORD_SSEQ
+	      ,D.USR_ID
+	      ,D.SYS_DT
+	      ,D.BMT_ITEM AS ITM_NM
+	      ,D.COM_RDSEC
+	      ,D.COM_UNDSEC
+	      ,D.COM_UNPSEC
+	      ,D.PLD_RCDT
+	      ,ISNULL(D.PLD_FQTY, 0) AS PLD_FQTY
+	      ,ISNULL(D.PLD_CFAMT, 0) AS PLD_CFAMT
+	      ,'0' CHK
+	      ,D.PLD_RMK
+	      ,D.COM_UNDSEC1
+	      ,D.COM_UNDSEC2
+	      ,A.BMT_NM
+	  FROM TA_PLANDTL D with (nolock)
+	      ,TT_BOMMST A with (nolock)
+	 WHERE D.BMT_ITEM = A.BMT_ITEM
+	   AND D.COL_CD = A.COL_CD
+	   AND D.PLM_NO = #{plm_no}
+	   AND D.COM_PLDSEC IN ( 'A6800' )
+	   AND D.COM_RDSEC = 'C13N'
+	 ORDER BY 
+	       D.ORD_SSEQ 
+]]>
+</select>
+
+<select id="selectResDtlList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_tabList1">
+<![CDATA[
+	SELECT DISTINCT D.BMT_ITEM
+	               ,D.COL_CD
+		           ,ISNULL(D.PLD_FAMT, 0) AS PLD_FAMT
+	               ,D.PLD_EQTY
+	               ,D.PLD_CRAMT
+	               ,D.COM_PLDSEC
+	               ,D.ORD_SSEQ
+	               ,I.BMT_NM
+	               ,D.PLM_NO
+				   ,CASE WHEN D.COM_RDSEC = '' OR D.COM_RDSEC IS NULL THEN 'C13W' ELSE D.COM_RDSEC END AS COM_RDSEC
+	               ,D.COM_UNDSEC
+	               ,D.USR_ID
+	               ,D.SYS_DT
+	               ,D.COM_UNPSEC
+	               ,D.PLD_RCDT
+	               ,ISNULL(D.PLD_FQTY, 0) PLD_FQTY
+	               ,D.PLD_CRAMT
+	               ,D.PLD_CFAMT
+	               ,'0' AS CHK
+	               ,D.PLD_RMK
+	               ,D.COM_UNDSEC1
+	               ,D.COM_UNDSEC2
+		           ,ISNULL(FLOOR(D.PLD_EQTY * D.PLD_FAMT), 0) AS AMT
+	  FROM TA_PLANDTL D with (nolock)
+	      ,TT_BOMMST I with (nolock)
+	 WHERE D.PLM_NO = #{plm_no}
+	   AND D.COM_PLDSEC = 'A6800'
+	   AND D.BMT_ITEM = I.BMT_ITEM
+	   AND D.COL_CD = I.COL_CD
+	 ORDER BY
+		   D.ORD_SSEQ 
+]]>
+</select>
+
+<select id="selectResMstList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_list1">
+<![CDATA[		
+    SELECT CONVERT(NVARCHAR(50), GETDATE(), 112) AS SEQ_SETDT
+	      ,X.CHK
+          ,X.SIGONG_Y
+	      ,X.NOTFINISH_YN
+	      ,X.REM_DT
+	      ,X.REM_SEQ
+	      ,X.RPT_NO
+	      ,X.RPT_SEQ
+	      ,X.COM_ATSEC
+	      ,X.REM_FTM
+	      ,X.PLM_FTM
+	      ,X.PLM_FTM_GUBUN
+	      ,X.VND_NM
+	      ,X.VND_TELNO
+	      ,X.ORM_NM
+	      ,X.FILE_ID
+	      ,X.FILE_YN
+	      ,X.CC
+	      ,X.SIGN_YN
+	      ,X.CTM_NM
+	      ,X.CTM_ADDR
+	      ,X.STI_CD
+	      ,X.COM_SPROG
+	      ,X.COM_RMFG
+	      ,X.COM_PLMFG
+	      ,X.COM_RFG
+	      ,X.PLM_RMK
+	      ,X.NOFIN_YN
+	      ,X.MOBILE2
+	      ,X.MOBILE3
+	      ,X.REM_CSEC
+	      ,X.PLM_NO
+		  ,X.COM_UNPSEC
+		  ,X.PLD_RCDT
+		  ,X.PLM_CDT
+	      ,CASE WHEN (X.COM_UNPSEC = 'A70A' OR X.COM_UNPSEC IS NULL) AND X.PLD_RCDT > '20091201' THEN 1 ELSE 0 END AS RE
+	      ,CASE WHEN (X.COM_UNPSEC = 'A70R' OR X.COM_UNPSEC IS NULL) AND X.PLD_RCDT IS NULL THEN 1 ELSE 0 END AS REFUND
+		  ,X.COM_AGSEC
+		  ,X.COM_SCD
+		  ,X.MOB
+		  ,X.PLM_RCSEC
+		  ,X.CTM_HP
+	  FROM (
+	          SELECT '0' AS CHK
+					,( CASE D.RPT_RST_ACTTM
+						WHEN NULL THEN 'N'
+						ELSE 'Y'
+						END ) AS SIGONG_Y	/*구분*/
+					,( CASE WHEN B.COM_RMFG = 'C13N' THEN '미결' ELSE '' END ) AS NOTFINISH_YN
+					,A.REM_DT				/*AS예정일*/
+					,A.REM_SEQ
+					,D.RPT_NO				/*접수번호*/
+					,D.RPT_SEQ			/*접수순번*/
+					,D.COM_ATSEC			/*조치구분*/
+					,A.REM_FTM			/*확정시간 (TC_RESMST) */
+					,B.PLM_FTM			/*확정시간 (TA_PLANMST)*/
+					,B.PLM_FTM_GUBUN
+					,V.VND_NM				/*대리점*/
+					,V.VND_TELNO			/*대리점전화번호*/
+					,A.ORM_NM				/*수주건명*/
+					,D.FILE_ID
+					,( CASE WHEN D.FILE_ID IS NOT NULL THEN 'Y' ELSE 'N' END ) AS FILE_YN
+				/* ,(CASE WHEN (SELECT COUNT(1)
+		 							FROM TE_CLAIMFILE with (nolock)
+									WHERE CLAIM_NO = A.PLM_NO
+									AND FILE_TYPE IN ('X', 'Y', 'Z')) > 0 THEN 'Y' ELSE 'N' END) AS FILE_YN*/
+					,( CASE WHEN (SELECT CTM_LVLCD FROM   TT_CUSTOM WHERE  CTM_CD = D.CTM_CD) = 'X' THEN '√' END ) AS CC
+					,( CASE
+						WHEN A.SIGN_DT = '' THEN 'N'
+						WHEN A.SIGN_DT IS NULL THEN 'N'
+						ELSE 'Y'
+						END ) AS SIGN_YN	/*서명*/
+					,D.CTM_NM				/*고객명*/
+					,D.CTM_ADDR	+ ' ' + ISNULL(D.CTM_ADDR2, '') AS CTM_ADDR			/*주소*/
+					,A.STI_CD				/*시공팀코드*/
+					,D.COM_SPROG			/*진행상태*/
+					/*,CASE WHEN B.COM_RMFG = '' OR B.COM_RMFG IS NULL THEN 'C13W' ELSE B.COM_RMFG END AS COM_RMFG	*/
+					,(SELECT TOP 1 COM_RDSEC FROM TA_PLANDTL with (nolock) WHERE PLM_NO = A.PLM_NO AND COM_PLDSEC IN ('A6800')) AS COM_RMFG
+					,B.COM_PLMFG			/*(지,청,특기)*/
+					,A.COM_RFG
+					,REPLACE(REPLACE(B.PLM_RMK, char(13), ''), char(10), '') AS PLM_RMK			/*AS특기사항*/
+					,( CASE WHEN (SELECT COUNT(*)
+									FROM TA_PLANDTL C with (nolock)
+									WHERE C.COM_RDSEC = 'C13N'
+									AND C.PLM_NO = B.PLM_NO
+									AND ISNULL(C.COM_UNPSEC, '') = '') = 0 THEN ''
+						ELSE '미처리'
+						END ) AS NOFIN_YN
+					,ISNULL((SELECT M.FAIL_KND
+			   					FROM TC_MOBRST M with (nolock)
+								WHERE M.PLM_NO = B.PLM_NO
+								AND M.RPT_SEQ = B.RPT_SEQ
+								AND M.COM_SSEC = 'C18A'), '') AS MOBILE2
+					,ISNULL((SELECT distinct M.ETC_CAR
+				 				FROM TC_MOBRST M with (nolock)
+								WHERE M.PLM_NO = B.PLM_NO
+								AND M.RPT_SEQ = B.RPT_SEQ
+								AND M.COM_SSEC = 'C18A'), '') AS MOBILE3
+					,A.REM_CSEC			/*재AS*/
+					,A.PLM_NO				/*시공번호*/
+					,( SELECT DISTINCT COM_UNPSEC FROM TA_PLANDTL with (nolock)
+						WHERE PLM_NO = A.PLM_NO
+							AND COM_PLDSEC IN ( 'A6800' )
+							AND COM_RDSEC = 'C13N') AS COM_UNPSEC
+					,( SELECT DISTINCT PLD_RCDT FROM TA_PLANDTL with (nolock)
+						WHERE PLM_NO = A.PLM_NO
+							AND COM_PLDSEC IN ( 'A6800' )
+							AND COM_RDSEC = 'C13N') AS PLD_RCDT
+		            ,B.PLM_CDT
+					,D.COM_AGSEC
+					,D.COM_SCD
+					,ISNULL((SELECT ING_KND FROM TC_MOBRST WHERE PLM_NO = B.PLM_NO AND RPT_SEQ = B.RPT_SEQ AND COM_SSEC = 'C18A'),'X')  AS MOB
+					,B.PLM_RCSEC
+					,B.CTM_HP
+				FROM TC_RESMST A with (nolock)
+					LEFT OUTER JOIN TA_PLANMST B with (nolock) ON A.PLM_NO = B.PLM_NO AND A.REM_ASNO = B.RPT_SEQ AND SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO AND B.PLM_NO = #{plm_no}
+					,TA_RPTREQ D with (nolock)
+					,TT_VENDOR V with (nolock)
+				WHERE SUBSTRING(A.ORM_NO, 1, 13) = D.RPT_NO
+				AND A.REM_ASNO = D.RPT_SEQ
+				AND A.AGT_CD = V.VND_CD
+				AND A.PLM_NO = #{plm_no}
+				AND A.COM_SSEC = 'C18A'
+		        AND
+			        (( CAST('N' AS VARCHAR) = 'Y' AND A.COM_RFG = 'C142' AND A.REM_CSEC = 'R' )
+			         OR ( CAST('N' AS VARCHAR) = 'N' )) 
+      	 ) X
+		 ORDER BY X.RPT_NO, X.RPT_SEQ
+]]>
+</select>
+    
+<select id="selectPlanInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_planInfo">
+<![CDATA[		
+	SELECT RPT_NO
+	      ,RPT_SEQ
+	  FROM TA_PLANMST WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+    </select>
+    
+<update id="modifyComUnpsec_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_uptplandtl">
+<![CDATA[
+    UPDATE TA_PLANDTL
+	   SET COM_UNPSEC = #{com_unpsec},
+           PLD_RMK = #{pld_rmk},
+           PLD_RCDT = #{pld_rcdt},
+	       USR_ID = #{usr_id},
+		   SYS_DT = GETDATE()
+	 WHERE PLM_NO = #{plm_no}
+]]>
+    </update>
+    
+<select id="selectPlmnoCnt" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+	SELECT COUNT(*) AS VALUE1
+	  FROM TC_RESMST WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+    </select>
+   
+<update id="modifyAsMigeulCancel_U" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_PLANDTL
+	   SET MOB_STD = 'C13N',
+	       MOB_NFINISHED = #{mob_remark},
+	       MOB_NQTY = PLD_FQTY,
+	       MOB_REMARK = ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = #{mob_remark} ),
+	       MOB_USEYN = 'N',
+	       MOB_NOTUSEQTY = PLD_FQTY
+	WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+
+<update id="modifyAsFinishTime" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_PLANMST
+	   SET MOB_ENDTM = GETDATE(), MOB_ENDYN = 'Y'
+	WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+
+<select id="selectMaxRcdt" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT MAX(PLD_RCDT) AS DATA1
+	  FROM TA_PLANDTL WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+]]>
+    </select>
+
+<update id="modifyAllsetRptReq_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_rptreq">
+<![CDATA[
+    UPDATE TA_RPTREQ
+	   SET RPT_ADESC = #{rpt_adesc},
+	       UNCPL_CNT = ( CASE
+	                       WHEN SUBSTRING(RPT_NO, 2, 8) >= '20110825'
+	                            AND #{ls_yn}= 'C13N' THEN ISNULL(UNCPL_CNT, 0) + 1
+	                       ELSE NULL
+	                     END ) ,
+	       USR_ID = #{usr_id},
+		   SYS_DT = GETDATE()
+	 WHERE RPT_NO = #{rpt_no}
+	   AND RPT_SEQ = #{rpt_seq}
+]]>
+    </update>
+
+<select id="selectRptAdsec" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+	SELECT RPT_ADESC AS DATA1
+	  FROM TA_RPTREQ WITH (NOLOCK)
+	 WHERE RPT_NO = #{rpt_no}
+	   AND RPT_SEQ = #{rpt_seq}
+]]>
+</select>
+    
+<select id="selectStiNm" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+	SELECT STI_NM AS DATA1
+	  FROM TC_STINF WITH (NOLOCK)
+	 WHERE COM_SCD = #{com_scd}
+	   AND STI_CD = #{sti_cd}
+]]>
+</select>  
+
+<update id="modifyPlanDtl_U" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_tabList1">
+<![CDATA[
+    UPDATE TA_PLANDTL
+	   SET COM_RDSEC = #{com_rdsec}
+		  ,COM_UNDSEC = #{com_undsec}
+		  ,COM_UNDSEC1 = #{com_undsec1}
+		  ,COM_UNDSEC2 = #{com_undsec2}
+		  ,PLD_RCDT = #{pld_rcdt}
+		  ,PLD_RMK = #{pld_rmk}
+		  ,PLD_FQTY = #{pld_fqty}
+		  ,PLD_CFAMT = #{pld_cfamt}
+		  ,USR_ID = #{usr_id}
+		  ,SYS_DT = GETDATE()
+		 WHERE PLM_NO = #{plm_no}
+		   AND COM_PLDSEC = 'A6800'
+]]>
+</update>
+         
+<update id="modifyPlanDetailMobStd" parameterType="HashMap">
+<![CDATA[
+    UPDATE TA_PLANDTL
+    SET MOB_STD = CASE MOB_NFINISHED WHEN 'C67000' THEN 'C13N'
+				                     WHEN 'C67001' THEN 'C13N'
+                                     ELSE #{mob_std} END ,
+        USR_ID = #{user_id},
+     SYS_DT = GETDATE()
+     FROM TA_PLANDTL
+  	WHERE PLM_NO = #{plm_no}
+  	AND COM_PLDSEC IN ('A6800')
+]]>
+</update>
+
+<select id="executePraAcctlistSave" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	DECLARE @RET_CODE NVARCHAR(300)
+	EXECUTE DBO.PRA_ACCTLIST_SAVE;1 @P_PLM_NO = #{plm_no}, @P_USER_ID = #{user_id}, @RET_CODE = @RET_CODE OUTPUT
+	SELECT @RET_CODE AS DATA1
+]]>
+</select>
+    
+<insert id="mergeTaPlanDtl" parameterType="com.fursys.mobilecm.vo.erp.apm0020_m01.ds_list1" >
+<![CDATA[
+	MERGE INTO TA_PLANDTL A
+	    USING DUAL
+	       ON A.PLM_NO = #{plm_no} 
+		  AND A.COM_PLDSEC = #{com_pldsec}
+	     WHEN MATCHED THEN
+	        UPDATE 
+			   SET PLD_FAMT = #{pld_famt}
+				  ,PLD_FQTY = #{pld_fqty}
+				  ,PLD_CFAMT = #{pld_famt}
+				  ,USR_ID = #{usr_id}
+				  ,SYS_DT = GETDATE()
+	     WHEN NOT MATCHED THEN
+	        INSERT 
+		           (PLM_NO,
+		            COM_PLDSEC,
+					ORD_SSEQ,
+					COM_ACD,
+		            PLD_FAMT,
+		            PLD_FQTY,
+		            PLD_CFAMT,
+		            COM_SVND,
+		            COM_VFSEC,
+		            COM_VTSEC,
+		            COM_RDSEC,
+		            PLD_CSEC,
+		            COM_RASEC,
+		            USR_ID,
+		            SYS_DT,
+		            FST_USR,
+		            FST_SYS_DT)
+		    VALUES (#{plm_no},	
+		            'A6811',
+		            (SELECT ISNULL(REPLICATE('0', 2 - LEN(CONVERT(NUMERIC, MAX(ORD_SSEQ), 112) + 1))
+                                   + CONVERT(VARCHAR, CONVERT(NUMERIC, MAX(ORD_SSEQ), 112) + 1, 112), '01')
+                     FROM   TA_PLANDTL
+                     WHERE  PLM_NO = #{plm_no}
+                     ),
+					'A6901',
+		            #{pld_famt},
+		            1,
+		            #{pld_famt},
+		            (SELECT COM_SVND FROM TA_ACTINF WHERE COM_ASEC = 'A6811' AND COM_ACD = 'A6901' AND COM_AGSEC = #{com_agsec}),
+		            (SELECT COM_VFSEC FROM TA_ACTINF WHERE COM_ASEC = 'A6811' AND COM_ACD = 'A6901' AND COM_AGSEC = #{com_agsec}),
+		            (SELECT COM_VTSEC FROM TA_ACTINF WHERE COM_ASEC = 'A6811' AND COM_ACD = 'A6901' AND COM_AGSEC = #{com_agsec}),
+		            'C13Y',
+		            'Y',
+		            (SELECT COM_RASEC FROM TA_ACTINF WHERE COM_ASEC = 'A6811' AND COM_ACD = 'A6901' AND COM_AGSEC = #{com_agsec}),
+		            #{usr_id},
+		            GETDATE(),
+		            #{usr_id},
+		            GETDATE());
+]]>
+</insert>
+
+    <select id="selectBtripAmt" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT ISNULL(A.AMT, 0) AS VALUE1
+	  FROM TA_BTRIP A WITH (NOLOCK)
+	     , TA_RPTREQ B WITH (NOLOCK)
+	 WHERE A.COM_AGSEC = B.COM_AGSEC
+	   AND A.COM_BRAND = B.COM_BRAND
+	   AND A.COM_SCD = B.COM_SCD
+	   AND A.CITY_CD = B.TOWN_CD
+	   AND A.USE_YN = 'Y'
+	   AND B.RPT_NO = #{rpt_no}
+	   AND B.RPT_SEQ = #{rpt_seq}
+]]>
+</select>
+
+	<update id="modifyComPlmfg_U" parameterType="HashMap">
+<![CDATA[
+    UPDATE TA_PLANMST
+    SET COM_PLMFG = #{com_plmfg},
+        USR_ID = #{user_id},
+     SYS_DT = GETDATE()
+  	WHERE PLM_NO = #{plm_no}
+]]>
+</update>
+    
+<select id="selectFaFinishYn" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+ SELECT ( ISNULL(SUM(CHARINDEX('C13N', COM_RDSEC)), 0) ) AS VALUE1
+       ,( ISNULL(SUM(CHARINDEX('C13W', COM_RDSEC)), 0) ) + ( ISNULL(SUM(CHARINDEX(NULL, COM_RDSEC)), 0) ) AS  VALUE2
+       ,( ISNULL(SUM(CHARINDEX('C13Y', COM_RDSEC)), 0) ) AS  VALUE3
+   FROM TA_PLANDTL WITH (NOLOCK)
+  WHERE PLM_NO = #{plm_no}
+    AND COM_PLDSEC IN ( 'A6800' )
+]]>
+</select>
+    
+<update id="modifyRowyComRdsec_U" parameterType="HashMap">
+<![CDATA[
+    UPDATE TA_PLANDTL
+    SET COM_RDSEC = 'C13Y',
+       USR_ID = #{user_id},
+    SYS_DT = GETDATE()
+  WHERE PLM_NO = #{plm_no}
+    AND COM_PLDSEC IN ('A6800')
+    AND COM_RDSEC  ='C13W'
+]]>
+</update>
+  
+<select id="selectRowyPlmnoCnt" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[ 
+	SELECT COUNT(PLM_NO) AS VALUE1
+	   FROM TA_PLANDTL WITH (NOLOCK)
+	  WHERE ( PLM_NO = #{plm_no} )
+	    AND ( COM_PLDSEC IN ( 'A6800' ) )
+	    AND ( COM_RDSEC = 'C13W' )
+	    AND ( PLD_EQTY <> ISNULL(PLD_FQTY, 0) )
+
+]]>
+</select>
+
+<insert id="asLoadingBeforeMinus" parameterType="HashMap"> 
+<![CDATA[  
+	        INSERT INTO TA_PLANDTL
+		           (PLM_NO,
+		            COM_PLDSEC,
+					ORD_SSEQ,
+					COM_ACD,
+		            PLD_FAMT,
+		            PLD_FQTY,
+		            PLD_CFAMT,
+		            PLD_RMK,
+		            COM_SVND,
+		            COM_VFSEC,
+		            COM_VTSEC,
+		            COM_RDSEC,
+		            PLD_CSEC,
+		            COM_RASEC,
+		            USR_ID,
+		            SYS_DT,
+		            FST_USR,
+		            FST_SYS_DT)
+		    VALUES (#{plm_no},	
+		            'A6802',
+		            (SELECT ISNULL(REPLICATE('0', 2 - LEN(CONVERT(NUMERIC, MAX(ORD_SSEQ), 112) + 1))
+                                   + CONVERT(VARCHAR, CONVERT(NUMERIC, MAX(ORD_SSEQ), 112) + 1, 112), '01')
+                     FROM   TA_PLANDTL
+                     WHERE  PLM_NO = #{plm_no}
+                     ),
+					'A6915',
+		            13000,
+		            -1,
+		            -13000,
+		            '',
+		            'C21B',
+		            'C2402',
+		            'C2501',
+		            'C13Y',
+		            'Y',
+		            'C12A',
+		            #{user_id},
+		            GETDATE(),
+		            #{user_id},
+		            GETDATE());
+]]>
+</insert>
+
+        
+</mapper>

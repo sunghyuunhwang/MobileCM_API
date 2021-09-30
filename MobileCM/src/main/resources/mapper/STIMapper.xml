@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.STIMapper">
+    <select id="getSTIList" parameterType="String" resultType="HashMap">        
+   select
+sti_cd, sti_nm
+from tc_stinf
+where k_sti_cd = 'YA142'
+and sti_rank = 'Y'
+and sti_icyn = 'Y'
+and sti_nm like 'HA%'
+    </select>
+    <select id="getZoneList" parameterType="String" resultType="HashMap">  
+<![CDATA[      
+   SELECT
+A.K_STI_CD AS K_STI_CD,
+( SELECT STI_NM FROM TC_STINF WHERE STI_CD = A.K_STI_CD AND COM_SCD <> 'C16S2') AS STI_NM,
+( SELECT COM_SCD FROM TC_STINF WHERE STI_CD = A.K_STI_CD AND COM_SCD <> 'C16S2') AS COM_SCD,
+( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = ( SELECT COM_SCD FROM TC_STINF WHERE STI_CD = A.K_STI_CD AND COM_SCD <> 'C16S2') ) AS CCD_NM
+FROM ( SELECT
+DISTINCT K_STI_CD
+FROM TC_STINF
+WHERE STI_RANK = 'Y'
+AND ( STI_CD NOT LIKE '%CJ%')
+AND (STI_NM NOT LIKE 'CS%')
+AND (COM_SCD <> 'C16S2' AND COM_SCD <> 'C16AN' )
+
+GROUP BY K_STI_CD ) A
+ ]]>
+    </select>
+</mapper>

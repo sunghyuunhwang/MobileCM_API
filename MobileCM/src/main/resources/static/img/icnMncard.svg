@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="ic_menu_card_selected" width="20" height="20" viewBox="0 0 20 20">
+    <defs>
+        <style>
+            .cls-1,.cls-3{fill:none}.cls-1{stroke:#242020}.cls-2{stroke:none}
+        </style>
+    </defs>
+    <g id="그룹_3829">
+        <g id="사각형_4516" class="cls-1">
+            <rect width="20" height="9" class="cls-2" rx="1"/>
+            <rect width="19" height="8" x=".5" y=".5" class="cls-3" rx=".5"/>
+        </g>
+        <g id="사각형_4519" class="cls-1" transform="translate(0 11)">
+            <rect width="20" height="9" class="cls-2" rx="1"/>
+            <rect width="19" height="8" x=".5" y=".5" class="cls-3" rx=".5"/>
+        </g>
+    </g>
+</svg>

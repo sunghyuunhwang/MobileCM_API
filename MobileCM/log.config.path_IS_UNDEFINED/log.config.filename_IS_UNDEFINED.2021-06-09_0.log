@@ -1,0 +1,42 @@
+INFO  21-06-09 15:03:34[main] [MobileCmApplication:55] - Starting MobileCmApplication on DESKTOP-Q2KV5DR with PID 22336 (D:\development\workspace\git\mobilecm_server\bin\main started by hwang in D:\development\workspace\git\mobilecm_server)
+INFO  21-06-09 15:03:34[main] [MobileCmApplication:651] - No active profile set, falling back to default profiles: default
+DEBUG 21-06-09 15:03:36[main] [LogFactory:105] - Logging initialized using 'class org.apache.ibatis.logging.slf4j.Slf4jImpl' adapter.
+INFO  21-06-09 15:03:36[main] [TomcatWebServer:108] - Tomcat initialized with port(s): 8082 (http)
+INFO  21-06-09 15:03:36[main] [Http11NioProtocol:173] - Initializing ProtocolHandler ["http-nio-8082"]
+INFO  21-06-09 15:03:36[main] [StandardService:173] - Starting service [Tomcat]
+INFO  21-06-09 15:03:36[main] [StandardEngine:173] - Starting Servlet engine: [Apache Tomcat/9.0.36]
+INFO  21-06-09 15:03:36[main] [[/]:173] - Initializing Spring embedded WebApplicationContext
+INFO  21-06-09 15:03:36[main] [ServletWebServerApplicationContext:285] - Root WebApplicationContext: initialization completed in 2459 ms
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/css/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/js/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/img/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/images/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/lib/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/templates/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/v2/api-docs'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/configuration/ui'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/swagger-resources/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/configuration/security'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/swagger-ui.html'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/webjars/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/swagger/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/_sign/**'], []
+INFO  21-06-09 15:03:39[main] [DefaultSecurityFilterChain:43] - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4e642ee1, org.springframework.security.web.context.SecurityContextPersistenceFilter@1b2df3aa, org.springframework.security.web.header.HeaderWriterFilter@59bbb974, org.springframework.security.web.authentication.logout.LogoutFilter@5dc0ff7d, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@2a39aa2b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7219ac49, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5562c2c9, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@29ebbdf4, org.springframework.security.web.session.SessionManagementFilter@12f49ca8, org.springframework.security.web.access.ExceptionTranslationFilter@361abd01, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@1e60b459]
+INFO  21-06-09 15:03:39[main] [PropertySourcedRequestMappingHandlerMapping:69] - Mapped URL path [/v2/api-docs] onto method [springfox.documentation.swagger2.web.Swagger2Controller#getDocumentation(String, HttpServletRequest)]
+INFO  21-06-09 15:03:39[main] [ThreadPoolTaskExecutor:181] - Initializing ExecutorService 'applicationTaskExecutor'
+WARN  21-06-09 15:03:39[main] [TemplateMode:150] - [THYMELEAF][main] Template Mode 'HTML5' is deprecated. Using Template Mode 'HTML' instead.
+INFO  21-06-09 15:03:39[main] [Http11NioProtocol:173] - Starting ProtocolHandler ["http-nio-8082"]
+INFO  21-06-09 15:03:39[main] [TomcatWebServer:220] - Tomcat started on port(s): 8082 (http) with context path ''
+INFO  21-06-09 15:03:39[main] [DocumentationPluginsBootstrapper:160] - Context refreshed
+INFO  21-06-09 15:03:39[main] [DocumentationPluginsBootstrapper:163] - Found 1 custom documentation plugin(s)
+INFO  21-06-09 15:03:39[main] [ApiListingReferenceScanner:41] - Scanning for api listing references
+WARN  21-06-09 15:03:40[main] [ParameterDataTypeReader:92] - Trying to infer dataType java.util.ArrayList<com.fursys.mobilecm.vo.tmserp.TMSERPOrderList>
+WARN  21-06-09 15:03:40[main] [ParameterDataTypeReader:92] - Trying to infer dataType java.util.ArrayList<com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList>
+INFO  21-06-09 15:03:40[main] [CachingOperationNameGenerator:40] - Generating unique operation named: loginUsingPOST_1
+INFO  21-06-09 15:03:41[main] [CachingOperationNameGenerator:40] - Generating unique operation named: userInfoUsingGET_1
+INFO  21-06-09 15:03:41[main] [MobileCmApplication:61] - Started MobileCmApplication in 7.596 seconds (JVM running for 11.165)
+INFO  21-06-09 15:03:41[http-nio-8082-exec-1] [[/]:173] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+INFO  21-06-09 15:03:41[http-nio-8082-exec-1] [DispatcherServlet:525] - Initializing Servlet 'dispatcherServlet'
+INFO  21-06-09 15:03:41[http-nio-8082-exec-1] [DispatcherServlet:547] - Completed initialization in 14 ms
+INFO  21-06-09 15:34:40[RMI TCP Connection(2)-127.0.0.1] [SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin:159] - Application shutdown requested.
+INFO  21-06-09 15:34:41[RMI TCP Connection(2)-127.0.0.1] [ThreadPoolTaskExecutor:218] - Shutting down ExecutorService 'applicationTaskExecutor'

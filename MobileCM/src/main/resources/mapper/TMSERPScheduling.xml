@@ -1,0 +1,1856 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fursys.mobilecm.mapper.TMSERPSchedulingMapper">
+
+    <select id="getKstiCdYn" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">     
+	<![CDATA[       
+        SELECT COUNT(*) AS VALUE1
+          FROM TC_STINF WITH (NOLOCK)
+         WHERE K_STI_CD = #{login_id}
+        
+	]]>
+    </select>
+	
+    <select id="getComRfg" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">     
+	<![CDATA[       
+        SELECT A.COM_RFG AS DATA1,
+               A.ORM_NM AS DATA2
+        FROM TC_RESMST A WITH (NOLOCK)
+        WHERE A.REM_DT = #{rem_dt}
+          AND A.REM_SEQ = #{rem_seq}
+	]]>
+    </select>
+			
+    <select id="getCenterAddr" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">     
+	<![CDATA[       
+		SELECT B.CCD_NM AS DATA1,
+		       A.SCD_GADDR AS DATA2,
+		       CONVERT(VARCHAR(8), GETDATE(), 112) + '0900' DATA3
+		FROM TC_SCDINF A WITH (NOLOCK) LEFT OUTER JOIN TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD
+		WHERE A.USE_YN = 'Y'
+		AND A.COM_SCD = #{com_scd}
+	]]>
+    </select>
+			
+	<update id="updateRouteOptimization" parameterType="HashMap">
+	<![CDATA[
+		UPDATE TC_RESMST
+		SET ARRIVAL_SEQ = B.ARRIVAL_SEQ
+		FROM TC_RESMST A WITH (NOLOCK), (
+							SELECT a.data REM_DT,
+								   b.data REM_SEQ,
+								   c.data ARRIVAL_SEQ 
+							FROM dbo.fnSplit(#{rem_dt_arr}) a, dbo.fnSplit(#{rem_seq_arr}) b, dbo.fnSplit(#{arrival_arr}) c 
+							WHERE a.seqno = b.seqno
+							AND a.seqno = c.seqno
+							) B
+		WHERE A.REM_DT = B.REM_DT
+	    AND A.REM_SEQ = B.REM_SEQ	
+	]]>
+	</update> 
+	
+    <select id="selectRouteOptimizationList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tms.TmsViaPoints">     
+	<![CDATA[
+        SELECT  CONVERT(int, A.ARRIVAL_SEQ) AS ARRIVAL_SEQ,
+                A.REM_SEQ AS viaPointId,
+                A.ORM_NM AS viaPointName,
+                ISNULL(( SELECT ISNULL(TOO.ORM_GADDR, '' ) + ' ' + ISNULL(TOO.ADDR_DTL , '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = A.ORM_NO ), '') AS viaDetailAddress,
+                ISNULL(A.LONGITUDE, '') AS viaX,
+                ISNULL(A.LATITUDE, '') AS viaY,
+                '' AS viaPoiId,
+                '600' AS viaTime,
+                CONVERT(VARCHAR(8), GETDATE(), 112) + ( SELECT ISNULL(TTC.CCD_NAME, '') FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.REM_FTM ) AS wishStartTime,
+                '' AS wishEndTime,
+                A.COM_RFG        
+        FROM TC_RESMST A WITH (NOLOCK)
+        WHERE A.COM_SCD = #{com_scd}
+          AND A.STI_CD = #{sti_cd}
+          AND A.REM_DT = #{rem_dt}
+          AND A.COM_SSEC = 'C18C'
+          AND ISNULL(A.ARRIVALTM_SENDYN, 'N') = 'Y'
+        UNION ALL        
+        SELECT  CONVERT(int, A.ARRIVAL_SEQ) AS ARRIVAL_SEQ,
+                A.REM_SEQ AS viaPointId,
+                A.ORM_NM AS viaPointName,
+                ISNULL(( SELECT ISNULL(B.CTM_ADDR, '') + ISNULL(B.CTM_ADDR2, '') FROM TA_RPTREQ B WITH (NOLOCK) WHERE SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ), '') AS viaDetailAddress,                
+                ISNULL(A.LONGITUDE, '') AS viaX,
+                ISNULL(A.LATITUDE, '') AS viaY,
+                '' AS viaPoiId,
+                '600' AS viaTime,
+                CONVERT(VARCHAR(8), GETDATE(), 112) + ( SELECT ISNULL(TTC.CCD_NAME, '') FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.REM_FTM ) AS wishStartTime,
+                '' AS wishEndTime,
+                A.COM_RFG        
+        FROM TC_RESMST A WITH (NOLOCK)
+        WHERE A.COM_SCD = #{com_scd}
+          AND A.STI_CD = #{sti_cd}
+          AND A.REM_DT = #{rem_dt}
+          AND A.COM_SSEC = 'C18A'
+          AND (SELECT COUNT(1) FROM TA_PLANDTL TP WHERE TP.PLM_NO = A.PLM_NO ) > 0
+          AND ISNULL(A.ARRIVALTM_SENDYN, 'N') = 'Y'
+        ORDER BY CONVERT(int, A.ARRIVAL_SEQ)
+		
+	]]>
+    </select>	
+	
+	
+	<insert id="insertAllocationResultDetail" parameterType="java.util.HashMap">
+	<![CDATA[
+			INSERT INTO TC_TMSRESULT_D (
+			       COM_SCD, REM_DT, STI_CD, SEQ_NO, ORM_NO, USR_CD, SYS_DT )
+			VALUES (#{com_scd}, #{rem_dt}, #{sti_cd}, #{seq_no}, #{orm_no}, #{usr_cd}, GETDATE())
+	]]>
+	</insert>
+	
+	<insert id="insertAllocationResult" parameterType="java.util.HashMap">
+	<![CDATA[
+			INSERT INTO TC_TMSRESULT_M (
+			       COM_SCD, REM_DT, STI_CD, TOTAL_KM, USR_CD, SYS_DT )
+			VALUES (#{com_scd}, #{rem_dt}, #{sti_cd}, #{total_km}, #{usr_cd}, GETDATE())
+	]]>
+	</insert>
+	
+	<delete id="deleteAllocationResult" parameterType="java.util.HashMap">
+	<![CDATA[
+			DELETE FROM TC_TMSRESULT_M
+			WHERE COM_SCD = #{com_scd}
+			AND REM_DT = #{rem_dt}
+			AND STI_CD = #{sti_cd}
+	]]>
+	</delete>
+		
+	<delete id="deleteAllocationResultDetail" parameterType="java.util.HashMap">
+	<![CDATA[
+			DELETE FROM TC_TMSRESULT_D
+			WHERE COM_SCD = #{com_scd}
+			AND REM_DT = #{rem_dt}
+			AND STI_CD = #{sti_cd}
+	]]>
+	</delete>
+		
+	<update id="updateOrderGeocoding" parameterType="java.util.HashMap">
+	<![CDATA[
+		UPDATE TC_RESMST
+	    SET LATITUDE = B.LAT,
+		    LONGITUDE = B.LON
+		FROM TC_RESMST A, (
+		                    SELECT a.data REM_DT,
+								   b.data REM_SEQ,
+								   c.data LAT,
+								   d.data LON
+			                FROM dbo.fnSplit(#{rem_dt_arr}) a, dbo.fnSplit(#{rem_seq_arr}) b, dbo.fnSplit(#{lat_arr}) c, dbo.fnSplit(#{lon_arr}) d
+							WHERE a.seqno = b.seqno
+							AND a.seqno = c.seqno
+							AND a.seqno = d.seqno ) B
+		WHERE A.REM_DT = B.REM_DT
+		AND A.REM_SEQ = B.REM_SEQ
+	]]>
+	</update>
+	
+	<select id="selectComCtsec" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+	<![CDATA[
+		SELECT A.COM_CTSEC AS DATA1
+		  FROM TC_STINF A WITH (NOLOCK)
+		 WHERE A.STI_CD = #{sti_cd}
+		   AND A.COM_SCD = #{com_scd}
+	]]>
+	</select>
+		
+	<update id="modyfyTaRptReqTrsY_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTaRptReqTrsY_U 2018.06.25 |주요한|  */
+		UPDATE TA_RPTREQ SET 
+				 USR_ID    = #{gv_userId}
+				,SYS_DT    = GETDATE()
+				,TRS_YN  ='Y'
+		 WHERE 1=1
+		   AND RPT_NO	=  LEFT( #{ORM_NO} ,13)
+		   AND RPT_SEQ	= RIGHT( #{ORM_NO},2)
+	]]>
+	</update>
+	
+	<update id="modyfyTaPlanmstComPlmfgC102_2_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTaPlanmstComPlmfgC102_2_U 2018.06.25 |주요한|  */
+		UPDATE TA_PLANMST SET   
+				 STM_NO      = #{STM_NO}
+				,PLM_FTM     = #{REM_FTM}
+				,COM_PLMFG   = 'C102'   
+		 WHERE 1=1
+		   AND PLM_NO = CAST(#{PLM_NO} AS VARCHAR)
+	]]>
+	</update>
+		
+	<update id="modyfyTaPlandtlComRdsecC13W_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTaPlandtlComRdsecC13W_U 2018.06.25 |주요한|  */
+		UPDATE TA_PLANDTL SET 
+				 COM_RDSEC  = 'C13W' 
+				,USR_ID      = #{gv_userId}
+				,SYS_DT      = GETDATE()
+		 WHERE 1=1
+		   AND PLM_NO = CAST(#{PLM_NO} AS VARCHAR)
+	]]>
+	</update>
+		
+	<update id="modyfyTaPlanmstComPlmfgC102_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTaPlanmstComPlmfgC102_U 2018.06.25 |주요한|  */
+		UPDATE TA_PLANMST SET 
+				 COM_PLMFG   = 'C102'   
+				,USR_ID      = #{gv_userId}
+				,SYS_DT      = GETDATE()
+				,PLM_RMK     = #{REM_RMK}
+				,STM_NO      = #{STM_NO}
+		 WHERE 1=1
+		   AND PLM_NO = CAST(#{PLM_NO} AS VARCHAR)
+	]]>
+	</update>		
+		
+	<update id="modyfyTcPlandtlComRdsecC13W_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTcPlandtlComRdsecC13W_U 2018.06.25 |주요한|  */
+		UPDATE TC_PLANDTL SET 
+				 COM_RDSEC  ='C13W' 
+				,USR_CD      = #{gv_userId}
+				,SYS_DT      =GETDATE()
+		 WHERE 1=1
+		   AND PLM_NO = CAST(#{PLM_NO} AS VARCHAR)
+	]]>
+	</update>	
+	
+	<update id="modyfyTcPlanmstComPlmfgC102_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTcPlanmstComPlmfgC102_U 2018.06.25 |주요한|  */
+		UPDATE TC_PLANMST SET 
+				 COM_PLMFG   ='C102'
+				,USR_CD      = #{gv_userId}
+				,SYS_DT      =GETDATE()
+				,PLM_RMK     =#{REM_RMK}
+				,STM_NO      =#{STM_NO}
+				,COM_SCD     =#{COM_SCD}
+				,PLM_FTM 	 =#{REM_FTM}
+		 WHERE 1=1
+		   AND PLM_NO = CAST(#{PLM_NO} AS VARCHAR)
+	]]>
+	</update>
+		
+	<update id="modyfyTrSchedule_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTrSchedule_U 2018.06.25 |주요한|  */
+		UPDATE  A SET 
+				 STM_NM			= B.STM_NM
+				,STM_NO			= B.STM_NO
+				,COM_SCD		= #{COM_SCD}
+				,STI_CD			= B.STI_CD
+				,STM_HP			= B.STM_HP
+				,DEV_NO			= B.STM_TEL
+				,SCH_REQTM		= #{REM_FTM}
+				,SCH_TIME_NAME	= ( SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = CAST(#{REM_FTM} AS VARCHAR)
+																  AND CDX_CD = 'C41')
+		  FROM TR_SCHEDULE AS A WITH (NOLOCK),( SELECT 
+											COM_SCD, STI_CD, STM_NM, STM_HP, STM_TEL, STM_NO
+									FROM TC_STMEMBER WITH (NOLOCK)
+								   WHERE 1=1
+								     AND COM_SCD=#{COM_SCD}
+								   	 AND STI_CD=#{STI_CD}
+								     AND STM_NO=#{STM_NO}
+								) AS B
+		WHERE 1=1
+		  AND A.ORM_NO = CAST(#{ORM_NO} AS VARCHAR)
+	]]>
+	</update>
+	
+	<update id="modyfyTcToOrddetC090_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTcToOrddetC090_U 2018.06.25 |주요한|  */
+		UPDATE A SET  
+				 COM_SCD   = #{COM_SCD}
+				,STI_CD    = #{STI_CD}
+				,COM_CTSEC = #{COM_CTSEC}
+				,COM_RFG   ='Y'
+		  FROM TO_ORDDET AS A, ( SELECT 
+										ORD_SSEQ,ORD_ISEQ
+								   FROM TC_PLANDTL WITH (NOLOCK)
+								  WHERE 1=1  
+								    AND COM_PLDSEC ='C090'
+								    AND PLM_NO = CAST(#{PLM_NO}  AS VARCHAR)
+								) AS B
+		 WHERE 1=1
+		   AND A.ORD_SSEQ = B.ORD_SSEQ
+		   AND A.ORD_ISEQ = B.ORD_ISEQ 
+		   AND A.ORM_NO = CAST(#{ORM_NO} AS VARCHAR)
+	]]>
+	</update>
+		
+	<update id="modyfyTaRptreqComSprog_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTaRptreqComSprog_U 2018.06.25 |주요한|  */
+		UPDATE TA_RPTREQ SET 
+				 COM_SPROG = #{COMSPROG}
+				,RPT_ACTTM = #{REM_FTM}
+				,USR_ID    = #{gv_userId}
+				,SYS_DT    = GETDATE()
+		 WHERE 1=1
+		   AND RPT_NO  = LEFT (#{ORM_NO} ,13) 
+		   AND RPT_SEQ = RIGHT( #{ORM_NO} ,2)
+	]]>
+	</update>	
+	
+	<select id="retrieveTaAstitemCount" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<![CDATA[
+	/*CRM0030.retrieveTaAstitemCount   */
+		SELECT 
+				 COUNT(1) AS CNT
+				,COUNT(CASE WHEN A.COM_PSEC='A03001' THEN 1 END) AS A03001_CNT
+		  FROM TA_ASTITEM A,TA_RPTREQ B
+		 WHERE 1=1
+		   AND A.RPT_NO = B.RPT_NO 
+		   AND A.RPT_SEQ = B.RPT_SEQ
+		   AND B.RPT_NO  = LEFT(CAST(#{ORM_NO} AS VARCHAR),13)
+		   AND B.RPT_SEQ = RIGHT(CAST(#{ORM_NO} AS VARCHAR),2)
+	]]>
+ 	</select>	
+ 	
+	<update id="modyfyTcResdtlComRfgC142_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTcResdtlComRfgC142_U 2018.06.25 |주요한|  */
+		UPDATE TC_RESDTL SET 
+				 RED_CELTM = #{REM_FTM}
+		 WHERE 1=1
+		   AND REM_DT    	= CAST(#{REM_DT} AS VARCHAR)
+		   AND REM_SEQ     	= CAST(#{REM_SEQ} AS VARCHAR)
+	]]>
+	</update>	
+	
+	<update id="modyfyTcResmstComRfgC142_U" parameterType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.modyfyTcResmstComRfgC142_U 2018.06.25 |주요한|  */
+		UPDATE TC_RESMST SET 
+				 COM_RFG = 'C142'
+				,USR_CD  = #{gv_userId}
+				,SYS_DT  = GETDATE()
+				,REM_FTM = #{REM_FTM}
+				,REM_RMK = #{REM_RMK}
+				,STM_NO  = #{STM_NO}
+				,REM_VTM = #{REM_FTM}
+		WHERE 1=1
+		  AND REM_DT =  CAST(#{REM_DT} AS VARCHAR)
+		  AND REM_SEQ = CAST(#{REM_SEQ} AS VARCHAR)
+	]]>
+	</update>	
+	
+	<select id="retrievesTcPlanmstGetPlmRcsec" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<![CDATA[
+	/* CRM0030.retrievesTcPlanmstGetPlmRcsec 2018.06.20 |주요한|  */
+		SELECT ISNULL(PLM_RCSEC,'') AS PLM_RCSEC		/*재시공건이면 2, 재시공 처리한 이전시공건이면 1, 둘다아니면 '' or null */
+		  FROM TC_PLANMST
+		 WHERE 1=1
+		   AND PLM_NO = #{PLM_NO}
+	]]>
+	</select>
+
+	<select id="packagebunbaeproc" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<![CDATA[
+		/*CRM0030."packagebunbaeproc" 일괄분배 프로시저*/
+	
+		EXECUTE prc_bunbae_y #{ORM_NO}, #{PLM_NO}, #{REM_DT}, #{COM_SSEC}, #{REM_SEQ},
+						 #{gv_userId}, #{COM_RFG}, #{SCHDIV_YN}, #{TT}, #{REM_FTM},
+						 #{REM_RMK}, #{STM_NO}, #{COM_AGSEC}, #{COM_SCD}, #{COM_CTSEC},
+						 #{STI_CD}, #{PLM_PTM}, #{COM_BRAND}, #{TOWN_CD}, #{ORM_GADDR},
+						 #{RPT_NO}, #{RPT_SEQ}
+	]]>
+	</select>
+		
+	<select id="retrieveBeabunDataList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<![CDATA[ 
+	/* CRM0030.retrieveBeabunDataList 2018.06.22 |주요한| 일괄배분 데이터 추출 */
+		WITH CTE AS ( SELECT
+						 A.REM_DT
+						,A.REM_SEQ
+						,ISNULL(RTRIM(A.PLM_NO),'') AS PLM_NO
+						,A.REM_CASYN
+						,A.COM_SSEC /* 구분:C18C(시공),C18A(A/S) */
+						,A.COM_CTSEC
+						,A.COM_SCD
+						,A.STM_NO
+						,CASE WHEN A.SCHDIV_YN = '' THEN 'N' ELSE ISNULL(A.SCHDIV_YN, 'N') END	AS SCHDIV_YN /* 분배 */
+						,A.COM_RFG /* 시공 */
+						,C.PLM_PTM /* 수주요청시간 */
+						,ISNULL(A.REM_FTM,'') AS REM_FTM/* 확정시간 */
+						,A.TOWN_CD /* 시공지역(법정동) */
+						,(SELECT TOP 1 TOWN_NM FROM TC_TOWNM WITH (NOLOCK) WHERE TOWN_CD=A.TOWN_CD)			AS TOWN_NAME  /* 시공지역(법정동) */
+						,(SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE STI_CD=A.STI_CD)				AS STI_NAME /* 시공팀 */
+						,A.STI_CD /* 시공팀 */
+						,C.ORM_GADDR /* 주소 */
+						,A.REM_RMK /* 특이사항 */
+						,A.COM_AGSEC /* 회사 */
+						,A.COM_BRAND /* 브랜드 */
+						,C.ORM_NO /* 수주번호 */
+						,'' as RPT_NO
+						,'' as RPT_SEQ
+						,(SELECT COM_CMP FROM [dbo].[TT_COMCD WITH (NOLOCK)] WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC) AS COM_CMP /* 회사코드 T */
+						,(CASE WHEN A.PLM_NO != NULL OR A.PLM_NO != '' THEN (SELECT RTRIM(PRJ_CD) FROM TC_PLANMST BB WITH (NOLOCK) WHERE BB.PLM_NO = A.PLM_NO)
+							   ELSE '' END) AS CJWAYBILL_NO	/*2018.06.18 |주요한| CJ운송장번호 추가 조회 CJ전송,배분후 운송장 번호가 있는 시공건은 확정취소 및 배분취소 불가능 *유효종 대리님 요청*/
+						,A.CJ_SEND_YN
+						,A.REM_CSEC /*재시공유무*/
+						,CASE (SELECT COUNT(*) FROM TC_PLANDTL WHERE PLM_NO=A.PLM_NO AND COM_PLDSEC != 'C090') WHEN 0 THEN '' ELSE 'Y' END AS TT /* 추가 */
+		 FROM	TC_RESMST A WITH (NOLOCK),   
+				TC_RESDTL B WITH (NOLOCK),
+				TO_ORDMAS C WITH(NOLOCK),
+				TC_STINF D WITH (NOLOCK)
+		WHERE 1=1
+		  AND A.REM_DT=B.REM_DT
+		  AND A.REM_SEQ=B.REM_SEQ
+		  AND A.ORM_NO=C.ORM_NO
+		  AND A.STI_CD=D.STI_CD
+		  AND A.COM_SSEC ='C18C'
+		  AND A.REM_CASYN='N' 
+		  AND D.STI_CD = CAST( #{STI_CD} AS VARCHAR) 
+		  AND A.REM_DT = CAST( #{REM_DT} AS VARCHAR) 
+		  /* 조회조건 추가 2018.03.21 |주요한|  이희석책임님 요청*/
+		  AND A.COM_AGSEC = CAST(#{COM_AGSEC} AS VARCHAR)
+		  AND A.COM_SCD = #{COM_SCD}
+		) 
+		SELECT 
+				 REM_DT
+				,REM_SEQ
+				,ISNULL(RTRIM(PLM_NO),'') AS PLM_NO
+				,REM_CASYN
+				,COM_SSEC
+				,COM_CTSEC
+				,COM_SCD
+				,STM_NO
+				,SCHDIV_YN
+				,COM_RFG
+				,PLM_PTM
+				,REM_FTM
+				,TOWN_CD
+				,TOWN_NAME
+				,STI_NAME
+				,STI_CD
+				,ORM_GADDR
+				,REM_RMK
+				,COM_AGSEC
+				,COM_BRAND
+				,ORM_NO
+				,RPT_NO
+				,RPT_SEQ
+				,COM_CMP
+				,ISNULL(CJWAYBILL_NO, '') AS CJWAYBILL_NO
+				,CJ_SEND_YN
+				,REM_CSEC
+				,TT
+		  FROM(
+				SELECT   
+						 C.REM_DT
+						,C.REM_SEQ
+						,C.PLM_NO
+						,C.REM_CASYN
+						,C.COM_SSEC
+						,C.COM_CTSEC
+						,C.COM_SCD
+						,C.STM_NO
+						,C.SCHDIV_YN
+						,C.COM_RFG
+						,C.PLM_PTM
+						,ISNULL(C.REM_FTM,'') AS REM_FTM
+						,C.TOWN_CD
+						,C.TOWN_NAME
+						,C.STI_NAME
+						,C.STI_CD
+						,C.ORM_GADDR
+						,C.REM_RMK
+						,C.COM_AGSEC
+						,C.COM_BRAND
+						,C.ORM_NO
+						,C.RPT_NO
+						,C.RPT_SEQ
+						,C.COM_CMP
+						,(CASE WHEN C.PLM_NO != NULL OR C.PLM_NO != '' THEN (SELECT RTRIM(PRJ_CD) FROM TC_PLANMST BB WITH (NOLOCK) WHERE BB.PLM_NO = C.PLM_NO)
+							   ELSE '' END) AS CJWAYBILL_NO	/*2018.06.18 |주요한| CJ운송장번호 추가 조회 CJ전송,배분후 운송장 번호가 있는 시공건은 확정취소 및 배분취소 불가능 *유효종 대리님 요청*/
+						,C.CJ_SEND_YN
+						,C.REM_CSEC /*재시공유무*/
+						,C.TT
+				  FROM CTE C
+				  JOIN (
+							SELECT
+									 A.ORM_NO
+									,ISNULL(SUM(B.ORD_QTY*C.IOP_SALCST), 0) AS LL_SALCST
+									, ISNULL(SUM(B.ORD_QTY*C.IOP_MNFCST), 0) AS LL_MNFCST
+									, ISNULL(SUM(B.ORD_QTY * C.ITM_CONSTCST), 0) AS LL_ITMCONSTCST
+									FROM TO_ORDMAS A WITH(NOLOCK), TO_ORDDET B WITH (NOLOCK), TT_ITMCOP C WITH(NOLOCK)
+									WHERE A.ORM_NO = B.ORM_NO
+									AND B.ITM_CD = C.ITM_CD
+									AND B.COL_CD = C.COL_CD
+									AND A.VND_CD = C.COM_CMP
+									GROUP BY  A.ORM_NO ) A ON C.ORM_NO = A.ORM_NO
+									LEFT OUTER JOIN (
+									SELECT A.PLM_NO ,B.COM_CMP
+									,ISNULL(SUM(A.PLD_FQTY*B.IOP_SALCST), 0) AS LL_SALCST2
+									, ISNULL(SUM(A.PLD_FQTY*B.IOP_MNFCST), 0) AS LL_MNFCST2                    
+									,SUM(ISNULL(A.PLD_EQTY*B.ITM_CONSTCST, 0) 
+									* CASE WHEN B.COM_CMP = 'T01I' AND A.COM_PLDSEC IN ('C092', 'C096') THEN 0.82 ELSE 1 END)
+									AS LL_ITMCONSTCST2
+	                 
+									FROM TC_PLANDTL A WITH (NOLOCK), TT_ITMCOP B WITH(NOLOCK)
+									WHERE A.COM_PLDSEC IN ( 'C092', 'C096')
+									AND A.ITM_CD = B.ITM_CD
+									AND A.COL_CD = B.COL_CD
+									GROUP BY  A.PLM_NO ,B.COM_CMP) B ON (C.PLM_NO = B.PLM_NO AND C.COM_CMP =B.COM_CMP)
+				  
+									UNION ALL
+									SELECT 
+									 A.REM_DT
+									,A.REM_SEQ
+									,ISNULL(RTRIM(A.PLM_NO),'') AS PLM_NO			 	  
+									,A.REM_CASYN
+									,A.COM_SSEC /* 구분:C18C(시공),C18A(A/S) */
+									,A.COM_CTSEC
+									,A.COM_SCD	
+									,'01' AS STM_NO
+									,ISNULL(A.SCHDIV_YN,'N') AS SCHDIV_YN /* 분배 */
+									,A.COM_RFG /* 시공 */
+									,'' AS PLM_PTM /* 수주요청시간 */
+									,ISNULL(A.REM_FTM,'') AS REM_FTM/* 확정시간 */
+									,A.TOWN_CD   /* 시공지역(법정동) */
+									,(SELECT TOP 1 TOWN_NM FROM TC_TOWNM WITH (NOLOCK) WHERE TOWN_CD=A.TOWN_CD) AS TOWN_NAME  /* 시공지역(법정동) */
+									,(SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE STI_CD=A.STI_CD) AS STI_NAME /* 시공팀 */
+									,A.STI_CD /* 시공팀 */
+									,B.CTM_ADDR AS ORM_GADDR /* 주소 */
+									,A.REM_RMK /* 특이사항 */
+					  
+									,A.COM_AGSEC /* 회사 */
+									,A.COM_BRAND /* 브랜드 */
+									,A.ORM_NO /* 수주번호 */
+									,b.RPT_NO
+								    ,b.RPT_SEQ
+								    ,(SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC) AS COM_CMP /* 회사코드 T */
+								    ,(CASE WHEN A.PLM_NO != NULL OR A.PLM_NO != '' THEN (SELECT RTRIM(PRJ_CD) FROM TC_PLANMST BB WITH (NOLOCK) WHERE BB.PLM_NO = A.PLM_NO)
+										   ELSE '' END) AS CJWAYBILL_NO	/*2018.06.18 |주요한| CJ운송장번호 추가 조회 CJ전송,배분후 운송장 번호가 있는 시공건은 확정취소 및 배분취소 불가능 *유효종 대리님 요청*/
+									,A.CJ_SEND_YN
+									,A.REM_CSEC
+									,CASE (SELECT COUNT(*) FROM TC_PLANDTL WITH (NOLOCK) WHERE PLM_NO=A.PLM_NO AND COM_PLDSEC != 'C090') WHEN 0 THEN 'N' ELSE 'Y' END AS TT /* 추가 */
+							   FROM TC_RESMST A WITH (NOLOCK), 
+									TA_RPTREQ B WITH (NOLOCK),
+									TC_STINF C WITH (NOLOCK)
+							  WHERE 1=1
+							    AND A.COM_SSEC ='C18A'
+								AND A.REM_CASYN='Y' 
+								/* AND A.COM_SCD = C.COM_SCD */
+								AND A.STI_CD = C.STI_CD
+								AND SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO
+								AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ
+								AND A.REM_DT= CAST( #{REM_DT} AS VARCHAR) 
+								AND C.STI_CD = CAST( #{STI_CD} AS VARCHAR) 
+				
+								/* 조회조건 추가 2018.03.21 |주요한|  이희석책임님 요청*/
+								AND A.COM_AGSEC = CAST(#{COM_AGSEC}  AS VARCHAR)
+								/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+								/*AND A.COM_BRAND = CAST(COM_BRAND  AS VARCHAR)*/
+								/* 조회조건 추가 2018.05.25 |주요한| 통합테스트 조건 com_scd 추가*/
+								AND A.COM_SCD = #{COM_SCD}
+	      			
+						) A
+		ORDER BY COM_SSEC DESC, PLM_PTM, STI_CD , REM_FTM
+	]]>
+	</select>	
+	
+	<select id="select_1" parameterType="java.util.HashMap" resultType="java.util.HashMap">        
+	<![CDATA[ 
+			/*CRM0030.select_1*/		
+		SELECT '0' AS CHK
+			   ,REM_DT /* 예약일 */			
+		       ,STI_CD /* 시공팀 코드*/			
+		       ,STI_NM /* 시공팀 명*/			
+		       ,COM_AGSEC /* 회사 */
+		      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+		      /*,COM_BRAND  브랜드 */
+			  /*,MAX(REAL_CNT) + SUM(AS_COUNT) AS SQTY	주문건수 [ 시공건수 + as건수 로 변경 ]*/
+	           ,SUM(SQTY) AS SQTY /* 주문건수 */			
+			   ,MAX(REAL_CNT)  AS REAL_CNT /*총건수 */		
+			   ,SUM(AS_COUNT) AS AS_COUNT /*as건수*/
+		       ,SUM(M_CNT) AS M_CNT /* 오전 */			
+		       ,SUM(A_CNT) AS A_CNT /* 오후 */			
+		       ,SUM(N_CNT) AS N_CNT /* 저녁 */			
+		       ,SUM(E_CNT) AS E_CNT /* 미지정 */			
+	     	   ,ROUND((SUM(REAL_CNT) / MAX(CNT_RATE) * 100),0) AS CNT_RATE /* 건수Capa 충족율 */			
+		       ,ROUND((SUM(SAMT)     / MAX(AMT_RATE) * 100),0) AS AMT_RATE /* 금액Capa 충족율 */			
+		       ,SUM(SAMT) AS SAMT /* 총시공액 */		
+		       ,ISNULL(SUM(CONST_AMT),0) AS CONST_AMT /* 총시공지급액 */	
+		       ,SUM(STMFYN) AS STMFYN
+		       ,CASE WHEN SUM(SCHDIV_YN) > 0 THEN 'N' ELSE 'Y' END AS SCHDIV_YN
+		       ,CASE WHEN SUM(ALLFIXYN) > 0 THEN 'N' ELSE 'Y' END AS ALLFIXYN
+		       ,K_STI_CD	
+		       ,K_STM_NM
+		       ,K_STM_HP
+		       ,COM_SCD
+		       ,FTM_CNT
+			   ,CASE ( SELECT COALESCE(MAX(B.ING_STT), 'X') 
+				  		 FROM TC_RESMST AA WITH (NOLOCK), TO_CHGMAS B WITH (NOLOCK)
+				 	    WHERE AA.ORM_NO = B.ORM_NO
+						  AND AA.REM_DT = A.REM_DT
+						  AND AA.COM_AGSEC = A.COM_AGSEC
+						  AND B.ING_STT IN ('O46001', 'O46005', 'O46006', 'O46007', 'O46008', 'O46010') 
+					      AND B.RQT_SEQ > '00'
+						  AND AA.STI_CD = A.STI_CD ) WHEN 'X' THEN '' ELSE 'Y' END  AS ORDCHG				       
+			 FROM  (		
+						SELECT A.REM_DT /* 예약일 */	
+						      ,A.COM_AGSEC /* 회사 */
+						      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+						      /*,A.COM_BRAND  브랜드 */
+						          ,ISNULL(B.STI_CD,'') as STI_CD/* 시공팀 코드*/
+						          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+						    	  ,ISNULL(count(distinct a.orm_no), 0) AS SQTY /* 주문건수 */		
+	                              ,isnull(MAX(REAL_CNT),0)  AS REAL_CNT   /* 실건수 */    		    		
+								  ,MAX(CASE WHEN A.com_ssec = 'C18A' THEN 1 ELSE 0 END) AS AS_COUNT /* AS건수 */
+						    	  ,MAX(CASE WHEN A.REM_FTM in ('C4130','C4138','C4140','C4150','C4151','C4152','C4153','C4154','C4155','C4156','C4157','C4158','C4009','C4010','C4011','C4012','C4019') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS M_CNT /* 오전 */		
+						    	  ,MAX(CASE WHEN A.REM_FTM in ('C4131','C4141','C4142','C4143','C4159','C4160','C4161','C4162','C4163','C4164','C4165','C4166','C4167','C4168','C4169','C4170','C4013','C4014','C4015','C4016','C4017','C4018','C4020','C4021','C4022') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS A_CNT /* 오후 */		
+						    	  ,MAX(CASE WHEN A.REM_FTM in ('C4132','C4144','C4171','C4172','C4173','C4174','C4175','C4176','C4177') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS N_CNT /* 저녁 */		
+						    	  ,MAX(CASE WHEN A.REM_FTM in ('C4133','C4178','C4179','C4180','C4181','C4182','C4183','C4184','C4185','C4186','C4187','C4099') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS E_CNT /* 미지정 */		
+						    	  ,CASE WHEN ISNULL(MAX(B.STI_QTYCAPA),1) = 0 THEN 1 ELSE ISNULL(MAX(B.STI_QTYCAPA),1) END AS CNT_RATE /* 건수Capa 충족율 */		
+						    	  ,CASE WHEN ISNULL(MAX(B.STI_AMTCAPA),1) = 0 THEN 1 ELSE ISNULL(MAX(B.STI_AMTCAPA),1) END AS AMT_RATE /* 금액Capa 충족율 */		
+						    	  ,MAX(A.ORM_AMT) AS SAMT /* 총시공액 */		
+								  ,SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) AS CONST_AMT /* 총시공지급액 */
+								  ,MAX(CASE WHEN A.REM_TMFYN = 'Y'  THEN 1 ELSE 0 END)  AS STMFYN 
+	                              ,MAX(CASE WHEN A.SCHDIV_YN  = 'Y' THEN 0 ELSE 1 END)  AS SCHDIV_YN		
+	                              ,MAX(CASE WHEN A.COM_RFG = 'C141' THEN 1 ELSE 0 END)  AS ALLFIXYN
+	                              ,B.K_STI_CD /*권역시공팀 추가 2017.03.14 |주요한|*/
+	                              ,(SELECT TOP 1 STM_NM FROM TC_STMEMBER WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.K_STI_CD AND COM_POS = 'C111') AS K_STM_NM
+	                              ,(SELECT TOP 1 STM_HP FROM TC_STMEMBER WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.K_STI_CD AND COM_POS = 'C111') AS K_STM_HP
+	                              ,A.COM_SCD
+	                              ,(SELECT COUNT(REM_FTM) FROM TC_RESMST WITH (NOLOCK) WHERE REM_DT = A.REM_DT AND COM_AGSEC = A.COM_AGSEC AND COM_SCD = A.COM_SCD AND STI_CD = A.STI_CD AND (REM_FTM IS NULL OR REM_FTM = '')) AS FTM_CNT
+						      FROM TC_RESMST A WITH (NOLOCK)
+						      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+							  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+												AND IB.COL_CD = IA.COL_CD
+												AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+							  LEFT OUTER JOIN			
+				  								( SELECT  count( DISTINCT CC.AGT_CD + CC.ORM_GADDR+ CC.ORM_CDT ) as REAL_CNT
+														,AA.STI_CD AS STI_CD
+														,AA.REM_DT AS REM_DT
+														,AA.COM_AGSEC AS COM_AGSEC
+														/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+														/*,AA.COM_BRAND*/
+														,AA.COM_SCD AS COM_SCD
+													FROM TC_RESMST AA WITH (NOLOCK),   
+														TC_RESDTL BB WITH (NOLOCK),
+														TO_ORDMAS CC WITH(NOLOCK),
+														TC_STINF DD	WITH (NOLOCK)		   
+													WHERE AA.REM_DT=BB.REM_DT
+														AND AA.REM_SEQ=BB.REM_SEQ
+														AND AA.ORM_NO=CC.ORM_NO
+														AND AA.COM_SCD = DD.COM_SCD
+														AND AA.STI_CD=DD.STI_CD
+														AND AA.COM_SSEC ='C18C'
+														AND AA.REM_CASYN='N' 
+													GROUP BY 
+														AA.STI_CD
+													   ,AA.REM_DT
+													   ,AA.COM_AGSEC
+													   /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+													   /*,AA.COM_BRAND*/
+													   ,AA.COM_SCD												   
+								   	) AS C	ON  A.REM_DT=C.REM_DT
+										   AND A.STI_CD=C.STI_CD	
+										   AND A.COM_AGSEC=C.COM_AGSEC
+										   /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+										   /*AND A.COM_BRAND=C.COM_BRAND*/			
+										   AND A.COM_SCD=C.COM_SCD			
+							       ,TC_STINF B, dbo.fnSplit(#{STI_CD_ARR}) X
+						     WHERE A.STI_CD = B.STI_CD
+						       AND B.STI_CD = X.DATA		
+						       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+						      /* AND A.COM_SCD = B.COM_SCD*/
+						       AND A.COM_CTSEC = 'C06L' /*  소액*/
+						       AND A.REM_DT = #{REM_DT}
+						       AND B.COM_STSEC != 'C20A'
+						      /* AND A.SCHDIV_YN = 'N' */
+						GROUP BY A.REM_DT 			
+						        ,K_STI_CD			
+						        ,B.STI_CD			
+						        ,A.STI_CD			
+								,B.COM_SCD	
+						    	,B.STI_NM
+	                            ,A.ORM_NO
+	                            ,A.COM_AGSEC
+								/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+								/*,A.COM_BRAND*/                            
+	                            ,B.K_STI_CD
+	                            ,A.COM_SCD
+	                            ,A.COM_SSEC
+						) AS A
+	/*	 WHERE A.ALLFIXYN > 0 */
+		 GROUP BY REM_DT 			
+		        ,STI_CD 			
+		    	,STI_NM 		
+				,K_STI_CD
+				,K_STM_NM
+				,K_STM_HP
+				,COM_SCD
+				,FTM_CNT
+		        ,COM_AGSEC /* 회사 */
+		      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+		      /*,COM_BRAND  브랜드 */	
+		 ORDER BY REM_DT 			
+		    	,STI_NM 		
+				,K_STI_CD
+	            ,STI_CD
+		        ,COM_AGSEC
+		      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+		      /*,COM_BRAND*/
+	          ,COM_SCD
+	]]>
+	</select>
+
+
+    <select id="selectOrderList_" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPOrderList">     
+	<![CDATA[       
+		select 
+		ltrim(rtrim(a.rem_dt))+'-'+ltrim(rtrim(a.rem_seq)) as ORDERID,
+		a.orm_nm ORDERNAME,
+		( case a.com_ssec when 'C18C' then (select orm_gaddr from to_ordmas where orm_no = a.orm_no )
+		else (select b.CTM_ADDR from ta_rptreq B where SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) end ) as ADDRESS,
+		      A.LATITUDE,
+		      A.LONGITUDE,
+		      '10' DELIVERYWEIGHT		
+		from tc_resmst a, tc_stinf b
+		where a.com_scd = 'C16YA'
+		and a.rem_dt = '20201030'
+		and b.k_sti_cd = 'YA142'
+		and a.com_agsec = 'C02I'
+		and a.sti_cd = b.sti_cd
+	]]>
+    </select>
+
+    <select id="selectOrderList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPOrderList">     
+	<![CDATA[       
+		SELECT
+			A.REM_DT + A.REM_SEQ ORDERID,
+			A.ORM_NM AS ORDERNAME,
+			( SELECT ISNULL(TOO.ORM_GADDR, '' ) + ' ' + ISNULL(TOO.ADDR_DTL , '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = A.ORM_NO ) AS ADDRESS,
+			A.LATITUDE,
+			A.LONGITUDE,
+			'10' DELIVERYWEIGHT,
+			A.STI_CD AS STI_CD,
+			A.COM_CTSEC AS COM_CTSEC,
+			A.COM_SCD AS COM_SCD,
+			A.REM_DT AS REM_DT,
+			A.REM_SEQ AS REM_SEQ,
+			A.PLM_NO AS PLM_NO,
+			A.ORM_NO AS ORM_NO,
+			TCS.STI_NM AS STI_NM,
+			A.COM_SSEC AS COM_SSEC,
+            A.COM_RFG AS COM_RFG
+		FROM TC_RESMST A WITH (NOLOCK), TC_STINF TCS WITH (NOLOCK), dbo.fnSplit(#{sti_cd_arr}) B
+		WHERE A.REM_DT = #{rem_dt} 
+		  AND A.COM_SSEC = 'C18C'
+		  AND A.COM_SCD = TCS.COM_SCD
+		  AND A.STI_CD = TCS.STI_CD
+		  AND A.STI_CD = B.DATA
+		UNION ALL	
+		SELECT
+			A.REM_DT + A.REM_SEQ ORDERID,
+			A.ORM_NM AS ORDERNAME,
+			( SELECT ISNULL(B.CTM_ADDR, '') + ' ' + ISNULL(B.CTM_ADDR2, '')
+				 FROM TA_RPTREQ B WITH (NOLOCK)
+	         WHERE SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO 
+				  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) AS ADDRESS,
+			A.LATITUDE,
+			A.LONGITUDE,
+			'10' DELIVERYWEIGHT,
+			A.STI_CD AS STI_CD,
+			A.COM_CTSEC AS COM_CTSEC,
+			A.COM_SCD AS COM_SCD,
+			A.REM_DT AS REM_DT,
+			A.REM_SEQ AS REM_SEQ,
+			A.PLM_NO AS PLM_NO,
+			A.ORM_NO AS ORM_NO,
+			TCS.STI_NM AS STI_NM,
+			A.COM_SSEC AS COM_SSEC,
+            A.COM_RFG
+		FROM TC_RESMST A WITH (NOLOCK), TC_STINF TCS WITH (NOLOCK), dbo.fnSplit(#{sti_cd_arr}) B 
+		WHERE A.REM_DT = #{rem_dt} 
+		  AND A.COM_SSEC = 'C18A'
+		  AND A.COM_SCD = TCS.COM_SCD
+		  AND A.STI_CD = TCS.STI_CD
+		  AND A.STI_CD = B.DATA
+	]]>
+    </select>
+
+    <select id="selectOrderListGeocoding" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPOrderList">     
+	<![CDATA[       
+		SELECT
+			A.REM_DT + A.REM_SEQ ORDERID,
+			A.ORM_NM AS ORDERNAME,
+			( SELECT ISNULL(TOO.ORM_GADDR, '' ) + ' ' + ISNULL(TOO.ADDR_DTL , '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = A.ORM_NO ) AS ADDRESS,
+			A.LATITUDE,
+			A.LONGITUDE,
+			'10' DELIVERYWEIGHT,
+			A.STI_CD AS STI_CD,
+			A.COM_CTSEC AS COM_CTSEC,
+			A.COM_SCD AS COM_SCD,
+			A.REM_DT AS REM_DT,
+			A.REM_SEQ AS REM_SEQ,
+			A.PLM_NO AS PLM_NO,
+			A.ORM_NO AS ORM_NO,
+			TCS.STI_NM AS STI_NM,
+			A.COM_SSEC AS COM_SSEC,
+            A.COM_RFG AS COM_RFG
+		FROM TC_RESMST A WITH (NOLOCK), TC_STINF TCS WITH (NOLOCK)
+		WHERE A.REM_DT = #{rem_dt} 
+		  AND A.COM_SSEC = 'C18C'
+		  AND TCS.K_STI_CD = #{k_sti_cd}
+		  AND A.COM_SCD = TCS.COM_SCD
+		  AND A.STI_CD = TCS.STI_CD
+		  AND ( A.LONGITUDE IS NULL OR A.LONGITUDE = '' ) 
+		UNION ALL	
+		SELECT
+			A.REM_DT + A.REM_SEQ ORDERID,
+			A.ORM_NM AS ORDERNAME,
+			( SELECT ISNULL(B.CTM_ADDR, '') + ' ' + ISNULL(B.CTM_ADDR2, '')
+				 FROM TA_RPTREQ B WITH (NOLOCK)
+	         WHERE SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO 
+				  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) AS ADDRESS,
+			A.LATITUDE,
+			A.LONGITUDE,
+			'10' DELIVERYWEIGHT,
+			A.STI_CD AS STI_CD,
+			A.COM_CTSEC AS COM_CTSEC,
+			A.COM_SCD AS COM_SCD,
+			A.REM_DT AS REM_DT,
+			A.REM_SEQ AS REM_SEQ,
+			A.PLM_NO AS PLM_NO,
+			A.ORM_NO AS ORM_NO,
+			TCS.STI_NM AS STI_NM,
+			A.COM_SSEC AS COM_SSEC,
+			A.COM_RFG AS COM_RFG			
+		FROM TC_RESMST A WITH (NOLOCK), TC_STINF TCS WITH (NOLOCK) 
+		WHERE A.REM_DT = #{rem_dt} 
+		  AND A.COM_SSEC = 'C18A'
+		  AND TCS.K_STI_CD = #{k_sti_cd}
+		  AND A.COM_SCD = TCS.COM_SCD
+		  AND A.STI_CD = TCS.STI_CD
+		  AND ( A.LONGITUDE IS NULL OR A.LONGITUDE = '' )
+	]]>
+    </select>
+                 
+    <select id="selectVehicleList_" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList">     
+	<![CDATA[       
+		select
+		sti_cd VEHICLEID, sti_nm VEHICLENAME,
+		'10' WEIGHT,
+		       '01' VEHICLETYPE,
+		       '' ZONECODE
+		from tc_stinf
+		where k_sti_cd = 'YA142'
+		and sti_rank = 'Y'
+		and sti_icyn = 'Y'
+		and sti_nm like 'HA%'
+	]]>
+    </select>
+
+    <select id="selectVehicleListTeam" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList">     
+	<![CDATA[       
+		SELECT A.STI_CD VEHICLEID,
+		       A.STI_NM AS VEHICLENAME,
+		       '10' WEIGHT,
+		       '01' VEHICLETYPE,
+		       '' ZONECODE,
+		       ISNULL(A.STI_SKILL, '100') AS SKILLPER
+		FROM TC_STINF A WITH (NOLOCK), dbo.fnSplit(#{sti_cd_arr}) B
+		WHERE A.STI_CD = B.DATA
+		AND A.K_STI_CD = #{k_sti_cd}
+		AND A.STI_RANK = 'Y'
+		ORDER BY A.STI_NM, A.STI_CD
+	]]>
+    </select>
+
+    <select id="selectVehicleList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList">     
+	<![CDATA[
+		SELECT A.STI_CD VEHICLEID,
+		       A.STI_NM AS VEHICLENAME,
+		       '10' WEIGHT,
+		       '01' VEHICLETYPE,
+		       '' ZONECODE,
+		       ISNULL(A.STI_SKILL, '100') AS SKILLPER
+		FROM TC_STINF A WITH (NOLOCK)
+		WHERE A.K_STI_CD = #{k_sti_cd}
+        AND A.STI_RANK = 'Y'
+		ORDER BY A.STI_NM, A.STI_CD
+	]]>
+    </select>
+
+    <select id="selectCenterList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPCenterList">     
+	<![CDATA[
+		SELECT TOP 1
+		       A.COM_SCD, B.CCD_NM, A.SCD_GADDR
+		FROM TC_SCDINF A WITH (NOLOCK) LEFT OUTER JOIN TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD,
+		     TC_STINF C WITH (NOLOCK)
+		WHERE A.COM_SCD  = C.COM_SCD 		
+		AND (C.K_STI_CD = #{k_sti_cd} OR C.STI_CD = #{sti_cd}) 
+		AND A.USE_YN = 'Y'
+	]]>
+    </select>
+
+    <select id="selectCenterList_as" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPCenterList">     
+	<![CDATA[
+		SELECT TOP 1
+		       A.COM_SCD, B.CCD_NM, A.SCD_GADDR
+		FROM TC_SCDINF A WITH (NOLOCK) LEFT OUTER JOIN TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD,
+		     TC_STINF C WITH (NOLOCK)
+		WHERE A.COM_SCD  = C.COM_SCD 		
+		AND C.STI_CD = #{sti_cd}
+		AND A.USE_YN = 'Y'
+	]]>
+    </select>
+
+    <select id="selectSigongAverageCount" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount">   
+    <![CDATA[      
+		SELECT  SUM(SQTY) AS SQTY			
+		       ,SUM(SAMT) AS SAMT		
+		       ,ISNULL(SUM(CONST_AMT),0) AS CONST_AMT     
+			 FROM  (		
+						SELECT A.REM_DT
+						      ,A.COM_AGSEC
+						          ,ISNULL(B.STI_CD,'') as STI_CD
+						          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+						    	  ,ISNULL(count(distinct a.orm_no), 0) AS SQTY			    		
+						    	  ,MAX(A.ORM_AMT) AS SAMT	
+								  ,(CASE WHEN A.COM_AGSEC = 'C02F' THEN SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) * 1.37
+									     WHEN A.COM_AGSEC = 'C02P' THEN SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) * 1.37
+										 ELSE SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) END ) AS CONST_AMT
+	                              ,B.K_STI_CD
+	                              ,A.COM_SCD
+						      FROM TC_RESMST A WITH (NOLOCK)
+						      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+							  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+												AND IB.COL_CD = IA.COL_CD
+												AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+							  LEFT OUTER JOIN			
+				  								( SELECT  count( DISTINCT CC.AGT_CD + CC.ORM_GADDR+ CC.ORM_CDT ) as REAL_CNT
+														,AA.STI_CD AS STI_CD
+														,AA.REM_DT AS REM_DT
+														,AA.COM_AGSEC AS COM_AGSEC
+														,AA.COM_SCD AS COM_SCD
+													FROM TC_RESMST AA WITH (NOLOCK),   
+														TC_RESDTL BB WITH (NOLOCK),
+														TO_ORDMAS CC WITH(NOLOCK),
+														TC_STINF DD	WITH (NOLOCK)		   
+													WHERE AA.REM_DT=BB.REM_DT
+														AND AA.REM_SEQ=BB.REM_SEQ
+														AND AA.ORM_NO=CC.ORM_NO
+														AND AA.COM_SCD = DD.COM_SCD
+														AND AA.STI_CD=DD.STI_CD
+														AND AA.COM_SSEC ='C18C'
+														AND AA.REM_CASYN='N' 
+													GROUP BY 
+														AA.STI_CD
+													   ,AA.REM_DT
+													   ,AA.COM_AGSEC
+													   ,AA.COM_SCD
+													   
+								   	) AS C	ON  A.REM_DT=C.REM_DT
+										   AND A.STI_CD=C.STI_CD	
+										   AND A.COM_AGSEC=C.COM_AGSEC	
+										   AND A.COM_SCD=C.COM_SCD			
+	
+							       ,TC_STINF B  WITH (NOLOCK)
+						     WHERE A.STI_CD=B.STI_CD		
+						       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+						       AND A.REM_DT = CAST(#{date} AS VARCHAR)
+						       AND B.COM_STSEC != 'C20A'				    			
+						       AND A.COM_SCD = #{com_scd}  			
+						       AND B.K_STI_CD = CAST( #{sti_cd} AS VARCHAR)				       			
+						GROUP BY A.REM_DT 			
+						        ,K_STI_CD			
+						        ,B.STI_CD			
+						        ,A.STI_CD			
+								,B.COM_SCD	
+						    	,B.STI_NM
+	                            ,A.ORM_NO
+	                            ,A.COM_AGSEC                    
+	                            ,B.K_STI_CD
+	                            ,A.COM_SCD
+	                            ,A.COM_SSEC
+						) AS A			
+		 GROUP BY K_STI_CD
+	]]>
+    </select> 
+
+    <select id="selectSigongAverageCount_TEST" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount">   
+    <![CDATA[      
+		SELECT  SUM(SQTY) AS SQTY			
+		       ,SUM(SAMT) AS SAMT		
+		       ,ISNULL(SUM(CONST_AMT),0) AS CONST_AMT     
+			 FROM  (		
+						SELECT A.REM_DT
+						      ,A.COM_AGSEC
+						          ,ISNULL(B.STI_CD,'') as STI_CD
+						          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+						    	  ,ISNULL(count(distinct a.orm_no), 0) AS SQTY			    		
+						    	  ,MAX(A.ORM_AMT) AS SAMT	
+								  ,SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) AS CONST_AMT
+	                              ,B.K_STI_CD
+	                              ,A.COM_SCD
+						      FROM TC_RESMST A WITH (NOLOCK)
+						      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+							  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+												AND IB.COL_CD = IA.COL_CD
+												AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+							  LEFT OUTER JOIN			
+				  								( SELECT  count( DISTINCT CC.AGT_CD + CC.ORM_GADDR+ CC.ORM_CDT ) as REAL_CNT
+														,AA.STI_CD AS STI_CD
+														,AA.REM_DT AS REM_DT
+														,AA.COM_AGSEC AS COM_AGSEC
+														,AA.COM_SCD AS COM_SCD
+													FROM TC_RESMST AA WITH (NOLOCK),   
+														TC_RESDTL BB WITH (NOLOCK),
+														TO_ORDMAS CC WITH(NOLOCK),
+														TC_STINF DD	WITH (NOLOCK)		   
+													WHERE AA.REM_DT=BB.REM_DT
+														AND AA.REM_SEQ=BB.REM_SEQ
+														AND AA.ORM_NO=CC.ORM_NO
+														AND AA.COM_SCD = DD.COM_SCD
+														AND AA.STI_CD=DD.STI_CD
+														AND AA.COM_SSEC ='C18C'
+														AND AA.REM_CASYN='N' 
+													GROUP BY 
+														AA.STI_CD
+													   ,AA.REM_DT
+													   ,AA.COM_AGSEC
+													   ,AA.COM_SCD
+													   
+								   	) AS C	ON  A.REM_DT=C.REM_DT
+										   AND A.STI_CD=C.STI_CD	
+										   AND A.COM_AGSEC=C.COM_AGSEC	
+										   AND A.COM_SCD=C.COM_SCD			
+	
+							       ,TC_STINF B  WITH (NOLOCK)
+						     WHERE A.STI_CD=B.STI_CD		
+						       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+						       AND A.REM_DT = CAST(#{date} AS VARCHAR)
+						       AND B.COM_STSEC != 'C20A'				    			
+						       AND A.COM_SCD = #{com_scd}  			
+						       AND B.K_STI_CD = CAST( #{sti_cd} AS VARCHAR)				       			
+						GROUP BY A.REM_DT 			
+						        ,K_STI_CD			
+						        ,B.STI_CD			
+						        ,A.STI_CD			
+								,B.COM_SCD	
+						    	,B.STI_NM
+	                            ,A.ORM_NO
+	                            ,A.COM_AGSEC                    
+	                            ,B.K_STI_CD
+	                            ,A.COM_SCD
+	                            ,A.COM_SSEC
+						) AS A			
+		 GROUP BY K_STI_CD
+	]]>
+    </select> 
+        
+    <select id="selectKstiScheduleList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPKstiList">        
+    <![CDATA[ 
+	SELECT  REM_DT AS REM_DT
+		   ,COM_SCD	AS COM_SCD	 
+	       ,STI_CD AS STI_CD	
+	       ,STI_NM AS STI_NM
+           ,SUM(SQTY) AS ORM_QTY /* 주문건수 */				
+	       ,SUM(SAMT) AS ORM_AMT /* 총시공액 */		
+	       ,ISNULL(SUM(CONST_AMT),0) AS CONSTCST_SUM /* 총시공지급액 */	
+	       ,SUM(AS_COUNT) AS AS_COUNT /*as건수*/
+	       ,MAX(REAL_CNT)  AS REAL_CNT
+		 FROM  (		
+					SELECT A.REM_DT /* 예약일 */	
+					      ,A.COM_AGSEC /* 회사 */
+					      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+					      /*,A.COM_BRAND  브랜드 */
+					          ,ISNULL(B.STI_CD,'') as STI_CD/* 시공팀 코드*/
+					          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+					    	  ,ISNULL(count(distinct a.orm_no), 0) AS SQTY /* 주문건수 */		
+                              ,isnull(MAX(REAL_CNT),0)  AS REAL_CNT   /* 실건수 */    		    		
+							  ,MAX(CASE WHEN A.com_ssec = 'C18A' THEN 1 ELSE 0 END) AS AS_COUNT /* AS건수 */
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4130','C4138','C4140','C4150','C4151','C4152','C4153','C4154','C4155','C4156','C4157','C4158','C4009','C4010','C4011','C4012','C4019') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS M_CNT /* 오전 */		
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4131','C4141','C4142','C4143','C4159','C4160','C4161','C4162','C4163','C4164','C4165','C4166','C4167','C4168','C4169','C4170','C4013','C4014','C4015','C4016','C4017','C4018','C4020','C4021','C4022') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS A_CNT /* 오후 */		
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4132','C4144','C4171','C4172','C4173','C4174','C4175','C4176','C4177') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS N_CNT /* 저녁 */		
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4133','C4178','C4179','C4180','C4181','C4182','C4183','C4184','C4185','C4186','C4187','C4099') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS E_CNT /* 미지정 */		
+					    	  ,CASE WHEN ISNULL(MAX(B.STI_QTYCAPA),1) = 0 THEN 1 ELSE ISNULL(MAX(B.STI_QTYCAPA),1) END AS CNT_RATE /* 건수Capa 충족율 */		
+					    	  ,CASE WHEN ISNULL(MAX(B.STI_AMTCAPA),1) = 0 THEN 1 ELSE ISNULL(MAX(B.STI_AMTCAPA),1) END AS AMT_RATE /* 금액Capa 충족율 */		
+					    	  ,MAX(A.ORM_AMT) AS SAMT /* 총시공액 */		
+							  ,(CASE WHEN A.COM_AGSEC = 'C02F' THEN SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) * 1.37
+									     WHEN A.COM_AGSEC = 'C02P' THEN SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) * 1.37
+										 ELSE SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) END ) AS CONST_AMT
+							  ,MAX(CASE WHEN A.REM_TMFYN = 'Y'  THEN 1 ELSE 0 END)  AS STMFYN 
+                              ,MAX(CASE WHEN A.SCHDIV_YN  = 'Y' THEN 0 ELSE 1 END)  AS SCHDIV_YN		
+                              ,MAX(CASE WHEN A.COM_RFG = 'C141' THEN 1 ELSE 0 END)  AS ALLFIXYN
+                              ,B.K_STI_CD /*권역시공팀 추가 2017.03.14 |주요한|*/
+                              ,(SELECT TOP 1 STM_NM FROM TC_STMEMBER WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.K_STI_CD AND COM_POS = 'C111') AS K_STM_NM
+                              ,(SELECT TOP 1 STM_HP FROM TC_STMEMBER WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.K_STI_CD AND COM_POS = 'C111') AS K_STM_HP
+                              ,A.COM_SCD
+                              ,(SELECT COUNT(REM_FTM) FROM TC_RESMST WITH (NOLOCK) WHERE REM_DT = A.REM_DT AND COM_AGSEC = A.COM_AGSEC AND COM_SCD = A.COM_SCD AND STI_CD = A.STI_CD AND (REM_FTM IS NULL OR REM_FTM = '')) AS FTM_CNT
+					      FROM TC_RESMST A WITH (NOLOCK)
+					      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+						  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+											AND IB.COL_CD = IA.COL_CD
+											AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+						  LEFT OUTER JOIN			
+			  								( SELECT  count( DISTINCT CC.AGT_CD + CC.ORM_GADDR+ CC.ORM_CDT ) as REAL_CNT
+													,AA.STI_CD AS STI_CD
+													,AA.REM_DT AS REM_DT
+													,AA.COM_AGSEC AS COM_AGSEC
+													/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+													/*,AA.COM_BRAND*/
+													,AA.COM_SCD AS COM_SCD
+												FROM TC_RESMST AA WITH (NOLOCK),   
+													TC_RESDTL BB WITH (NOLOCK),
+													TO_ORDMAS CC WITH(NOLOCK),
+													TC_STINF DD	WITH (NOLOCK)		   
+												WHERE AA.REM_DT=BB.REM_DT
+													AND AA.REM_SEQ=BB.REM_SEQ
+													AND AA.ORM_NO=CC.ORM_NO
+													AND AA.COM_SCD = DD.COM_SCD
+													AND AA.STI_CD=DD.STI_CD
+													AND AA.COM_SSEC ='C18C'
+													AND AA.REM_CASYN='N' 
+												GROUP BY 
+													AA.STI_CD
+												   ,AA.REM_DT
+												   ,AA.COM_AGSEC
+												   /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+												   /*,AA.COM_BRAND*/
+												   ,AA.COM_SCD
+												   
+							   	) AS C	ON  A.REM_DT=C.REM_DT
+									   AND A.STI_CD=C.STI_CD	
+									   AND A.COM_AGSEC=C.COM_AGSEC
+									   /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+									   /*AND A.COM_BRAND=C.COM_BRAND*/			
+									   AND A.COM_SCD=C.COM_SCD			
+
+						       ,TC_STINF B 
+					     WHERE A.STI_CD=B.STI_CD		
+					       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+					       AND A.COM_CTSEC = 'C06L' /*  소액*/
+					       AND A.REM_DT = #{date}
+					       AND B.COM_STSEC != 'C20A'					    			
+					       AND A.COM_SCD = #{com_scd}			
+					       AND B.K_STI_CD = #{sti_cd}
+       					       									       			
+					GROUP BY A.REM_DT 			
+					        ,K_STI_CD			
+					        ,B.STI_CD			
+					        ,A.STI_CD			
+							,B.COM_SCD	
+					    	,B.STI_NM
+                            ,A.ORM_NO
+                            ,A.COM_AGSEC
+							/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+							/*,A.COM_BRAND*/                            
+                            ,B.K_STI_CD
+                            ,A.COM_SCD
+                            ,A.COM_SSEC
+					) AS A			
+	 GROUP BY REM_DT 			
+	        ,STI_CD 			
+	    	,STI_NM 	
+			,COM_SCD
+	 ORDER BY REM_DT 			
+	    	,STI_NM 	
+            ,STI_CD
+          ,COM_SCD
+
+	]]>
+    </select>
+
+
+    <select id="selectKstiScheduleList_20210101" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPKstiList">        
+    <![CDATA[ 
+	SELECT  REM_DT AS REM_DT
+		   ,COM_SCD	AS COM_SCD	 
+	       ,STI_CD AS STI_CD	
+	       ,STI_NM AS STI_NM
+           ,SUM(SQTY) AS ORM_QTY /* 주문건수 */				
+	       ,SUM(SAMT) AS ORM_AMT /* 총시공액 */		
+	       ,ISNULL(SUM(CONST_AMT),0) AS CONSTCST_SUM /* 총시공지급액 */	
+		 FROM  (		
+					SELECT A.REM_DT /* 예약일 */	
+					      ,A.COM_AGSEC /* 회사 */
+					      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+					      /*,A.COM_BRAND  브랜드 */
+					          ,ISNULL(B.STI_CD,'') as STI_CD/* 시공팀 코드*/
+					          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+					    	  ,ISNULL(count(distinct a.orm_no), 0) AS SQTY /* 주문건수 */		
+                              ,isnull(MAX(REAL_CNT),0)  AS REAL_CNT   /* 실건수 */    		    		
+							  ,MAX(CASE WHEN A.com_ssec = 'C18A' THEN 1 ELSE 0 END) AS AS_COUNT /* AS건수 */
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4130','C4138','C4140','C4150','C4151','C4152','C4153','C4154','C4155','C4156','C4157','C4158','C4009','C4010','C4011','C4012','C4019') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS M_CNT /* 오전 */		
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4131','C4141','C4142','C4143','C4159','C4160','C4161','C4162','C4163','C4164','C4165','C4166','C4167','C4168','C4169','C4170','C4013','C4014','C4015','C4016','C4017','C4018','C4020','C4021','C4022') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS A_CNT /* 오후 */		
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4132','C4144','C4171','C4172','C4173','C4174','C4175','C4176','C4177') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS N_CNT /* 저녁 */		
+					    	  ,MAX(CASE WHEN A.REM_FTM in ('C4133','C4178','C4179','C4180','C4181','C4182','C4183','C4184','C4185','C4186','C4187','C4099') AND A.com_ssec != 'C18A' THEN 1 ELSE 0 END) AS E_CNT /* 미지정 */		
+					    	  ,CASE WHEN ISNULL(MAX(B.STI_QTYCAPA),1) = 0 THEN 1 ELSE ISNULL(MAX(B.STI_QTYCAPA),1) END AS CNT_RATE /* 건수Capa 충족율 */		
+					    	  ,CASE WHEN ISNULL(MAX(B.STI_AMTCAPA),1) = 0 THEN 1 ELSE ISNULL(MAX(B.STI_AMTCAPA),1) END AS AMT_RATE /* 금액Capa 충족율 */		
+					    	  ,MAX(A.ORM_AMT) AS SAMT /* 총시공액 */		
+							  ,SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) AS CONST_AMT /* 총시공지급액 */
+							  ,MAX(CASE WHEN A.REM_TMFYN = 'Y'  THEN 1 ELSE 0 END)  AS STMFYN 
+                              ,MAX(CASE WHEN A.SCHDIV_YN  = 'Y' THEN 0 ELSE 1 END)  AS SCHDIV_YN		
+                              ,MAX(CASE WHEN A.COM_RFG = 'C141' THEN 1 ELSE 0 END)  AS ALLFIXYN
+                              ,B.K_STI_CD /*권역시공팀 추가 2017.03.14 |주요한|*/
+                              ,(SELECT TOP 1 STM_NM FROM TC_STMEMBER WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.K_STI_CD AND COM_POS = 'C111') AS K_STM_NM
+                              ,(SELECT TOP 1 STM_HP FROM TC_STMEMBER WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.K_STI_CD AND COM_POS = 'C111') AS K_STM_HP
+                              ,A.COM_SCD
+                              ,(SELECT COUNT(REM_FTM) FROM TC_RESMST WITH (NOLOCK) WHERE REM_DT = A.REM_DT AND COM_AGSEC = A.COM_AGSEC AND COM_SCD = A.COM_SCD AND STI_CD = A.STI_CD AND (REM_FTM IS NULL OR REM_FTM = '')) AS FTM_CNT
+					      FROM TC_RESMST A WITH (NOLOCK)
+					      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+						  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+											AND IB.COL_CD = IA.COL_CD
+											AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+						  LEFT OUTER JOIN			
+			  								( SELECT  count( DISTINCT CC.AGT_CD + CC.ORM_GADDR+ CC.ORM_CDT ) as REAL_CNT
+													,AA.STI_CD AS STI_CD
+													,AA.REM_DT AS REM_DT
+													,AA.COM_AGSEC AS COM_AGSEC
+													/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+													/*,AA.COM_BRAND*/
+													,AA.COM_SCD AS COM_SCD
+												FROM TC_RESMST AA WITH (NOLOCK),   
+													TC_RESDTL BB WITH (NOLOCK),
+													TO_ORDMAS CC WITH(NOLOCK),
+													TC_STINF DD	WITH (NOLOCK)		   
+												WHERE AA.REM_DT=BB.REM_DT
+													AND AA.REM_SEQ=BB.REM_SEQ
+													AND AA.ORM_NO=CC.ORM_NO
+													AND AA.COM_SCD = DD.COM_SCD
+													AND AA.STI_CD=DD.STI_CD
+													AND AA.COM_SSEC ='C18C'
+													AND AA.REM_CASYN='N' 
+												GROUP BY 
+													AA.STI_CD
+												   ,AA.REM_DT
+												   ,AA.COM_AGSEC
+												   /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+												   /*,AA.COM_BRAND*/
+												   ,AA.COM_SCD
+												   
+							   	) AS C	ON  A.REM_DT=C.REM_DT
+									   AND A.STI_CD=C.STI_CD	
+									   AND A.COM_AGSEC=C.COM_AGSEC
+									   /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+									   /*AND A.COM_BRAND=C.COM_BRAND*/			
+									   AND A.COM_SCD=C.COM_SCD			
+
+						       ,TC_STINF B 
+					     WHERE A.STI_CD=B.STI_CD		
+					       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+					       AND A.COM_CTSEC = 'C06L' /*  소액*/
+					       AND A.REM_DT = #{date}
+					       AND B.COM_STSEC != 'C20A'					    			
+					       AND A.COM_SCD = #{com_scd}			
+					       AND B.K_STI_CD = #{sti_cd}
+       					       									       			
+					GROUP BY A.REM_DT 			
+					        ,K_STI_CD			
+					        ,B.STI_CD			
+					        ,A.STI_CD			
+							,B.COM_SCD	
+					    	,B.STI_NM
+                            ,A.ORM_NO
+                            ,A.COM_AGSEC
+							/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+							/*,A.COM_BRAND*/                            
+                            ,B.K_STI_CD
+                            ,A.COM_SCD
+                            ,A.COM_SSEC
+					) AS A			
+	 GROUP BY REM_DT 			
+	        ,STI_CD 			
+	    	,STI_NM 	
+			,COM_SCD
+	 ORDER BY REM_DT 			
+	    	,STI_NM 	
+            ,STI_CD
+          ,COM_SCD
+
+	]]>
+    </select>
+    
+    <select id="selectKstiScheduleListtest" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPKstiList">        
+    <![CDATA[ 
+		SELECT
+			AAA.REM_DT AS REM_DT,
+			AAA.COM_SCD AS COM_SCD,
+			AAA.STI_CD AS STI_CD,
+			AAA.STI_NM AS STI_NM,
+			SUM(AAA.ORM_QTY) AS ORM_QTY,
+			SUM(AAA.ORM_AMT) AS ORM_AMT,
+		    SUM(AAA.CONSTCST_SUM) AS CONSTCST_SUM
+		FROM (
+		
+			SELECT
+				A.REM_DT AS REM_DT,
+				A.COM_SCD AS COM_SCD,
+				A.STI_CD AS STI_CD,
+				TCS.STI_NM AS STI_NM,
+				COUNT(A.REM_DT + A.REM_SEQ) AS ORM_QTY,
+				SUM(A.ORM_AMT) AS ORM_AMT,
+				CASE LEFT(A.ORM_NO, 1) WHEN 'F' THEN ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)) * 1.37, 0)
+														FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+													   WHERE AA.ORM_NO = BB.ORM_NO
+														 AND AA.ORM_NO = A.ORM_NO
+														 AND BB.ITM_CD = CC.ITM_CD
+														 AND BB.COL_CD = CC.COL_CD
+														 AND CC.COM_CMP = AA.VND_CD )
+								       WHEN 'P' THEN ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)) * 1.37, 0)
+														FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+													   WHERE AA.ORM_NO = BB.ORM_NO
+														 AND AA.ORM_NO = A.ORM_NO
+														 AND BB.ITM_CD = CC.ITM_CD
+														 AND BB.COL_CD = CC.COL_CD
+														 AND CC.COM_CMP = AA.VND_CD  )
+									   ELSE ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)), 0)
+														FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+													   WHERE AA.ORM_NO = BB.ORM_NO
+														 AND AA.ORM_NO = A.ORM_NO
+														 AND BB.ITM_CD = CC.ITM_CD
+														 AND BB.COL_CD = CC.COL_CD
+														 AND CC.COM_CMP = AA.VND_CD  ) END AS CONSTCST_SUM
+			FROM TC_RESMST A WITH (NOLOCK), TC_STINF TCS WITH (NOLOCK)
+			WHERE A.COM_SCD = #{com_scd}	
+			  AND TCS.K_STI_CD = #{sti_cd}	
+			  AND A.REM_DT = #{date}
+			  AND A.COM_SSEC = 'C18C'
+			  AND A.STI_CD = TCS.STI_CD
+			  AND A.COM_SCD = TCS.COM_SCD
+			GROUP BY A.COM_SCD, A.REM_DT, A.STI_CD, TCS.STI_NM, A.ORM_NO
+		
+			UNION ALL
+		
+			SELECT
+				A.REM_DT AS REM_DT,
+				A.COM_SCD AS COM_SCD,				
+				A.STI_CD AS STI_CD,
+				TCS.STI_NM AS STI_NM,
+				COUNT(A.REM_DT + A.REM_SEQ) AS ORM_QTY,
+				SUM(A.ORM_AMT) AS ORM_AMT,
+				0 AS CONSTCST_SUM		
+			FROM TC_RESMST A WITH (NOLOCK), TC_STINF TCS WITH (NOLOCK)
+			WHERE A.COM_SCD = #{com_scd}
+			  AND TCS.K_STI_CD = #{sti_cd}	
+			  AND A.REM_DT = #{date}
+			  AND A.COM_SSEC = 'C18A'
+			  AND (SELECT COUNT(1) FROM TA_PLANDTL TP WITH (NOLOCK) WHERE TP.PLM_NO = A.PLM_NO ) > 0
+			  AND A.STI_CD = TCS.STI_CD
+			  AND A.COM_SCD = TCS.COM_SCD
+			  GROUP BY A.COM_SCD, A.REM_DT, A.STI_CD, TCS.STI_NM
+		
+			) AAA
+			GROUP BY AAA.COM_SCD, AAA.REM_DT, AAA.STI_CD, AAA.STI_NM
+	]]>
+    </select>
+
+    <select id="selectSigongAsList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList">    
+    <![CDATA[     
+		SELECT
+			'시공'   AS COM_SSEC,
+			( SELECT TT.CCD_NM FROM TT_COMCD TT WITH (NOLOCK) WHERE TT.CCD_CD = A.COM_BRAND ) AS COM_BRAND,
+			A.REM_DT AS REM_DT,
+			A.REM_SEQ AS REM_SEQ,
+			A.PLM_NO AS PLM_NO,
+			A.ORM_NO AS ORM_NO,
+			A.ORM_NM AS ORM_NM,
+			( SELECT ISNULL(TOO.ORM_GADDR, '' ) + ISNULL(TOO.ADDR_DTL , '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = A.ORM_NO ) AS ORM_GADDR,
+			( CASE A.COM_BRAND WHEN 'T60I02' THEN ( SELECT SUM(CC.IOP_SALCST*BB.ORD_QTY)
+													  FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+												     WHERE AA.ORM_NO = BB.ORM_NO
+													   AND AA.ORM_NO = A.ORM_NO
+													   AND BB.ITM_CD = CC.ITM_CD
+													   AND BB.COL_CD = CC.COL_CD
+													   AND CC.COM_CMP = AA.VND_CD )
+							   ELSE  A.ORM_AMT END ) AS ORD_AMT,
+			( CASE LEFT(A.ORM_NM, 5) WHEN '(벽고정)' THEN  'Y' ELSE 'N' END ) AS 'WALLFIX_YN',
+			(CASE WHEN (SELECT COUNT(*) 
+			              FROM TO_ORDDET IA WITH (NOLOCK), TC_IMPO IB WITH (NOLOCK)
+						 WHERE IA.ORM_NO=A.ORM_NO 
+						   AND IA.ITM_CD=IB.ITM_CD 
+						   AND A.COM_BRAND=IB.COM_BRAND 
+						   AND A.COM_AGSEC=IB.COM_AGSEC 
+						   AND IA.COL_CD=IB.COL_CD) = '0' THEN 'N' ELSE 'Y' END) AS CANNOT_ONE /* 1인불가 */,
+			( CASE WHEN ( SELECT COUNT(*)
+							FROM TC_PLANDTL TCP WITH (NOLOCK)
+						   WHERE TCP.PLM_NO = A.PLM_NO 
+						     AND TCP.COM_PLDSEC = 'C09A' ) > 0 THEN 'Y' ELSE 'N' END ) AS 'TRASH_YN',
+			( SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = A.REM_PTM ) AS REM_PTM,
+			ISNULL(A.REM_RMK, '') + ',' + ( SELECT ISNULL(TOO.ORM_GSPC, '') FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = A.ORM_NO ) AS REM_RMK,
+			ISNULL(A.LATITUDE, '') AS LATITUDE,
+			ISNULL(A.LONGITUDE, '') AS LONGITUDE,
+				CASE LEFT(A.ORM_NO, 1) WHEN 'F' THEN ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)) * 1.37, 0)
+														FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+													   WHERE AA.ORM_NO = BB.ORM_NO
+														 AND AA.ORM_NO = A.ORM_NO
+														 AND BB.ITM_CD = CC.ITM_CD
+														 AND BB.COL_CD = CC.COL_CD
+														 AND CC.COM_CMP = AA.VND_CD )
+								       WHEN 'P' THEN ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)) * 1.37, 0)
+														FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+													   WHERE AA.ORM_NO = BB.ORM_NO
+														 AND AA.ORM_NO = A.ORM_NO
+														 AND BB.ITM_CD = CC.ITM_CD
+														 AND BB.COL_CD = CC.COL_CD
+														 AND CC.COM_CMP = AA.VND_CD  )
+									   ELSE ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)), 0)
+														FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+													   WHERE AA.ORM_NO = BB.ORM_NO
+														 AND AA.ORM_NO = A.ORM_NO
+														 AND BB.ITM_CD = CC.ITM_CD
+														 AND BB.COL_CD = CC.COL_CD
+														 AND CC.COM_CMP = AA.VND_CD  ) END AS CONSTCST_SUM,
+			ISNULL((SELECT TTV.VND_NM FROM TT_VENDOR TTV WITH (NOLOCK) WHERE TTV.VND_CD = A.AGT_CD ), '') AS VND_NM,
+			( CASE WHEN ISNULL(A.SCHDIV_YN, '') = 'Y' THEN '분배확정' ELSE '확정전' END ) AS SCHDIV_YN											 			
+		FROM TC_RESMST A WITH (NOLOCK)
+		WHERE A.COM_SCD = #{com_scd}	
+		  AND A.STI_CD = #{sti_cd}	
+		  AND A.REM_DT = #{date}
+		  AND A.COM_SSEC = 'C18C'
+		
+		UNION ALL
+	
+		SELECT
+			'AS'   AS COM_SSEC,
+			( SELECT TT.CCD_NM FROM TT_COMCD TT WITH (NOLOCK) WHERE TT.CCD_CD = A.COM_BRAND ) AS COM_BRAND,
+			A.REM_DT AS REM_DT,
+			A.REM_SEQ AS REM_SEQ,
+			A.PLM_NO AS PLM_NO,
+			A.ORM_NO AS ORM_NO,
+			A.ORM_NM AS ORM_NM,
+			( SELECT ISNULL(B.CTM_ADDR, '') + ISNULL(B.CTM_ADDR2, '')
+				 FROM TA_RPTREQ B WITH (NOLOCK)
+	         WHERE SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO 
+				  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) AS ORM_GADDR,
+			( SELECT SUM(TAA.AST_QQTY * TAA.BMT_SAMT)
+			    FROM TA_ASTITEM TAA WITH (NOLOCK), TA_RPTREQ B WITH(NOLOCK)
+			   WHERE TAA.RPT_NO = B.RPT_NO
+			     AND TAA.RPT_SEQ = B.RPT_SEQ
+				  AND SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO 
+				  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) AS ORD_AMT,
+			( SELECT ( CASE LEFT(B.CTM_NM, 5) WHEN '(벽고정)' THEN  'Y' ELSE 'N' END )
+				 FROM TA_RPTREQ B WITH (NOLOCK)
+	         WHERE SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO 
+				  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) AS WALLFIX_YN,
+			'N' AS CANNOT_ONE /* 1인불가 */,
+			'N' AS 'TRASH_YN',
+			( SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = A.REM_PTM ) AS REM_PTM,
+		ISNULL(A.REM_RMK, '') + ' , ' +( SELECT ISNULL(TOO.RPT_DESC, '' )
+		    FROM TA_RPTREQ TOO WITH (NOLOCK)
+		   WHERE TOO.RPT_NO  = SUBSTRING(A.ORM_NO, 1, 13)
+		     AND TOO.RPT_SEQ = SUBSTRING(A.ORM_NO, 14, 15) ) + ' ' + ( SELECT ISNULL(TOO.RPT_DESCPLUS, '' )
+		    FROM TA_RPTREQ TOO WITH (NOLOCK)
+		   WHERE TOO.RPT_NO  = SUBSTRING(A.ORM_NO, 1, 13)
+		     AND TOO.RPT_SEQ = SUBSTRING(A.ORM_NO, 14, 15) ) AS REM_RMK,
+			ISNULL(A.LATITUDE, '') AS LATITUDE,
+			ISNULL(A.LONGITUDE, '') AS LONGITUDE,
+			0 AS CONSTCST_SUM,
+			ISNULL((SELECT TTV.VND_NM FROM TT_VENDOR TTV WITH (NOLOCK) WHERE TTV.VND_CD = A.AGT_CD ), '') AS VND_NM,
+			( CASE WHEN ISNULL(A.SCHDIV_YN, '') = 'Y' THEN '분배확정' ELSE '확정전' END ) AS SCHDIV_YN
+		FROM TC_RESMST A WITH (NOLOCK)
+		WHERE A.COM_SCD = #{com_scd}
+		  AND A.STI_CD = #{sti_cd}	
+		  AND A.REM_DT = #{date}
+		  AND A.COM_SSEC = 'C18A'
+		  AND (SELECT COUNT(1) FROM TA_PLANDTL TP WITH (NOLOCK) WHERE TP.PLM_NO = A.PLM_NO ) > 0
+		  
+	ORDER BY ORM_GADDR, ORD_AMT DESC		  
+		  
+		  
+	]]>
+    </select> 
+
+    <select id="selectSigongItemList_20210101" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList">     
+	<![CDATA[       
+		SELECT
+			(SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.COM_PLDSEC ) AS COM_PLDSEC,
+			ISNULL(A.ITM_CD, '') + '-' + ISNULL(A.COL_CD, '') AS 'ITMCD_COL',
+			SUM(A.PLD_FQTY) AS PLD_FQTY,
+			ISNULL((SELECT ISNULL(TTI.ITM_NM, '') FROM TT_ITMMST TTI WITH (NOLOCK) WHERE TTI.ITM_CD = A.ITM_CD AND TTI.COL_CD = A.COL_CD ), '') AS ITM_NM,
+			SUM(ISNULL((PLD_EQTY*PLD_FAMT),0) + ISNULL(PLD_CFAMT,0)) AS ORD_AMT,
+				 (CASE WHEN (A.COM_UNDSEC = 'C52B02' or A.COM_UNDSEC = 'C52C01' or A.COM_UNDSEC = 'C52C02') THEN  ISNULL((SELECT ISNULL(A.PLD_EQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																						   WHERE 1=1
+																							 AND A.ITM_CD = DD.ITM_CD
+																							 AND A.COL_CD = DD.COL_CD
+																							 AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																								   							 WHERE CDX_CD = 'C02' AND CCD_CD = 'C02'+CAST( LEFT(A.PLM_NO, 1) AS VARCHAR))		  
+						   ),0)
+																							ELSE  ISNULL((SELECT ISNULL(A.PLD_FQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																						   WHERE 1=1
+																							 AND A.ITM_CD = DD.ITM_CD
+																							 AND A.COL_CD = DD.COL_CD
+																							 AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																								   							 WHERE CDX_CD = 'C02' AND CCD_CD = 'C02'+CAST( LEFT(A.PLM_NO, 1) AS VARCHAR))		  
+						   ),0) END) AS PLD_SUM
+	      FROM TC_PLANDTL A WITH (NOLOCK)
+	     WHERE A.PLM_NO = #{plm_no} /*plm_no*/ 
+	     GROUP BY A.ITM_CD, A.COL_CD, A.COL_SCD, A.PLM_NO, A.COM_PLDSEC, A.PLD_EQTY, A.COM_UNDSEC, A.PLD_FQTY, A.PLM_NO
+
+	]]>
+    </select>
+
+    <select id="selectSigongItemList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList">     
+	<![CDATA[       
+		SELECT
+			(SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.COM_PLDSEC ) AS COM_PLDSEC,
+			ISNULL(A.ITM_CD, '') + '-' + ISNULL(A.COL_CD, '') AS 'ITMCD_COL',
+			SUM(A.PLD_FQTY) AS PLD_FQTY,
+			ISNULL((SELECT ISNULL(TTI.ITM_NM, '') FROM TT_ITMMST TTI WITH (NOLOCK) WHERE TTI.ITM_CD = A.ITM_CD AND TTI.COL_CD = A.COL_CD ), '') AS ITM_NM,
+			SUM(ISNULL((PLD_EQTY*PLD_FAMT),0) + ISNULL(PLD_CFAMT,0)) AS ORD_AMT,
+			(CASE LEFT(A.PLM_NO, 1) WHEN 'I' THEN
+				 (CASE WHEN (A.COM_UNDSEC = 'C52B02' or A.COM_UNDSEC = 'C52C01' or A.COM_UNDSEC = 'C52C02') THEN  ISNULL((SELECT ISNULL(A.PLD_EQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																						   WHERE 1=1
+																							 AND A.ITM_CD = DD.ITM_CD
+																							 AND A.COL_CD = DD.COL_CD
+																							 AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																								   							 WHERE CDX_CD = 'C02' AND CCD_CD = 'C02'+CAST( LEFT(A.PLM_NO, 1) AS VARCHAR))		  
+						   ),0)
+																							ELSE  ISNULL((SELECT ISNULL(A.PLD_FQTY,0) * ISNULL(DD.ITM_CONSTCST,0) FROM TT_ITMCOP DD WITH (NOLOCK)
+																						   WHERE 1=1
+																							 AND A.ITM_CD = DD.ITM_CD
+																							 AND A.COL_CD = DD.COL_CD
+																							 AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																								   							 WHERE CDX_CD = 'C02' AND CCD_CD = 'C02'+CAST( LEFT(A.PLM_NO, 1) AS VARCHAR))		  
+						   ),0) END) 
+						   
+			ELSE
+			
+				 (CASE WHEN (A.COM_UNDSEC = 'C52B02' or A.COM_UNDSEC = 'C52C01' or A.COM_UNDSEC = 'C52C02') THEN  ISNULL((SELECT ISNULL(A.PLD_EQTY,0) * ISNULL(DD.ITM_CONSTCST,0) * 1.37 FROM TT_ITMCOP DD WITH (NOLOCK)
+																						   WHERE 1=1
+																							 AND A.ITM_CD = DD.ITM_CD
+																							 AND A.COL_CD = DD.COL_CD
+																							 AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																								   							 WHERE CDX_CD = 'C02' AND CCD_CD = 'C02'+CAST( LEFT(A.PLM_NO, 1) AS VARCHAR))		  
+						   ),0)
+																							ELSE  ISNULL((SELECT ISNULL(A.PLD_FQTY,0) * ISNULL(DD.ITM_CONSTCST,0) * 1.37 FROM TT_ITMCOP DD WITH (NOLOCK)
+																						   WHERE 1=1
+																							 AND A.ITM_CD = DD.ITM_CD
+																							 AND A.COL_CD = DD.COL_CD
+																							 AND DD.COM_CMP = (SELECT COM_CMP FROM [dbo].[TT_COMCD] WITH (NOLOCK)
+																								   							 WHERE CDX_CD = 'C02' AND CCD_CD = 'C02'+CAST( LEFT(A.PLM_NO, 1) AS VARCHAR))		  
+						   ),0) END) 
+
+
+
+			END )			   
+						   
+						   AS PLD_SUM
+
+	      FROM TC_PLANDTL A WITH (NOLOCK)
+	     WHERE A.PLM_NO = #{plm_no} /*plm_no*/ 
+	     GROUP BY A.ITM_CD, A.COL_CD, A.COL_SCD, A.PLM_NO, A.COM_PLDSEC, A.PLD_EQTY, A.COM_UNDSEC, A.PLD_FQTY, A.PLM_NO
+
+	]]>
+    </select>
+
+    <select id="selectAsItemList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList">     
+	<![CDATA[       
+		SELECT
+			ISNULL((SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.COM_PLDSEC ), 'AS') AS COM_PLDSEC,
+			A.BMT_ITEM + '-' + A.COL_CD AS 'ITMCD_COL',
+			SUM(A.PLD_FQTY) AS PLD_FQTY, 
+			(SELECT TTI.BMT_NM
+			   FROM TT_BOMMST TTI WITH (NOLOCK)
+		     WHERE TTI.BMT_ITEM = A.BMT_ITEM
+		       AND TTI.COL_CD = A.COL_CD ) AS ITM_NM,
+			SUM(ISNULL(FLOOR(A.PLD_EQTY * A.PLD_FAMT), 0)) AS ORD_AMT,
+			0 AS PLD_SUM
+		FROM TA_PLANDTL A WITH (NOLOCK)
+		WHERE A.PLM_NO = #{plm_no}
+		GROUP BY A.BMT_ITEM, A.COL_CD, A.COM_PLDSEC
+	]]>
+    </select>
+
+    <select id="selectKsticdAllList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList">     
+	<![CDATA[       
+		SELECT
+			STI_CD AS STI_CD,
+			STI_NM AS STI_NM,
+			COM_CTSEC AS COM_CTSEC
+			COM_SCD AS COM_SCD
+		  FROM TC_STINF WITH (NOLOCK)
+		 WHERE K_STI_CD = #{k_sti_cd}
+	       AND STI_RANK = 'Y'
+	    ORDER BY STI_NM, STI_CD
+	]]>
+    </select>
+
+
+	<update id="updateSticdResmst" parameterType="HashMap">
+	<![CDATA[
+	    UPDATE TC_RESMST SET
+		       USR_CD    = #{sti_cd}
+		      ,SYS_DT    = GETDATE()
+		      ,STI_CD    = #{sti_cd}
+		      ,COM_CTSEC = #{com_ctsec}	    
+		      ,COM_SCD   = #{com_scd}
+		      ,TREQ_TIME = #{treq_time}
+		WHERE REM_DT= CAST( #{rem_dt} AS VARCHAR)
+		  AND REM_SEQ= CAST( #{rem_seq} AS VARCHAR)
+	]]>
+	</update> 
+	
+	<update id="updateSticdTcPlanmst" parameterType="HashMap">
+	<![CDATA[
+		UPDATE TC_PLANMST
+		   SET USR_CD    = #{sti_cd}
+	      	  ,SYS_DT    = GETDATE()
+		 	  ,COM_SCD   = #{com_scd}
+	          ,COM_CTSEC = #{com_ctsec}
+	          ,STI_CD    = #{sti_cd}
+	     WHERE 1=1	
+	       AND PLM_NO = CAST( #{plm_no} AS VARCHAR)
+	]]>
+	</update> 
+	
+	<update id="updateSticdTrSchedule" parameterType="HashMap">
+	<![CDATA[
+		UPDATE TR_SCHEDULE SET
+					 COM_SCD	=	#{com_scd}
+					,STI_CD		=	#{sti_cd}
+					,STM_NM		=	#{sti_nm}
+					,SYS_DT		=	GETDATE()
+					,USR_CD		=	#{sti_cd}
+		WHERE 1=1
+		  AND ORM_NO = CAST( #{orm_no} AS VARCHAR)
+	]]>
+	</update> 
+
+	<select id="getStmHpNo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+	<![CDATA[ 	    
+	    SELECT
+			ISNULL(STM_HP, '') AS DATA1
+		  FROM TC_STMEMBER
+		 WHERE STM_NO = '01'
+		   AND COM_SCD = #{com_scd}
+		   AND STI_CD = #{sti_cd}
+	]]>
+	</select>
+
+	<update id="updateSticdTaPlanmst" parameterType="HashMap">
+	<![CDATA[
+	    UPDATE TA_PLANMST SET
+	           USR_ID	= #{sti_cd}
+		      ,SYS_DT	= GETDATE()
+	    	  ,STI_CD	= #{sti_cd}
+		 WHERE RPT_NO= SUBSTRING(#{orm_no}, 1, 13)
+		   AND RPT_SEQ= SUBSTRING(#{orm_no}, 14, 15)
+	]]>
+	</update> 
+	
+	<update id="updateSticdTaRptReq" parameterType="HashMap">
+	<![CDATA[
+	    UPDATE TA_RPTREQ SET
+	           USR_ID		= #{sti_cd}
+		      ,SYS_DT		= GETDATE()
+	          ,STI_CD		= #{sti_cd}
+	          ,COM_SCD		= #{com_scd}
+	          ,ACT_STICD	= #{sti_cd}
+		WHERE RPT_NO  = SUBSTRING(#{orm_no}, 1, 13)
+		  AND RPT_SEQ = SUBSTRING(#{orm_no}, 14, 15)
+	]]>
+	</update> 
+
+	<update id="updateSticdTaOtpMinf" parameterType="HashMap">
+	<![CDATA[
+	    UPDATE TA_OTPMINF SET
+	           USR_ID	= #{sti_cd}
+		      ,SYS_DT	= GETDATE()
+	    	  ,STI_CD	= #{sti_cd}
+		 WHERE RPT_NO = SUBSTRING(#{orm_no}, 1, 13)
+		   AND RPT_SEQ = SUBSTRING(#{orm_no}, 14, 15)
+	]]>
+	</update> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <select id="selectSigongAverageCount_test" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount">        
+		SELECT  SUM(SQTY) AS SQTY			
+		       ,SUM(SAMT) AS SAMT		
+		       ,ISNULL(SUM(CONST_AMT),0) AS CONST_AMT     
+			 FROM  (		
+						SELECT A.REM_DT
+						      ,A.COM_AGSEC
+						          ,ISNULL(B.STI_CD,'') as STI_CD
+						          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+						    	  ,ISNULL(count(distinct a.orm_no), 0) AS SQTY			    		
+						    	  ,MAX(A.ORM_AMT) AS SAMT	
+								  ,SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) AS CONST_AMT
+	                              ,B.K_STI_CD
+	                              ,A.COM_SCD
+						      FROM TC_RESMST A WITH (NOLOCK)
+						      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+							  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+												AND IB.COL_CD = IA.COL_CD
+												AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+							  LEFT OUTER JOIN			
+				  								( SELECT  count( DISTINCT CC.AGT_CD + CC.ORM_GADDR+ CC.ORM_CDT ) as REAL_CNT
+														,AA.STI_CD AS STI_CD
+														,AA.REM_DT AS REM_DT
+														,AA.COM_AGSEC AS COM_AGSEC
+														,AA.COM_SCD AS COM_SCD
+													FROM TC_RESMST AA WITH (NOLOCK),   
+														TC_RESDTL BB WITH (NOLOCK),
+														TO_ORDMAS CC WITH(NOLOCK),
+														TC_STINF DD	WITH (NOLOCK)		   
+													WHERE AA.REM_DT=BB.REM_DT
+														AND AA.REM_SEQ=BB.REM_SEQ
+														AND AA.ORM_NO=CC.ORM_NO
+														AND AA.COM_SCD = DD.COM_SCD
+														AND AA.STI_CD=DD.STI_CD
+														AND AA.COM_SSEC ='C18C'
+														AND AA.REM_CASYN='N' 
+													GROUP BY 
+														AA.STI_CD
+													   ,AA.REM_DT
+													   ,AA.COM_AGSEC
+													   ,AA.COM_SCD
+													   
+								   	) AS C	ON  A.REM_DT=C.REM_DT
+										   AND A.STI_CD=C.STI_CD	
+										   AND A.COM_AGSEC=C.COM_AGSEC	
+										   AND A.COM_SCD=C.COM_SCD			
+	
+							       ,TC_STINF B 
+						     WHERE A.STI_CD=B.STI_CD		
+						       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+						       AND A.COM_CTSEC = 'C06L' 
+						       AND A.REM_DT = CAST('20200601' AS VARCHAR)
+						       AND B.COM_STSEC != 'C20A'				    			
+						       AND A.COM_SCD IN ('C16YA')   			
+						       AND B.K_STI_CD = CAST( 'YA142' AS VARCHAR)				       			
+						GROUP BY A.REM_DT 			
+						        ,K_STI_CD			
+						        ,B.STI_CD			
+						        ,A.STI_CD			
+								,B.COM_SCD	
+						    	,B.STI_NM
+	                            ,A.ORM_NO
+	                            ,A.COM_AGSEC                    
+	                            ,B.K_STI_CD
+	                            ,A.COM_SCD
+	                            ,A.COM_SSEC
+						) AS A			
+		 GROUP BY K_STI_CD
+    </select>
+    
+    <select id="selectKstiTeamSelectList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPKstiList">        
+    <![CDATA[ 
+		SELECT
+			TCS.COM_SCD,
+			TCS.STI_CD,
+			TCS.STI_NM,
+			(
+				SELECT
+					ISNULL(SUM(AAA.ORM_QTY), 0)
+				  FROM (
+					SELECT
+						COUNT(A.REM_DT + A.REM_SEQ) AS ORM_QTY
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.COM_SCD = TCS.COM_SCD
+					  AND A.REM_DT = #{date}
+					  AND A.COM_SSEC = 'C18C'
+					  AND A.STI_CD = TCS.STI_CD
+		
+					UNION ALL
+				
+					SELECT
+						COUNT(A.REM_DT + A.REM_SEQ) AS ORM_QTY
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.COM_SCD = TCS.COM_SCD
+					  AND A.STI_CD = TCS.STI_CD
+					  AND A.REM_DT = #{date}
+					  AND A.COM_SSEC = 'C18A'
+					  AND (SELECT COUNT(1) FROM TA_PLANDTL TP WHERE TP.PLM_NO = A.PLM_NO ) > 0
+				) AAA
+			) AS ORM_QTY,
+			(
+				SELECT
+					ISNULL(SUM(AAA.ORM_AMT), 0)
+				  FROM (
+					SELECT
+						SUM(A.ORM_AMT) AS ORM_AMT
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.COM_SCD = TCS.COM_SCD
+					  AND A.REM_DT = #{date}
+					  AND A.COM_SSEC = 'C18C'
+					  AND A.STI_CD = TCS.STI_CD
+		
+					UNION ALL
+				
+					SELECT
+						SUM(A.ORM_AMT) AS ORM_AMT
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.COM_SCD = TCS.COM_SCD
+					  AND A.STI_CD = TCS.STI_CD
+					  AND A.REM_DT = #{date}
+					  AND A.COM_SSEC = 'C18A'
+					  AND (SELECT COUNT(1) FROM TA_PLANDTL TP WITH (NOLOCK) WHERE TP.PLM_NO = A.PLM_NO ) > 0
+				) AAA
+			) AS ORM_AMT,
+			(
+				SELECT
+					ISNULL(SUM(AAA.CONSTCST_SUM), 0)
+				  FROM (
+					SELECT
+						CASE LEFT(A.ORM_NO, 1) WHEN 'F' THEN ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)) * 1.37, 0)
+																FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+															   WHERE AA.ORM_NO = BB.ORM_NO
+																 AND AA.ORM_NO = A.ORM_NO
+																 AND BB.ITM_CD = CC.ITM_CD
+																 AND BB.COL_CD = CC.COL_CD
+																 AND CC.COM_CMP = AA.VND_CD )
+										       WHEN 'P' THEN ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)) * 1.37, 0)
+																FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+															   WHERE AA.ORM_NO = BB.ORM_NO
+																 AND AA.ORM_NO = A.ORM_NO
+																 AND BB.ITM_CD = CC.ITM_CD
+																 AND BB.COL_CD = CC.COL_CD
+																 AND CC.COM_CMP = AA.VND_CD  )
+											   ELSE ( SELECT ROUND(SUM(BB.ORD_QTY*ISNULL(CC.ITM_CONSTCST, 0)), 0)
+																FROM TO_ORDMAS AA WITH (NOLOCK), TO_ORDDET BB WITH (NOLOCK), TT_ITMCOP CC WITH (NOLOCK)
+															   WHERE AA.ORM_NO = BB.ORM_NO
+																 AND AA.ORM_NO = A.ORM_NO
+																 AND BB.ITM_CD = CC.ITM_CD
+																 AND BB.COL_CD = CC.COL_CD
+																 AND CC.COM_CMP = AA.VND_CD  ) END AS CONSTCST_SUM
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.COM_SCD = TCS.COM_SCD
+					  AND A.REM_DT = #{date}
+					  AND A.COM_SSEC = 'C18C'
+					  AND A.STI_CD = TCS.STI_CD
+		
+					UNION ALL
+				
+					SELECT
+						0 AS CONSTCST_SUM
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.COM_SCD = TCS.COM_SCD
+					  AND A.STI_CD = TCS.STI_CD
+					  AND A.REM_DT = #{date}
+					  AND A.COM_SSEC = 'C18A'
+					  AND (SELECT COUNT(1) FROM TA_PLANDTL TP WITH (NOLOCK) WHERE TP.PLM_NO = A.PLM_NO ) > 0
+				) AAA
+			) AS CONSTCST_SUM
+		FROM TC_STINF TCS WITH (NOLOCK)
+		WHERE TCS.STI_RANK = 'Y'
+		  AND TCS.K_STI_CD = #{sti_cd}
+		  AND TCS.COM_SCD = #{com_scd}
+		ORDER BY TCS.STI_NM
+	]]>
+    </select>    
+    
+    
+</mapper>

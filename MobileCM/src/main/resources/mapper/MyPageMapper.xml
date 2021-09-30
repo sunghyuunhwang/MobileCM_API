@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.MyPageMapper">
+
+    <select id="selectStiBoardListByBoardName" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardList">        
+<![CDATA[ 
+	SELECT A.BOARD_ID AS BOARD_ID,
+	       A.BOARD_NM AS BOARD_NM,
+		   A.BOARD_WRITER AS BOARD_WRITER,
+		   A.COM_SCD AS COM_SCD,
+		   CONVERT(NVARCHAR(50), A.WRITE_DT, 120) AS WRITE_DT,
+		   A.USR_CD AS USE_CD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS SYS_DT,
+		   ISNULL(B.CCD_NM, '전체') AS CCD_NM
+	FROM TC_STIBOARD A WITH(NOLOCK) LEFT OUTER JOIN
+	     TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD AND B.CCD_YN ='Y'
+	WHERE A.COM_SCD IN ('ALL', #{com_scd})
+	AND A.BOARD_NM LIKE '%' + CAST( #{board_nm} AS VARCHAR) + '%' 
+	ORDER BY A.WRITE_DT DESC, A.BOARD_ID DESC
+]]>
+    </select>
+
+    <select id="selectStiBoardFileList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardFileList">        
+<![CDATA[ 
+	SELECT
+		ATTCH_FILE_ID,
+		ATTCH_DIV_CD,
+		REAL_ATTCH_FILE_NAME,
+		ATTCH_FILE_SNUM
+	FROM TY_ATTCHFILE WITH (NOLOCK)
+	WHERE ATTCH_FILE_ID = #{board_id}
+]]>
+    </select>
+
+    <select id="getStiBoardDetail" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoard">        
+<![CDATA[ 
+	SELECT A.BOARD_ID AS BOARD_ID,
+	       A.BOARD_NM AS BOARD_NM,
+		   A.BOARD_WRITER AS BOARD_WRITER,
+		   A.BOARD_CONTENT AS BOARD_CONTENT,
+		   A.COM_SCD AS COM_SCD,
+		   CONVERT(NVARCHAR(50), A.WRITE_DT, 120) AS WRITE_DT,
+		   A.USR_CD AS USE_CD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS SYS_DT,
+		   ISNULL(B.CCD_NM, '전체') AS CCD_NM		   
+	FROM TC_STIBOARD A WITH(NOLOCK) LEFT OUTER JOIN
+	     TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD AND B.CCD_YN ='Y' 
+	WHERE A.BOARD_ID = #{board_id} 
+]]>
+    </select>
+
+    <select id="selectStiBoardList_" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardList">        
+<![CDATA[ 
+SELECT TOP 11
+           A.STI_CD AS BOARD_ID,
+	       A.STI_NM AS BOARD_NM,
+		   A.USR_CD AS BOARD_WRITER,
+		   A.COM_SCD AS COM_SCD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS WRITE_DT,
+		   A.USR_CD AS USE_CD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS SYS_DT,
+		   A.STI_NM AS CCD_NM
+	FROM TC_STINF A WITH(NOLOCK)
+	WHERE A.COM_SCD IN ('ALL', #{com_scd})
+	ORDER BY A.SYS_DT DESC, A.STI_CD DESC
+]]>
+    </select>
+
+    <select id="selectStiBoardListNext_" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardList">        
+<![CDATA[ 
+    SELECT TOP 11
+           A.STI_CD AS BOARD_ID,
+	       A.STI_NM AS BOARD_NM,
+		   A.USR_CD AS BOARD_WRITER,
+		   A.COM_SCD AS COM_SCD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS WRITE_DT,
+		   A.USR_CD AS USE_CD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS SYS_DT,
+		   A.STI_NM AS CCD_NM
+	FROM TC_STINF A WITH(NOLOCK)
+	WHERE A.COM_SCD IN ('ALL', #{com_scd})
+	AND A.STI_CD <= #{board_id}
+	ORDER BY A.SYS_DT DESC, A.STI_CD DESC
+]]>
+    </select>
+
+    <select id="selectStiBoardListNext" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardList">        
+<![CDATA[ 
+	SELECT TOP 11
+	       A.BOARD_ID AS BOARD_ID,
+	       A.BOARD_NM AS BOARD_NM,
+		   A.BOARD_WRITER AS BOARD_WRITER,
+		   A.COM_SCD AS COM_SCD,
+		   CONVERT(NVARCHAR(50), A.WRITE_DT, 120) AS WRITE_DT,
+		   A.USR_CD AS USE_CD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS SYS_DT,
+		   ISNULL(B.CCD_NM, '전체') AS CCD_NM
+	FROM TC_STIBOARD A WITH(NOLOCK) LEFT OUTER JOIN
+	     TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD AND B.CCD_YN ='Y'
+	WHERE A.COM_SCD IN ('ALL', #{com_scd})
+	AND A.BOARD_ID <= #{board_id}
+	ORDER BY A.WRITE_DT DESC, A.BOARD_ID DESC]]>
+    </select>
+
+    <select id="selectStiBoardList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardList">        
+<![CDATA[ 
+	SELECT TOP 11
+	       A.BOARD_ID AS BOARD_ID,
+	       A.BOARD_NM AS BOARD_NM,
+		   A.BOARD_WRITER AS BOARD_WRITER,
+		   A.COM_SCD AS COM_SCD,
+		   CONVERT(NVARCHAR(50), A.WRITE_DT, 120) AS WRITE_DT,
+		   A.USR_CD AS USE_CD,
+		   CONVERT(NVARCHAR(50), A.SYS_DT, 120) AS SYS_DT,
+		   ISNULL(B.CCD_NM, '전체') AS CCD_NM
+	FROM TC_STIBOARD A WITH(NOLOCK) LEFT OUTER JOIN
+	     TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD AND B.CCD_YN ='Y'
+	WHERE A.COM_SCD IN ('ALL', #{com_scd})
+	ORDER BY A.WRITE_DT DESC, A.BOARD_ID DESC
+]]>
+    </select>
+
+    <select id="selectStiBoardListRecent" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPStiBoardList">        
+<![CDATA[ 
+	SELECT TOP 5
+	       A.BOARD_ID AS BOARD_ID,
+	       A.BOARD_NM AS BOARD_NM,
+		   A.BOARD_WRITER AS BOARD_WRITER,
+		   CONVERT(NVARCHAR(50), A.WRITE_DT, 120) AS WRITE_DT,
+		   ISNULL(B.CCD_NM, '전체') AS CCD_NM		   
+	FROM TC_STIBOARD A WITH(NOLOCK) LEFT OUTER JOIN 
+	     TT_COMCD B WITH (NOLOCK) ON A.COM_SCD = B.CCD_CD AND B.CCD_YN ='Y' 
+	WHERE A.COM_SCD IN ('ALL', #{com_scd}) 
+	AND A.WRITE_DT >= DATEADD(day,-70, GETDATE())
+	ORDER BY A.WRITE_DT DESC, A.BOARD_ID DESC
+]]>
+    </select>
+
+    <select id="getMyPage" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.MyPage">        
+<![CDATA[ 
+    SELECT  A.STI_NM AS STI_NM,
+            B.CCD_NM + CASE WHEN A.STI_CD = A.K_STI_CD THEN ' 권역장' ELSE '' END AS STI_NM_DUTY
+    FROM    TC_STINF A WITH (NOLOCK),
+	        TT_COMCD B WITH (NOLOCK)
+    WHERE   A.COM_SCD = B.CCD_CD
+	AND     A.COM_SCD = CAST( #{com_scd} AS VARCHAR)
+    AND     A.STI_CD = CAST( #{sti_cd} AS VARCHAR)
+	AND     B.CCD_YN ='Y'
+]]>      
+    </select>
+        
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.UserMapper">
+
+	<update id="updateCalPassWord" parameterType="HashMap">
+	<![CDATA[
+		UPDATE TT_WEBUSER
+		   SET CMJUNGSAN_PWD = #{pw}		   	   
+		 WHERE USR_CD = #{id}
+	]]>
+	</update> 
+ 
+	<update id="updateLoginPassWord" parameterType="HashMap">
+	<![CDATA[
+		UPDATE TT_WEBUSER
+		   SET USR_PWD = #{pw}		   	   
+		 WHERE USR_CD = #{id}
+	]]>
+	</update> 
+
+    <select id="login" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.FursysUser">        
+   SELECT * FROM TT_WEBUSER WITH (NOLOCK) WHERE USR_CD = #{login_id} AND USR_PWD = #{login_pw}
+    </select>
+    <select id="getUserInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.FursysUser">        
+   SELECT * FROM TT_WEBUSER WITH (NOLOCK)WHERE MENU_GRP = 'CD' AND USR_CD = #{login_id}
+    </select>
+    <select id="getUserVND_CD" parameterType="HashMap" resultType="HashMap">        
+   SELECT VND_CD FROM TT_WEBUSER WHERE USR_CD = #{login_id}
+    </select>
+    <select id="getUserEtc" parameterType="HashMap" resultType="HashMap">
+	SELECT COM_SCD,
+	STI_CD,
+	ISNULL(K_STI_CD, STI_CD) AS K_STI_CD,
+	ISNULL(TMAP_APPKEY, 'l7xx965cfaee1f4c47608284f1271eccb662') AS TMAP_APPKEY
+	FROM TC_STINF
+	WHERE STI_CD = #{vnd_cd}
+	AND STI_RANK = 'Y'
+    </select>
+    <select id="getCom_Stsec" parameterType="HashMap" resultType="HashMap">        
+   SELECT COM_STSEC FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = #{com_scd} AND STI_CD = #{sti_cd}
+    </select>
+
+	<update id="updateLoginDt" parameterType="HashMap">
+	<![CDATA[
+		UPDATE TT_WEBUSER
+		   SET USR_LOGINDT = GETDATE()	   	   
+		 WHERE USR_CD = #{login_id}
+	]]>
+	</update>    
+</mapper>

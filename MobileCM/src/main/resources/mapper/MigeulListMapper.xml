@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.MigeulListMapper">
+<select id="selectMigeulList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPMigeulList">        
+<![CDATA[ 
+	SELECT   PLM_NO		
+		   , '시공' AS COM_SSEC 
+		   , ( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = COM_BRAND ) AS COM_BRAND	
+		   , PLM_CDT		
+		   , ORM_NM		
+		   ,(CASE WHEN  sum(A) > 0	 THEN 'Y' ELSE 'N' END ) AS AS_YN	
+		   ,(CASE WHEN  sum(B) > 0	 THEN 'Y' ELSE 'N' END ) AS RE_YN	
+		   ,(CASE WHEN  sum(C) > 0	 THEN 'Y' ELSE 'N' END ) AS RETURN_YN
+		   , 'N' AS ADDAS_YN
+		   , 'N' AS ASCANCEL_YN
+       FROM (SELECT  A.PLM_NO		
+				   , A.COM_BRAND	
+				   , A.PLM_CDT		
+				   , A.ORM_NM		
+				   ,(CASE WHEN COM_UNPSEC= 'C23A' OR (ISNULL(COM_UNPSEC,'') = '' AND PLD_RASDT > 0 ) THEN 1 ELSE 0 END ) AS A	
+				   ,(CASE WHEN ISNULL(COM_UNPSEC,'') = 'C23R' OR (ISNULL(COM_UNPSEC,'') = '' AND PLD_RCDT > 0 ) THEN 1 ELSE 0 END ) AS B
+				   ,(CASE WHEN ISNULL(COM_UNPSEC,'') = 'C23E' OR (ISNULL(COM_UNPSEC,'') = '' AND ISNULL(PLD_RCDT,'') = '' AND ISNULL(PLD_RASDT,'') = '' ) THEN 1 ELSE 0 END ) AS C
+			   FROM  TC_PLANMST A WITH (NOLOCK)
+				   , TC_STINF B WITH (NOLOCK)
+				   , TC_PLANDTL C WITH (NOLOCK)  	
+			  WHERE  A.COM_PLMFG >='C103'
+				AND  A.COM_RMFG ='C13N'
+				AND  C.PLM_NO = A.PLM_NO 
+				AND  C.COM_PLDSEC IN ('C090','C091','C092','C093','C094','C095','C096','C0930','C09A') 
+				AND  C.COM_RDSEC ='C13N'
+				AND  A.STI_CD = B.STI_CD 
+				AND  A.COM_SCD = #{com_scd}
+				AND A.STI_CD = #{sti_cd}	
+				AND A.PLM_CDT BETWEEN #{date1} AND #{date2}
+				)A
+   	GROUP BY  PLM_NO , COM_BRAND , PLM_CDT, ORM_NM		
+
+	UNION ALL
+
+	SELECT
+		A.PLM_NO AS PLM_NO,
+		'AS'   AS COM_SSEC,
+		( SELECT TT.CCD_NM FROM TT_COMCD TT WITH (NOLOCK) WHERE TT.CCD_CD = A.COM_BRAND ) AS COM_BRAND,
+		A.REM_DT AS PLM_CDT,
+		A.ORM_NM AS ORM_NM,
+		'N' AS AS_YN,	
+		(CASE WHEN (SELECT COUNT(*) 
+		              FROM TA_PLANDTL TAP WITH (NOLOCK) 
+				     WHERE TAP.PLM_NO = A.PLM_NO
+				       AND TAP.MOB_NFINISHED IN ('C67002', 'C67003', 'C67004', 'C67005' ) ) > 0  THEN 'Y' ELSE 'N' END ) AS RE_YN,	
+		'N' AS RETURN_YN,
+		(CASE WHEN (SELECT COUNT(*) 
+		              FROM TA_PLANDTL TAP WITH (NOLOCK) 
+				     WHERE TAP.PLM_NO = A.PLM_NO
+				       AND TAP.MOB_NFINISHED IN ('C67006', 'C67007', 'C67008', 'C67009', 'C67010', 'C67011' ) ) > 0  THEN 'Y' ELSE 'N' END ) AS ADDAS_YN,
+		(CASE WHEN (SELECT COUNT(*) 
+		              FROM TA_PLANDTL TAP WITH (NOLOCK) 
+				     WHERE TAP.PLM_NO = A.PLM_NO
+				       AND TAP.MOB_NFINISHED IN ('C67000', 'C67001' ) ) > 0  THEN 'Y' ELSE 'N' END ) AS ASCANCEL_YN
+	FROM TC_RESMST A WITH (NOLOCK), TA_PLANMST B WITH (NOLOCK)
+	WHERE B.COM_SCD = #{com_scd}
+	  AND B.STI_CD = #{sti_cd}	
+	  AND A.REM_DT BETWEEN #{date1} AND #{date2}
+	  AND A.COM_SSEC = 'C18A'
+	  AND A.REM_DT = B.PLM_CDT
+	  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ 
+	  AND SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO
+	  AND B.COM_RMFG = 'C13N'
+]]>
+</select>
+
+<select id="selectMigeulSigongDetailList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPMigeulDetailList">        
+<![CDATA[ 
+	SELECT   TCP.ITM_CD	AS ITM_CD						
+			 , TCP.COL_CD		
+			 , (SELECT ITM.ITM_NM FROM TT_ITMMST ITM WITH (NOLOCK) WHERE ITM.ITM_CD = TCP.ITM_CD AND ITM.COL_CD = TCP.COL_CD ) AS ITM_NM	
+			 , ( SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = TCP.COM_PLDSEC ) AS COM_PLDSEC
+			 , TCP.PLD_EQTY		AS PLD_FQTY
+			 , ( SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = TCP.COM_UNDSEC ) AS MOB_NFINISHED 
+			 , TCP.PLD_RMK	AS REMARK	
+	 FROM  TC_PLANDTL TCP WITH (NOLOCK)
+    WHERE  TCP.COM_PLDSEC IN('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
+	  AND  TCP.COM_RDSEC ='C13N'
+	  AND  TCP.PLM_NO = #{plm_no}
+
+]]>
+</select> 
+
+<select id="selectMigeulAsDetailList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPMigeulDetailList">        
+<![CDATA[ 
+
+	SELECT DISTINCT D.BMT_ITEM AS ITM_CD
+	               ,D.COL_CD AS COL_CD
+				   ,I.BMT_NM AS ITM_NM
+				   ,D.PLD_EQTY AS PLD_FQTY
+		           ,(SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = D.MOB_NFINISHED ) AS MOB_NFINISHED
+		           ,D.MOB_REMARK AS REMARK	
+		           ,'AS건' AS COM_PLDSEC
+	  FROM TA_PLANDTL D WITH (NOLOCK)
+	      ,TT_BOMMST I WITH (NOLOCK)
+	 WHERE D.PLM_NO = #{plm_no}
+	   AND D.COM_PLDSEC = 'A6800'
+	   AND D.BMT_ITEM = I.BMT_ITEM
+	   AND D.COL_CD = I.COL_CD
+	   AND D.COM_UNDSEC = 'C13N'
+
+]]>
+</select>
+
+<select id="selectMigeulAverageCount" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPMigeulAverage">        
+<![CDATA[ 
+	SELECT
+		ISNULL(SUM(AA.TOTAL_CNT), 0) AS TOTAL_CNT,
+		ISNULL(SUM(AA.MIGEUL_CNT), 0) AS MIGEUL_CNT
+	FROM ( 
+			SELECT
+				COUNT(*) AS TOTAL_CNT, 
+				( SELECT
+					COUNT(*)
+					FROM TA_PLANMST TAP WITH (NOLOCK), TC_RESMST TCR WITH (NOLOCK)
+				   WHERE TAP.STI_CD =  #{sti_cd}
+					 AND TAP.COM_SCD = #{com_scd}
+					 AND TAP.RPT_NO = SUBSTRING(TCR.ORM_NO, 1, 13)
+					 AND TAP.RPT_SEQ = SUBSTRING(TCR.ORM_NO, 14, 15)
+					 AND TAP.PLM_CDT = TCR.REM_DT
+					 AND TAP.COM_RMFG = 'C13N'
+					 AND TAP.PLM_CDT BETWEEN #{fdate} AND #{tdate} ) AS MIGEUL_CNT
+			FROM TA_PLANMST TAP WITH (NOLOCK), TC_RESMST TCR WITH (NOLOCK)
+			WHERE TAP.STI_CD = #{sti_cd}
+			  AND TAP.COM_SCD = #{com_scd}
+			  AND TAP.PLM_CDT BETWEEN #{fdate} AND #{tdate}
+			  AND TAP.RPT_NO = SUBSTRING(TCR.ORM_NO, 1, 13)
+			  AND TAP.RPT_SEQ = SUBSTRING(TCR.ORM_NO, 14, 15)
+			  AND TAP.PLM_CDT = TCR.REM_DT
+			  	
+			UNION ALL
+	
+			SELECT
+				COUNT(*) AS TOTAL_CNT,
+				( SELECT
+					COUNT(*)
+					FROM TC_PLANMST TCP WITH (NOLOCK)
+				   WHERE TCP.STI_CD = #{sti_cd}
+					 AND TCP.COM_SCD = #{com_scd}
+					 AND TCP.COM_RMFG = 'C13N'
+					 AND TCP.PLM_CDT BETWEEN #{fdate} AND #{tdate} ) AS MIGEUL_CNT
+			FROM TC_PLANMST TCP WITH (NOLOCK)
+			WHERE TCP.STI_CD = #{sti_cd}
+			  AND TCP.COM_SCD = #{com_scd}
+			  AND TCP.PLM_CDT BETWEEN #{fdate} AND #{tdate}	) AA
+]]>
+</select>
+
+
+</mapper>

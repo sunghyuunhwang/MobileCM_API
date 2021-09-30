@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ErpAsAddInfoInsertMapper">
+
+<select id="selectAsFileID" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+	SELECT ISNULL(MOB_REMARK, '') DATA1
+	FROM TA_PLANMST WITH(NOLOCK)	   	   
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</select>
+
+<insert id="insertSiGongAddSignFileInfo" parameterType="HashMap"> 
+<![CDATA[ 
+    INSERT INTO TY_ATTCHFILE
+    (
+          ATTCH_DIV_CD
+        , ATTCH_FILE_ID
+        , ATTCH_FILE_SNUM
+        , REAL_ATTCH_FILE_NAME
+        , VIRTUAL_ATTCH_FILE_NAME
+        , ATTCH_FILE_PATH
+        , ATTCH_FILE_SIZE
+        , FST_USR
+        , FST_SYS_DT
+    )VALUES (
+          'C'
+        , #{file_id}
+        , (SELECT ISNULL(MAX(ATTCH_FILE_SNUM),0)+1 AS ATTCH_FILE_SNUM FROM TY_ATTCHFILE WITH (NOLOCK) WHERE ATTCH_FILE_ID = #{file_id})
+        , #{file_nm}
+        , #{file_nm}
+        , '/ERP/CSIGN/'+CONVERT(CHAR(8), GETDATE(), 112)
+        , ''
+        , #{user_id}
+        , GETDATE()
+    )
+
+]]>
+</insert>
+
+<insert id="insertAsAddSignFileInfo" parameterType="HashMap"> 
+<![CDATA[ 
+    INSERT INTO TY_ATTCHFILE
+    (
+          ATTCH_DIV_CD
+        , ATTCH_FILE_ID
+        , ATTCH_FILE_SNUM
+        , REAL_ATTCH_FILE_NAME
+        , VIRTUAL_ATTCH_FILE_NAME
+        , ATTCH_FILE_PATH
+        , ATTCH_FILE_SIZE
+        , FST_USR
+        , FST_SYS_DT
+    )VALUES (
+          'A'
+        , #{file_id}
+        , (SELECT ISNULL(MAX(ATTCH_FILE_SNUM),0)+1 AS ATTCH_FILE_SNUM FROM TY_ATTCHFILE WITH (NOLOCK) WHERE ATTCH_FILE_ID = #{file_id})
+        , #{file_nm}
+        , #{file_nm}
+        , '/ERP/ASIGN/'+CONVERT(CHAR(8), GETDATE(), 112)
+        , ''
+        , #{user_id}
+        , GETDATE()
+    )
+
+]]>
+</insert>
+
+<insert id="insertSiGongAddFileInfo" parameterType="HashMap"> 
+<![CDATA[ 
+    INSERT INTO TY_ATTCHFILE
+    (
+          ATTCH_DIV_CD
+        , ATTCH_FILE_ID
+        , ATTCH_FILE_SNUM
+        , REAL_ATTCH_FILE_NAME
+        , VIRTUAL_ATTCH_FILE_NAME
+        , ATTCH_FILE_PATH
+        , ATTCH_FILE_SIZE
+        , FST_USR
+        , FST_SYS_DT
+    )VALUES (
+          'C'
+        , #{file_id}
+        , (SELECT ISNULL(MAX(ATTCH_FILE_SNUM),0)+1 AS ATTCH_FILE_SNUM FROM TY_ATTCHFILE WITH (NOLOCK) WHERE ATTCH_FILE_ID = #{file_id})
+        , #{file_nm}
+        , #{file_nm}
+        , '/ERP/C/'+CONVERT(CHAR(8), GETDATE(), 112)
+        , ''
+        , #{user_id}
+        , GETDATE()
+    )
+
+
+]]>
+</insert>
+
+<select id="searchToday" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[ 
+    SELECT CONVERT(NVARCHAR(8), GETDATE(), 112) AS DATA1
+]]>
+</select>
+
+<select id="searchMaxSeq" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[ 
+    SELECT RIGHT(REPLICATE('0',2) + CAST(ISNULL(MAX(RPT_SEQ), 0) AS VARCHAR), 2) AS DATA1
+	  FROM TA_RPTREQ WITH (NOLOCK)
+	 WHERE RPT_NO = CAST(#{rpt_no} AS VARCHAR)
+]]>
+</select>
+
+<insert id="selInsertRptReq" parameterType="HashMap">
+<![CDATA[ 
+   	INSERT INTO TA_RPTREQ
+           (RPT_NO
+           ,RPT_SEQ
+           ,RPT_DT
+           ,COM_RPSEC
+           ,COM_ATSEC
+           ,CTM_TYPE
+           ,CTM_CD
+           ,CTM_OCD
+           ,CTM_ONM
+           ,CTM_CORPNUM
+           ,CTM_DNM
+           ,CTM_NM
+           ,CTM_TEL
+           ,CTM_HP
+           ,CTM_ZIP
+           ,CTM_ADDR
+           ,CTM_ADDR2
+           ,CTM_EMAIL
+           ,COM_AGSEC
+           ,COM_BRAND
+           ,COM_SCD
+           ,RPT_SCD
+           ,COM_PKSEC
+           ,COM_SACD
+           ,TOWN_CD
+           ,VND_SCD
+           ,VND_SNM
+           ,VND_RPTCD
+           ,VND_RPTNM
+           ,RPT_QDT
+           ,RPT_QTM_GUBUN
+           ,RPT_QTM
+           ,RPT_DESC
+           ,RPT_QNM
+           ,RPT_USRID
+           ,RPT_USRNM
+           ,RESP_USRID
+           ,RPT_QYN
+           ,RPT_YN
+           ,RPT_URG
+           ,RPT_REQDT
+           ,RPT_STARTTM
+           ,RPT_ENDTM
+           ,RPT_ACTTM
+           ,STI_CD
+           ,ORD_NO
+           ,RPT_RST
+           ,RPT_ENDDT
+           ,COM_MESEC
+           ,RPT_EXP
+           ,RPT_TCOST
+           ,COM_ISEC
+           ,RPT_IDESC
+           ,COM_DSEC
+           ,COM_DDESC
+           ,ITM_GROUP
+           ,PRE_RETURN_YN
+           ,HOLDING_YN
+           ,REFUND_YN
+           ,COM_SPROG
+           ,USR_ID
+           ,SYS_DT
+           ,TM_RMK
+           ,ACT_STICD
+           ,TRS_YN
+           ,SCH_TRNO
+           ,STI_ACC
+           ,RPT_RSTYN
+           ,RPT_RST_ACTTM
+           ,REMARK
+           ,CHK_USRID
+           ,RPT_DESCPLUS
+           ,TAEKBAE_YN
+           ,DEPOSIT
+           ,RELATION_YN
+           ,ADDGUBUN
+           ,ESOL_YN
+           ,UNCPL_CNT
+           ,CC_INSTUSR
+           ,CC_STD
+           ,CC_RMK
+           ,CC_CONFIRM_GUBUN
+           ,CC_CONFIRM_USR
+           ,CC_CONFIRM_DT
+           ,SMS_SEND1_YN
+           ,SMS_SEND2_YN
+           ,SMS_SEND3_YN
+           ,SMS_SEND4_YN
+           ,SMS_NOSEND_YN
+           ,FILE_ID
+           ,FST_USR
+           ,FST_SYS_DT) 
+    (SELECT RPT_NO
+           ,RIGHT(REPLICATE('0',2) + CAST(ISNULL(RPT_SEQ+1, 0) AS VARCHAR), 2) AS RPT_SEQ
+           ,CONVERT(VARCHAR(8), GETDATE(), 112) AS RPT_DT
+           ,'A12004'
+           ,COM_ATSEC
+           ,CTM_TYPE
+           ,CTM_CD
+           ,CTM_OCD
+           ,CTM_ONM
+           ,CTM_CORPNUM
+           ,CTM_DNM
+           ,CTM_NM
+           ,CTM_TEL
+           ,CTM_HP
+           ,CTM_ZIP
+           ,CTM_ADDR
+           ,CTM_ADDR2
+           ,CTM_EMAIL
+           ,COM_AGSEC
+           ,COM_BRAND
+           ,COM_SCD
+           ,RPT_SCD
+           ,COM_PKSEC
+           ,COM_SACD
+           ,TOWN_CD
+           ,VND_SCD
+           ,VND_SNM
+           ,VND_RPTCD
+           ,VND_RPTNM
+           ,RPT_QDT
+           ,RPT_QTM_GUBUN
+           ,RPT_QTM
+           ,#{rpt_desc}
+           ,( SELECT TCS.STI_NM FROM TC_STINF TCS WITH (NOLOCK) WHERE TCS.COM_SCD = TAR.COM_SCD AND TCS.STI_CD = TAR.STI_CD )
+           ,STI_CD
+           ,( SELECT TCS.STI_NM FROM TC_STINF TCS WITH (NOLOCK) WHERE TCS.COM_SCD = TAR.COM_SCD AND TCS.STI_CD = TAR.STI_CD )
+           ,TAR.RESP_USRID
+           ,TAR.RPT_QYN
+           ,TAR.RPT_YN
+           ,TAR.RPT_URG
+           ,'' AS RPT_REQDT
+           ,TAR.RPT_STARTTM
+           ,TAR.RPT_ENDTM
+           ,TAR.RPT_ACTTM
+           ,TAR.STI_CD
+           ,TAR.ORD_NO
+           ,TAR.RPT_RST
+           ,TAR.RPT_ENDDT
+           ,TAR.COM_MESEC
+           ,TAR.RPT_EXP
+           ,TAR.RPT_TCOST
+           ,TAR.COM_ISEC
+           ,TAR.RPT_IDESC
+           ,TAR.COM_DSEC
+           ,TAR.COM_DDESC
+           ,TAR.ITM_GROUP
+           ,TAR.PRE_RETURN_YN
+           ,TAR.HOLDING_YN
+           ,TAR.REFUND_YN
+           ,'A17001'
+           ,TAR.STI_CD
+           ,GETDATE()
+           ,TAR.TM_RMK
+           ,TAR.ACT_STICD
+           ,TAR.TRS_YN
+           ,TAR.SCH_TRNO
+           ,TAR.STI_ACC
+           ,TAR.RPT_RSTYN
+           ,TAR.RPT_RST_ACTTM
+           ,TAR.REMARK
+           ,TAR.CHK_USRID
+           ,TAR.RPT_DESCPLUS
+           ,TAR.TAEKBAE_YN
+           ,'A7204'
+           ,TAR.RELATION_YN
+           ,TAR.ADDGUBUN
+           ,TAR.ESOL_YN
+           ,TAR.UNCPL_CNT
+           ,TAR.CC_INSTUSR
+           ,TAR.CC_STD
+           ,TAR.CC_RMK
+           ,TAR.CC_CONFIRM_GUBUN
+           ,TAR.CC_CONFIRM_USR
+           ,TAR.CC_CONFIRM_DT
+           ,'N'
+           ,'N'
+           ,'N'
+           ,'N'
+           ,'Y'
+           ,''
+           ,TAR.STI_CD
+           ,GETDATE()
+	   FROM TA_RPTREQ TAR
+	  WHERE TAR.RPT_NO = CAST(#{rpt_no} AS VARCHAR)
+        AND TAR.RPT_SEQ = CAST(#{rpt_seq} AS VARCHAR) )
+]]>
+</insert>
+
+<update id="updateAddAsMobileStatus" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_PLANDTL
+	   SET MOB_STD = 'C13Y',
+	       MOB_NFINISHED = #{req_std},
+	       MOB_NQTY = 0,
+	       MOB_REMARK = '요청일자 : ' + #{req_dt} + ', ' + (SELECT CCD_NM FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = #{req_std} ),
+	       MOB_USEYN = 'Y',
+	       MOB_NOTUSEQTY = 0
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update> 
+
+<update id="updateAddEndTimeStatus" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_PLANMST
+	   SET MOB_ENDTM = GETDATE(),
+	   	   MOB_ENDYN = 'Y',
+	   	   MOB_REMARK = #{file_id}
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update> 
+
+<select id="sp_get_filekey" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+  
+	DECLARE @RET_CODE NVARCHAR(300)                           
+	execute DBO.SP_GET_FILEKEY;1 @p_AttchDivCd = 'A' , @p_RTN = @RET_CODE OUTPUT                           	                           
+	SELECT @RET_CODE DATA1
+	
+]]>
+</select>
+
+<update id="updateAsFileId" parameterType="HashMap">
+<![CDATA[
+    UPDATE TA_RPTREQ
+        SET FILE_ID = #{file_id}
+	WHERE	RPT_NO = #{rpt_no}
+	AND     RPT_SEQ = #{rpt_seq}
+
+]]>
+</update> 
+
+<update id="updateAsAddFileId" parameterType="HashMap">
+<![CDATA[
+    UPDATE TA_RPTREQ
+        SET FILE_ID = #{file_id}
+	WHERE	RPT_NO = #{rpt_no}
+	AND     RPT_SEQ =  RIGHT(REPLICATE('0',2) + CAST(ISNULL(#{rpt_seq}+1, 0) AS VARCHAR), 2)
+
+]]>
+</update> 
+
+<insert id="insertAsAddFileInfo" parameterType="HashMap"> 
+<![CDATA[ 
+    INSERT INTO TY_ATTCHFILE
+    (
+          ATTCH_DIV_CD
+        , ATTCH_FILE_ID
+        , ATTCH_FILE_SNUM
+        , REAL_ATTCH_FILE_NAME
+        , VIRTUAL_ATTCH_FILE_NAME
+        , ATTCH_FILE_PATH
+        , ATTCH_FILE_SIZE
+        , FST_USR
+        , FST_SYS_DT
+    )VALUES (
+          'A'
+        , #{file_id}
+        , (SELECT ISNULL(MAX(ATTCH_FILE_SNUM),0)+1 AS ATTCH_FILE_SNUM FROM TY_ATTCHFILE WITH (NOLOCK) WHERE ATTCH_FILE_ID = #{file_id})
+        , #{file_nm}
+        , #{file_nm}
+        , '/ERP/A/'+CONVERT(CHAR(8), GETDATE(), 112)
+        , ''
+        , #{user_id}
+        , GETDATE()
+    )
+
+]]>
+</insert>
+
+</mapper>

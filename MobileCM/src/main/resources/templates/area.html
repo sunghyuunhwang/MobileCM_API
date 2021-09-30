@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>simpleMap</title>
+<link rel="stylesheet" type="text/css" media="all" href="/css/common.css" />
+<script src="http://code.jquery.com/jquery.min.js"></script>
+<script src="/js/tms/tmsUtils.js"></script>
+<script src="/js/erp/erpUtils.js"></script>
+<script th:src="|https://apis.openapi.sk.com/tmap/js?version=1&format=javascript&appKey=${appKey}|"></script>
+<script type="text/javascript"  th:inline="javascript">
+	var test = [];
+	var markers = [];
+	var map;
+	var allDatas = [];
+	var markerLayer;
+	// 페이지가 로딩이 된 후 호출하는 함수입니다.
+	function initTmap(){
+		$("#loader_div").hide();
+		
+		map = new Tmap.Map({
+             div: "map_div",
+             width: "100%",
+             height: "500px"
+         });
+
+		markerLayer = new Tmap.Layer.Markers();
+		map.addLayer(markerLayer);
+		map.zoomTo(11);
+	} 
+	
+	function addMarkers() {
+        removeMarkers();
+        
+        var bounds = new Tmap.Bounds();
+        for (var i = 0; i < allDatas.length; i++) {
+            var lat = allDatas[i].lat;
+            var lng = allDatas[i].lon;
+            var label = "";
+            var lonlat = new Tmap.LonLat(lng, lat).transform("EPSG:4326", "EPSG:3857");
+            var size = new Tmap.Size(24, 38);//아이콘 크기 설정
+    		var offset = new Tmap.Pixel(-(size.w / 2), -(size.h));//아이콘 중심점 설정
+    		var icon = new Tmap.Icon('http://tmapapis.sktelecom.com/upload/tmap/marker/pin_b_m_a.png',size, offset);//마커 아이콘 설정
+    		
+    		marker = new Tmap.Marker(lonlat, icon);
+            markerLayer.addMarker(marker);
+            markers.push(marker);
+        }
+        
+        map.zoomToExtent(markerLayer.getDataExtent());
+    }
+	 
+	// 모든 마커를 제거하는 함수입니다.
+	function removeMarkers() {
+		markers = [];
+		markerLayer.clearMarkers();   
+	}
+	
+	function tms_getCenterList() {
+		getCenterList(
+			function (data) {
+				$("#result").html(JSON.stringify(data));
+			},
+			function (request, status, error) {
+				
+			}
+		);
+	}
+	
+	function tms_getVehicleList() {
+		getVehicleList(
+			function (data) {
+				$("#result").html(JSON.stringify(data));
+			},
+			function (request, status, error) {
+				
+			}
+		);
+	}
+	
+	function tms_getOrderList() {
+		getOrderList(
+				function (data) {
+					$("#result").html(JSON.stringify(data));
+				},
+				function (request, status, error) {
+				}
+			);
+	}
+	
+	function tms_centerDelete() {
+		centerId = $("#centerId").val();
+		
+		deleteCenter(
+			centerId,
+			function (data) {
+				$("#result").html(JSON.stringify(data));
+			},
+			function (request, status, error) {
+				
+			}
+		);
+	}
+	
+	function tms_allCenterDelete() {
+		if (confirm( '모든 센터 데이터를 삭제하시겠습니까?' )) {
+			allDeleteCenter(
+				function (data) {
+					$("#result").html(JSON.stringify(data));
+				},
+				function (request, status, error) {
+					
+				}
+			);
+		}
+	}
+	
+	function tms_vehicleListInsert() {
+		
+	}
+	
+	function erp_getORMList() {
+		$("#loader_div").show();
+		
+		getORMList(
+			function (data) {
+				$("#result").html(JSON.stringify(data));
+				
+				allDatas = data;
+				addMarkers();
+
+				$("#loader_div").hide();
+			},
+			function (request, status, error) {
+				$("#loader_div").hide();
+			}
+		);
+	}
+	
+	function tms_orderListUpdateFromErp() {
+		$("#loader_div").show();
+		
+		orderListUpdateFromErp(
+			function (data) {
+				$("#result").html(JSON.stringify(data));
+				
+				$("#loader_div").hide();
+			},
+			function (request, status, error) {
+				$("#loader_div").hide();
+			}
+		);
+	}
+	
+	function tms_allocation() {
+		var vehicleIdList = $('input[name="vehicles"]:checked').map(function () {  
+        	return this.value;
+        }).get().join(",");
+		
+		allocation("1","",vehicleIdList,"0900",
+			function (data) {
+				$("#result").html(JSON.stringify(data));
+				
+				$("#loader_div").hide();
+			},
+			function (request, status, error) {
+				$("#loader_div").hide();
+			}
+		);
+	}
+	
+	$(function(){ 
+		//전체선택 체크박스 클릭 
+		$("#allCheck").click(function(){ 
+			//만약 전체 선택 체크박스가 체크된상태일경우 
+			if($("#allCheck").prop("checked")) { 
+				//해당화면에 전체 checkbox들을 체크해준다 
+				$("input[name='vehicles']").prop("checked",true); 
+				// 전체선택 체크박스가 해제된 경우 
+			} else { 
+				//해당화면에 모든 checkbox들의 체크를해제시킨다. 
+				$("input[name='vehicles']").prop("checked",false); 
+			} 
+		}) 
+	})
+</script>
+<style>
+#map_wrapper {
+}
+#map_div {
+}
+
+#result_wrapper {
+}
+#location_wrapper {
+	padding:20px;
+}
+</style>
+</head>
+<body onload="initTmap()"><!-- 맵 생성 실행 -->
+	<div id="map_wrapper">
+		<div id="map_div"></div>
+		<div id="loader_div" class="loader"></div>
+	</div>
+	<div id="location_wrapper">
+		<ul>
+			<li>전체선택 : <input type="checkbox" id="allCheck" checked="true"/></li>
+			<li th:each="data : ${vehicleList.resultData}"><input type="checkbox" name="vehicles" checked="true" th:value="${data.vehicleId}"/><span th:text="${data.vehicleName}"></span></li>
+			<li><button onclick="tms_allocation()">배차하기</button></li>
+		</ul>
+	</div>
+	<!-- <div id="result_wrapper">
+		<ol>
+			<li><button onclick="erp_getORMList()">주문정보 조회</button></li>
+			<li><button onclick="tms_getCenterList()">센터 목록 조회</button></li>
+			<li><button onclick="tms_getVehicleList()">차량 목록 조회</button></li>
+			<li><button onclick="tms_getOrderList()">배송지 목록  조회</button></li>
+			<li><input id="centerId" type="text" /> <button onclick="tms_centerDelete()">센터 삭제</button></li>
+			<li><button onclick="tms_allCenterDelete()">센터 전체 목록 삭제</button></li>
+			<li><button onclick="tms_vehicleListInsert()">차량 여러건 추가</button></li>
+			<li><button>배차하기</button></li>
+		</ol>
+	</div> -->
+	<p id="result"></p>
+</body>
+</html>

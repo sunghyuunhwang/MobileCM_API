@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>로그인 페이지</title>
+    <link rel="stylesheet" type="text/css" href="/css/common_MblCm.css" />
+    <link rel="stylesheet" href="http://static.fursys.com/drctSources/css/fonts/font-NotoSansKR.css">
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
+    <script src="/js/mbCM-frontApiActn.js"></script><!-- 프론트엔드 이벤 -->
+</head>
+<body>
+    <main class="loginBx">
+          <div class="bx">
+               <h1 class="inLogo">로그인<!--로고는 자동표시됌--></h1>
+               <form action="/user/login" method="post" class="frmBx">
+                   <input type="text" class="inptBx" name="username" placeholder="아이디">
+                   <input type="password" class="inptBx" name="password" placeholder="비밀번호">
+                   <input type="checkbox" class="chck rghtTxt" id="login"/><label for="login">자동 로그인</label>
+                   <button type="submit" class="btn btnSzDf btnGry w100p login">로그인하기</button>
+               </form>
+          </div>
+    </main>
+</body>
+</html>
+</html>

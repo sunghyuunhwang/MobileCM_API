@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ErpAsPaymentMapper">
+
+<select id="selectPaymentOrderNo"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[	
+	SELECT #{rpt_no} + #{rpt_seq} + RIGHT(REPLICATE('0',2) + CAST(ISNULL(MAX(SUB_SEQ), 0)+1 AS VARCHAR), 2) AS DATA1
+	FROM TA_IPGUM_D WITH(NOLOCK)	
+	WHERE RPT_NO = #{rpt_no}
+	AND RPT_SEQ = #{rpt_seq}
+	AND CA_GUBUN = 'A'
+]]>
+</select>
+
+<update id="asPaymentDetailUpdate" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_IPGUM_D
+	   SET IPG_RMK = ISNULL(#{ipg_rmk}, '') + ISNULL(IPG_RMK, '')
+	 WHERE CA_GUBUN = 'A'
+	   AND RPT_NO = #{rpt_no}
+	   AND RPT_SEQ = #{rpt_seq}
+	   AND CARD_APPYNO = #{card_appyno}
+]]>
+</update>
+
+<select id="selectPaymentList"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPaymentList">
+<![CDATA[		
+	SELECT '' AS CUST_NAME,
+	       B.IPG_AMT,
+	       B.APT_YMD,
+	       B.CARD_APPYNO,
+	       CASE WHEN B.IPG_AMT < 0 THEN 'N' ELSE 
+	       CASE CHARINDEX('결재취소완료', B.IPG_RMK) WHEN 0 THEN 'Y' ELSE 'N' END END AS CANCELABLE,
+	       B.IPG_RMK
+	FROM TA_IPGUM_M A WITH(NOLOCK), TA_IPGUM_D B WITH(NOLOCK)
+	WHERE A.RPT_NO = B.RPT_NO 
+	AND A.RPT_SEQ  = B.RPT_SEQ 
+	AND A.CA_GUBUN = 'A'
+	AND A.RPT_NO  = #{rpt_no}
+	AND A.RPT_SEQ  = #{rpt_seq}
+]]>
+</select>
+
+
+<select id="selectPaymentCheck"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+	SELECT 
+		CASE WHEN COUNT(*) > 0 THEN 'Y' ELSE 'N' END AS DATA1
+	  FROM TA_IPGUM_M WITH (NOLOCK)
+	 WHERE RPT_NO = #{rpt_no}
+	   AND RPT_SEQ = #{rpt_seq}
+]]>
+</select>
+
+<insert id="asPaymentMasterInsert" parameterType="HashMap">
+<![CDATA[ 
+	INSERT INTO TA_IPGUM_M
+	(
+		CA_GUBUN,
+		RPT_NO,
+		RPT_SEQ,
+		IPG_ENDYN,
+		RMK_RMK,
+		RL_AMT,
+		SLIP_S_YN,
+		EVD_TYP,
+		ACCT_VND,
+		USR_CD,
+		SYS_DT,
+		FST_USR,
+		FST_SYS_DT
+	)
+	VALUES
+	(
+		'A',
+		#{rpt_no},
+		#{rpt_seq},
+		'N',
+		'',
+		#{pay_amt},
+		'N',
+		'T4703',
+		'',
+		#{sti_cd},
+		GETDATE(),
+		#{sti_cd},
+		GETDATE()
+	)
+]]>
+</insert>
+
+<insert id="asPaymentDetailInsert" parameterType="HashMap">
+<![CDATA[ 
+	INSERT INTO TA_IPGUM_D
+	(
+		CA_GUBUN,
+		RPT_NO,
+		RPT_SEQ,
+		SUB_SEQ,
+		APT_YMD,
+		IPG_YMD,
+		IPG_GUBUN,
+		IPG_TYP,
+		IPG_AMT,
+		IPG_RMK,
+		SLIP_I_YN,
+		EVD_TYP,
+		ACCT_VND,
+		CARD_APPYNO,
+		USR_CD,
+		SYS_DT,
+		FST_USR,
+		FST_SYS_DT
+	)
+	VALUES
+	(
+		'A',
+		#{rpt_no},
+		#{rpt_seq},
+		(SELECT RIGHT(REPLICATE('0',2) + CAST(ISNULL(MAX(SUB_SEQ), 0)+1 AS VARCHAR), 2)
+			  FROM TA_IPGUM_D	
+			 WHERE RPT_NO = #{rpt_no}
+			   AND RPT_SEQ = #{rpt_seq}),
+		CONVERT(CHAR(8), GETDATE(), 112),
+		CONVERT(CHAR(8), GETDATE(), 112),
+		'A91001',
+		'A7202',
+		#{pay_amt},
+		#{ipg_remark},
+		'N',
+		'T4703',
+		'',
+		#{card_appyno},
+		#{sti_cd},
+		GETDATE(),
+		#{sti_cd},
+		GETDATE()
+	)
+]]>
+</insert>
+
+<update id="asPaymentMasterUpdate" parameterType="HashMap">
+<![CDATA[
+	UPDATE TA_IPGUM_M
+	   SET RL_AMT = RL_AMT + #{pay_amt}
+	 WHERE RPT_NO = #{rpt_no}
+	   AND RPT_SEQ = #{rpt_seq}
+]]>
+</update>
+
+<select id="selectPaynemtKakaoYn"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[		
+SELECT
+	( CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END ) AS DATA1
+ FROM TA_ASTITEM TAA WITH (NOLOCK)
+WHERE TAA.RPT_NO = SUBSTRING(#{ORM_NO}, 1, 13) AND TAA.RPT_SEQ = SUBSTRING(#{ORM_NO}, 14, 15)
+  AND ( ( TAA.COM_RPFSEC = 'A6431' AND TAA.COM_RPFTYP = '642022' ) OR ( TAA.COM_RPFSEC = 'A6431' AND TAA.COM_RPFTYP = '642027' ) )
+
+]]>
+</select>
+
+
+</mapper>

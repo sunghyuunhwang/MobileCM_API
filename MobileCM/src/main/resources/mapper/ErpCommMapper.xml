@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ErpCommMapper">
+
+ <select id="erp_searchTeamList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSearchTeamList">
+<![CDATA[
+	SELECT
+		TCS.STI_CD AS STI_CD,
+		TCS.STI_NM AS STI_NM,
+		TCS.COM_CTSEC AS COM_CTSEC,
+		TCS.COM_SCD AS COM_SCD,
+		B.STM_HP
+	  FROM TC_STINF TCS WITH (NOLOCK), TC_STMEMBER B WITH (NOLOCK) 
+	WHERE TCS.COM_SCD  = B.COM_SCD 
+	   AND TCS.STI_CD  = B.STI_CD 
+	   AND TCS.COM_SCD = #{com_scd}
+	   AND TCS.K_STI_CD = #{k_sti_cd}
+	   AND TCS.STI_NM LIKE #{sti_nm}
+	   AND TCS.STI_RANK = 'Y' 
+	   AND TCS.REAL_YN = 'Y'
+	   AND TCS.K_STI_CD NOT LIKE 'CJ%'
+	   AND TCS.COM_STSEC IN ('C20C', 'C20B')
+	   AND B.STM_NO = '01'
+]]>
+</select>
+
+ <select id="erp_selectTeamList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTeamList">
+<![CDATA[
+	SELECT
+		DISTINCT
+		TCS.K_STI_CD AS K_STI_CD,
+		( SELECT A.STI_NM FROM TC_STINF A WITH (NOLOCk) WHERE A.COM_SCD = TCS.COM_SCD AND A.STI_CD = TCS.K_STI_CD ) AS STI_NM  
+	  FROM TC_STINF TCS WITH (NOLOCK)
+	WHERE TCS.COM_SCD = #{com_scd}    -----변수값
+	   AND TCS.STI_RANK = 'Y' 
+	   AND TCS.REAL_YN = 'Y'
+	   AND TCS.K_STI_CD NOT LIKE 'CJ%'
+	   AND TCS.COM_STSEC IN ('C20C', 'C20B')
+]]>
+</select>
+
+  <select id="erp_selectTeamListAll" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTeamList">
+<![CDATA[
+	SELECT
+		TCS.STI_CD AS K_STI_CD,
+		TCS.STI_NM AS STI_NM  
+	  FROM TC_STINF TCS WITH (NOLOCK)
+	WHERE TCS.COM_SCD = #{com_scd}    -----변수값
+	   AND TCS.STI_RANK = 'Y' 
+	   AND TCS.K_STI_CD NOT LIKE 'CJ%'
+]]>
+</select>
+
+ <select id="erp_selectCenterList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPCenterList">
+<![CDATA[
+	SELECT
+		CCD_CD AS COM_SCD,
+		CCD_NM AS COM_SCD_NM
+	FROM TT_COMCD WITH (NOLOCk)
+	WHERE CDX_CD = 'C16'
+	  AND CCD_YN = 'Y'
+	ORDER BY CCD_NM
+]]>
+</select>
+ 
+ <select id="erp_selectTtComcd" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTtComcd">
+<![CDATA[
+	SELECT
+		CCD_CD,
+		CCD_NM
+	FROM TT_COMCD WITH (NOLOCk)
+	WHERE CDX_CD = #{CDX_CD} --'C67'
+	  AND CCD_YN = 'Y'
+	  AND REF_1 = #{REF_1} --'ASRE'
+]]>
+</select>
+
+</mapper>

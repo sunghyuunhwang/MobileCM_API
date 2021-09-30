@@ -1,0 +1,39 @@
+INFO  21-05-30 06:28:57[main] [MobileCmApplication:55] - Starting MobileCmApplication on DESKTOP-Q2KV5DR with PID 26956 (D:\development\workspace\git\mobilecm_server\bin\main started by hwang in D:\development\workspace\git\mobilecm_server)
+INFO  21-05-30 06:28:57[main] [MobileCmApplication:651] - No active profile set, falling back to default profiles: default
+DEBUG 21-05-30 06:28:58[main] [LogFactory:105] - Logging initialized using 'class org.apache.ibatis.logging.slf4j.Slf4jImpl' adapter.
+INFO  21-05-30 06:28:59[main] [TomcatWebServer:108] - Tomcat initialized with port(s): 8082 (http)
+INFO  21-05-30 06:28:59[main] [Http11NioProtocol:173] - Initializing ProtocolHandler ["http-nio-8082"]
+INFO  21-05-30 06:28:59[main] [StandardService:173] - Starting service [Tomcat]
+INFO  21-05-30 06:28:59[main] [StandardEngine:173] - Starting Servlet engine: [Apache Tomcat/9.0.36]
+INFO  21-05-30 06:28:59[main] [[/]:173] - Initializing Spring embedded WebApplicationContext
+INFO  21-05-30 06:28:59[main] [ServletWebServerApplicationContext:285] - Root WebApplicationContext: initialization completed in 1746 ms
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/css/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/js/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/img/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/images/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/lib/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/templates/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/v2/api-docs'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/configuration/ui'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/swagger-resources/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/configuration/security'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/swagger-ui.html'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/webjars/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/swagger/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: Ant [pattern='/_sign/**'], []
+INFO  21-05-30 06:29:00[main] [DefaultSecurityFilterChain:43] - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2a43e0ac, org.springframework.security.web.context.SecurityContextPersistenceFilter@3e906375, org.springframework.security.web.header.HeaderWriterFilter@47311277, org.springframework.security.web.authentication.logout.LogoutFilter@4833eff3, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@748f93bb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5b7aa898, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2fd954f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@22d9bc14, org.springframework.security.web.session.SessionManagementFilter@1e60b459, org.springframework.security.web.access.ExceptionTranslationFilter@316acbb5, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@31b7d869]
+INFO  21-05-30 06:29:00[main] [PropertySourcedRequestMappingHandlerMapping:69] - Mapped URL path [/v2/api-docs] onto method [springfox.documentation.swagger2.web.Swagger2Controller#getDocumentation(String, HttpServletRequest)]
+INFO  21-05-30 06:29:00[main] [ThreadPoolTaskExecutor:181] - Initializing ExecutorService 'applicationTaskExecutor'
+WARN  21-05-30 06:29:00[main] [TemplateMode:150] - [THYMELEAF][main] Template Mode 'HTML5' is deprecated. Using Template Mode 'HTML' instead.
+INFO  21-05-30 06:29:00[main] [Http11NioProtocol:173] - Starting ProtocolHandler ["http-nio-8082"]
+INFO  21-05-30 06:29:00[main] [TomcatWebServer:220] - Tomcat started on port(s): 8082 (http) with context path ''
+INFO  21-05-30 06:29:00[main] [DocumentationPluginsBootstrapper:160] - Context refreshed
+INFO  21-05-30 06:29:00[main] [DocumentationPluginsBootstrapper:163] - Found 1 custom documentation plugin(s)
+INFO  21-05-30 06:29:00[main] [ApiListingReferenceScanner:41] - Scanning for api listing references
+WARN  21-05-30 06:29:01[main] [ParameterDataTypeReader:92] - Trying to infer dataType java.util.ArrayList<com.fursys.mobilecm.vo.tmserp.TMSERPOrderList>
+WARN  21-05-30 06:29:01[main] [ParameterDataTypeReader:92] - Trying to infer dataType java.util.ArrayList<com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList>
+INFO  21-05-30 06:29:01[main] [CachingOperationNameGenerator:40] - Generating unique operation named: loginUsingPOST_1
+INFO  21-05-30 06:29:01[main] [CachingOperationNameGenerator:40] - Generating unique operation named: userInfoUsingGET_1
+INFO  21-05-30 06:29:01[main] [MobileCmApplication:61] - Started MobileCmApplication in 4.049 seconds (JVM running for 6.207)
+INFO  21-05-30 06:37:06[RMI TCP Connection(2)-127.0.0.1] [SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin:159] - Application shutdown requested.
+INFO  21-05-30 06:37:07[RMI TCP Connection(2)-127.0.0.1] [ThreadPoolTaskExecutor:218] - Shutting down ExecutorService 'applicationTaskExecutor'

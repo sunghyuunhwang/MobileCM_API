@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.TestMapper">
+
+<select id="test" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTestVo">        
+<![CDATA[ 
+
+	SELECT
+		ORM_NM AS ORM_NM
+	  FROM TO_ORDMAS TOO WITH (NOLOCK)
+	 WHERE TOO.ORM_NO = #{k_sti_cd}
+ 
+]]>
+</select>
+
+
+</mapper>

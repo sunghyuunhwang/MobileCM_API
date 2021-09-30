@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ErpCalculateMoneyMapper">
+
+<update id="updateLogispot" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_RESMST
+	   SET ADDVND_NM = 'LOGISPOT',
+	       ADDVND_YN = 'Y'	       
+	WHERE REM_DT = #{rem_dt}
+	AND REM_SEQ = #{rem_seq}
+]]>
+</update> 
+
+<update id="updateGoGoVan" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_RESMST
+	   SET ADDVND_NM = '고고벤',
+	       ADDVND_YN = 'Y'	       
+	WHERE REM_DT = #{rem_dt}
+	AND REM_SEQ = #{rem_seq}
+]]>
+</update> 
+
+<select id="selectWayPointList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPGoGoVanWayPoint">     
+<![CDATA[ 
+	SELECT
+		A.DATA AS ADDRESS1,
+		NULL AS ADDRESS2,
+		C.DATA AS NAME,
+		D.DATA AS MOBILE_NO,
+		E.DATA AS DESCRIPTION,
+		F.DATA AS COMPANY,
+		G.DATA AS TEAM,
+		H.DATA AS REQUEST_AT
+	FROM dbo.fnSplit3(#{addr_arr}) A
+	     LEFT OUTER JOIN dbo.fnSplit3(#{addr_arr}) B ON A.SEQNO = B.SEQNO
+	     LEFT OUTER JOIN dbo.fnSplit3(#{name_arr}) C ON A.SEQNO = C.SEQNO
+	     LEFT OUTER JOIN dbo.fnSplit3(#{mobile_no_arr}) D ON A.SEQNO = D.SEQNO
+	     LEFT OUTER JOIN dbo.fnSplit3(#{description_arr}) E ON A.SEQNO = E.SEQNO
+	     LEFT OUTER JOIN dbo.fnSplit3(#{company_arr}) F ON A.SEQNO = F.SEQNO
+	     LEFT OUTER JOIN dbo.fnSplit3(#{team_arr}) G ON A.SEQNO = G.SEQNO
+	     LEFT OUTER JOIN dbo.fnSplit3(#{request_at_arr}) H ON A.SEQNO = H.SEQNO
+]]>
+</select>
+
+<select id="selectBusinessTripDetail" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPBusinessTripDetail">
+<![CDATA[
+	SELECT DISTINCT 
+	       A.SORT_SEQ, A.PLM_NO, A.MOB_STARTTM, A.COM_RMFG, A.ORM_NM , A.ORM_GADDR, A.MOB_ENDTM, A.LATITUDE, A.LONGITUDE 
+	  FROM (
+		SELECT  B.MOB_STARTTM AS SORT_SEQ,
+		        A.PLM_NO,
+		        CONVERT(VARCHAR(8), B.MOB_STARTTM, 112) + replace(CONVERT(VARCHAR(5), B.MOB_STARTTM, 108), ':', '') AS MOB_STARTTM,
+		        ( SELECT TT.CCD_NM FROM TT_COMCD TT WITH (NOLOCK) WHERE TT.CCD_CD = ( SELECT ISNULL(TCP.COM_RMFG, 'C13W') FROM TC_PLANMST TCP WITH (NOLOCK) WHERE A.PLM_NO = TCP.PLM_NO ) ) AS COM_RMFG	,
+				A.ORM_NM AS ORM_NM,
+				( SELECT ISNULL(TOO.ORM_GADDR, '' ) + ISNULL(TOO.ADDR_DTL , '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = A.ORM_NO ) AS ORM_GADDR,		
+				LEFT(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR(20), B.MOB_ENDTM, 120), '-', ''), ':', ''), ' ', ''), 12) AS MOB_ENDTM,
+				A.LATITUDE,
+				A.LONGITUDE 
+			FROM TC_RESMST A WITH (NOLOCK), TC_PLANMST B WITH (NOLOCK), TC_PLANDTL C WITH (NOLOCK)
+			WHERE A.PLM_NO = B.PLM_NO
+			  AND B.PLM_NO  = C.PLM_NO 
+			  AND C.MOB_STD IN ('C13Y', 'C13N')
+			  --AND C.MOB_NFINISHED NOT IN ('C68000', 'C68002')
+			  AND ISNULL(C.COM_UNDSEC, '') NOT IN ('C52A01', 'C52B01')
+			  AND A.COM_SCD = #{com_scd} 	
+			  AND A.STI_CD = #{sti_cd} 	
+			  AND A.REM_DT = #{rem_dt} 
+			  AND A.COM_SSEC = 'C18C'
+		UNION ALL
+		SELECT  B.MOB_STARTTM AS SORT_SEQ,
+		        A.PLM_NO,
+		        CONVERT(VARCHAR(8), B.MOB_STARTTM, 112) + replace(CONVERT(VARCHAR(5), B.MOB_STARTTM, 108), ':', '') AS MOB_STARTTM,
+		        ( SELECT TT.CCD_NM FROM TT_COMCD TT WITH (NOLOCK) WHERE TT.CCD_CD = ( SELECT TOP 1 ( CASE TCP.COM_RDSEC  WHEN   '' THEN 'C13W' WHEN   NULL THEN 'C13W' ELSE TCP.COM_RDSEC END) FROM TA_PLANDTL TCP WITH (NOLOCK) WHERE A.PLM_NO = TCP.PLM_NO ) ) AS COM_RMFG,
+				A.ORM_NM AS ORM_NM,
+		        ( SELECT ISNULL(B.CTM_ADDR, '') + ISNULL(B.CTM_ADDR2, '') 
+					 FROM TA_RPTREQ B WITH (NOLOCK)
+		         WHERE SUBSTRING(A.ORM_NO, 1, 13) = B.RPT_NO 
+					  AND SUBSTRING(A.ORM_NO, 14, 15) = B.RPT_SEQ ) AS ORM_GADDR,		
+				LEFT(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR(20), B.MOB_ENDTM, 120), '-', ''), ':', ''), ' ', ''), 12) AS MOB_ENDTM,
+				A.LATITUDE,
+				A.LONGITUDE
+			FROM TC_RESMST A WITH (NOLOCK), TA_PLANMST B WITH (NOLOCK), TA_PLANDTL C WITH (NOLOCK)
+			WHERE A.PLM_NO = B.PLM_NO
+			  AND B.PLM_NO  = C.PLM_NO 
+			  AND C.MOB_STD IN ('C13Y')
+			  --AND C.MOB_NFINISHED NOT IN ('C67001', 'C67002', 'C67003', 'C67004') 
+			  AND A.COM_SCD = #{com_scd} 	
+			  AND A.STI_CD = #{sti_cd} 	
+			  AND A.REM_DT = #{rem_dt} 
+			  AND A.COM_SSEC = 'C18A'	) A	  
+	 ORDER BY A.SORT_SEQ
+]]>
+</select>
+
+<select id="selectBusinessTrip" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPBusinessTrip">
+<![CDATA[
+	SELECT ISNULL(MOVE_KM, 0) AS MOVE_KM,
+	       ISNULL(MOVE_AMT ,0) AS MOVE_AMT,
+	       ISNULL(TOLL_FEE, 0) AS TOLL_FEE,
+	       PROC_STATUS
+	FROM TC_TRVALLOWANCE WITH(NOLOCK)	       
+	 WHERE REM_DT = #{rem_dt}
+	 AND STI_CD = #{sti_cd}
+	 AND COM_SCD = #{com_scd}
+]]>
+</select>
+
+<select id="selectBusinessTripScheduleCount" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPScheduleCount">         
+<![CDATA[ 
+	SELECT TOP 1
+		SUM(BB.TOTAL_CNT) AS TOTAL_CNT,
+		SUM(BB.REAL_CNT) AS REAL_CNT
+	  FROM (
+			SELECT
+				ISNULL(COUNT(*), 0) AS TOTAL_CNT,
+				( CASE AA.COM_SSEC WHEN 'C18C' THEN ISNULL(COUNT( DISTINCT ISNULL(AA.AGT_CD, '') + ISNULL(AA.ORM_GADDR+ AA.ORM_CDT, '') ), 0) ELSE ISNULL(COUNT(*),  0) END ) AS REAL_CNT
+			FROM ( SELECT
+						A.ORM_NO AS 'ORM_NO',
+						( SELECT TOO.AGT_CD
+						   FROM TO_ORDMAS TOO WITH (NOLOCK)
+						  WHERE TOO.ORM_NO = A.ORM_NO ) AS 'AGT_CD',
+						( SELECT TOO.ORM_GADDR
+						   FROM TO_ORDMAS TOO WITH (NOLOCK)
+						  WHERE TOO.ORM_NO = A.ORM_NO ) AS 'ORM_GADDR',
+						( SELECT TOO.ORM_CDT
+						   FROM TO_ORDMAS TOO WITH (NOLOCK)
+						  WHERE TOO.ORM_NO = A.ORM_NO ) AS 'ORM_CDT',
+						A.COM_SSEC AS COM_SSEC
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.STI_CD = #{sti_cd}
+					  AND A.COM_SCD = #{com_scd}
+					  AND A.REM_DT = #{rem_dt}
+					  AND A.COM_SSEC = 'C18C'
+					UNION ALL
+					SELECT
+						A.ORM_NO AS 'ORM_NO',
+						( SELECT TOO.AGT_CD
+						   FROM TO_ORDMAS TOO WITH (NOLOCK)
+						  WHERE TOO.ORM_NO = A.ORM_NO ) AS 'AGT_CD',
+						( SELECT TOO.ORM_GADDR
+						   FROM TO_ORDMAS TOO WITH (NOLOCK)
+						  WHERE TOO.ORM_NO = A.ORM_NO ) AS 'ORM_GADDR',
+						( SELECT TOO.ORM_CDT
+						   FROM TO_ORDMAS TOO WITH (NOLOCK)
+						  WHERE TOO.ORM_NO = A.ORM_NO ) AS 'ORM_CDT',
+						A.COM_SSEC AS COM_SSEC
+					FROM TC_RESMST A WITH (NOLOCK)
+					WHERE A.STI_CD = #{sti_cd}
+					  AND A.COM_SCD = #{com_scd}
+					  AND A.REM_DT = #{rem_dt}
+					  AND A.COM_SSEC = 'C18A' ) AA
+			GROUP BY AA.COM_SSEC ) BB
+]]>
+</select> 
+
+<update id="insertBusinessTrip" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_TRVALLOWANCE (
+	       REM_DT, STI_CD, COM_SCD, MOVE_KM, MOVE_AMT, TOLL_FEE, PROC_STATUS, USR_CD, SYS_DT, FST_USR_CD, FST_SYS_DT)	       	
+	SELECT #{rem_dt}, #{sti_cd}, #{com_scd}, #{move_km}, ((ISNULL(#{total_move_km}, '0') * CONVERT(INT, REF_1)) + (CONVERT(INT, #{toll_fee})*2)), (CONVERT(INT, #{toll_fee})*2), #{proc_status}, #{usr_cd},  GETDATE(), #{usr_cd},  GETDATE()	
+	FROM TT_COMCD WITH (NOLOCK)
+	WHERE CCD_CD = 'C72000'
+	       
+]]>
+</update> 
+
+<update id="insertBusinessTrip_backup" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_TRVALLOWANCE (
+	       REM_DT, STI_CD, COM_SCD, MOVE_KM, MOVE_AMT, TOLL_FEE, PROC_STATUS, USR_CD, SYS_DT, FST_USR_CD, FST_SYS_DT)	       	
+	SELECT #{rem_dt}, #{sti_cd}, #{com_scd}, #{move_km}, CONVERT(INT, (ISNULL(#{move_km}, '0') * CONVERT(INT, REF_1)) + CONVERT(INT, #{toll_fee})), #{toll_fee}, #{proc_status}, #{usr_cd},  GETDATE(), #{usr_cd},  GETDATE()	
+	FROM TT_COMCD WITH (NOLOCK)
+	WHERE CCD_CD = 'C72000'
+	       
+]]>
+</update> 
+
+<update id="updateBusinessTrip" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_TRVALLOWANCE
+	   SET MOVE_KM = #{move_km},
+	       MOVE_AMT = (SELECT ((ISNULL(#{total_move_km}, '0') * CONVERT(INT, REF_1)) + (CONVERT(INT, #{toll_fee})*2)) FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = 'C72000'),
+	       TOLL_FEE = #{toll_fee},
+	       PROC_STATUS = #{proc_status},
+	    USR_CD = #{usr_cd},
+		SYS_DT = GETDATE()	       
+	 WHERE REM_DT = #{rem_dt}
+	 AND STI_CD = #{sti_cd}
+	 AND COM_SCD = #{com_scd}
+]]>
+</update> 
+
+<update id="updateBusinessTrip_backup" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_TRVALLOWANCE
+	   SET MOVE_KM = #{move_km},
+	       MOVE_AMT = (SELECT CONVERT(INT, (ISNULL(#{move_km}, '0') * CONVERT(INT, REF_1)) + CONVERT(INT, #{toll_fee})) FROM TT_COMCD WITH (NOLOCK) WHERE CCD_CD = 'C72000'),
+	       TOLL_FEE = #{toll_fee},
+	       PROC_STATUS = #{proc_status},
+	    USR_CD = #{usr_cd},
+		SYS_DT = GETDATE()	       
+	 WHERE REM_DT = #{rem_dt}
+	 AND STI_CD = #{sti_cd}
+	 AND COM_SCD = #{com_scd}
+]]>
+</update>
+
+<select id="selectAsCalculateMoney"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsCalculateMoney">
+<![CDATA[
+	SELECT SUM(X.A6812) AS BASE_AMT, /*기본용역비*/
+	       SUM(X.RPT_GUN_AMT) AS GUN_AMT, /*건수정액비*/
+		   SUM(X.A6899) AS ETC_AMT, /*기타용역비*/
+		   SUM(X.A6807) AS ETC_AMT_1, /*식대(지)*/
+		   SUM(X.A6813) AS ETC_AMT_2, /*식대(청)*/
+		   SUM(X.A6811) AS ETC_AMT_3, /*출장비*/
+		   SUM(X.A6803) AS ETC_AMT_4, /*난지역*/
+		   SUM(X.A6806) AS ETC_AMT_5, /*AS하자*/
+		   SUM(X.A6804) AS ETC_AMT_6, /*년차휴가*/
+		   SUM(X.A6814) AS ETC_AMT_7, /*AS조치품*/
+		   SUM(X.A6815) AS ETC_AMT_8, /*기타비용(지)*/
+		   SUM(X.A6816) AS ETC_AMT_9, /*기타비용(청)*/
+		   (SUM(X.A6812) + SUM(X.RPT_GUN_AMT) + SUM(X.A6899)) AS AMT_TOTAL /*전체합계*/
+	FROM (
+		SELECT A.PLM_NO
+		       ,A.COM_AGSEC
+		       ,A.COM_SCD
+		       ,A.STI_CD
+		       ,A.CTM_NM
+		       ,A.RPT_NO
+		       ,A.RPT_SEQ
+		       ,A.AGT_CD
+		       ,A.PLM_CDT
+		       ,A.CTM_ADDR
+		       ,A.PLM_FTM
+		       ,(SELECT VND_NM
+		         FROM   TT_VENDOR with (nolock)
+		         WHERE  A.AGT_CD = VND_CD) AS VND_NM
+	           ,CASE WHEN 'true' = 'false' THEN
+	                SUM(CASE
+		              WHEN C.COM_ASEC <> 'A6800' OR C.COM_ASEC <> 'A6812' THEN ISNULL(ACL_AMT, 0)
+		              ELSE 0
+		            END)
+	            ELSE
+	                SUM(CASE
+		                WHEN C.COM_ASEC <> 'A6800' OR C.COM_ASEC <> 'A6812' THEN ISNULL(ACL_AMT, 0)
+		                ELSE 0
+		                END)
+	                + CASE WHEN ( ROW_NUMBER()OVER(PARTITION BY A.RPT_NO, A.PLM_CDT ORDER BY A.RPT_NO, A.RPT_SEQ)) = 1 THEN
+	                      (SELECT CAST(ISNULL(ACI_RATEAMT, 13000) AS DECIMAL )FROM TA_ACTINF with (nolock) WHERE COM_AGSEC = A.COM_AGSEC AND COM_ASEC = 'A6812' AND COM_ACD = 'A6910')
+	                  ELSE
+	                      0
+	                  END
+	            END AS A68
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6812' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6812
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6801' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6801
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6807' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6807
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6811' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6811
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6803' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6803
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6806' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6806
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6813' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6813
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6804' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6804
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6814' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6814
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6815' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6815
+		       ,SUM(CASE
+		              WHEN C.COM_ASEC = 'A6816' THEN ISNULL(C.ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6816
+		       ,SUM(CASE
+		              WHEN ( C.COM_ASEC <> 'A6800'
+		                     AND C.COM_ASEC <> 'A6812' ) THEN ISNULL(ACL_AMT, 0)
+		              ELSE 0
+		            END)                   A6899
+	
+	           ,
+	            CASE
+	              WHEN 'true' = 'false' THEN
+	                0
+	              ELSE
+	                CASE
+	                WHEN ( ROW_NUMBER()OVER(PARTITION BY A.RPT_NO, A.PLM_CDT ORDER BY A.RPT_NO, A.RPT_SEQ)) = 1 THEN
+	                  (SELECT CAST(ISNULL(ACI_RATEAMT, 13000) AS DECIMAL )FROM TA_ACTINF WHERE COM_AGSEC = A.COM_AGSEC AND COM_ASEC = 'A6812' AND COM_ACD = 'A6910')
+	                ELSE
+	                  0
+	                END
+	            END RPT_GUN_AMT
+		FROM   TA_PLANMST A with (nolock) LEFT OUTER JOIN TA_ACTLIST C with (nolock) ON A.PLM_NO = C.PLM_NO AND C.COM_VFSEC = 'C2402' AND C.COM_VTSEC = 'C2501' AND C.COM_DPSEC = 'C07P'
+	                                      LEFT OUTER JOIN TC_STINF B WITH (NOLOCK) ON A.COM_SCD = B.COM_SCD AND A.STI_CD = B.STI_CD AND B.STI_RANK = 'Y' 	   
+		WHERE  A.PLM_CDT BETWEEN #{fr_dt} AND #{to_dt}
+		AND A.COM_PLMFG = 'C104'
+		AND A.STI_CD = #{sti_cd}
+		GROUP  BY
+		  A.PLM_NO
+		  ,A.COM_AGSEC
+		  ,A.COM_SCD
+		  ,A.STI_CD
+		  ,A.CTM_NM
+		  ,A.RPT_NO
+		  ,A.RPT_SEQ
+		  ,A.AGT_CD
+		  ,A.PLM_CDT
+		  ,A.CTM_ADDR
+		  ,A.PLM_FTM
+	) X
+	
+
+]]>
+</select>
+
+
+<select id="selectSigongCalculateMoneyTeam"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoneyTeam">
+<![CDATA[
+	SELECT X.STI_NM AS STI_NM,
+	       SUM(X.YEAR_AMT) AS YEAR_AMT,
+		   SUM(X.PREV_MONTH_AMT) AS PREV_MONTH_AMT,
+		   SUM(X.MONTH_AMT) AS MONTH_AMT,
+		   0 AS CHANGE_RATE_AMT
+	FROM (
+		SELECT A.STI_NM, A.AMT_TOTAL AS YEAR_AMT, 0 AS PREV_MONTH_AMT, 0 AS MONTH_AMT
+		FROM (
+			SELECT  STI_NM,
+				   COMPUTE6 + (c92+c93+c94+c95+c96+c97+c933) + (c934+c942) + (c98+c99+c914+c921+c936+c929+c932+c928+c9A) + (c923+c924+c925+c922+c938) + c927 AS AMT_TOTAL /*전체합계*/
+			FROM (
+					 SELECT  COM_SCD, STI_CD
+							 ,COM_CTSEC
+							 ,VND_NAME
+							 ,ST_CNT								/*팀인원*/
+							 ,c90									/*정상시공*/
+							 ,ETC									/*기타시공*/	
+							 ,TRAVEL								/*출장비*/
+							 ,ROUND((c90+ ETC ),0) AS SIGONGG		/*시공금액*/
+							 ,ROUND(((c90+ ETC)*1.1), 0) AS VAT		/*시공금액(vat)*/
+							 /*,ROUND((c90/10) / 10 ,0)AS NOMALSGPAY	/*정상시공비*/
+							 ,ROUND((ETC/10) / 10,0) AS ETCSGPAY	/*기타시공비*/*/
+							 ,ROUND(((c90/10) / 10 + (ETC/10) / 10),0) AS PAYPEP	/*지급액*/
+							 ,FLOOR(FLOOR(ETC /10)*10) AS COMPUTE11	/*정상시공비*/
+							 ,FLOOR(FLOOR(C90/10)*10) AS COMPUTE6	/*기타시공비*/
+							 ,AMT_VAT
+							 ,ACL_AMT
+							 ,STI_NM
+							 ,SUBSTRING(PLM_CDT,0,7) AS MON			
+							 ,FLOOR((FLOOR(FLOOR(C90/10)*10)+FLOOR(FLOOR(ETC /10)*10)+TRAVEL)*1.1) AS TOTAL
+							 ,K_STI_CD /* 권역시공팀 코드*/	
+							 ,K_NM
+			   				 ,c91			/**/
+			   				 ,c92			/*매장경유(청)*/
+			   				 ,c93			/*타사품목(청)*/
+			   				 ,c94			/*분해설치(청)*/
+			   				 ,c95			/*샘플회수*/
+			   				 ,c96			/*반품회수*/
+			   				 ,c97			/*장비용차(청)*/	
+			   				 ,c98			/*숙식비(지)*/
+			   				 ,c99			/*공수비(청)*/
+			   				 ,c914		    /*불요*/		
+			   				 ,c921		    /*원거리(지)*/
+			   				 ,c936		    /*장비용차()지)*/
+			   				 ,c922		    /*식대공제*/
+			   				 ,c923		    /*시공복공제*/
+			   				 ,c924		    /*시공하자공제*/
+			   				 ,c925		    /*용차공제*/
+			   				 ,c927		    /*공동시공분할*/
+			   				 ,c938		    /*기타공제*/
+			   				 ,c933		    /*출장비(청)*/
+			   				 ,c932		    /*출장비(지)*/
+			   				 ,c929		    /*근무지외*/		   
+			   				 ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
+			   				 ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
+			   				 ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+			   				 ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
+			   				 ,c942		    /*제품반입비*/
+						FROM(
+						  SELECT A.COM_SCD								
+								,A.COM_CTSEC   						
+								,B.STI_CD
+								,(SELECT VND_NAME FROM TT_VENDOR WITH (NOLOCK) WHERE VND_CD = B.STI_CD  )AS  VND_NAME			
+								,MAX(A.PLM_CDT)	AS PLM_CDT	
+								,SUM(ISNULL(A.ACL_AMT,0)) ACL_AMT
+								,SUM(ISNULL(A.ACL_AMT,0)) * 1.1 AMT_VAT 									
+								,SUM(CASE WHEN A.COM_ASEC = 'C090' Then IsNull(A.acl_amt,0) Else 0 End )AS c90					/*정상시공*/					
+								,SUM(CASE WHEN A.COM_ASEC IN ( 'C090', 'C0932') THEN 0  Else ISNULL(A.ACL_AMT,0) End )AS ETC	/*기타시공*/						
+								,SUM(CASE WHEN A.COM_ASEC IN ( 'C0932', 'C01081') THEN  ISNULL(A.ACL_AMT,0) ELSE 0 END )AS TRAVEL	/*출장비*/
+								,(SELECT STI_NM FROM TC_STINF WITH (NOLOCK) WHERE STI_CD = B.STI_CD AND COM_SCD=A.COM_SCD AND COM_SCD=B.COM_SCD )AS STI_NM					
+								,(SELECT COUNT(*) FROM TC_STMEMBER WITH (NOLOCK) WHERE STI_CD = B.STI_CD	AND COM_SCD = A.COM_SCD AND COM_SCD=B.COM_SCD	)AS ST_CNT	
+								,ISNULL(C.K_STI_CD, B.STI_CD) as K_STI_CD/* 권역시공팀 코드*/	
+								,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND K_STI_CD = C.K_STI_CD ),MAX(C.STI_NM) )  AS  K_NM
+								,SUM(CASE WHEN A.COM_ASEC = 'C091'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c91		
+								,SUM(CASE WHEN A.COM_ASEC = 'C092'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c92		
+								,SUM(CASE WHEN A.COM_ASEC = 'C093'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c93		
+								,SUM(CASE WHEN A.COM_ASEC = 'C094'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c94		
+								,SUM(CASE WHEN A.COM_ASEC = 'C095'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c95		
+								,SUM(CASE WHEN A.COM_ASEC = 'C096'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c96		
+								,SUM(CASE WHEN A.COM_ASEC = 'C097'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c97		
+								,SUM(CASE WHEN A.COM_ASEC = 'C098'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c98		
+								,SUM(CASE WHEN A.COM_ASEC = 'C099'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c99		
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0914' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c914
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0920' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c920
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0921' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c921		   
+								,SUM(CASE WHEN A.COM_ASEC = 'C0922' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c922		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0923' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c923
+			     				/* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 start*/
+								/*,SUM(CASE WHEN A.COM_ASEC in ('C0924', 'C09A') THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924*/		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0924' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C09A'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c9A	
+			     				/* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 end*/
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0925' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c925
+								,SUM(CASE WHEN A.COM_ASEC = 'C0926' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c926		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0927' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c927
+								,SUM(CASE WHEN A.COM_ASEC = 'C0928' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c928		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0929' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c929		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0930' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c930		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0931' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c931		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0938' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c938		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0937' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c937		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0934' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c934		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0940' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c940		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0939' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c939		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0933' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c933		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0936' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c936		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0941' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c941		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0935' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c935		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942
+							FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
+								   TC_PLANMST AS B WITH (NOLOCK),
+								   TC_STINF  AS C WITH (NOLOCK)			
+						   WHERE   A.PLM_NO = B.PLM_NO				
+							 AND   B.STI_CD = C.STI_CD					
+							 AND   B.COM_SCD   = C.COM_SCD
+							 AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+							 AND   A.COM_VTSEC  = 'C2501'
+							 AND   A.COM_DPSEC = 'C07P'   														
+							 AND   B.COM_PLMFG = 'C104' 
+		   					 AND   A.PLM_CDT LIKE #{fr_year}
+							 AND   C.K_STI_CD = #{k_sti_cd}
+						GROUP BY  A.COM_SCD  									
+								 ,A.COM_CTSEC   									
+								 ,B.STI_CD
+								 ,B.COM_SCD	
+								 ,C.K_STI_CD
+							 )AS A
+			) X
+			) A
+		UNION ALL
+		SELECT A.STI_NM, 0 AS YEAR_AMT, A.AMT_TOTAL AS PREV_MONTH_AMT, 0 AS_MONTH_AMT
+		FROM (
+			SELECT  STI_NM,
+				   COMPUTE6 + (c92+c93+c94+c95+c96+c97+c933) + (c934+c942) + (c98+c99+c914+c921+c936+c929+c932+c928+c9A) + (c923+c924+c925+c922+c938) + c927 AS AMT_TOTAL /*전체합계*/
+			FROM (
+					 SELECT  COM_SCD, STI_CD
+							 ,COM_CTSEC
+							 ,VND_NAME
+							 ,ST_CNT								/*팀인원*/
+							 ,c90									/*정상시공*/
+							 ,ETC									/*기타시공*/	
+							 ,TRAVEL								/*출장비*/
+							 ,ROUND((c90+ ETC ),0) AS SIGONGG		/*시공금액*/
+							 ,ROUND(((c90+ ETC)*1.1), 0) AS VAT		/*시공금액(vat)*/
+							 /*,ROUND((c90/10) / 10 ,0)AS NOMALSGPAY	/*정상시공비*/
+							 ,ROUND((ETC/10) / 10,0) AS ETCSGPAY	/*기타시공비*/*/
+							 ,ROUND(((c90/10) / 10 + (ETC/10) / 10),0) AS PAYPEP	/*지급액*/
+							 ,FLOOR(FLOOR(ETC /10)*10) AS COMPUTE11	/*정상시공비*/
+							 ,FLOOR(FLOOR(C90/10)*10) AS COMPUTE6	/*기타시공비*/
+							 ,AMT_VAT
+							 ,ACL_AMT
+							 ,STI_NM
+							 ,SUBSTRING(PLM_CDT,0,7) AS MON			
+							 ,FLOOR((FLOOR(FLOOR(C90/10)*10)+FLOOR(FLOOR(ETC /10)*10)+TRAVEL)*1.1) AS TOTAL
+							 ,K_STI_CD /* 권역시공팀 코드*/	
+							 ,K_NM
+			   				 ,c91			/**/
+			   				 ,c92			/*매장경유(청)*/
+			   				 ,c93			/*타사품목(청)*/
+			   				 ,c94			/*분해설치(청)*/
+			   				 ,c95			/*샘플회수*/
+			   				 ,c96			/*반품회수*/
+			   				 ,c97			/*장비용차(청)*/	
+			   				 ,c98			/*숙식비(지)*/
+			   				 ,c99			/*공수비(청)*/
+			   				 ,c914		    /*불요*/		
+			   				 ,c921		    /*원거리(지)*/
+			   				 ,c936		    /*장비용차()지)*/
+			   				 ,c922		    /*식대공제*/
+			   				 ,c923		    /*시공복공제*/
+			   				 ,c924		    /*시공하자공제*/
+			   				 ,c925		    /*용차공제*/
+			   				 ,c927		    /*공동시공분할*/
+			   				 ,c938		    /*기타공제*/
+			   				 ,c933		    /*출장비(청)*/
+			   				 ,c932		    /*출장비(지)*/
+			   				 ,c929		    /*근무지외*/		   
+			   				 ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
+			   				 ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
+			   				 ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+			   				 ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
+			   				 ,c942		    /*제품반입비*/
+						FROM(
+						  SELECT A.COM_SCD								
+								,A.COM_CTSEC   						
+								,B.STI_CD
+								,(SELECT VND_NAME FROM TT_VENDOR WITH (NOLOCK) WHERE VND_CD = B.STI_CD  )AS  VND_NAME			
+								,MAX(A.PLM_CDT)	AS PLM_CDT	
+								,SUM(ISNULL(A.ACL_AMT,0)) ACL_AMT
+								,SUM(ISNULL(A.ACL_AMT,0)) * 1.1 AMT_VAT 									
+								,SUM(CASE WHEN A.COM_ASEC = 'C090' Then IsNull(A.acl_amt,0) Else 0 End )AS c90					/*정상시공*/					
+								,SUM(CASE WHEN A.COM_ASEC IN ( 'C090', 'C0932') THEN 0  Else ISNULL(A.ACL_AMT,0) End )AS ETC	/*기타시공*/						
+								,SUM(CASE WHEN A.COM_ASEC IN ( 'C0932', 'C01081') THEN  ISNULL(A.ACL_AMT,0) ELSE 0 END )AS TRAVEL	/*출장비*/
+								,(SELECT STI_NM FROM TC_STINF WITH (NOLOCK) WHERE STI_CD = B.STI_CD AND COM_SCD=A.COM_SCD AND COM_SCD=B.COM_SCD )AS STI_NM					
+								,(SELECT COUNT(*) FROM TC_STMEMBER WITH (NOLOCK) WHERE STI_CD = B.STI_CD	AND COM_SCD = A.COM_SCD AND COM_SCD=B.COM_SCD	)AS ST_CNT	
+								,ISNULL(C.K_STI_CD, B.STI_CD) as K_STI_CD/* 권역시공팀 코드*/	
+								,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND K_STI_CD = C.K_STI_CD ),MAX(C.STI_NM) )  AS  K_NM
+								,SUM(CASE WHEN A.COM_ASEC = 'C091'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c91		
+								,SUM(CASE WHEN A.COM_ASEC = 'C092'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c92		
+								,SUM(CASE WHEN A.COM_ASEC = 'C093'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c93		
+								,SUM(CASE WHEN A.COM_ASEC = 'C094'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c94		
+								,SUM(CASE WHEN A.COM_ASEC = 'C095'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c95		
+								,SUM(CASE WHEN A.COM_ASEC = 'C096'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c96		
+								,SUM(CASE WHEN A.COM_ASEC = 'C097'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c97		
+								,SUM(CASE WHEN A.COM_ASEC = 'C098'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c98		
+								,SUM(CASE WHEN A.COM_ASEC = 'C099'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c99		
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0914' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c914
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0920' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c920
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0921' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c921		   
+								,SUM(CASE WHEN A.COM_ASEC = 'C0922' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c922		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0923' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c923
+			     				/* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 start*/
+								/*,SUM(CASE WHEN A.COM_ASEC in ('C0924', 'C09A') THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924*/		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0924' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C09A'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c9A	
+			     				/* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 end*/
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0925' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c925
+								,SUM(CASE WHEN A.COM_ASEC = 'C0926' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c926		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0927' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c927
+								,SUM(CASE WHEN A.COM_ASEC = 'C0928' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c928		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0929' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c929		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0930' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c930		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0931' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c931		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0938' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c938		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0937' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c937		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0934' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c934		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0940' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c940		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0939' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c939		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0933' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c933		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0936' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c936		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0941' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c941		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0935' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c935		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932
+								,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942		
+							FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
+								   TC_PLANMST AS B WITH (NOLOCK),
+								   TC_STINF  AS C WITH (NOLOCK)			
+						   WHERE   A.PLM_NO = B.PLM_NO				
+							 AND   B.STI_CD = C.STI_CD					
+							 AND   B.COM_SCD   = C.COM_SCD
+							 AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+							 AND   A.COM_VTSEC  = 'C2501'
+							 AND   A.COM_DPSEC = 'C07P'   														
+							 AND   B.COM_PLMFG = 'C104' 
+		   					 --AND   A.PLM_CDT BETWEEN '20200101' AND '20201131'
+		   					 AND   A.PLM_CDT BETWEEN #{fr_prev_month} AND #{to_prev_month}
+		   					 
+							 AND   C.K_STI_CD = #{k_sti_cd}
+						GROUP BY  A.COM_SCD  									
+								 ,A.COM_CTSEC   									
+								 ,B.STI_CD
+								 ,B.COM_SCD	
+								 ,C.K_STI_CD
+							 )AS A
+			) X
+			) A
+		UNION ALL
+		SELECT A.STI_NM, 0 AS YEAR_AMT, 0 AS PREV_MONTH_AMT, A.AMT_TOTAL AS_MONTH_AMT
+		FROM (
+			SELECT  STI_NM,
+				   COMPUTE6 + (c92+c93+c94+c95+c96+c97+c933) + (c934+c942) + (c98+c99+c914+c921+c936+c929+c932+c928+c9A) + (c923+c924+c925+c922+c938) + c927 AS AMT_TOTAL /*전체합계*/
+			FROM (
+					 SELECT  COM_SCD, STI_CD
+							 ,COM_CTSEC
+							 ,VND_NAME
+							 ,ST_CNT								/*팀인원*/
+							 ,c90									/*정상시공*/
+							 ,ETC									/*기타시공*/	
+							 ,TRAVEL								/*출장비*/
+							 ,ROUND((c90+ ETC ),0) AS SIGONGG		/*시공금액*/
+							 ,ROUND(((c90+ ETC)*1.1), 0) AS VAT		/*시공금액(vat)*/
+							 /*,ROUND((c90/10) / 10 ,0)AS NOMALSGPAY	/*정상시공비*/
+							 ,ROUND((ETC/10) / 10,0) AS ETCSGPAY	/*기타시공비*/*/
+							 ,ROUND(((c90/10) / 10 + (ETC/10) / 10),0) AS PAYPEP	/*지급액*/
+							 ,FLOOR(FLOOR(ETC /10)*10) AS COMPUTE11	/*정상시공비*/
+							 ,FLOOR(FLOOR(C90/10)*10) AS COMPUTE6	/*기타시공비*/
+							 ,AMT_VAT
+							 ,ACL_AMT
+							 ,STI_NM
+							 ,SUBSTRING(PLM_CDT,0,7) AS MON			
+							 ,FLOOR((FLOOR(FLOOR(C90/10)*10)+FLOOR(FLOOR(ETC /10)*10)+TRAVEL)*1.1) AS TOTAL
+							 ,K_STI_CD /* 권역시공팀 코드*/	
+							 ,K_NM
+			   				 ,c91			/**/
+			   				 ,c92			/*매장경유(청)*/
+			   				 ,c93			/*타사품목(청)*/
+			   				 ,c94			/*분해설치(청)*/
+			   				 ,c95			/*샘플회수*/
+			   				 ,c96			/*반품회수*/
+			   				 ,c97			/*장비용차(청)*/	
+			   				 ,c98			/*숙식비(지)*/
+			   				 ,c99			/*공수비(청)*/
+			   				 ,c914		    /*불요*/		
+			   				 ,c921		    /*원거리(지)*/
+			   				 ,c936		    /*장비용차()지)*/
+			   				 ,c922		    /*식대공제*/
+			   				 ,c923		    /*시공복공제*/
+			   				 ,c924		    /*시공하자공제*/
+			   				 ,c925		    /*용차공제*/
+			   				 ,c927		    /*공동시공분할*/
+			   				 ,c938		    /*기타공제*/
+			   				 ,c933		    /*출장비(청)*/
+			   				 ,c932		    /*출장비(지)*/
+			   				 ,c929		    /*근무지외*/		   
+			   				 ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
+			   				 ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
+			   				 ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+			   				 ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
+			   				 ,c942		    /*제품반입비*/
+						FROM(
+						  SELECT A.COM_SCD								
+								,A.COM_CTSEC   						
+								,B.STI_CD
+								,(SELECT VND_NAME FROM TT_VENDOR WITH (NOLOCK) WHERE VND_CD = B.STI_CD  )AS  VND_NAME			
+								,MAX(A.PLM_CDT)	AS PLM_CDT	
+								,SUM(ISNULL(A.ACL_AMT,0)) ACL_AMT
+								,SUM(ISNULL(A.ACL_AMT,0)) * 1.1 AMT_VAT 									
+								,SUM(CASE WHEN A.COM_ASEC = 'C090' Then IsNull(A.acl_amt,0) Else 0 End )AS c90					/*정상시공*/					
+								,SUM(CASE WHEN A.COM_ASEC IN ( 'C090', 'C0932') THEN 0  Else ISNULL(A.ACL_AMT,0) End )AS ETC	/*기타시공*/						
+								,SUM(CASE WHEN A.COM_ASEC IN ( 'C0932', 'C01081') THEN  ISNULL(A.ACL_AMT,0) ELSE 0 END )AS TRAVEL	/*출장비*/
+								,(SELECT STI_NM FROM TC_STINF WITH (NOLOCK) WHERE STI_CD = B.STI_CD AND COM_SCD=A.COM_SCD AND COM_SCD=B.COM_SCD )AS STI_NM					
+								,(SELECT COUNT(*) FROM TC_STMEMBER WITH (NOLOCK) WHERE STI_CD = B.STI_CD	AND COM_SCD = A.COM_SCD AND COM_SCD=B.COM_SCD	)AS ST_CNT	
+								,ISNULL(C.K_STI_CD, B.STI_CD) as K_STI_CD/* 권역시공팀 코드*/	
+								,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND K_STI_CD = C.K_STI_CD ),MAX(C.STI_NM) )  AS  K_NM
+								,SUM(CASE WHEN A.COM_ASEC = 'C091'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c91		
+								,SUM(CASE WHEN A.COM_ASEC = 'C092'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c92		
+								,SUM(CASE WHEN A.COM_ASEC = 'C093'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c93		
+								,SUM(CASE WHEN A.COM_ASEC = 'C094'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c94		
+								,SUM(CASE WHEN A.COM_ASEC = 'C095'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c95		
+								,SUM(CASE WHEN A.COM_ASEC = 'C096'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c96		
+								,SUM(CASE WHEN A.COM_ASEC = 'C097'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c97		
+								,SUM(CASE WHEN A.COM_ASEC = 'C098'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c98		
+								,SUM(CASE WHEN A.COM_ASEC = 'C099'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c99		
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0914' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c914
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0920' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c920
+			        			,SUM(CASE WHEN A.COM_ASEC = 'C0921' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c921		   
+								,SUM(CASE WHEN A.COM_ASEC = 'C0922' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c922		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0923' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c923
+			     				/* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 start*/
+								/*,SUM(CASE WHEN A.COM_ASEC in ('C0924', 'C09A') THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924*/		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0924' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C09A'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c9A	
+			     				/* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 end*/
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0925' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c925
+								,SUM(CASE WHEN A.COM_ASEC = 'C0926' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c926		
+			     				,SUM(CASE WHEN A.COM_ASEC = 'C0927' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c927
+								,SUM(CASE WHEN A.COM_ASEC = 'C0928' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c928		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0929' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c929		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0930' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c930		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0931' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c931		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0938' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c938		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0937' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c937		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0934' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c934		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0940' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c940		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0939' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c939		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0933' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c933		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0936' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c936		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0941' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c941		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0935' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c935		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
+								,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932
+								,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942		
+							FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
+								   TC_PLANMST AS B WITH (NOLOCK),
+								   TC_STINF  AS C WITH (NOLOCK)			
+						   WHERE   A.PLM_NO = B.PLM_NO				
+							 AND   B.STI_CD = C.STI_CD					
+							 AND   B.COM_SCD   = C.COM_SCD
+							 AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+							 AND   A.COM_VTSEC  = 'C2501'
+							 AND   A.COM_DPSEC = 'C07P'   														
+							 AND   B.COM_PLMFG = 'C104' 
+		   					 --AND   A.PLM_CDT BETWEEN '20201201' AND '20201231'
+		   					 AND   A.PLM_CDT BETWEEN #{fr_dt} AND #{to_dt}
+							 AND   C.K_STI_CD = #{k_sti_cd}
+						GROUP BY  A.COM_SCD  									
+								 ,A.COM_CTSEC   									
+								 ,B.STI_CD
+								 ,B.COM_SCD	
+								 ,C.K_STI_CD
+							 )AS A
+			) X
+			) A
+		) X
+	GROUP BY X.STI_NM
+	ORDER BY X.STI_NM
+	
+]]>
+</select>
+
+<select id="selectCalculateMoneyDate"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	 SELECT  CONVERT(VARCHAR(4),CONVERT(DATETIME, #{yyyymm}), 121) AS DATA1,
+           REPLACE(LEFT(CONVERT(VARCHAR,DATEADD(m, -1, CONVERT(DATETIME, #{yyyymm})),121), 7), '-', '') AS DATA2,
+           REPLACE(CONVERT(VARCHAR(8), CONVERT(DATETIME, #{yyyymm}), 121), '-', '') AS DATA3,
+           REPLACE(CONVERT(VARCHAR(10), CONVERT(DATETIME, #{yyyymm}), 121), '-', '') AS DATA4           
+]]>
+</select>
+
+<select id="selectSigongCalculateMoney"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoney">
+	SELECT SUM(A.NORMAL_AMT) AS NORMAL_AMT,
+			SUM(A.REQ_AMT_TOTAL) AS REQ_AMT_TOTAL,
+			SUM(A.REQ_AMT_1) AS REQ_AMT_1,
+			SUM(A.REQ_AMT_2) AS REQ_AMT_2,
+			SUM(A.REQ_AMT_3) AS REQ_AMT_3,
+			SUM(A.REQ_AMT_4) AS REQ_AMT_4,
+			SUM(A.REQ_AMT_5) AS REQ_AMT_5,
+			SUM(A.REQ_AMT_6) AS REQ_AMT_6,
+			SUM(A.REQ_AMT_7) AS REQ_AMT_7,			
+			SUM(A.RELATIVE_AMT_TOTAL) AS RELATIVE_AMT_TOTAL,
+			SUM(A.RELATIVE_AMT_1) AS RELATIVE_AMT_1,
+			SUM(A.RELATIVE_AMT_2) AS RELATIVE_AMT_2,
+			SUM(A.PAY_AMT_TOTAL) AS PAY_AMT_TOTAL,
+			SUM(A.PAY_AMT_1) AS PAY_AMT_1,
+			SUM(A.PAY_AMT_2) AS PAY_AMT_2,
+			SUM(A.PAY_AMT_3) AS PAY_AMT_3,
+			SUM(A.PAY_AMT_4) AS PAY_AMT_4,
+			SUM(A.PAY_AMT_5) AS PAY_AMT_5,
+			SUM(A.PAY_AMT_6) AS PAY_AMT_6,
+			SUM(A.PAY_AMT_7) AS PAY_AMT_7,
+			SUM(A.PAY_AMT_8) AS PAY_AMT_8,
+			SUM(A.PAY_AMT_9) AS PAY_AMT_9,
+			SUM(A.MINUS_AMT_TOTAL) AS MINUS_AMT_TOTAL,
+			SUM(A.MINUS_AMT_1) AS MINUS_AMT_1,
+			SUM(A.MINUS_AMT_2) AS MINUS_AMT_2,
+			SUM(A.MINUS_AMT_3) AS MINUS_AMT_3,
+			SUM(A.MINUS_AMT_4) AS MINUS_AMT_4,
+			SUM(A.MINUS_AMT_5) AS MINUS_AMT_5,
+			SUM(A.SHARE_AMT) AS SHARE_AMT,
+			SUM(A.AMT_TOTAL) AS AMT_TOTAL
+	FROM (
+		SELECT  COMPUTE6 AS NORMAL_AMT /*정상시공*/
+			   ,(c92+c93+c94+c95+c96+c97+c933) AS REQ_AMT_TOTAL /*청구금액합계*/
+			   ,C92 AS REQ_AMT_1 /*매장경유*/
+			   ,C93 AS REQ_AMT_2 /*타사품목*/
+			   ,C94 AS REQ_AMT_3 /*분해설치*/
+			   ,C95 AS REQ_AMT_4 /*샘플회수*/
+			   ,C96 AS REQ_AMT_5 /*반품회수*/
+			   ,C97 AS REQ_AMT_6 /*장비용차*/
+			   ,C933 AS REQ_AMT_7 /*출장비*/
+			   ,(c934+c942) AS RELATIVE_AMT_TOTAL /*관계사청구금액합계*/
+			   ,C934 AS RELATIVE_AMT_1 /*관계사(청)*/
+			   ,C942 AS RELATIVE_AMT_2 /*제품반입비*/
+		       ,(c98+c99+c914+c921+c936+c929+c932+c928+c9A) AS PAY_AMT_TOTAL /*지급금액합계*/		       
+			   ,C98 AS PAY_AMT_1 /*숙식비*/
+			   ,C99 AS PAY_AMT_2 /*공수비*/
+			   ,C914 AS PAY_AMT_3 /*AS지원비*/
+			   ,C921 AS PAY_AMT_4 /*원거리*/
+			   ,C936 AS PAY_AMT_5 /*장비용차*/
+			   ,C929 AS PAY_AMT_6 /*근무지외*/
+			   ,C932 AS PAY_AMT_7 /*출장비*/
+			   ,C928 AS PAY_AMT_8 /*기타지원*/
+			   ,C9A AS PAY_AMT_9 /*폐기물*/
+			   ,(c923+c924+c925+c922+c938) AS MINUS_AMT_TOTAL /*공제금액합계*/
+			   ,C923 AS MINUS_AMT_1 /*사공복*/
+			   ,C924 AS MINUS_AMT_2 /*시공하자*/
+			   ,C925 AS MINUS_AMT_3 /*용차*/
+			   ,C922 AS MINUS_AMT_4 /*식대*/
+			   ,C938 AS MINUS_AMT_5 /*기타*/
+		       ,c927 AS SHARE_AMT /*공동시공분할합계*/
+		       ,COMPUTE6 + (c92+c93+c94+c95+c96+c97+c933) + (c98+c99+c914+c921+c936+c929+c932+c928+c9A) + (c923+c924+c925+c922+c938) + c927 AS AMT_TOTAL /*전체합계*/
+		FROM (
+		         SELECT  COM_SCD, STI_CD
+					     ,COM_CTSEC
+					     ,VND_NAME
+					     ,ST_CNT								/*팀인원*/
+					     ,c90									/*정상시공*/
+					     ,ETC									/*기타시공*/	
+					     ,TRAVEL								/*출장비*/
+					     ,ROUND((c90+ ETC ),0) AS SIGONGG		/*시공금액*/
+					     ,ROUND(((c90+ ETC)*1.1), 0) AS VAT		/*시공금액(vat)*/
+					     /*,ROUND((c90/10) / 10 ,0)AS NOMALSGPAY	/*정상시공비*/
+					     ,ROUND((ETC/10) / 10,0) AS ETCSGPAY	/*기타시공비*/*/
+					     ,ROUND(((c90/10) / 10 + (ETC/10) / 10),0) AS PAYPEP	/*지급액*/
+					     ,FLOOR(FLOOR(ETC /10)*10) AS COMPUTE11	/*정상시공비*/
+						 ,FLOOR(FLOOR(C90/10)*10) AS COMPUTE6	/*기타시공비*/
+					     ,AMT_VAT
+					     ,ACL_AMT
+					     ,STI_NM
+					     ,SUBSTRING(PLM_CDT,0,7) AS MON			
+					     ,FLOOR((FLOOR(FLOOR(C90/10)*10)+FLOOR(FLOOR(ETC /10)*10)+TRAVEL)*1.1) AS TOTAL
+					     ,K_STI_CD /* 권역시공팀 코드*/	
+					     ,K_NM
+				   	     ,c91			/**/
+				   	     ,c92			/*매장경유(청)*/
+				   	     ,c93			/*타사품목(청)*/
+				   	     ,c94			/*분해설치(청)*/
+				   	     ,c95			/*샘플회수*/
+				   	     ,c96			/*반품회수*/
+				   	     ,c97			/*장비용차(청)*/	
+				   	     ,c98			/*숙식비(지)*/
+				   	     ,c99			/*공수비(청)*/
+				   	     ,c914		    /*불요*/		
+				   	     ,c921		    /*원거리(지)*/
+				   	     ,c936		    /*장비용차()지)*/
+				   	     ,c922		    /*식대공제*/
+				   	     ,c923		    /*시공복공제*/
+				   	     ,c924		    /*시공하자공제*/
+				   	     ,c925		    /*용차공제*/
+				   	     ,c927		    /*공동시공분할*/
+				   	     ,c938		    /*기타공제*/
+				   	     ,c933		    /*출장비(청)*/
+				   	     ,c932		    /*출장비(지)*/
+				   	     ,c929		    /*근무지외*/		   
+				   	     ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
+				   	     ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
+				   	     ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+				   	     ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
+				   	     ,c942		    /*관계사제품반입비*/
+				    FROM(
+					  SELECT A.COM_SCD								
+					        ,A.COM_CTSEC   						
+					        ,B.STI_CD
+							,(SELECT VND_NAME FROM TT_VENDOR WITH (NOLOCK) WHERE VND_CD = B.STI_CD  )AS  VND_NAME			
+					        ,MAX(A.PLM_CDT)	AS PLM_CDT	
+					        ,SUM(ISNULL(A.ACL_AMT,0)) ACL_AMT
+					        ,SUM(ISNULL(A.ACL_AMT,0)) * 1.1 AMT_VAT 									
+					        ,SUM(CASE WHEN A.COM_ASEC = 'C090' Then IsNull(A.acl_amt,0) Else 0 End )AS c90					/*정상시공*/					
+					        ,SUM(CASE WHEN A.COM_ASEC IN ( 'C090', 'C0932') THEN 0  Else ISNULL(A.ACL_AMT,0) End )AS ETC	/*기타시공*/						
+							,SUM(CASE WHEN A.COM_ASEC IN ( 'C0932', 'C01081') THEN  ISNULL(A.ACL_AMT,0) ELSE 0 END )AS TRAVEL	/*출장비*/
+							,(SELECT STI_NM FROM TC_STINF WITH (NOLOCK) WHERE STI_CD = B.STI_CD AND COM_SCD=A.COM_SCD AND COM_SCD=B.COM_SCD )AS STI_NM					
+					        ,(SELECT COUNT(*) FROM TC_STMEMBER WITH (NOLOCK) WHERE STI_CD = B.STI_CD	AND COM_SCD = A.COM_SCD AND COM_SCD=B.COM_SCD	)AS ST_CNT	
+					        ,ISNULL(C.K_STI_CD, B.STI_CD) as K_STI_CD/* 권역시공팀 코드*/	
+							,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND K_STI_CD = C.K_STI_CD ),MAX(C.STI_NM) )  AS  K_NM
+							,SUM(CASE WHEN A.COM_ASEC = 'C091'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c91		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C092'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c92		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C093'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c93		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C094'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c94		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C095'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c95		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C096'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c96		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C097'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c97		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C098'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c98		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C099'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c99		
+				        	,SUM(CASE WHEN A.COM_ASEC = 'C0914' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c914
+				        	,SUM(CASE WHEN A.COM_ASEC = 'C0920' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c920
+				        	,SUM(CASE WHEN A.COM_ASEC = 'C0921' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c921		   
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0922' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c922		
+				     	    ,SUM(CASE WHEN A.COM_ASEC = 'C0923' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c923
+				     	    /* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 start*/
+				            /*,SUM(CASE WHEN A.COM_ASEC in ('C0924', 'C09A') THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924*/		
+				     	    ,SUM(CASE WHEN A.COM_ASEC = 'C0924' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c924
+				     	    ,SUM(CASE WHEN A.COM_ASEC = 'C09A'  THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c9A	
+				     	    /* 2018.05.22 |주요한| 폐기물 항목 분류 폐기물 생성 end*/
+				     	    ,SUM(CASE WHEN A.COM_ASEC = 'C0925' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c925
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0926' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c926		
+				     	    ,SUM(CASE WHEN A.COM_ASEC = 'C0927' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c927
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0928' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c928		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0929' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c929		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0930' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c930		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0931' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c931		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0938' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c938		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0937' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c937		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0934' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c934		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0940' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c940		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0939' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c939		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0933' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c933		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0936' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c936		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0941' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c941		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0935' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c935		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932
+				            ,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942
+					    FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
+					           TC_PLANMST AS B WITH (NOLOCK),
+					           TC_STINF  AS C WITH (NOLOCK)			
+					   WHERE   A.PLM_NO = B.PLM_NO				
+					     AND   B.STI_CD = C.STI_CD					
+					     AND   B.COM_SCD   = C.COM_SCD
+					     AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+					     AND   A.COM_VTSEC  = 'C2501'
+					     AND   A.COM_DPSEC = 'C07P'   														
+					     AND   B.COM_PLMFG = 'C104' 	  			  
+			   			 AND   A.PLM_CDT BETWEEN CAST( #{fr_dt} AS VARCHAR) AND CAST( #{to_dt} AS VARCHAR)
+					 	<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(k_sti_cd)">
+				            AND   C.K_STI_CD  = #{k_sti_cd}
+				        </if>
+					 	<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(sti_cd)">
+				            AND   B.STI_CD  = #{sti_cd}
+				        </if>					 
+					GROUP BY  A.COM_SCD  									
+					         ,A.COM_CTSEC   									
+					         ,B.STI_CD
+							 ,B.COM_SCD	
+							 ,C.K_STI_CD
+						 )AS A
+		) X
+	) A
+
+</select>
+
+
+
+</mapper>

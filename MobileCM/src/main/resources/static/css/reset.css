@@ -1,0 +1,66 @@
+@charset "utf-8";
+/*
+    2020년 - 작업자 심민아 - 브라우저 css 리셋(reset )
+*/
+html { font-size: 100%; /* 1 */-webkit-text-size-adjust: 100%; /* 2 */-ms-text-size-adjust: 100%; /* 2 */}
+/* html5 부터 비표준 엘리먼드 - acronym,applet, big, center, tt, s, strike */
+html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym,address, big, cite, code,del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong,
+sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, embed, figure, figcaption, footer, header,
+hgroup,menu, nav, output, ruby, section, summary,time, mark,
+audio, video {margin: 0; padding: 0; border: 0;vertical-align: baseline;}
+body {-webkit-text-size-adjust:none; line-height: 1;-webkit-overflow-scrolling: touch;}
+/* 공통 폰트 기준 css는 common.css에서 지정합니다. */
+fieldset,img {border:0 none;-ms-interpolation-mode: bicubic;}
+img {vertical-align: middle;}
+dl,ul,ol,menu, nav ul, nav {font-size:0;line-height: 0;margin: 0;padding: 0;list-style: none;}
+li,dt,dd {list-style: none;}
+blockquote, q {quotes: none;}
+blockquote:before, blockquote:after,q:before, q:after {content:''; content:none;}
+input,select,textarea,button,details,summary  {outline: 0;background: transparent;-webkit-tap-highlight-color: transparent;}
+/* make sure to set some focus styles for accessibility */
+:focus {outline: 0;}
+details > summary,input + label  {cursor: pointer;}
+input,select,textarea,button {font-size:100%;border: 0;margin: 0; padding: 0; cursor:pointer; vertical-align: baseline; *vertical-align:middle;}
+button,input {line-height: normal;}
+button::-moz-focus-inner,input::-moz-focus-inner {border: 0;padding: 0;}
+button,select {text-transform: none;}
+textarea {overflow: auto; vertical-align: top;resize: vertical;}
+button[disabled],
+html input[disabled] {cursor: default;}
+input[type='text'],input[type='password'],input[type='submit'],input[type='search'], input[type='date'], input[type='number'] {-webkit-appearance:none; }
+input[type="checkbox"],input[type="radio"] {box-sizing: border-box;padding: 0;}
+input:checked[type='checkbox'] {background-color:transparent; -webkit-appearance:checkbox;}
+button,input[type='button'],input[type='submit'],input[type='reset'],input[type='file'] {-webkit-appearance:button;cursor: pointer;}
+input[type="search"] {-webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box;box-sizing: content-box;}
+input[type=search]::-webkit-search-cancel-button,
+input[type=search]::-webkit-search-decoration,
+input[type=search]::-webkit-search-results-button,
+input[type=search]::-webkit-search-results-decoration {-webkit-appearance: none;-moz-appearance: none;}
+input[type=search] {-webkit-appearance: none;-moz-appearance: none;-webkit-box-sizing: content-box;-moz-box-sizing: content-box;box-sizing: content-box;}
+table {border-collapse:collapse; border-spacing:0;}
+a {margin:0; padding:0;font-size:100%; vertical-align:baseline; background:transparent; cursor: pointer;}
+/* Address `outline` inconsistency between Chrome and other browsers. */
+a:focus {outline: 0;}
+/* Improve readability when focused and also mouse hovered in all browsers.*/
+a:active,a:hover {outline: 0;}
+
+
+
+/* Correct `inline-block` display not defined in IE 6/7/8/9 and Firefox 3.*/
+audio,canvas,video {display: inline-block;*display: inline;*zoom: 1; max-width: 100%;}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+audio:not([controls]) {display: none;height: 0;}
+
+/**
+ * Address styling not present in IE 7/8/9, Firefox 3, and Safari 4.
+ * Known issue: no IE 6 support.
+ */
+[hidden] {display: none;}
+
+legend {white-space: normal; /* 2 */*margin-left: -7px; /* 3 */}
+::-moz-selection {background: transparent;text-shadow: none;}
+::selection {background: transparent;text-shadow: none;}
