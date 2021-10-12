@@ -39,6 +39,7 @@ import com.fursys.mobilecm.dto.MemberDto;
 import com.fursys.mobilecm.mapper.CRS0010_M01Mapper;
 import com.fursys.mobilecm.mapper.ErpCalculateMoneyMapper;
 import com.fursys.mobilecm.mapper.ErpPraAcctListSaveMapper;
+import com.fursys.mobilecm.mapper.ErpSigongAsMapper;
 import com.fursys.mobilecm.mapper.STIMapper;
 import com.fursys.mobilecm.mapper.ScheduleMainListMapper;
 import com.fursys.mobilecm.mapper.UserMapper;
@@ -54,6 +55,7 @@ import com.fursys.mobilecm.vo.erp.ERPAsCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPAsResult;
 import com.fursys.mobilecm.vo.erp.ERPGoGoVan;
 import com.fursys.mobilecm.vo.erp.ERPGoGoVanWayPoint;
+import com.fursys.mobilecm.vo.erp.ERPSigongAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoneyTeam;
 import com.fursys.mobilecm.vo.erp.apm0020_m01.APM0020_M01;
@@ -77,6 +79,7 @@ import io.swagger.annotations.ApiResponses;
 
 @Service
 public class ApiErpServiceImpl  implements ApiErpService {
+	@Autowired ErpSigongAsMapper erpsigongasMapper;
 	@Autowired ErpPraAcctListSaveMapper erppraacctlistsaveMapper;
 	@Autowired CRS0010_M01Mapper crs0010_m01Mapper; 
 	@Autowired ScheduleMainListMapper schedulemainlistMapper;
@@ -84,6 +87,27 @@ public class ApiErpServiceImpl  implements ApiErpService {
 	
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
+	
+	@Override		
+	public ArrayList<ERPSigongAttachFileList> erp_sigongAttachFileList(HashMap<String, Object> param) {
+		ArrayList<ERPSigongAttachFileList> allitems;
+		HashMap<String, Object> params;
+		
+		try {
+			String as_plm_no = (String) param.get("plm_no");
+			
+			params = new HashMap<String, Object>();
+	        params.put("attch_file_id", "cresult" + as_plm_no);
+	        params.put("attch_div_cd", "C");
+
+	        allitems = erpsigongasMapper.selectSigongAttachFileList(params);		
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return allitems;
+	}
 	
 	@Override
 	public BaseResponse erp_requestGoGoVan(HashMap<String, Object> param) {

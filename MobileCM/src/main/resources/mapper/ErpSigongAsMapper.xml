@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
+
+<select id="selectSigongAttachFileList"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongAttachFileList">
+<![CDATA[	
+	SELECT ATTCH_FILE_ID,
+	       ATTCH_FILE_SNUM,
+	       ATTCH_DIV_CD,
+	       REAL_ATTCH_FILE_NAME,
+	       VIRTUAL_ATTCH_FILE_NAME,
+	       ATTCH_FILE_PATH,
+	       ATTCH_FILE_SIZE
+	FROM TY_ATTCHFILE WITH(NOLOCK)	
+	WHERE ATTCH_FILE_ID = #{attch_file_id}
+	AND ATTCH_DIV_CD = 'C'
+]]>
+</select>
+
+</mapper>
