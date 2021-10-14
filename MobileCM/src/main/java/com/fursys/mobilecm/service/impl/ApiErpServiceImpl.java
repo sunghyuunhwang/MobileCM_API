@@ -55,7 +55,7 @@ import com.fursys.mobilecm.vo.erp.ERPAsCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPAsResult;
 import com.fursys.mobilecm.vo.erp.ERPGoGoVan;
 import com.fursys.mobilecm.vo.erp.ERPGoGoVanWayPoint;
-import com.fursys.mobilecm.vo.erp.ERPSigongAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoneyTeam;
 import com.fursys.mobilecm.vo.erp.apm0020_m01.APM0020_M01;
@@ -89,16 +89,17 @@ public class ApiErpServiceImpl  implements ApiErpService {
 	Gson gson = new Gson();
 	
 	@Override		
-	public ArrayList<ERPSigongAttachFileList> erp_sigongAttachFileList(HashMap<String, Object> param) {
-		ArrayList<ERPSigongAttachFileList> allitems;
+	public ArrayList<ERPAttachFileList> erp_AttachFileList(HashMap<String, Object> param) {
+		ArrayList<ERPAttachFileList> allitems;
 		HashMap<String, Object> params;
 		
 		try {
-			String as_plm_no = (String) param.get("plm_no");
+			String as_attch_file_id = (String) param.get("attch_file_id");
+			String as_attch_div_cd = (String) param.get("attch_div_cd");
 			
 			params = new HashMap<String, Object>();
-	        params.put("attch_file_id", "cresult" + as_plm_no);
-	        params.put("attch_div_cd", "C");
+	        params.put("attch_file_id", as_attch_file_id);
+	        params.put("attch_div_cd", as_attch_div_cd);
 
 	        allitems = erpsigongasMapper.selectSigongAttachFileList(params);		
 	        

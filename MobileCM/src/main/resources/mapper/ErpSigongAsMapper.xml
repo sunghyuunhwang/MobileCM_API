@@ -2,7 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
-<select id="selectSigongAttachFileList"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongAttachFileList">
+<update id="deleteAttachFile" parameterType="HashMap">
+<![CDATA[
+	DELETE
+	 FROM TY_ATTCHFILE
+	WHERE ATTCH_FILE_ID = #{attch_file_id}
+	AND ATTCH_DIV_CD = #{attch_div_cd}	 
+	AND ATTCH_FILE_SNUM = #{attch_file_snum}
+	
+]]>
+</update> 
+
+<select id="selectSigongAttachFileList"  parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAttachFileList">
 <![CDATA[	
 	SELECT ATTCH_FILE_ID,
 	       ATTCH_FILE_SNUM,
@@ -13,7 +24,8 @@
 	       ATTCH_FILE_SIZE
 	FROM TY_ATTCHFILE WITH(NOLOCK)	
 	WHERE ATTCH_FILE_ID = #{attch_file_id}
-	AND ATTCH_DIV_CD = 'C'
+	AND ATTCH_DIV_CD = #{attch_div_cd}
+	ORDER BY ATTCH_FILE_SNUM DESC
 ]]>
 </select>
 

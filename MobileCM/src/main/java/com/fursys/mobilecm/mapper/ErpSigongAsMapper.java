@@ -8,11 +8,12 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.fursys.mobilecm.vo.DataResult;
-import com.fursys.mobilecm.vo.erp.ERPSigongAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 
 @Mapper
 public interface ErpSigongAsMapper {
 	
-	public ArrayList<ERPSigongAttachFileList> selectSigongAttachFileList(HashMap<String,Object> params);
+	public ArrayList<ERPAttachFileList> selectSigongAttachFileList(HashMap<String,Object> params);
+	public int deleteAttachFile(HashMap<String,Object> params);
 	
 }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.erp.ERPAsCalculateMoney;
-import com.fursys.mobilecm.vo.erp.ERPSigongAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoneyTeam;
 import com.fursys.mobilecm.vo.erp.apm0020_m01.ds_tabList1;
@@ -15,7 +15,7 @@ import com.fursys.mobilecm.vo.mobile.response.SigongResultResponse;
 public interface ApiErpService {
 	
 	
-	public ArrayList<ERPSigongAttachFileList> erp_sigongAttachFileList(HashMap<String, Object> param);
+	public ArrayList<ERPAttachFileList> erp_AttachFileList(HashMap<String, Object> param);
 	public BaseResponse erp_requestGoGoVan(HashMap<String, Object> param);
 	public ERPAsCalculateMoney erp_selectAsCalculateMoney(HashMap<String, Object> param);
 	public ArrayList<ERPSigongCalculateMoneyTeam> erp_selectSigongCalculateMoneyTeam(HashMap<String, Object> param);

@@ -9,7 +9,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ERPSigongAttachFileList {
+public class ERPAttachFileList {
 
 	private String attch_file_id;
 	private String attch_file_snum;
