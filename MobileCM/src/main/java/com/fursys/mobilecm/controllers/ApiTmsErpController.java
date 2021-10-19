@@ -689,7 +689,9 @@ public class ApiTmsErpController {
 			@ApiParam(value = "회사코드", required = false, example = "C16YA")
 			@RequestParam(name = "com_scd", required = false) String as_com_scd,			
 			@RequestParam(name="sti_cd", required=false) String sti_cd,
-			@RequestParam(name="time", required=false) String time
+			@RequestParam(name="time", required=false) String time,
+			@RequestParam(name="sort_type", required=false, defaultValue="ORM_NM") String sort_type,
+			@RequestParam(name="sort_seq", required=false, defaultValue="DESC") String sort_seq
 		) { 
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
@@ -702,6 +704,10 @@ public class ApiTmsErpController {
 		}
         params.put("date", time);
         params.put("sti_cd", sti_cd);
+        
+        //2021.10.20 일정조회 정렬 기능 추가, hong
+        params.put("sort_type", sort_type);
+        params.put("sort_seq", sort_seq);
         
         ArrayList<TMSERPSigongAsList> allItems = tmserpScheduling.selectSigongAsList(params);
 		

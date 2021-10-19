@@ -276,6 +276,17 @@ function addMarkersTooMuch(list) {
                  <article class="assgnSubBox onoffBx">
                        <div class="dfBx flxBtwn">
                               <button class="clsBtn icnArrwHd_blck_prv"><!--닫기--></button>
+                              <select name="sort_type">
+                              	<option value="ORM_NM" selected>건명</option>
+                              	<option value="ORM_GADDR">주소</option>
+                              	<option value="ORD_AMT">수주금액</option>
+                              	<option value="CONSTCST_SUM">지급금액</option>
+                              </select>
+                              <select name="sort_seq">
+                              	<option value="DESC" selected>↓</option>
+                              	<option value="ASC">↑</option>
+                              </select>
+                              <button class="lndBtn smll btnBlck" onclick="sortAssgnSub_lst()">정렬</button>
                               <button class="icnWidBx on"><!--이리스트만보기--></button>
                               <button class="icnNrrwBx"><!--원상태로--></button>
                        </div>

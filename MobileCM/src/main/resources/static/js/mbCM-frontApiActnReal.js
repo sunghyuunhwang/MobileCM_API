@@ -476,9 +476,11 @@ function tmsrpAllctnLst(rem_dt,com_scd,sti_cd,sti_nm,orm_qty,orm_amt, constcst_s
 }
 
 //assgnDn
-function assgnSubLst(_this, com_ssec,com_brand,rem_dt,rem_seq,plm_no,orm_no,orm_nm,orm_gaddr, ord_amt) {//상세리스트
+function sortAssgnSub_lst() {//상세리스트 정렬
 
-var queryString = $(_this).find("[name=sti_cd]").val();
+var sti_cd = $('.clck').find("[name=sti_cd]").val(); // 시공팀 코드
+var sort_type = $('select[name=sort_type]').val();
+var sort_seq = $('select[name=sort_seq]').val();
 var dateapi = $('#date2').val();//현재 조정한 날짜
 $('#assgnSub_lst li').remove();
 	$.ajax({
@@ -487,8 +489,104 @@ $('#assgnSub_lst li').remove();
 	    cache: false,
 	    dataType: "json",
          data: {
+         	  sti_cd: sti_cd,
+              time:dateapi,
+              sort_type: sort_type,
+              sort_seq: sort_seq
+	    },
+	    success: function(list){
+		    $.each(list, function(idx, response) {
+	                   var com_ssec = response.com_ssec;
+			         var com_brand = response.com_brand;
+	                   var rem_dt = response.rem_dt;
+	                   var rem_seq = response.rem_seq;
+	                   var plm_no = response.plm_no;
+	                   var orm_no = response.orm_no;
+	                   var orm_nm = response.orm_nm;
+	                   var orm_gaddr = response.orm_gaddr;
+	                   var ord_amt = response.ord_amt;
+	                   var wallfix_yn = response.wallfix_yn;
+	                   var cannot_one = response.cannot_one;
+	                   var trash_yn = response.trash_yn;
+	                   var rem_ptm = response.rem_ptm;
+	                   var rem_rmk = response.rem_rmk;
+	                   var latitude = response.latitude;//위도
+	                   var longitude = response.longitude;//경도
+	                   var constcst_sum = response.constcst_sum;
+					   var vnd_nm = response.vnd_nm;
+					   var schdiv_yn = response.schdiv_yn;
+	                   var amt2 = constcst_sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//					   var amt2 = constcst_sum;
+	                   var text = "지급금액 : ";
+	                   var text2 = " 원";
+
+	                   var arr_change_data = "";
+	                   arr_change_data = com_ssec+"/"+rem_dt+"/"+rem_seq+"/"+plm_no+"/"+orm_no
+
+			    var assgn_lst = "<li onclick='assgninfLstdt(this)'>";
+			        assgn_lst += "<span class='crlclOn'></span>";
+    			        assgn_lst += "<dl class='dfDl assgnSbInfBx'>";
+    			        assgn_lst += "<dt class='fao'>";
+    			        assgn_lst += "<input type='checkbox' name='fromsti2' id='chks_"+idx+"' value = '"+arr_change_data+"' /><span class='txt' data-plm-no='"+response.plm_no+"' data-com-ssec='"+response.com_ssec+"' >"+response.orm_nm+"</span>";
+    			        assgn_lst += "<ul class='chkIcnLst iss'>";
+    			        assgn_lst += "<li class='issIcn_3'>"+response.cannot_one+"</li>";
+    			        assgn_lst += "<li class='issIcn_4'>"+response.wallfix_yn+"</li>";
+    			        assgn_lst += "<li class='issIcn_8'>"+response.trash_yn+"</li>";
+    			        assgn_lst += "</ul>";
+    			        assgn_lst += "</dt>";
+    			        assgn_lst += "<dd>";
+    			        assgn_lst += "<address class='assgnSbAddInf'>"+response.orm_gaddr+"</address>";
+    			        assgn_lst += "<span class='comSsec'>"+response.com_ssec+"<input type='hidden' name='from_com_ssec' value="+response.com_ssec+" /><input type='hidden' name='from_rem_dt' value="+response.rem_dt+" /><input type='hidden' name='from_rem_seq' value="+response.rem_seq+" /><input type='hidden' name='from_plm_no' value="+response.plm_no+" /><input type='hidden' name='from_orm_no' value="+response.orm_no+" /></span>";
+    			        assgn_lst += "<span class='numTxt'></span><input type='hidden' value="+response.ord_amt+" class='innmbr nmCmma'/>";
+    			        assgn_lst += "<span class='txtIcn fllGry'>"+response.com_brand+"</span>";
+    			        assgn_lst += "<span class='assgnRqtime'>"+response.rem_ptm+" </span>";
+    			        assgn_lst += "<span class='assgnRqtxt'>"+response.rem_rmk+"</span>";
+    			        assgn_lst += "<span class='assgnRqgiveamt'><font color = 'blue'><b>"+amt2+"</b></font>"+text2+"</span>";
+    			        assgn_lst += "<span class='assgnRqagt'>"+vnd_nm+"</span>";
+    			        assgn_lst += "<span class='assgnRqschdivyn'>"+schdiv_yn+"</font></span>";
+                       assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
+                       assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
+    			        assgn_lst += "</dd>";
+    			        assgn_lst += "</dl>";
+    			        assgn_lst += "</li>";
+	  		     $('#assgnSub_lst').append(assgn_lst);
+				issonoff();
+			 console.log(response);
+ 	          });
+                 cmma();//콤마
+                 innmbr();//인풋값 스팬으로 넘기기
+                 addMarkersTooMuch(list);
+			  $('#assgnSub_lst').append('<script>assgnsubLstChk();assgnsubInf();</script>');
+	    },
+         //complete:function{
+
+         //},
+	    error: function (request, status, error){
+              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+              alert('데이터를 불러올수 없습니다.');
+	    }
+	  });
+
+}
+
+//assgnDn
+function assgnSubLst(_this, com_ssec,com_brand,rem_dt,rem_seq,plm_no,orm_no,orm_nm,orm_gaddr, ord_amt) {//상세리스트
+
+var queryString = $(_this).find("[name=sti_cd]").val();
+var dateapi = $('#date2').val();//현재 조정한 날짜
+var sort_type = $('select[name=sort_type]').val();
+var sort_seq = $('select[name=sort_seq]').val(); 
+$('#assgnSub_lst li').remove();
+	$.ajax({
+	    url: "/v1/api/tmserp/erp_SelectSigongAsList",
+	    type: "GET",
+	    cache: false,
+	    dataType: "json",
+         data: {
          	    sti_cd:queryString,
-              time:dateapi
+              time:dateapi,
+              sort_type: sort_type,
+              sort_seq: sort_seq
 	    },
 	    success: function(list){
 		    $.each(list, function(idx, response) {

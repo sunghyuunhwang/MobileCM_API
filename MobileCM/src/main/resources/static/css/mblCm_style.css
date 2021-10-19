@@ -115,7 +115,7 @@
 .nrrwwid._nrrw dd{display: none;}
 .nrrwwid._wid dd{display: inline-block;}
 
-.fssMblCm._Map .assgnSubBox{float: left;width: 335px;height: 100%;margin: 0 0 0 16px;padding: 0;border-radius: 8px;background: #fff;transition: 0.3s;box-sizing: border-box;overflow-y: auto;}
+.fssMblCm._Map .assgnSubBox{float: left;width: 335px;height: 100%;margin: 0 0 0 16px;padding: 0;border-radius: 8px;background: #fff;transition: 0.3s;box-sizing: border-box;}
 .assgnSubBox .assgnSubLst{height: calc(100% - 68px);padding: 0; box-sizing: border-box;overflow-y: auto;}
    .assgnSubBox .assgnSubLst > li{width: calc(100% - 32px);padding: 0 0 16px 0;margin: 0 16px;border-bottom: #babcbe 1px solid;}
     .assgnSubBox .assgnSubLst > li:not(:last-child){margin:0 16px 16px 16px;}
@@ -249,7 +249,7 @@
            .assgnLst li:nth-child(51n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl21 .fao > .crlclOn{background-color: #960D0D;}
            .crclLnds20::after{background-color: #960D0D;}
-           .assgnLst li:nth-child(22) > .assgnBx. .fao > .crlclOn,
+           .assgnLst li:nth-child(22) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(52n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl22 .fao > .crlclOn{background-color: #009343;}
            .crclLnds21::after{background-color: #009343;}
