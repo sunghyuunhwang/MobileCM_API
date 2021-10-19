@@ -1271,6 +1271,50 @@
 ]]> 
 </select> 
 
+<select id="selectSigongSearchInfoByItem" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongSearchInfo">         
+<![CDATA[
+	SELECT DISTINCT
+		TCR.REM_DT AS REM_DT,
+		TCR.REM_SEQ AS REM_SEQ,
+		TCR.ORM_NM AS ORM_NM,
+		( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = TCR.COM_SSEC ) AS COM_SSEC,
+		(SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = TCR.COM_SCD ) AS COM_SCD_NM,
+		(SELECT TCS.STI_NM 
+		   FROM TC_STINF TCS WITH (NOLOCK) 
+		  WHERE TCS.COM_SCD = TCR.COM_SCD 
+		    AND TCS.STI_CD = TCR.STI_CD ) AS STI_NM,
+		TCR.ORM_AMT AS ORM_AMT,
+		(SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = TCR.REM_FTM ) AS REM_FTM,
+		(SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = TCR.COM_BRAND ) AS COM_BRAND,
+	    (CASE TCR.COM_SSEC WHEN 'C18C' THEN ( SELECT ISNULL(TOO.ORM_GADDR, '' ) + ISNULL(TOO.ADDR_DTL , '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = TCR.ORM_NO ) 
+		                   ELSE  ( SELECT ISNULL(B.CTM_ADDR, '') + ISNULL(B.CTM_ADDR2, '')
+									 FROM TA_RPTREQ B WITH (NOLOCK)
+									WHERE SUBSTRING(TCR.ORM_NO, 1, 13) = B.RPT_NO 
+									  AND SUBSTRING(TCR.ORM_NO, 14, 15) = B.RPT_SEQ ) END ) AS ORM_GADDR,
+	    (CASE TCR.COM_SSEC WHEN 'C18C' THEN ( SELECT ISNULL(TOO.ORM_HDPHONE, '' ) FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = TCR.ORM_NO ) 
+		                   ELSE  ( SELECT ISNULL(B.CTM_TEL, '') + ' / ' + ISNULL(B.CTM_HP, '')
+									 FROM TA_RPTREQ B WITH (NOLOCK)
+									WHERE SUBSTRING(TCR.ORM_NO, 1, 13) = B.RPT_NO 
+									  AND SUBSTRING(TCR.ORM_NO, 14, 15) = B.RPT_SEQ ) END ) AS ORM_HDPHONE,
+		TCR.ORM_NO AS ORM_NO		
+	  FROM (
+			SELECT A.*
+			  FROM TC_RESMST A WITH (NOLOCK), TC_PLANDTL B WITH (NOLOCK)
+			 WHERE A.PLM_NO = B.PLM_NO
+			   AND A.COM_SSEC = 'C18C'
+			   AND A.REM_DT BETWEEN #{from_dt} AND #{to_dt} 
+			   AND B.ITM_CD LIKE '%' +#{itm_cd}+'%'
+			UNION ALL
+			SELECT A.*
+			  FROM TC_RESMST A WITH (NOLOCK), TC_PLANDTL B WITH (NOLOCK)
+			 WHERE A.PLM_NO = B.PLM_NO
+			   AND A.COM_SSEC = 'C18A'
+			   AND A.REM_DT BETWEEN #{from_dt} AND #{to_dt} 
+			   AND B.ITM_CD LIKE '%' +#{itm_cd}+'%' 
+			) TCR 
+]]>
+</select>
+
 <select id="selectSigongSearchInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongSearchInfo">         
 <![CDATA[ 
 	SELECT

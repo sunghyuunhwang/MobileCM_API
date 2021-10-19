@@ -67,6 +67,7 @@ public interface ScheduleMainListMapper {
 	public ArrayList<ERPStmInfo> selectStmInfoList(HashMap<String,Object> params);
 	public ArrayList<ERPAgtInfo> selectAgtInfoList(HashMap<String,Object> params);
 	public ArrayList<ERPSigongSearchInfo> selectSigongSearchInfo(HashMap<String,Object> params);
+	public ArrayList<ERPSigongSearchInfo> selectSigongSearchInfoByItem(HashMap<String,Object> params);
 	public ArrayList<ERPSigongSearchDetailInfo > selectSigongSearchDetailInfo(HashMap<String,Object> params);
 	public ArrayList<ERPSigongSearchDetailInfo > selectAsSearchDetailInfo(HashMap<String,Object> params);
 	public ERPNetKmAllowance selectNetKmAllowance(HashMap<String,Object> params);
