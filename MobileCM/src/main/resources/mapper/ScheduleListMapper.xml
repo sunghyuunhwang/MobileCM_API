@@ -1273,7 +1273,7 @@
 
 <select id="selectSigongSearchInfoByItem" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongSearchInfo">         
 <![CDATA[
-	SELECT DISTINCT
+	SELECT
 		TCR.REM_DT AS REM_DT,
 		TCR.REM_SEQ AS REM_SEQ,
 		TCR.ORM_NM AS ORM_NM,
@@ -1298,17 +1298,19 @@
 									  AND SUBSTRING(TCR.ORM_NO, 14, 15) = B.RPT_SEQ ) END ) AS ORM_HDPHONE,
 		TCR.ORM_NO AS ORM_NO		
 	  FROM (
-			SELECT A.*
+			SELECT DISTINCT A.*
 			  FROM TC_RESMST A WITH (NOLOCK), TC_PLANDTL B WITH (NOLOCK)
 			 WHERE A.PLM_NO = B.PLM_NO
 			   AND A.COM_SSEC = 'C18C'
+			   AND A.COM_SCD = #{com_scd}
 			   AND A.REM_DT BETWEEN #{from_dt} AND #{to_dt} 
 			   AND B.ITM_CD LIKE #{itm_cd}+'%'
 			UNION ALL
-			SELECT A.*
+			SELECT DISTINCT A.*
 			  FROM TC_RESMST A WITH (NOLOCK), TC_PLANDTL B WITH (NOLOCK)
 			 WHERE A.PLM_NO = B.PLM_NO
 			   AND A.COM_SSEC = 'C18A'
+			   AND A.COM_SCD = #{com_scd}
 			   AND A.REM_DT BETWEEN #{from_dt} AND #{to_dt} 
 			   AND B.ITM_CD LIKE #{itm_cd}+'%' 
 			) TCR 
@@ -1344,6 +1346,7 @@
 	  FROM TC_RESMST TCR WITH (NOLOCK)
 	 WHERE TCR.REM_DT BETWEEN #{from_dt} AND #{to_dt}
 	   AND TCR.ORM_NM LIKE '%' +#{orm_nm}+'%'
+	   AND TCR.COM_SCD = #{com_scd}
 ]]>
 </select>
 

@@ -4803,13 +4803,15 @@ public class ApiErpController {
 	public String selectSigongSearchInfoByItem(
 			@RequestParam(name="from_dt", required=true) String from_dt,
 			@RequestParam(name="to_dt", required=true) String to_dt,
-			@RequestParam(name="itm_cd", required=false) String itm_cd
+			@RequestParam(name="itm_cd", required=false) String itm_cd,
+			@RequestParam(name="com_scd", required=false) String com_scd
 		) { 
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("from_dt",from_dt);
         params.put("to_dt",to_dt);
         params.put("itm_cd",itm_cd);
+        params.put("com_scd",com_scd);
         
 		ArrayList<ERPSigongSearchInfo> arList = sCheduleMainListMapper.selectSigongSearchInfoByItem(params);
 
@@ -4817,18 +4819,20 @@ public class ApiErpController {
         
 	}
 	
-	@ApiOperation(value = "selectSigongSearchInfo", notes = "시공건 검색")
+	@ApiOperation(value = "selectSigongSearchInfo", notes = "시공건 건명 검색")
 	@GetMapping("/selectSigongSearchInfo")  
 	public String erp_selectSigongSearchInfo(
 			@RequestParam(name="from_dt", required=true) String from_dt,
 			@RequestParam(name="to_dt", required=true) String to_dt,
-			@RequestParam(name="orm_nm", required=false) String orm_nm
+			@RequestParam(name="orm_nm", required=false) String orm_nm,
+			@RequestParam(name="com_scd", required=false) String com_scd
 		) { 
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("from_dt",from_dt);
         params.put("to_dt",to_dt);
         params.put("orm_nm",orm_nm);
+        params.put("com_scd",com_scd);
         
 		ArrayList<ERPSigongSearchInfo> arList = sCheduleMainListMapper.selectSigongSearchInfo(params);
 
