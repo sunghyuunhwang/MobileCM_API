@@ -1303,14 +1303,14 @@
 			 WHERE A.PLM_NO = B.PLM_NO
 			   AND A.COM_SSEC = 'C18C'
 			   AND A.REM_DT BETWEEN #{from_dt} AND #{to_dt} 
-			   AND B.ITM_CD LIKE '%' +#{itm_cd}+'%'
+			   AND B.ITM_CD LIKE #{itm_cd}+'%'
 			UNION ALL
 			SELECT A.*
 			  FROM TC_RESMST A WITH (NOLOCK), TC_PLANDTL B WITH (NOLOCK)
 			 WHERE A.PLM_NO = B.PLM_NO
 			   AND A.COM_SSEC = 'C18A'
 			   AND A.REM_DT BETWEEN #{from_dt} AND #{to_dt} 
-			   AND B.ITM_CD LIKE '%' +#{itm_cd}+'%' 
+			   AND B.ITM_CD LIKE #{itm_cd}+'%' 
 			) TCR 
 ]]>
 </select>
