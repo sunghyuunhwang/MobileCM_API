@@ -4798,6 +4798,25 @@ public class ApiErpController {
 
 	}	
 	
+	@ApiOperation(value = "selectSigongSearchInfoByItem", notes = "시공건 풀목코드 검색")
+	@GetMapping("/selectSigongSearchInfoByItem")  
+	public String selectSigongSearchInfoByItem(
+			@RequestParam(name="from_dt", required=true) String from_dt,
+			@RequestParam(name="to_dt", required=true) String to_dt,
+			@RequestParam(name="itm_cd", required=false) String itm_cd
+		) { 
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("from_dt",from_dt);
+        params.put("to_dt",to_dt);
+        params.put("itm_cd",itm_cd);
+        
+		ArrayList<ERPSigongSearchInfo> arList = sCheduleMainListMapper.selectSigongSearchInfoByItem(params);
+
+		return gson.toJson(arList);        
+        
+	}
+	
 	@ApiOperation(value = "selectSigongSearchInfo", notes = "시공건 검색")
 	@GetMapping("/selectSigongSearchInfo")  
 	public String erp_selectSigongSearchInfo(
