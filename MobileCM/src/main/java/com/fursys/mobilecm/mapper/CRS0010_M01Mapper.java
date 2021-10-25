@@ -11,6 +11,7 @@ import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTrip;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTripDetail;
 import com.fursys.mobilecm.vo.erp.ERPPlanDtList;
+import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList1;
 import com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList2;
 import com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlandtlList3;
@@ -19,6 +20,10 @@ import com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlanmstList;
 @Mapper
 public interface CRS0010_M01Mapper {
 	
+	
+	public ArrayList<ERPPushMessage> selectPhoneID(HashMap<String,Object> params);
+	public int updatePhoneID(HashMap<String,Object> params);
+	public int insertNotify(HashMap<String,Object> params);
 	public DataResult selectIsEmpty(HashMap<String,Object> params);
 	public int updateAsResultRemark(HashMap<String,Object> params);
 	public int updateAsResult(HashMap<String,Object> params);

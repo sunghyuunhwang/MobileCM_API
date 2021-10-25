@@ -14,6 +14,7 @@ import com.fursys.mobilecm.vo.mobile.response.SigongResultResponse;
 
 public interface ApiErpService {
 	
+	public BaseResponse erp_Fcm_SendNotify(HashMap<String, Object> param);
 	
 	public ArrayList<ERPAttachFileList> erp_AttachFileList(HashMap<String, Object> param);
 	public BaseResponse erp_requestGoGoVan(HashMap<String, Object> param);

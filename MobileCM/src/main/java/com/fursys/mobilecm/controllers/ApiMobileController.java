@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fursys.mobilecm.mapper.CRS0010_M01Mapper;
 import com.fursys.mobilecm.mapper.UserMapper;
 import com.fursys.mobilecm.security.FursysPasswordEncoder;
 import com.fursys.mobilecm.vo.BaseResponse;
@@ -33,6 +34,7 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/v1/api/mobile")
 public class ApiMobileController {
 	@Autowired UserMapper userMapper;
+	@Autowired CRS0010_M01Mapper crs0010_p01Mapper;
 	@Autowired private PlatformTransactionManager txManager;
 
 	@Value("${spring.datasource.url}")
@@ -181,9 +183,12 @@ public class ApiMobileController {
 	@GetMapping("/userInfo") 
 	@RequestMapping(value="/userInfo",method=RequestMethod.GET)
 	public String userInfo(
-			@RequestParam(name="id", required=false) String id) { 
+			@RequestParam(name="id", required=false) String id,
+			@RequestParam(name="phone_id", required=false) String phone_id) { 
 		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		UserInfoResponse userInfoResponse = new UserInfoResponse();
+		int res = 0;
 		
 		HashMap<String, Object> params = new HashMap<String, Object>();
     	params.put("login_id", id);
@@ -217,7 +222,18 @@ public class ApiMobileController {
         	params.put("sti_cd", user.getSti_cd());
         	Map<String, Object> com_stec = userMapper.getCom_Stsec(params);
         	user.setCom_stsec(com_stec.get("COM_STSEC").toString());
+        	        	
+        	params.put("phone_id", phone_id);
+        	res = crs0010_p01Mapper.updatePhoneID(params);
+
+        	if (res < 1){
+        		txManager.rollback(status);
+        		userInfoResponse.setResultCode("5001");
+        		userInfoResponse.setResultMessage("비밀번호 변경에 실패하였습니다.");
+        		return gson.toJson(userInfoResponse);
+        	}
         	
+        	txManager.commit(status);
     		userInfoResponse.setUser(user);
     		userInfoResponse.setResultCode("200");
     	}

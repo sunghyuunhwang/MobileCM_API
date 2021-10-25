@@ -38,6 +38,41 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@ApiOperation(value = "erp_FcmSendNotify", notes = "FCM test")
+	@GetMapping("/erp_FcmSendNotify")  
+	public String erp_FcmSendNotify (
+			@ApiParam(value = "SEND_FROM_SYSTEM", required=true, example = "MOBILECM")
+			@RequestParam(name="send_from_system", required=true) String as_send_from_system,
+			@ApiParam(value = "SEND_TO_SYSTEM", required=true, example = "MOBILECM")
+			@RequestParam(name="send_to_system", required=true) String as_send_to_system,
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String as_com_scd,
+			@ApiParam(value = "TITLE", required=true, example = "This is Title")
+			@RequestParam(name="title", required=true) String as_title,
+			@ApiParam(value = "MESSAGE", required=true, example = "This is First Message.")
+			@RequestParam(name="message", required=true) String as_message,
+			@ApiParam(value = "USER_ID", required=true, example = "Ya521")
+			@RequestParam(name="user_id", required=true) String as_user_id
+		) { 	
+        
+		BaseResponse response = new BaseResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("token", "fAzKUXVfTdeS2LyJaByIvt:APA91bEaZV4pWP27UyJF3JcAOnUR7bFP3p_a5g_yZXmHevueXYGpE9rgU_FpQNKZrifDbjQCNXibrh9YwP4bXxZavfehwZXSfEWrjOHMZzYIB7ORIFEUsKm7Z8L5FLLpyAJ_EcHbs_Iu");
+        params.put("command", "MobileCM.NOTIFICATION");
+        params.put("send_from_system", as_send_from_system);
+        params.put("send_to_system", as_send_to_system);
+        params.put("com_scd", as_com_scd);
+        params.put("title", as_title);
+        params.put("message", as_message);
+        params.put("user_id", as_user_id);
+        
+		response = apiErpService.erp_Fcm_SendNotify(params);
+		
+		System.out.println(response.toString());
+		return gson.toJson(response);
+		
+	}
+	
 	@ApiOperation(value = "erp_AttachFileList", notes = "시공,AS첨부파일리스트")
 	@GetMapping("/erp_AttachFileList")  
 	public String erp_AttachFileList (

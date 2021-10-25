@@ -2,6 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.CRS0010_M01Mapper">
 
+
+<select id="selectPhoneID" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPushMessage">
+<![CDATA[
+	SELECT STI_CD AS sti_cd, PHONE_ID AS token
+	FROM TC_STINF TCS WITH (NOLOCK)
+	WHERE ( TCS.COM_SCD = #{com_scd} OR TCS.STI_CD = #{com_scd} ) 
+	  AND TCS.PHONE_ID IS NOT NULL
+	  AND TCS.STI_RANK = 'Y'  				
+]]>
+</select>
+
+<update id="updatePhoneID" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_STINF
+	   SET PHONE_ID = #{phone_id}
+	 WHERE COM_SCD = #{com_scd}
+	   AND STI_CD = #{sti_cd}
+]]>
+</update> 
+
+
+<insert id="insertNotify" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_NOTIFY (
+	       SEND_FROM_SYSTEM, SEND_TO_SYSTEM, SEND_DT, SENDER_ID, SEND_TEXT, RECEIVE_ID, RECEIVE_PHONE_ID )
+	VALUES (
+	       #{send_from_system}, #{send_to_system}, GETDATE(), #{sender_id}, #{send_text}, #{receive_id}, #{receive_phone_id})
+]]>
+</insert> 
+
+
 <select id="selectIsEmpty" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">				
 	SELECT TOP 1
 	       A.PLM_NO DATA1 

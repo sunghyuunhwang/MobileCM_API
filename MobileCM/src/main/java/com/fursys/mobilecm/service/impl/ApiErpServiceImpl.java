@@ -46,6 +46,7 @@ import com.fursys.mobilecm.mapper.UserMapper;
 import com.fursys.mobilecm.role.Role;
 import com.fursys.mobilecm.service.ApiErpService;
 import com.fursys.mobilecm.utils.CommonObjectUtils;
+import com.fursys.mobilecm.utils.FcmMessage;
 import com.fursys.mobilecm.utils.GoGoVan;
 import com.fursys.mobilecm.utils.StringUtil;
 import com.fursys.mobilecm.vo.BaseResponse;
@@ -55,6 +56,8 @@ import com.fursys.mobilecm.vo.erp.ERPAsCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPAsResult;
 import com.fursys.mobilecm.vo.erp.ERPGoGoVan;
 import com.fursys.mobilecm.vo.erp.ERPGoGoVanWayPoint;
+import com.fursys.mobilecm.vo.erp.ERPPushMessage;
+import com.fursys.mobilecm.vo.erp.ERPScheduleList;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoneyTeam;
@@ -87,6 +90,80 @@ public class ApiErpServiceImpl  implements ApiErpService {
 	
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
+	
+	@Override		
+	public BaseResponse erp_Fcm_SendNotify(HashMap<String, Object> param) {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		BaseResponse response = new BaseResponse();
+		HashMap<String, Object> params;
+		int res = 1;
+		
+		try {
+			
+			String DELIMETER = "";
+
+			String as_command = (String) param.get("command");
+			String as_send_from_system = (String) param.get("send_from_system");
+			String as_send_to_system = (String) param.get("send_to_system");
+			String as_com_scd = (String) param.get("com_scd");
+			String as_title = (String) param.get("title");
+			String as_message = (String) param.get("message");
+			String as_user_id = (String) param.get("user_id");
+			String send_text = "";
+						
+			params = new HashMap<String, Object>();
+			params.put("com_scd", as_com_scd);
+	        
+			ArrayList<ERPPushMessage> allItems = crs0010_m01Mapper.selectPhoneID(params);
+			if (allItems != null) {
+    			for(int i=0; i<allItems.size(); i++) {
+    				
+    				int noti_seqno = 10001;
+    				send_text = as_command + DELIMETER + noti_seqno + DELIMETER + as_user_id + DELIMETER + allItems.get(i).getSti_cd() + DELIMETER + as_title + DELIMETER + as_message;
+    				
+    				params = new HashMap<String, Object>();			
+    				params.put("send_from_system", as_send_from_system);
+    				params.put("send_to_system", as_send_to_system);
+    				params.put("sender_id", as_user_id);
+    				params.put("send_text", send_text);
+    				params.put("receive_id", allItems.get(i).getSti_cd());
+    				params.put("receive_phone_id", allItems.get(i).getToken());
+    				    				
+    	    		res = crs0010_m01Mapper.insertNotify(params);
+    	    		if (res < 1) {
+    	    			txManager.rollback(status);
+    					response.setResultCode("5001");
+    					response.setResultMessage("erp_Fcm_SendNotify insertNotify 오류 [" + res + "]");
+    					return response;
+    				}
+    	    		txManager.commit(status);
+    	    		
+    	    		allItems.get(i).setCommand(as_command);
+    	    		allItems.get(i).setMessage(send_text);
+    	    		
+    				FcmMessage.Send(allItems.get(i));
+    	    		
+    			}
+    		} else {
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("전송 대상자가 없습니다.");
+				return response;
+    		}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return response;
+		}
+
+		response.setResultCode("200");		
+		return response;
+
+	}
+	
 	
 	@Override		
 	public ArrayList<ERPAttachFileList> erp_AttachFileList(HashMap<String, Object> param) {
