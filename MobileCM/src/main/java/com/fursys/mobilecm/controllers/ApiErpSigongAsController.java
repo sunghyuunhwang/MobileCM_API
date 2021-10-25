@@ -39,7 +39,8 @@ public class ApiErpSigongAsController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@ApiOperation(value = "erp_FcmSendNotify", notes = "FCM test")
-	@GetMapping("/erp_FcmSendNotify")  
+	@GetMapping("/erp_FcmSendNotify")
+	@RequestMapping(value="/erp_FcmSendNotify",method=RequestMethod.POST)
 	public String erp_FcmSendNotify (
 			@ApiParam(value = "SEND_FROM_SYSTEM", required=true, example = "MOBILECM")
 			@RequestParam(name="send_from_system", required=true) String as_send_from_system,
@@ -57,8 +58,6 @@ public class ApiErpSigongAsController {
         
 		BaseResponse response = new BaseResponse();
 		HashMap<String,Object> params = new HashMap<String, Object>();
-        params.put("token", "fAzKUXVfTdeS2LyJaByIvt:APA91bEaZV4pWP27UyJF3JcAOnUR7bFP3p_a5g_yZXmHevueXYGpE9rgU_FpQNKZrifDbjQCNXibrh9YwP4bXxZavfehwZXSfEWrjOHMZzYIB7ORIFEUsKm7Z8L5FLLpyAJ_EcHbs_Iu");
-        params.put("command", "MobileCM.NOTIFICATION");
         params.put("send_from_system", as_send_from_system);
         params.put("send_to_system", as_send_to_system);
         params.put("com_scd", as_com_scd);
@@ -67,8 +66,7 @@ public class ApiErpSigongAsController {
         params.put("user_id", as_user_id);
         
 		response = apiErpService.erp_Fcm_SendNotify(params);
-		
-		System.out.println(response.toString());
+				
 		return gson.toJson(response);
 		
 	}

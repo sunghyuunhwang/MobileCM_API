@@ -23,7 +23,7 @@
 </update> 
 
 
-<insert id="insertNotify" parameterType="HashMap">
+<insert id="insertNotify" parameterType="HashMap" useGeneratedKeys="true" keyProperty="seq_no">
 <![CDATA[
 	INSERT INTO TC_NOTIFY (
 	       SEND_FROM_SYSTEM, SEND_TO_SYSTEM, SEND_DT, SENDER_ID, SEND_TEXT, RECEIVE_ID, RECEIVE_PHONE_ID )

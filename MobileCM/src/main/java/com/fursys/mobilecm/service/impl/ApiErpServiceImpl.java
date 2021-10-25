@@ -102,7 +102,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
 			
 			String DELIMETER = "";
 
-			String as_command = (String) param.get("command");
+			String as_command = "MobileCM.NOTIFICATION";
 			String as_send_from_system = (String) param.get("send_from_system");
 			String as_send_to_system = (String) param.get("send_to_system");
 			String as_com_scd = (String) param.get("com_scd");
@@ -118,7 +118,11 @@ public class ApiErpServiceImpl  implements ApiErpService {
 			if (allItems != null) {
     			for(int i=0; i<allItems.size(); i++) {
     				
+    				//long noti_seqno = System.currentTimeMillis(); //10001;
     				int noti_seqno = 10001;
+    				
+    				//System.out.println("noti_seqno===>[" + noti_seqno + "]");
+    				
     				send_text = as_command + DELIMETER + noti_seqno + DELIMETER + as_user_id + DELIMETER + allItems.get(i).getSti_cd() + DELIMETER + as_title + DELIMETER + as_message;
     				
     				params = new HashMap<String, Object>();			
@@ -136,7 +140,6 @@ public class ApiErpServiceImpl  implements ApiErpService {
     					response.setResultMessage("erp_Fcm_SendNotify insertNotify 오류 [" + res + "]");
     					return response;
     				}
-    	    		txManager.commit(status);
     	    		
     	    		allItems.get(i).setCommand(as_command);
     	    		allItems.get(i).setMessage(send_text);
@@ -159,6 +162,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
 			return response;
 		}
 
+		txManager.commit(status);		
 		response.setResultCode("200");		
 		return response;
 
