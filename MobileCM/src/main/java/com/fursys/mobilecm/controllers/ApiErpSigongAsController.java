@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fursys.mobilecm.mapper.CRS0010_M01Mapper;
 import com.fursys.mobilecm.mapper.ErpSigongAsMapper;
 import com.fursys.mobilecm.service.ApiErpService;
 import com.fursys.mobilecm.vo.BaseResponse;
@@ -31,6 +32,7 @@ public class ApiErpSigongAsController {
 	
 	@Autowired ApiErpService apiErpService;
 	@Autowired ErpSigongAsMapper erpSigongAsMapper;
+	@Autowired CRS0010_M01Mapper crs0010_m01Mapper;
 	
 	@Autowired private PlatformTransactionManager txManager;
 	
@@ -38,7 +40,68 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	@ApiOperation(value = "erp_FcmSendNotify", notes = "FCM test")
+	
+	
+	@ApiOperation(value = "erp_insertWallFix", notes = "일룸 벽고정 자동정산")
+	@GetMapping("/erp_insertWallFix")
+	@RequestMapping(value = "/erp_insertWallFix", method = RequestMethod.GET)
+	public String erp_insertWallFix(
+			@ApiParam(value = "PLM_NO", required=true, example = "P202103090529")
+			@RequestParam(name="plm_no", required=true) String as_plm_no,
+			@ApiParam(value = "STI_CD", required=true, example = "YA551")
+			@RequestParam(name="sti_cd", required=true) String as_sti_cd,
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String as_com_scd,
+			@ApiParam(value = "PLM_CDT", required=true, example = "20210309")
+			@RequestParam(name="plm_cdt", required=true) String as_plm_cdt,
+			@ApiParam(value = "COM_BRAND", required=true, example = "T60P01")
+			@RequestParam(name="com_brand", required=true) String as_com_brand
+			) {
+		       
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		
+		try {
+			HashMap<String, Object> params = new HashMap<String, Object>();		
+			params.put("plm_no", as_plm_no);
+			params.put("sti_cd", as_sti_cd);
+
+			res = crs0010_m01Mapper.insertWallFix(params);
+			if (res < 1) { 
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("insertWallFix 오류 [" + res + "]");
+				return gson.toJson(response);
+    		}
+			
+			params.put("com_scd", as_com_scd);
+			params.put("plm_cdt", as_plm_cdt);
+			params.put("com_brand", as_com_brand);        			
+			
+			res = crs0010_m01Mapper.insertWallFixAcc(params);
+			if (res < 1) { 
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("insertWallFixAcc 오류 [" + res + "]");
+				return gson.toJson(response);
+    		}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}
+		
+	@ApiOperation(value = "erp_FcmSendNotify", notes = "FCM Notify")
 	@GetMapping("/erp_FcmSendNotify")
 	@RequestMapping(value="/erp_FcmSendNotify",method=RequestMethod.POST)
 	public String erp_FcmSendNotify (

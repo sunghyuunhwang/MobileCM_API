@@ -1518,7 +1518,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
             				
             			}
         				
-            		}	                		
+            		}
             	}
             	//일룸이아닐때
             	else{
@@ -2140,6 +2140,36 @@ public class ApiErpServiceImpl  implements ApiErpService {
         	}
         	
         	crs0010_m01Mapper.TcplanmstAllCalculate(mapMst);*/
+        	
+        	//일룸벽고정 추가정산 
+        	if("C02I".equals(mapMst.get("COM_AGSEC"))){
+        		if (ds_tcPlanmstList.orm_nm.indexOf("(벽고정)") == 0) {
+        			
+        			HashMap<String, Object> params = new HashMap<String, Object>();
+        			params.put("plm_no", ds_tcPlanmstList.plm_no);
+        			params.put("sti_cd", ds_tcPlanmstList.sti_cd);
+
+        			res = crs0010_m01Mapper.insertWallFix(params);
+        			if (res < 1) { 
+            			txManager.rollback(status);
+        				response.setResultCode("5001");
+        				response.setResultMessage("insertWallFix 오류 [" + res + "]");
+        				return response;
+            		}
+        			
+        			params.put("com_scd", ds_tcPlanmstList.com_scd);
+        			params.put("plm_cdt", ds_tcPlanmstList.plm_cdt);
+        			params.put("com_brand", ds_tcPlanmstList.com_brand);        			
+        			
+        			res = crs0010_m01Mapper.insertWallFixAcc(params);
+        			if (res < 1) { 
+            			txManager.rollback(status);
+        				response.setResultCode("5001");
+        				response.setResultMessage("insertWallFixAcc 오류 [" + res + "]");
+        				return response;
+            		}
+        		}
+        	}
         	
         	
         	//처리결과시간

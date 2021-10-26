@@ -3,6 +3,121 @@
 <mapper namespace="com.fursys.mobilecm.mapper.CRS0010_M01Mapper">
 
 
+<insert id="insertWallFixAcc" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_ACTLIST (
+		PLM_NO,
+		COM_ASEC,
+		COM_ACD,
+		COM_SVND,
+		COM_AGSEC,
+		COM_DPSEC,
+		ACL_VFROM,
+		ACL_VTO,
+		COM_VFSEC,
+		COM_VTSEC,
+		ACL_AMT,
+		COM_SCD,
+		COM_CTSEC,
+		PLM_CDT,
+		ACL_DT,
+		ACL_CMPYN,
+		ACL_RMK,
+		USR_CD,
+		SYS_DT,
+		COM_CESEC,
+		COM_BRAND )
+	VALUES (
+		#{plm_no},
+		'C0928',
+		'C01208',
+		'C21B',
+		'C02I',
+		'C07P',
+		'C21B',
+		#{sti_cd},
+		'C2402',
+		'C2501',
+		5000,
+		#{com_scd},
+		'C06L',
+		#{plm_cdt},
+		#{plm_cdt},
+		'N',
+		'기타추가비용 지급정산금액 = 5000',
+		#{sti_cd},
+		GETDATE(),
+		'C292',
+		#{com_brand}
+	)
+
+]]>
+</insert> 
+
+<insert id="insertWallFix" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_PLANDTL (
+	      PLM_NO,
+	      COM_PLDSEC,
+	      ORD_SSEQ,
+	      ORD_ISEQ,
+	      ITM_CD,
+	      COL_CD,
+	      SET_CD,
+	      COL_SCD,
+	      PLD_EQTY,
+	      PLD_FQTY,
+	      PLD_FAMT,
+	      PLD_CRAMT,
+	      PLD_CFAMT,
+	      PLD_CUSAMT,
+	      COM_RDSEC,
+	      PLD_RMK,
+	      USR_CD,
+	      SYS_DT,
+	      COM_ACD,
+	      COM_SVND,
+	      COM_VFSEC,
+	      COM_VTSEC,
+	      COM_RASEC,
+	      PLD_CSEC,
+	      FST_USR,
+	      FST_SYS_DT,
+	      MOB_STD )
+	VALUES (
+	      #{plm_no},
+	      'C0928',
+	      '07P',
+	      '001',
+	      '',
+	      '',
+	      '',
+	      '',
+	      1,
+	      1,
+	      5000,
+	      5000,
+	      5000,
+	      5000,
+	      'C13Y',
+	      '벽고정시공건(AUTO)',
+	      #{sti_cd},
+	      GETDATE(),
+	      'C01208',
+	      'C21B',
+	      'C2402',
+	      'C2501',
+	      'C12A',
+	      'Y',
+	      #{sti_cd},
+	      GETDATE(),
+	      'C13Y')
+
+
+]]>
+</insert> 
+
+
 <select id="selectPhoneID" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPushMessage">
 <![CDATA[
 	SELECT STI_CD AS sti_cd, PHONE_ID AS token
