@@ -3,7 +3,137 @@
 <mapper namespace="com.fursys.mobilecm.mapper.CRS0010_M01Mapper">
 
 
-<insert id="insertWallFixAcc" parameterType="HashMap">
+
+<insert id="insertSigonWorkTimeOverAcc" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_ACTLIST (
+		PLM_NO,
+		COM_ASEC,
+		COM_ACD,
+		COM_SVND,
+		COM_AGSEC,
+		COM_DPSEC,
+		ACL_VFROM,
+		ACL_VTO,
+		COM_VFSEC,
+		COM_VTSEC,
+		ACL_AMT,
+		COM_SCD,
+		COM_CTSEC,
+		PLM_CDT,
+		ACL_DT,
+		ACL_CMPYN,
+		ACL_RMK,
+		USR_CD,
+		SYS_DT,
+		COM_CESEC,
+		COM_BRAND )
+	VALUES (
+		#{plm_no},
+		'C0929',
+		'C01090',
+		'C21I',
+		'C02I',
+		'C07P',
+		'C21B',
+		#{sti_cd},
+		'C2404',
+		'C2501',
+		5000,
+		#{com_scd},
+		'C06L',
+		#{plm_cdt},
+		#{plm_cdt},
+		'N',
+		'기타추가비용 지급정산금액 = 5000',
+		#{sti_cd},
+		GETDATE(),
+		'C292',
+		#{com_brand} )
+
+]]>
+</insert>
+ 
+<insert id="insertSigonWorkTimeOver" parameterType="HashMap">
+<![CDATA[
+	 INSERT INTO TC_PLANDTL (
+	      PLM_NO,
+	      COM_PLDSEC,
+	      ORD_SSEQ,
+	      ORD_ISEQ,
+	      ITM_CD,
+	      COL_CD,
+	      SET_CD,
+	      COL_SCD,
+	      PLD_EQTY,
+	      PLD_FQTY,
+	      PLD_FAMT,
+	      PLD_CRAMT,
+	      PLD_CFAMT,
+	      PLD_CUSAMT,
+	      COM_RDSEC,
+	      PLD_RMK,
+	      USR_CD,
+	      SYS_DT,
+	      COM_ACD,
+	      COM_SVND,
+	      COM_VFSEC,
+	      COM_VTSEC,
+	      COM_RASEC,
+	      PLD_CSEC,
+	      FST_USR,
+	      FST_SYS_DT,
+	      MOB_STD )
+	VALUES (
+	      #{plm_no},
+	      'C0929',
+	      '07P',
+	      '001',
+	      '',
+	      '',
+	      '',
+	      '',
+	      1,
+	      1,
+	      5000,
+	      5000,
+	      5000,
+	      5000,
+	      'C13Y',
+	      '저녁시공건(AUTO)',
+	      #{sti_cd},
+	      GETDATE(),
+	      'C01090',
+	      'C21I',
+	      'C2404',
+	      'C2501',
+	      'C12C',
+	      'Y',
+	      #{sti_cd},
+	      GETDATE(),
+	      'C13Y')
+]]>
+</insert>
+ 
+<select id="selectSigongArrivalTimeCheck" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT REM_FTM DATA1
+	FROM TC_RESMST WITH (NOLOCK)
+	WHERE REM_DT = #{rem_dt}
+	 AND REM_SEQ = #{rem_seq}
+	 AND REM_FTM BETWEEN 'C70037' AND 'C70049'
+]]>
+</select>
+
+<select id="selectSigongWorkTimeCheck" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT CASE WHEN REPLACE(CONVERT(NVARCHAR(8), CONVERT(TIME, MOB_STARTTM), 120), ':', '') >= '180000' THEN 'Y' ELSE 'N' END DATA1      
+	FROM TC_PLANMST WITH (NOLOCK)
+	WHERE PLM_NO = #{plm_no}
+]]>
+</select>
+
+<insert id="insertSigongWallFixAcc" parameterType="HashMap">
 <![CDATA[
 	INSERT INTO TC_ACTLIST (
 		PLM_NO,
@@ -54,7 +184,7 @@
 ]]>
 </insert> 
 
-<insert id="insertWallFix" parameterType="HashMap">
+<insert id="insertSigongWallFix" parameterType="HashMap">
 <![CDATA[
 	INSERT INTO TC_PLANDTL (
 	      PLM_NO,

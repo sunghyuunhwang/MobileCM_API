@@ -41,11 +41,97 @@ public class ApiErpSigongAsController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	
+	@ApiOperation(value = "erp_insertSigongOverTimeWork", notes = "일룸 저녁시간 자동정산")
+	@GetMapping("/erp_insertSigongOverTimeWork")
+	@RequestMapping(value = "/erp_insertSigongOverTimeWork", method = RequestMethod.GET)
+	public String erp_insertSigongOverTimeWork(
+			@ApiParam(value = "PLM_NO", required=true, example = "P202103090529")
+			@RequestParam(name="plm_no", required=true) String as_plm_no,
+			@ApiParam(value = "STI_CD", required=true, example = "YA551")
+			@RequestParam(name="sti_cd", required=true) String as_sti_cd,
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String as_com_scd,
+			@ApiParam(value = "PLM_CDT", required=true, example = "20210309")
+			@RequestParam(name="plm_cdt", required=true) String as_plm_cdt,
+			@ApiParam(value = "COM_BRAND", required=true, example = "T60P01")
+			@RequestParam(name="com_brand", required=true) String as_com_brand,
+			@ApiParam(value = "REM_DT", required=true, example = "20210309")
+			@RequestParam(name="rem_dt", required=true) String as_rem_dt,
+			@ApiParam(value = "REM_SEQ", required=true, example = "PC0827")
+			@RequestParam(name="rem_seq", required=true) String as_rem_seq
+			) {
+		       
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		DataResult dataResult = new DataResult();
+		String over_time = "", rem_ftm = "";
+		
+		try {
+			HashMap<String, Object> params = new HashMap<String, Object>();		
+			params.put("plm_no", as_plm_no);
+			params.put("sti_cd", as_sti_cd);
+
+			dataResult = crs0010_m01Mapper.selectSigongWorkTimeCheck(params);
+    		if (dataResult != null) {
+    			over_time = dataResult.getData1();
+    		} else {
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("시공시작시간 조회에 오류가 발생했습니다.");
+				return gson.toJson(response);
+    		}
+			
+			params.put("rem_dt", as_rem_dt);
+			params.put("rem_seq", as_rem_seq);
+
+			dataResult = crs0010_m01Mapper.selectSigongArrivalTimeCheck(params);
+    		if (dataResult != null) {
+    			rem_ftm = dataResult.getData1();
+    		}
+    		
+    		//시공시간이 18:00 이후이고, 도착안내시간이 18:00 이후인 경우,
+			if ("Y".equals(over_time) && !"".equals(rem_ftm)) {				
+				res = crs0010_m01Mapper.insertSigonWorkTimeOver(params);
+				if (res < 1) { 
+	    			txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage("insertSigonWorkTimeOver 오류 [" + res + "]");
+					return gson.toJson(response);
+	    		}
+				
+				params.put("com_scd", as_com_scd);
+				params.put("plm_cdt", as_plm_cdt);
+				params.put("com_brand", as_com_brand);        			
+			
+				res = crs0010_m01Mapper.insertSigonWorkTimeOverAcc(params);
+				if (res < 1) { 
+	    			txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage("insertSigonWorkTimeOverAcc 오류 [" + res + "]");
+					return gson.toJson(response);
+	    		}
+				
+			}
+    					
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}
 	
-	@ApiOperation(value = "erp_insertWallFix", notes = "일룸 벽고정 자동정산")
-	@GetMapping("/erp_insertWallFix")
-	@RequestMapping(value = "/erp_insertWallFix", method = RequestMethod.GET)
-	public String erp_insertWallFix(
+	@ApiOperation(value = "erp_insertSigongWallFix", notes = "일룸 벽고정 자동정산")
+	@GetMapping("/erp_insertSigongWallFix")
+	@RequestMapping(value = "/erp_insertSigongWallFix", method = RequestMethod.GET)
+	public String erp_insertSigongWallFix(
 			@ApiParam(value = "PLM_NO", required=true, example = "P202103090529")
 			@RequestParam(name="plm_no", required=true) String as_plm_no,
 			@ApiParam(value = "STI_CD", required=true, example = "YA551")
@@ -67,7 +153,7 @@ public class ApiErpSigongAsController {
 			params.put("plm_no", as_plm_no);
 			params.put("sti_cd", as_sti_cd);
 
-			res = crs0010_m01Mapper.insertWallFix(params);
+			res = crs0010_m01Mapper.insertSigongWallFix(params);
 			if (res < 1) { 
     			txManager.rollback(status);
 				response.setResultCode("5001");
@@ -79,7 +165,7 @@ public class ApiErpSigongAsController {
 			params.put("plm_cdt", as_plm_cdt);
 			params.put("com_brand", as_com_brand);        			
 			
-			res = crs0010_m01Mapper.insertWallFixAcc(params);
+			res = crs0010_m01Mapper.insertSigongWallFixAcc(params);
 			if (res < 1) { 
     			txManager.rollback(status);
 				response.setResultCode("5001");

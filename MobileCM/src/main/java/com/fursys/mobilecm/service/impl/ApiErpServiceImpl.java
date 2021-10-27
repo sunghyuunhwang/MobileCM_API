@@ -2141,36 +2141,70 @@ public class ApiErpServiceImpl  implements ApiErpService {
         	
         	crs0010_m01Mapper.TcplanmstAllCalculate(mapMst);*/
         	
-        	//일룸벽고정 추가정산 
+        	//일룸일 경우, 
         	if("C02I".equals(mapMst.get("COM_AGSEC"))){
+        		
+    			HashMap<String, Object> params = new HashMap<String, Object>();
+    			params.put("plm_no", ds_tcPlanmstList.plm_no);
+    			params.put("sti_cd", ds_tcPlanmstList.sti_cd);
+    			params.put("com_scd", ds_tcPlanmstList.com_scd);
+    			params.put("plm_cdt", ds_tcPlanmstList.plm_cdt);
+    			params.put("com_brand", ds_tcPlanmstList.com_brand);        			
+    			
+    			//벽고정 추가정산
         		if (ds_tcPlanmstList.orm_nm.indexOf("(벽고정)") == 0) {
         			
-        			HashMap<String, Object> params = new HashMap<String, Object>();
-        			params.put("plm_no", ds_tcPlanmstList.plm_no);
-        			params.put("sti_cd", ds_tcPlanmstList.sti_cd);
-
-        			res = crs0010_m01Mapper.insertWallFix(params);
+        			res = crs0010_m01Mapper.insertSigongWallFix(params);
         			if (res < 1) { 
             			txManager.rollback(status);
         				response.setResultCode("5001");
-        				response.setResultMessage("insertWallFix 오류 [" + res + "]");
+        				response.setResultMessage("insertSigongWallFix 오류 [" + res + "]");
         				return response;
             		}
         			
-        			params.put("com_scd", ds_tcPlanmstList.com_scd);
-        			params.put("plm_cdt", ds_tcPlanmstList.plm_cdt);
-        			params.put("com_brand", ds_tcPlanmstList.com_brand);        			
-        			
-        			res = crs0010_m01Mapper.insertWallFixAcc(params);
+        			res = crs0010_m01Mapper.insertSigongWallFixAcc(params);
         			if (res < 1) { 
             			txManager.rollback(status);
         				response.setResultCode("5001");
-        				response.setResultMessage("insertWallFixAcc 오류 [" + res + "]");
+        				response.setResultMessage("insertSigongWallFixAcc 오류 [" + res + "]");
         				return response;
             		}
         		}
-        	}
-        	
+
+        		//저녁시공 자동정산
+        		String over_time = "", rem_ftm = "";
+        		dataResult = crs0010_m01Mapper.selectSigongWorkTimeCheck(params);
+        		if (dataResult != null) {
+        			over_time = dataResult.getData1();
+        		}
+        		
+    			params.put("rem_dt", ds_tcPlanmstList.rem_dt);
+    			params.put("rem_seq", ds_tcPlanmstList.rem_seq);
+
+    			dataResult = crs0010_m01Mapper.selectSigongArrivalTimeCheck(params);
+        		if (dataResult != null) {
+        			rem_ftm = dataResult.getData1();
+        		}
+        		
+        		//시공시간이 18:00 이후이고, 도착안내시간이 18:00 이후인 경우,
+    			if ("Y".equals(over_time) && !"".equals(rem_ftm)) {				
+    				res = crs0010_m01Mapper.insertSigonWorkTimeOver(params);
+    				if (res < 1) { 
+    	    			txManager.rollback(status);
+    					response.setResultCode("5001");
+    					response.setResultMessage("insertSigonWorkTimeOver 오류 [" + res + "]");
+    					return response;
+    	    		}
+    				
+    				res = crs0010_m01Mapper.insertSigonWorkTimeOverAcc(params);
+    				if (res < 1) { 
+    	    			txManager.rollback(status);
+    					response.setResultCode("5001");
+    					response.setResultMessage("insertSigonWorkTimeOverAcc 오류 [" + res + "]");
+    					return response;
+    	    		}    				
+    			}
+        	}        	
         	
         	//처리결과시간
         	HashMap<String, Object> params = new HashMap<String, Object>();
