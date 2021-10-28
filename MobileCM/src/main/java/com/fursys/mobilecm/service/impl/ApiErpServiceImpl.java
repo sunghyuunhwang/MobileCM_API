@@ -95,7 +95,9 @@ public class ApiErpServiceImpl  implements ApiErpService {
 	public BaseResponse erp_Fcm_SendNotify(HashMap<String, Object> param) {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		BaseResponse response = new BaseResponse();
+		DataResult dataResult = new DataResult();
 		HashMap<String, Object> params;
+		
 		int res = 1;
 		
 		try {
@@ -109,27 +111,35 @@ public class ApiErpServiceImpl  implements ApiErpService {
 			String as_title = (String) param.get("title");
 			String as_message = (String) param.get("message");
 			String as_user_id = (String) param.get("user_id");
-			String send_text = "";
+			String send_dt = "";
+			StringBuffer send_text = new StringBuffer();
+			int noti_seqno = 0;
 						
 			params = new HashMap<String, Object>();
 			params.put("com_scd", as_com_scd);
 	        
+			dataResult = crs0010_m01Mapper.selectNotifyGetDate(params);
+			if (dataResult != null) {
+				send_dt = dataResult.getData1();
+			}
+			
 			ArrayList<ERPPushMessage> allItems = crs0010_m01Mapper.selectPhoneID(params);
 			if (allItems != null) {
     			for(int i=0; i<allItems.size(); i++) {
-    				
-    				//long noti_seqno = System.currentTimeMillis(); //10001;
-    				int noti_seqno = 10001;
-    				
-    				//System.out.println("noti_seqno===>[" + noti_seqno + "]");
-    				
-    				send_text = as_command + DELIMETER + noti_seqno + DELIMETER + as_user_id + DELIMETER + allItems.get(i).getSti_cd() + DELIMETER + as_title + DELIMETER + as_message;
+    				send_text = new StringBuffer();
+    				send_text.append(as_command);
+    				send_text.append(DELIMETER + noti_seqno);
+    				send_text.append(DELIMETER + as_user_id);
+    				send_text.append(DELIMETER + allItems.get(i).getSti_cd());
+    				send_text.append(DELIMETER + as_title);
+    				send_text.append(DELIMETER + as_message);
+    				send_text.append(DELIMETER + send_dt);
     				
     				params = new HashMap<String, Object>();			
     				params.put("send_from_system", as_send_from_system);
     				params.put("send_to_system", as_send_to_system);
     				params.put("sender_id", as_user_id);
-    				params.put("send_text", send_text);
+    				params.put("send_text", send_text.toString());
     				params.put("receive_id", allItems.get(i).getSti_cd());
     				params.put("receive_phone_id", allItems.get(i).getToken());
     				    				
@@ -141,8 +151,21 @@ public class ApiErpServiceImpl  implements ApiErpService {
     					return response;
     				}
     	    		
+    	    		noti_seqno = (int) params.get("seq_no");
+    	    		
+    	    		send_text = new StringBuffer();
+    				send_text.append(as_command);
+    				send_text.append(DELIMETER + noti_seqno);
+    				send_text.append(DELIMETER + as_user_id);
+    				send_text.append(DELIMETER + allItems.get(i).getSti_cd());
+    				send_text.append(DELIMETER + as_title);
+    				send_text.append(DELIMETER + as_message);
+    				send_text.append(DELIMETER + send_dt);
+    				
+    	    		System.out.println("send_text ="  + send_text.toString());
+    	    		
     	    		allItems.get(i).setCommand(as_command);
-    	    		allItems.get(i).setMessage(send_text);
+    	    		allItems.get(i).setMessage(send_text.toString());
     	    		
     				FcmMessage.Send(allItems.get(i));
     	    		
