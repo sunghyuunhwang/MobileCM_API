@@ -267,13 +267,24 @@
 ]]>
 </update> 
 
+<select id="selectNotifyGetDate" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT CONVERT(NVARCHAR(20), GETDATE(), 2) + ' ' + CONVERT(NVARCHAR(8), GETDATE(), 8) DATA1      
+	
+]]>
+</select>
 
 <insert id="insertNotify" parameterType="HashMap" useGeneratedKeys="true" keyProperty="seq_no">
+<selectKey keyProperty="seq_no" resultType="Integer" order="AFTER"> 
+	SELECT IDENT_CURRENT('TC_NOTIFY')
+</selectKey>
+
 <![CDATA[
 	INSERT INTO TC_NOTIFY (
 	       SEND_FROM_SYSTEM, SEND_TO_SYSTEM, SEND_DT, SENDER_ID, SEND_TEXT, RECEIVE_ID, RECEIVE_PHONE_ID )
 	VALUES (
 	       #{send_from_system}, #{send_to_system}, GETDATE(), #{sender_id}, #{send_text}, #{receive_id}, #{receive_phone_id})
+     
 ]]>
 </insert> 
 

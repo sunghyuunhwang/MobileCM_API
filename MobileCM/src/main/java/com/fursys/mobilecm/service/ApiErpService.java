@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.fursys.mobilecm.vo.BaseResponse;
+import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPAsCalculateMoney;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPSigongCalculateMoney;
@@ -13,6 +14,7 @@ import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.SigongResultResponse;
 
 public interface ApiErpService {
+	
 	
 	public BaseResponse erp_Fcm_SendNotify(HashMap<String, Object> param);
 	

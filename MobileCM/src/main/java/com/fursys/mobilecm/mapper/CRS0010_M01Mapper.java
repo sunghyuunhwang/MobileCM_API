@@ -20,7 +20,7 @@ import com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlanmstList;
 @Mapper
 public interface CRS0010_M01Mapper {
 	
-	
+	public DataResult selectNotifyGetDate(HashMap<String, Object> param);
 	public int insertSigonWorkTimeOverAcc(HashMap<String,Object> params);
 	public int insertSigonWorkTimeOver(HashMap<String,Object> params);
 	public DataResult selectSigongArrivalTimeCheck(HashMap<String,Object> params);
