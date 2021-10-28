@@ -405,6 +405,36 @@
 ]]>
 </update>
 
+<update id="modyfyTcPlandtlSuspense_U_2nd" parameterType="java.util.HashMap">
+		/* CRS0010.modyfyTcPlandtlSuspense_U 2018.01.26 |주요한| 시공결과 미결처리 */
+		UPDATE TC_PLANDTL SET
+		    MOB_STD = 'C13N'
+		    ,COM_UNDSEC = #{COM_UNDSEC} /* 미결사유구분 */
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_RCDT)">
+			,PLD_RCDT = #{PLD_RCDT} /* 재시공요청일 */
+		</if>
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_RASDT)">
+			,PLD_RASDT = #{PLD_RASDT} /* AS요청일 */
+		</if>
+			,PLD_RMK = #{PLD_RMK} /* 비고 */
+			,COM_RDSEC = 'C13N' /* 결과구분 */
+			,USR_CD = #{USER_CD}
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_FQTY)">
+			,PLD_CFAMT = PLD_FAMT / PLD_FQTY * (PLD_FQTY - #{PLD_FQTY}) /* */
+		</if>
+		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_FQTY)">
+			,PLD_FQTY = PLD_FQTY - #{PLD_FQTY}/* 확정수량 */
+		</if>
+		,MOB_REMARK = #{MOB_REMARK}
+		,SYS_DT = GETDATE()
+		WHERE 1=1
+		AND PLM_NO = CAST( #{PLM_NO} AS VARCHAR)
+		AND COM_PLDSEC = CAST( #{COM_PLDSEC} AS VARCHAR)
+		AND ORD_SSEQ = CAST( #{ORD_SSEQ} AS VARCHAR)
+		AND ORD_ISEQ = CAST( #{ORD_ISEQ} AS VARCHAR)
+		AND ITM_CD = CAST( #{ITM_CD} AS VARCHAR)
+</update>
+
 <update id="modyfyTcPlandtlSuspense_U" parameterType="java.util.HashMap">
 		/* CRS0010.modyfyTcPlandtlSuspense_U 2018.01.26 |주요한| 시공결과 미결처리 */
 		UPDATE TC_PLANDTL SET

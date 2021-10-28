@@ -37,6 +37,7 @@ public interface CRS0010_M01Mapper {
 	public int updateSignDt(HashMap<String,Object> params);
 	public ArrayList<DataResult> selectTcSignContent(HashMap<String,Object> params);
 	public int insertTcStiReq(Map map);
+	public int modyfyTcPlandtlSuspense_U_2nd(Map map);
 	public int modyfyTcPlandtlSuspense_U(Map map);
 	public int modyfyTcActlist_D(Map map);
 	public int TcplanmstAllCalculate(Map map);

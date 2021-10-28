@@ -3,6 +3,7 @@ package com.fursys.mobilecm.controllers;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class ApiErpSigongAsController {
 	@Autowired CRS0010_M01Mapper crs0010_m01Mapper;
 	
 	@Autowired private PlatformTransactionManager txManager;
+	private SqlSession sql;
 	
 	Gson gson = new Gson();
 	boolean	isDeBug = false;	
