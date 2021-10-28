@@ -602,6 +602,8 @@ public class ApiErpServiceImpl  implements ApiErpService {
         	System.out.println("input2_size()   =  "  + input2.size());
         	System.out.println("input3_size()   =  "  + input3.size());
         	
+        	String pld_fqty_arr1[] = as_pld_fqty_arr.split(",");
+        	
         	for(int i = 0; i < input1.size();i++){
         		Map Map = CommonObjectUtils.convertObjectToMapUpperCase(input1.get(i));
         		suspenChk = (String) Map.get("SUSPEN_CHK");
@@ -643,21 +645,20 @@ public class ApiErpServiceImpl  implements ApiErpService {
         			//상차전반품인 경우 확정수량 0으로 변경
         			else if("C52B01".equals(undsec)){
         				
-        				Map.put("PLD_FQTY", "0");
-    					Map.put("PLD_CFAMT", "0");
-    					
-    					System.out.println("PLD_FQTY2 ==" + Map.get("PLD_FQTY"));
+        				//Map2.put("PLD_FQTY", "0");
+        				//Map2.put("PLD_CFAMT", "0");
+        				
+        				Map.put("PLD_FQTY", pld_fqty_arr1[i]);
+        				
         			}
-        			        			
-        			System.out.println("MOB_REMARK ==" + Map.get("MOB_REMARK"));
         			
         			//미결처리
-        			crs0010_m01Mapper.modyfyTcPlandtlSuspense_U(Map);
+        			crs0010_m01Mapper.modyfyTcPlandtlSuspense_U_2nd(Map);
                 	updateCount++;
         		}
         	}
         	
-        	String pld_fqty_arr[] = as_pld_fqty_arr.split(",");
+        	String pld_fqty_arr2[] = as_pld_fqty_arr.split(",");
         	
         	for(int j = 0; j < input2.size();j++){
         		Map Map2 = CommonObjectUtils.convertObjectToMapUpperCase(input2.get(j));
@@ -701,7 +702,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
         				//Map2.put("PLD_FQTY", "0");
         				//Map2.put("PLD_CFAMT", "0");
         				
-        				Map2.put("PLD_FQTY", pld_fqty_arr[j]);
+        				Map2.put("PLD_FQTY", pld_fqty_arr2[j]);
         				
         			}
         			
@@ -711,6 +712,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
         		}
         	}
         	        	
+        	String pld_fqty_arr3[] = as_pld_fqty_arr.split(",");
         	for(int x = 0; x < input3.size();x++){
         		Map Map3 = CommonObjectUtils.convertObjectToMapUpperCase(input3.get(x));
         		suspenChk = (String) Map3.get("SUSPEN_CHK");
@@ -750,12 +752,15 @@ public class ApiErpServiceImpl  implements ApiErpService {
         			//상차전반품인 경우 확정수량 0으로 변경
         			else if("C52B01".equals(undsec)){
         				
-        				Map3.put("PLD_FQTY", "0");
-        				Map3.put("PLD_CFAMT", "0");
+        				//Map2.put("PLD_FQTY", "0");
+        				//Map2.put("PLD_CFAMT", "0");
+        				
+        				Map3.put("PLD_FQTY", pld_fqty_arr3[x]);
+        				
         			}
         			
         			//미결처리
-        			crs0010_m01Mapper.modyfyTcPlandtlSuspense_U(Map3);
+        			crs0010_m01Mapper.modyfyTcPlandtlSuspense_U_2nd(Map3);
                 	updateCount++;
         		}
         	}
