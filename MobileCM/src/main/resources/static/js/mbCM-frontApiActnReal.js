@@ -864,7 +864,13 @@ function selectAll(selectAll)  {
   
   checkboxes.forEach((checkbox) => {
     checkbox.checked = selectAll.checked
-  })
+  });
+  $('#chsAssgnInfBx').addClass('opn');
+  var vInfTmNm = $('#chsAssgnInfBx .assgnTm');
+  var tmNm = $('.assgnLst .clck > .assgnBx .fao .txt');
+  vInfTmNm.find('.fao').empty();
+  vInfTmNm.find('.fao').text(tmNm.text());
+  $('#chsAssgnInfBx .faoCtmrNm').text('');
 }
 
 function allctnconfirm() {//분배확정 버튼모양 변경,팝업닫기이벤트
