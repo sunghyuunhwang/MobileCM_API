@@ -46,5 +46,26 @@
 		   SET USR_LOGINDT = GETDATE()	   	   
 		 WHERE USR_CD = #{login_id}
 	]]>
-	</update>    
+	</update>   
+	<insert id="insertLoginHistory" parameterType="java.lang.String">
+	<![CDATA[
+		INSERT INTO TY_FUNCTIONUSE_HIST (
+			 SYSTEM_GUBUN
+			,CALL_FUNCTION
+			,FUNCTION_NAME
+			,CALL_IP
+			,CALL_RESULT
+			,FST_USR_CD
+			,FST_SYS_DT
+		) VALUES (
+			'Y25003'
+			,'login'
+			,'CM 스케줄링 로그인'
+			,'220.118.27.34'
+			,''
+			,#{login_id}
+			,GETDATE()
+		)
+	]]>
+	</insert>
 </mapper>

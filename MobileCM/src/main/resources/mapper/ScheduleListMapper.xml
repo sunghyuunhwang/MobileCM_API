@@ -20,6 +20,29 @@
     ORDER BY A.STI_NM, A.STI_CD       
 ]]>
 </select>
+<select id="selectKStiList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSti">        
+<![CDATA[ 
+	SELECT A.sti_cd    AS STI_CD,
+	       A.sti_nm    AS STI_NM,
+	       B.ccd_nm    AS COM_SCD_NM,
+	       A.com_ctsec AS COM_CTSEC,
+	       A.com_scd   AS COM_SCD
+	FROM   tc_stinf A WITH (nolock),
+	       tt_comcd B WITH (nolock)
+	WHERE  A.com_scd = B.ccd_cd
+	       AND A.sti_cd IN (SELECT DISTINCT k_sti_cd
+	                        FROM   tc_stinf S WITH (nolock)
+	                        WHERE  S.com_scd = #{com_scd}
+	                        	   AND S.sti_rank = 'Y'
+	                        	   AND S.real_yn = 'Y')
+	       AND A.sti_rank = 'Y'
+	       AND A.real_yn = 'Y'
+	       AND B.cdx_cd = 'C16'
+	       AND B.ccd_yn = 'Y'
+	ORDER  BY A.sti_nm,
+	          A.sti_cd       
+]]>
+</select>
 <select id="selectScheduleMainList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPScheduleList">         
 <![CDATA[ 
 	SELECT

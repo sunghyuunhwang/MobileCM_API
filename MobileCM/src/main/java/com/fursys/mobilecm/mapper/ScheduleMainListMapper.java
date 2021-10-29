@@ -34,6 +34,7 @@ import com.fursys.mobilecm.vo.erp.ERPScheduleCount;
 public interface ScheduleMainListMapper {
 	
 	public ArrayList<ERPSti> selectStiList(HashMap<String,Object> params); 
+	public ArrayList<ERPSti> selectKStiList(HashMap<String,Object> params);
 	public ArrayList<ERPScheduleList> selectScheduleMainList(HashMap<String,Object> params); 
 	public ERPConstructionMainPage selectSigongMainPage(HashMap<String,Object> params); 
 	public ArrayList<ERPConstructionItemPage> selectSigongItemPage(HashMap<String,Object> params); 

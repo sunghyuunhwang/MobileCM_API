@@ -28,6 +28,13 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .dfBx{display: inline-block;float: left;width: 100%;}
 .dfBx.flxBtwn{display: inline-flex;}
 .flxBtwn{justify-content: space-between;}
+.dfBx.flxBtwn.allcheck{    
+	/*margin: 0px 0px 0px 0px; */
+    /* justify-content: inherit; */
+    position: relative;
+    /* align-self: self-start; */
+    display: inline-block
+}
 
 .fltRght{float: right;}
 .fltLft{float: left;}

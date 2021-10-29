@@ -519,6 +519,7 @@ $('#assgnSub_lst li').remove();
 //					   var amt2 = constcst_sum;
 	                   var text = "지급금액 : ";
 	                   var text2 = " 원";
+	                   var com_rfg = response.com_rfg;
 
 	                   var arr_change_data = "";
 	                   arr_change_data = com_ssec+"/"+rem_dt+"/"+rem_seq+"/"+plm_no+"/"+orm_no
@@ -544,8 +545,10 @@ $('#assgnSub_lst li').remove();
     			        assgn_lst += "<span class='assgnRqgiveamt'><font color = 'blue'><b>"+amt2+"</b></font>"+text2+"</span>";
     			        assgn_lst += "<span class='assgnRqagt'>"+vnd_nm+"</span>";
     			        assgn_lst += "<span class='assgnRqschdivyn'>"+schdiv_yn+"</font></span>";
-                       assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
-                       assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
+    			        assgn_lst += "<span class='assgnRqcomrfg'>"+com_rfg+"</span>";
+    			        assgn_lst += "<input type='hidden' value="+com_rfg+" name='comrfg/>"
+                       	assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
+                       	assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
     			        assgn_lst += "</dd>";
     			        assgn_lst += "</dl>";
     			        assgn_lst += "</li>";
@@ -557,6 +560,7 @@ $('#assgnSub_lst li').remove();
                  innmbr();//인풋값 스팬으로 넘기기
                  addMarkersTooMuch(list);
 			  $('#assgnSub_lst').append('<script>assgnsubLstChk();assgnsubInf();</script>');
+			  $("input:checkbox[id='allcheck']").prop("checked", false); /* by ID */
 	    },
          //complete:function{
 
@@ -613,6 +617,7 @@ $('#assgnSub_lst li').remove();
 //					   var amt2 = constcst_sum;
 	                   var text = "지급금액 : ";
 	                   var text2 = " 원";
+	                   var com_rfg = response.com_rfg;
 
 	                   var arr_change_data = "";
 	                   arr_change_data = com_ssec+"/"+rem_dt+"/"+rem_seq+"/"+plm_no+"/"+orm_no
@@ -638,8 +643,10 @@ $('#assgnSub_lst li').remove();
     			        assgn_lst += "<span class='assgnRqgiveamt'><font color = 'blue'><b>"+amt2+"</b></font>"+text2+"</span>";
     			        assgn_lst += "<span class='assgnRqagt'>"+vnd_nm+"</span>";
     			        assgn_lst += "<span class='assgnRqschdivyn'>"+schdiv_yn+"</font></span>";
-                       assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
-                       assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
+    			        assgn_lst += "<span class='assgnRqcomrfg'>"+com_rfg+"</span>";
+    			        assgn_lst += "<input type='hidden' value="+com_rfg+" name='comrfg' />"
+                       	assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
+                       	assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
     			        assgn_lst += "</dd>";
     			        assgn_lst += "</dl>";
     			        assgn_lst += "</li>";
@@ -651,6 +658,7 @@ $('#assgnSub_lst li').remove();
                  innmbr();//인풋값 스팬으로 넘기기
                  addMarkersTooMuch(list);
 			  $('#assgnSub_lst').append('<script>assgnsubLstChk();assgnsubInf();</script>');
+			  $("input:checkbox[id='allcheck']").prop("checked", false); /* by ID */
 	    },
          //complete:function{
 
@@ -673,6 +681,38 @@ function chngTmStrt(sti_cd,sti_nm) {//팀변경
 	    dataType: "json",
          data: {
 //              k_sti_cd:"YA521"
+	    },
+	    success: function(list){
+		    $.each(list, function(idx, response) {
+	                   var sti_cd = response.sti_cd;
+	                   var sti_nm = response.sti_nm;
+	                   var com_scd = response.com_scd;
+	                   var com_ctsec = response.com_ctsec;
+	  		     $('#chngTmLst').append("<li>"+response.sti_nm+"<input type='hidden' name='from_com_scd' value="+response.com_scd+" /><input type='hidden' name='from_com_ctsec' value="+response.com_ctsec+" /><input type='hidden' name='from_sti_nm' value="+response.sti_nm+" /><input type='hidden' name='from_sti_cd' value="+response.sti_cd+" /></li>");
+				$('#chsAssgnInfBx').append('<script>chngTmLst();</script>');
+			 console.log(response);
+ 	          });
+	    },
+         //complete:function{
+
+         //},
+	    error: function (request, status, error){
+              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+              alert('데이터를 불러올수 없습니다.');
+	    }
+
+	  });
+}
+
+function chngKTmStrt(sti_cd,sti_nm) {//권역외변경
+     assgnsubInfOnly();
+	$.ajax({
+	    url: "/v1/api/erp/selectKStiList",
+	    type: "GET",
+	    cache: false,
+	    dataType: "json",
+         data: {
+//              com_scd :"C16YA"
 	    },
 	    success: function(list){
 		    $.each(list, function(idx, response) {
@@ -816,6 +856,15 @@ function assgninfLstdt(_this,rem_dt,com_scd,sti_cd,sti_nm,orm_qty,orm_amt, const
 	    }
 
 	  });
+}
+
+function selectAll(selectAll)  {
+  const checkboxes 
+     = document.querySelectorAll('input[name ="fromsti2"]');
+  
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = selectAll.checked
+  })
 }
 
 function allctnconfirm() {//분배확정 버튼모양 변경,팝업닫기이벤트

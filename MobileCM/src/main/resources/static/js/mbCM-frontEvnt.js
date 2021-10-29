@@ -285,6 +285,8 @@ function chngTmCls() {//팀변경 취소
      $('.chngTmCls').click(function() {
         $('.chngTmBx1').removeClass('chng');
         $('.chngTmLstBx').removeClass('chng');
+        $('.chngTm').removeClass('don');
+        $('.chngTm').text('미지정');
         $('.chngTmBtn').removeClass('chng');
         $('#assgnInfLstPop').addClass('opn');
         $('#assgnInfLstPop').addClass('smll');
@@ -292,6 +294,30 @@ function chngTmCls() {//팀변경 취소
 }
 function chngTmDonPop() {//팀 변경 완료팝업
      $('.chngTmBtn').click(function() {
+	   var cnt = $('input:checkbox[name="fromsti2"]:checked').length;
+	   if (cnt < 1) {
+		alert("변경할 수주건을 체크해주세요.");
+		return;
+	   };
+	   
+	   var isSelected = $('.chngTm').hasClass('don');
+	   if(!isSelected) {
+		alert("변경할 팀을 선택해주세요.");
+		return;
+	   };   
+	   var check = true;
+	   $('input:checkbox[name="fromsti2"]:checked').each(function () {
+			var com_rfg = $(this).closest('li').find('input[name=comrfg]').val();
+			var com_ssec = $(this).closest('li').find('input[name=from_com_ssec]').val();
+			if(com_rfg === "예약확정") {
+			   check = false;			
+			}
+	   	});
+	   if(!check) {
+	       $('.alrtPop').addClass('opn');
+	       $('#chngTmDonPopFail').addClass('on');	
+	       return;	
+	   }
        $('.alrtPop').addClass('opn');
        $('#chngTmDonPop').addClass('on');
      });
@@ -416,6 +442,8 @@ function allRset() {//모두 처음으로 돌리기(프론트엔드부분만)
      $('.menuBox .assgnStrt').removeClass('btnGry');
      $('.menuBox .assgnStrt').addClass('btnBlck');
      $('.crld').remove();
+     $('.chngTm').removeClass('don');
+     $('.chngTm').text('미지정');
 }
 $(document).ready(function(){
       if($('.loginBx').length < 1){

@@ -19,4 +19,5 @@ public interface UserMapper {
 	public Map<String, Object> getUserEtc(HashMap<String,Object> params); 
 	public Map<String, Object> getCom_Stsec(HashMap<String,Object> params);
 	public int updateLoginDt(HashMap<String,Object> params);
+	public int insertLoginHistory(String name);
 }

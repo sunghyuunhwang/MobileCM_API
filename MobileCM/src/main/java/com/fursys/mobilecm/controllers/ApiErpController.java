@@ -2876,6 +2876,26 @@ public class ApiErpController {
 		
 		return gson.toJson(allItems);
 	}	
+
+	@ApiOperation(value = "selectKStiList", notes = "권역시공팀 조회 리스트 ")
+	@GetMapping("/selectKStiList")  
+	public String selectKStiList(
+			@AuthenticationPrincipal User user,
+			@RequestParam(name="com_scd", required=false) String com_scd
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		
+		if (user != null) {
+			UserEtc etc = apiTmsErpController.getUserEtc(user);	
+			params.put("com_scd", etc.getCom_scd());
+		} else {
+			params.put("com_scd", com_scd);
+		}
+		
+		ArrayList<ERPSti> allItems = sCheduleMainListMapper.selectKStiList(params);
+		
+		return gson.toJson(allItems);
+	}	
 	
 	@ApiOperation(value = "scheduleMainList", notes = "시공/as 메인 페이지 조회")
 	@GetMapping("/scheduleMainList")  

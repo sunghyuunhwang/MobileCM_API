@@ -289,6 +289,10 @@ function addMarkersTooMuch(list) {
                               <button class="lndBtn smll btnBlck" onclick="sortAssgnSub_lst()">정렬</button>
                               <button class="icnWidBx on"><!--이리스트만보기--></button>
                               <button class="icnNrrwBx"><!--원상태로--></button>
+                       </div>                      
+                       <div class="dfBx flxBtwn allcheck">
+                       	    <input type="checkbox" id="allcheck" onclick="selectAll(this)"/>
+                           	<label for="chckall">전체선택</label>
                        </div>
                        <ul class="dfUl assgnSubLst" id="assgnSub_lst">
                               <!--<li>
@@ -330,6 +334,7 @@ function addMarkersTooMuch(list) {
                                 <span class="fao">HA10김기연팀</span>
                            </h2>
                            <span class="chngTm">미지정</span>
+                           <button class="lndBtn smll btnBlck chngTmStrt" onclick="chngKTmStrt()">권역외변경</button>
                            <button class="lndBtn smll btnBlck chngTmStrt" onclick="chngTmStrt()">팀변경</button>
                            <button class="chngTmCls icnCls_blck"></button>
                       </div>
@@ -404,6 +409,17 @@ function addMarkersTooMuch(list) {
                      <div class="btnBx">
                           <button class="clsBtn btn btnSzHrf lft btnGry h54px">취소</button>
                           <button class="btn btnSzHrf rght btnBlck h54px" onclick="chngTmDon()">완료</button>
+                     </div>
+                </article>
+                <article class="popCntnts alrtBx" id="chngTmDonPopFail">
+                     <h2 class="ttl _f19px _32px">
+                          예약확정된 건은 변경할 수 없습니다.
+                     </h2>
+                     <h4 class="ttlInf">
+                          체크한 시공건의 예약상태를 확인해주세요. 
+                     </h4>
+                     <div class="btnBx">
+                          <button class="clsBtn btn btnSzHrf lft btnGry h54px">닫기</button>   
                      </div>
                 </article>
                 <article class="popCntnts alrtBx" id="assgnDonPop">

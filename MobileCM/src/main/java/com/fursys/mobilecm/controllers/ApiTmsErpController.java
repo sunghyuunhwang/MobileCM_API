@@ -831,7 +831,7 @@ public class ApiTmsErpController {
 			if ("C142".equals(com_rfg)) {				
 				txManager.rollback(status);				
 				response.setResultCode("5001");
-				response.setResultMessage(orm_nm + "님 건은 시공확정건 입니다. 확정취소 처리후 작업하세요.");
+				response.setResultMessage(orm_nm + "님 건은 예약확정건 입니다. 확정취소 처리후 작업하세요.");
 				return gson.toJson(response);
 			}
 	        
@@ -854,9 +854,6 @@ public class ApiTmsErpController {
 				response.setResultMessage("updateSticdTcPlanmst 오류 [" + res + "]");
 				return gson.toJson(response);
 			}				
-			
-			
-			System.out.println(com_ssec);
  		
 	        if("C18A".equals(com_ssec)) {
 	        	
@@ -902,7 +899,7 @@ public class ApiTmsErpController {
 					return gson.toJson(response);
 				}	
 				
-	        } else if ( "AS".equals(com_ssec) )	{
+	        } else if ("AS".equals(com_ssec) )	{
 
 	        	//ta_rptreq 변경
 	        	res = tmserpScheduling.updateSticdTaRptReq(params);
@@ -952,7 +949,7 @@ public class ApiTmsErpController {
 				//시공팀 hp 가져오기
 				
 //				dataResult = tmserpScheduling.getStmHpNo(params);
-//				
+//					
 //				String stmHpNo = dataResult.getData1();;			
 //	
 //				if (stmHpNo == null) {

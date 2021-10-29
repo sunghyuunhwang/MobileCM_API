@@ -30,6 +30,7 @@ public class TMSERPSigongAsList {
 	private Integer constcst_sum;
 	private String vnd_nm;
 	private String schdiv_yn;
+	private String com_rfg;
 }
 
 
