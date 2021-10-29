@@ -16,6 +16,7 @@ import com.fursys.mobilecm.vo.erp.ERPStiReqTimeSendList;
 import com.fursys.mobilecm.vo.erp.ERPStmInfo;
 import com.fursys.mobilecm.vo.erp.ERPGubbunInfo;
 import com.fursys.mobilecm.vo.erp.ERPNetKmAllowance;
+import com.fursys.mobilecm.vo.erp.ERPPraNewRptNo;
 import com.fursys.mobilecm.vo.erp.ERPConstructionMainPage;
 import com.fursys.mobilecm.vo.erp.ERPCooperationList;
 import com.fursys.mobilecm.vo.erp.ERPReReserveInfo;
@@ -99,7 +100,12 @@ public interface ScheduleMainListMapper {
 	public DataResult getSigongAgtCd(Map params);
 	public DataResult searchIosFileYn(Map params);
 	
-	
-	
+	public DataResult selectAsReqBasicInfomation(HashMap<String,Object> params);
+	public DataResult selectAsReqBasicInfomation2(HashMap<String,Object> params);
+	public DataResult selectExcuteAsTeamInfo(HashMap<String,Object> params);
+	public int insertSigongMigeulAsRequest(HashMap<String,Object> params);
+	public DataResult executePraFaRptno(HashMap<String,Object> params);
+	public DataResult selectExcuteAsReqBasicInfo(HashMap<String,Object> params); 
+	public int updateSigongAsConfirmInform(HashMap<String,Object> params);
 	
 }

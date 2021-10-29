@@ -22,5 +22,9 @@ public class DataResult {
 	private int value3;
 	private int value4;
 	private int value5;
+	public Object get(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

@@ -2039,4 +2039,213 @@ SELECT
 	WHERE A.DATA_KEY = #{file_id}
 ]]> 
 </select>
+
+<select id="selectAsReqBasicInfomation" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+
+	SELECT
+		TCP.COM_AGSEC AS DATA1,
+		TCP.COM_SCD AS DATA2,
+		TCP.COM_BRAND AS DATA3, 
+		TCP.STI_CD AS DATA4,
+		TCP.TOWN_CD AS DATA5
+	  FROM TC_PLANMST TCP WITH (NOLOCK)
+	 WHERE TCP.PLM_NO = #{plm_no}
+
+]]>
+</select>
+
+<select id="selectAsReqBasicInfomation2" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+
+SELECT 
+		 CC.ROAD_ADDR AS DATA1,
+		 BB.ORM_GPOST AS DATA2,
+		 BB.ORM_GADDR AS DATA3,
+		 BB.AGT_CD AS DATA4,
+		 BB.VND_NM AS DATA5
+  FROM 
+		(SELECT TOP 1 ROAD_ADDR FROM TC_ROADZIP WITH (NOLOCK) WHERE 1=1  AND ZIP_CD = '16954') CC,			
+		(SELECT  
+				A.ORM_GPOST AS ORM_GPOST
+				,A.ORM_GADDR AS ORM_GADDR
+				,A.AGT_CD AS AGT_CD
+				,ISNULL(B.VND_NM,'') AS VND_NM
+  		   FROM TC_PLANMST A WITH (NOLOCK) ,TT_VENDOR B WITH (NOLOCK)
+ 		  WHERE A.AGT_CD 	= B.VND_CD 
+   		    AND PLM_NO 		= #{plm_no}
+		)BB  
+
+]]>
+</select>
+
+<select id="selectExcuteAsTeamInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+
+ SELECT TOP 1 A.STI_CD  AS DATA1
+       ,C.STI_NM AS DATA2
+       ,C.COM_SCD AS DATA3
+  FROM TC_BRANDITM A with (nolock)
+       ,TA_TOWND B with (nolock)
+       ,TC_STINF C with (nolock)
+ WHERE A.COM_AGSEC = B.COM_AGSEC
+   AND A.COM_BRAND = B.COM_BRAND
+   AND A.STI_CD    = B.STI_CD
+   AND A.STI_CD    = C.STI_CD
+   AND A.COM_SCD   = C.COM_SCD
+   AND A.COM_AGSEC = #{com_agsec}  
+   AND A.COM_BRAND = #{com_brand}
+   AND B.TOWN_CD   = #{town_cd}
+   AND C.STI_RANK = 'Y'
+
+]]>
+</select>
+
+
+<insert id="insertSigongMigeulAsRequest" parameterType="HashMap">
+<![CDATA[
+ 
+INSERT INTO TA_RPTREQ
+		(
+		 RPT_NO
+		,RPT_SEQ
+		,RPT_DT
+		,CTM_CD
+		,CTM_ZIP
+		,CTM_ADDR
+		,COM_AGSEC
+		,STI_CD
+		,USR_ID
+		,SYS_DT
+		,REMARK
+		,FST_USR
+		,FST_SYS_DT
+		,COM_ATSEC
+		,COM_RPSEC
+		,CTM_TYPE
+		,CTM_OCD
+		,CTM_ONM
+		,CTM_NM
+		,CTM_TEL
+		,CTM_HP
+		,CTM_EMAIL
+		,VND_SCD
+		,VND_RPTCD
+		,VND_RPTNM
+		,VND_SNM
+		,RPT_QDT
+		,COM_SCD
+		,RPT_USRNM
+		,RPT_QNM
+		,RPT_SCD
+		,RPT_RST_ACTTM
+		,RPT_QTM_GUBUN
+		,RPT_QTM
+		,COM_PKSEC
+		,RPT_STARTTM
+		,RPT_ENDTM
+		,COM_SPROG
+		,RPT_YN
+		,FILE_ID
+		,RPT_DESC
+		,COM_BRAND
+		,TOWN_CD
+		,ORD_NO 
+		,RPT_QYN
+		,ITM_GROUP
+		,ACT_STICD
+		,TRS_YN
+		,RPT_USRID		
+		,PLM_NO
+		,CTM_ADDR2
+		) 
+	VALUES
+		(
+		 #{new_rpt_no}
+		,'01'									
+		,CONVERT(CHAR(8), GETDATE(), 112)		
+		,''								
+		,#{orm_gpost}
+		,#{orm_gaddr}
+		,#{com_agsec}
+		,#{as_sti_cd}
+		,#{sti_cd}
+		,GETDATE()
+		,NULL
+		,#{sti_cd}
+		,GETDATE()
+		,'A11003'
+		,'A12004'
+		,''	
+		,''	
+		,''
+		,(SELECT TCP.ORM_NM FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
+		,''
+		,''
+		,''
+		,#{agt_cd}
+		,#{agt_cd}
+		,ISNULL(#{vnd_nm},'ANONY1')
+		,ISNULL(#{vnd_nm},'대리점불명')
+		,#{req_as_dt}
+		,#{as_com_scd}
+		,#{as_sti_nm}
+		,#{as_sti_nm}
+		,#{as_com_scd}
+		,#{as_sti_cd}
+		,'C4133'
+		,'C4133'
+        ,'R03002'
+        ,''
+        ,''
+        ,'A17001'
+		,'N'
+	    ,''
+		,#{as_req_remark}
+		,#{com_brand}
+		,'4146311100'
+		,#{town_cd}
+		,'Y'
+		,'A94002'
+		,#{as_sti_cd}
+		,'Y'
+		,#{sti_cd}
+		,#{plm_no}
+		,''								
+		)	 
+]]>
+</insert> 
+ 
+<select id="executePraFaRptno" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	
+	execute dbo.PRA_FA_RPTNO_CM;1 @P_COM_AGSEC = #{com_agsec}, @P_WKSEC = 'C08A01'
+	
+]]>
+</select>
+
+<select id="selectExcuteAsReqBasicInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+	SELECT
+		TCP.ORM_NM AS DATA1,
+		( SELECT TCS.STI_NM FROM TC_STINF TCS WITH (NOLOCK) WHERE TCS.COM_SCD = TCP.COM_SCD AND TCS.STI_CD = TCP.STI_CD ) AS DATA2,
+		TCP.PLM_CDT AS DATA3,
+		ISNULL(TCP.MOB_REMARK, '') AS DATA4,
+		TCP.ORM_NO AS DATA5
+	  FROM TC_PLANMST TCP WITH (NOLOCK)
+	 WHERE TCP.PLM_NO = #{plm_no}
+
+]]>
+</select>
+
+<update id="updateSigongAsConfirmInform" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_PLANDTL SET COM_UNPSEC = 'C23A', USR_CD = 'YA521' ,SYS_DT = GETDATE()
+	WHERE PLM_NO = #{plm_no}
+	   AND COM_RDSEC ='C13N'
+	   AND COM_PLDSEC IN('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
+
+]]>
+</update>
+
 </mapper>
