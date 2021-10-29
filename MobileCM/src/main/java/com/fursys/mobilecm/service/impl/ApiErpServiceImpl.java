@@ -92,6 +92,26 @@ public class ApiErpServiceImpl  implements ApiErpService {
 	Gson gson = new Gson();
 	
 	@Override		
+	public ArrayList<DataResult> erp_NotifyList(HashMap<String, Object> param) {
+		ArrayList<DataResult> allitems;
+		HashMap<String, Object> params;
+		
+		try {
+			String as_sti_cd = (String) param.get("sti_cd");
+			
+			params = new HashMap<String, Object>();
+	        params.put("sti_cd", as_sti_cd);
+	        
+	        allitems = erpsigongasMapper.selectNotifyList(params);		
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return allitems;
+	}
+	
+	@Override
 	public BaseResponse erp_Fcm_SendNotify(HashMap<String, Object> param) {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		BaseResponse response = new BaseResponse();
@@ -118,12 +138,12 @@ public class ApiErpServiceImpl  implements ApiErpService {
 			params = new HashMap<String, Object>();
 			params.put("com_scd", as_com_scd);
 	        
-			dataResult = crs0010_m01Mapper.selectNotifyGetDate(params);
+			dataResult = erpsigongasMapper.selectNotifyGetDate(params);
 			if (dataResult != null) {
 				send_dt = dataResult.getData1();
 			}
 			
-			ArrayList<ERPPushMessage> allItems = crs0010_m01Mapper.selectPhoneID(params);
+			ArrayList<ERPPushMessage> allItems = erpsigongasMapper.selectPhoneID(params);
 			if (allItems != null) {
     			for(int i=0; i<allItems.size(); i++) {
     				send_text = new StringBuffer();
@@ -143,7 +163,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
     				params.put("receive_id", allItems.get(i).getSti_cd());
     				params.put("receive_phone_id", allItems.get(i).getToken());
     				    				
-    	    		res = crs0010_m01Mapper.insertNotify(params);
+    	    		res = erpsigongasMapper.insertNotify(params);
     	    		if (res < 1) {
     	    			txManager.rollback(status);
     					response.setResultCode("5001");
@@ -189,8 +209,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
 		response.setResultCode("200");		
 		return response;
 
-	}
-	
+	}	
 	
 	@Override		
 	public ArrayList<ERPAttachFileList> erp_AttachFileList(HashMap<String, Object> param) {
@@ -2187,7 +2206,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
     			//벽고정 추가정산
         		if (ds_tcPlanmstList.orm_nm.indexOf("(벽고정)") == 0) {
         			
-        			res = crs0010_m01Mapper.insertSigongWallFix(params);
+        			res = erpsigongasMapper.insertSigongWallFix(params);
         			if (res < 1) { 
             			txManager.rollback(status);
         				response.setResultCode("5001");
@@ -2195,7 +2214,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
         				return response;
             		}
         			
-        			res = crs0010_m01Mapper.insertSigongWallFixAcc(params);
+        			res = erpsigongasMapper.insertSigongWallFixAcc(params);
         			if (res < 1) { 
             			txManager.rollback(status);
         				response.setResultCode("5001");
@@ -2206,7 +2225,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
 
         		//저녁시공 자동정산
         		String over_time = "", rem_ftm = "";
-        		dataResult = crs0010_m01Mapper.selectSigongWorkTimeCheck(params);
+        		dataResult = erpsigongasMapper.selectSigongWorkTimeCheck(params);
         		if (dataResult != null) {
         			over_time = dataResult.getData1();
         		}
@@ -2214,14 +2233,14 @@ public class ApiErpServiceImpl  implements ApiErpService {
     			params.put("rem_dt", ds_tcPlanmstList.rem_dt);
     			params.put("rem_seq", ds_tcPlanmstList.rem_seq);
 
-    			dataResult = crs0010_m01Mapper.selectSigongArrivalTimeCheck(params);
+    			dataResult = erpsigongasMapper.selectSigongArrivalTimeCheck(params);
         		if (dataResult != null) {
         			rem_ftm = dataResult.getData1();
         		}
         		
         		//시공시간이 18:00 이후이고, 도착안내시간이 18:00 이후인 경우,
     			if ("Y".equals(over_time) && !"".equals(rem_ftm)) {				
-    				res = crs0010_m01Mapper.insertSigonWorkTimeOver(params);
+    				res = erpsigongasMapper.insertSigonWorkTimeOver(params);
     				if (res < 1) { 
     	    			txManager.rollback(status);
     					response.setResultCode("5001");
@@ -2229,7 +2248,7 @@ public class ApiErpServiceImpl  implements ApiErpService {
     					return response;
     	    		}
     				
-    				res = crs0010_m01Mapper.insertSigonWorkTimeOverAcc(params);
+    				res = erpsigongasMapper.insertSigonWorkTimeOverAcc(params);
     				if (res < 1) { 
     	    			txManager.rollback(status);
     					response.setResultCode("5001");

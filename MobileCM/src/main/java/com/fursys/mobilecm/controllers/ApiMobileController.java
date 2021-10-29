@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fursys.mobilecm.mapper.CRS0010_M01Mapper;
+import com.fursys.mobilecm.mapper.ErpSigongAsMapper;
 import com.fursys.mobilecm.mapper.UserMapper;
 import com.fursys.mobilecm.security.FursysPasswordEncoder;
 import com.fursys.mobilecm.vo.BaseResponse;
@@ -35,6 +36,8 @@ import io.swagger.annotations.ApiResponses;
 public class ApiMobileController {
 	@Autowired UserMapper userMapper;
 	@Autowired CRS0010_M01Mapper crs0010_p01Mapper;
+	@Autowired ErpSigongAsMapper erpsigongasMapper;
+	
 	@Autowired private PlatformTransactionManager txManager;
 
 	@Value("${spring.datasource.url}")
@@ -224,12 +227,20 @@ public class ApiMobileController {
         	user.setCom_stsec(com_stec.get("COM_STSEC").toString());
         	        	
         	params.put("phone_id", phone_id);
-        	res = crs0010_p01Mapper.updatePhoneID(params);
-
+        	
+        	res = erpsigongasMapper.deleteUsedPhoneID(params);
         	if (res < 1){
         		txManager.rollback(status);
         		userInfoResponse.setResultCode("5001");
-        		userInfoResponse.setResultMessage("비밀번호 변경에 실패하였습니다.");
+        		userInfoResponse.setResultMessage("PhoneID 삭제에 실패하였습니다.");
+        		return gson.toJson(userInfoResponse);
+        	}
+        	
+        	res = erpsigongasMapper.updatePhoneID(params);
+        	if (res < 1){
+        		txManager.rollback(status);
+        		userInfoResponse.setResultCode("5001");
+        		userInfoResponse.setResultMessage("PhoneId 변경에 실패하였습니다.");
         		return gson.toJson(userInfoResponse);
         	}
         	

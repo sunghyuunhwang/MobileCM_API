@@ -20,16 +20,6 @@ import com.fursys.mobilecm.vo.erp.crs0010_m01.ds_tcPlanmstList;
 @Mapper
 public interface CRS0010_M01Mapper {
 	
-	public DataResult selectNotifyGetDate(HashMap<String, Object> param);
-	public int insertSigonWorkTimeOverAcc(HashMap<String,Object> params);
-	public int insertSigonWorkTimeOver(HashMap<String,Object> params);
-	public DataResult selectSigongArrivalTimeCheck(HashMap<String,Object> params);
-	public DataResult selectSigongWorkTimeCheck(HashMap<String,Object> params);
-	public int insertSigongWallFixAcc(HashMap<String,Object> params);
-	public int insertSigongWallFix(HashMap<String,Object> params);
-	public ArrayList<ERPPushMessage> selectPhoneID(HashMap<String,Object> params);
-	public int updatePhoneID(HashMap<String,Object> params);
-	public int insertNotify(HashMap<String,Object> params);
 	public DataResult selectIsEmpty(HashMap<String,Object> params);
 	public int updateAsResultRemark(HashMap<String,Object> params);
 	public int updateAsResult(HashMap<String,Object> params);

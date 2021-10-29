@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiParam;
 public class ApiErpSigongAsController {
 	
 	@Autowired ApiErpService apiErpService;
-	@Autowired ErpSigongAsMapper erpSigongAsMapper;
+	@Autowired ErpSigongAsMapper erpsigongasMapper;
 	@Autowired CRS0010_M01Mapper crs0010_m01Mapper;
 	
 	@Autowired private PlatformTransactionManager txManager;
@@ -42,6 +42,20 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@ApiOperation(value = "erp_NotifyList", notes = "알림리스트")
+	@GetMapping("/erp_NotifyList")  
+	public String erp_NotifyList (
+			@ApiParam(value = "STI_CD", required=true, example = "YA521")
+			@RequestParam(name="sti_cd", required=true) String as_sti_cd
+		) { 	
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("sti_cd", as_sti_cd);
+        
+        ArrayList<DataResult> allItems = apiErpService.erp_NotifyList(params);
+        
+		return gson.toJson(allItems);
+	}
 	
 	@ApiOperation(value = "erp_insertSigongOverTimeWork", notes = "일룸 저녁시간 자동정산")
 	@GetMapping("/erp_insertSigongOverTimeWork")
@@ -74,7 +88,7 @@ public class ApiErpSigongAsController {
 			params.put("plm_no", as_plm_no);
 			params.put("sti_cd", as_sti_cd);
 
-			dataResult = crs0010_m01Mapper.selectSigongWorkTimeCheck(params);
+			dataResult = erpsigongasMapper.selectSigongWorkTimeCheck(params);
     		if (dataResult != null) {
     			over_time = dataResult.getData1();
     		} else {
@@ -87,14 +101,14 @@ public class ApiErpSigongAsController {
 			params.put("rem_dt", as_rem_dt);
 			params.put("rem_seq", as_rem_seq);
 
-			dataResult = crs0010_m01Mapper.selectSigongArrivalTimeCheck(params);
+			dataResult = erpsigongasMapper.selectSigongArrivalTimeCheck(params);
     		if (dataResult != null) {
     			rem_ftm = dataResult.getData1();
     		}
     		
     		//시공시간이 18:00 이후이고, 도착안내시간이 18:00 이후인 경우,
 			if ("Y".equals(over_time) && !"".equals(rem_ftm)) {				
-				res = crs0010_m01Mapper.insertSigonWorkTimeOver(params);
+				res = erpsigongasMapper.insertSigonWorkTimeOver(params);
 				if (res < 1) { 
 	    			txManager.rollback(status);
 					response.setResultCode("5001");
@@ -106,7 +120,7 @@ public class ApiErpSigongAsController {
 				params.put("plm_cdt", as_plm_cdt);
 				params.put("com_brand", as_com_brand);        			
 			
-				res = crs0010_m01Mapper.insertSigonWorkTimeOverAcc(params);
+				res = erpsigongasMapper.insertSigonWorkTimeOverAcc(params);
 				if (res < 1) { 
 	    			txManager.rollback(status);
 					response.setResultCode("5001");
@@ -155,7 +169,7 @@ public class ApiErpSigongAsController {
 			params.put("plm_no", as_plm_no);
 			params.put("sti_cd", as_sti_cd);
 
-			res = crs0010_m01Mapper.insertSigongWallFix(params);
+			res = erpsigongasMapper.insertSigongWallFix(params);
 			if (res < 1) { 
     			txManager.rollback(status);
 				response.setResultCode("5001");
@@ -167,7 +181,7 @@ public class ApiErpSigongAsController {
 			params.put("plm_cdt", as_plm_cdt);
 			params.put("com_brand", as_com_brand);        			
 			
-			res = crs0010_m01Mapper.insertSigongWallFixAcc(params);
+			res = erpsigongasMapper.insertSigongWallFixAcc(params);
 			if (res < 1) { 
     			txManager.rollback(status);
 				response.setResultCode("5001");
@@ -260,7 +274,7 @@ public class ApiErpSigongAsController {
 			params.put("attch_div_cd", attch_div_cd);
 			params.put("attch_file_snum", attch_file_snum);
 			
-			res = erpSigongAsMapper.deleteAttachFile(params);			
+			res = erpsigongasMapper.deleteAttachFile(params);			
 			if (res < 1) {
 				txManager.rollback(status);
 				response.setResultCode("5001");
