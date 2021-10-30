@@ -225,23 +225,20 @@ public class ApiMobileController {
         	params.put("sti_cd", user.getSti_cd());
         	Map<String, Object> com_stec = userMapper.getCom_Stsec(params);
         	user.setCom_stsec(com_stec.get("COM_STSEC").toString());
-        	        	
-        	params.put("phone_id", phone_id);
         	
-        	res = erpsigongasMapper.deleteUsedPhoneID(params);
-        	if (res < 1){
-        		txManager.rollback(status);
-        		userInfoResponse.setResultCode("5001");
-        		userInfoResponse.setResultMessage("PhoneID 삭제에 실패하였습니다.");
-        		return gson.toJson(userInfoResponse);
-        	}
-        	
-        	res = erpsigongasMapper.updatePhoneID(params);
-        	if (res < 1){
-        		txManager.rollback(status);
-        		userInfoResponse.setResultCode("5001");
-        		userInfoResponse.setResultMessage("PhoneId 변경에 실패하였습니다.");
-        		return gson.toJson(userInfoResponse);
+        	if (!"".equals(phone_id)) {
+	        	params.put("phone_id", phone_id);
+	        	
+	        	//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
+	        	res = erpsigongasMapper.deleteUsedPhoneID(params);
+	        	
+	        	res = erpsigongasMapper.updatePhoneID(params);
+	        	if (res < 1){
+	        		txManager.rollback(status);
+	        		userInfoResponse.setResultCode("5001");
+	        		userInfoResponse.setResultMessage("PhoneId 변경에 실패하였습니다.");
+	        		return gson.toJson(userInfoResponse);
+	        	}
         	}
         	
         	txManager.commit(status);

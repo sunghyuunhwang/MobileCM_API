@@ -42,6 +42,53 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@ApiOperation(value = "erp_UpdatePhoneID", notes = "Phone ID UPDATE")
+	@GetMapping("/erp_UpdatePhoneID")
+	@RequestMapping(value = "/erp_UpdatePhoneID", method = RequestMethod.GET)
+	public String erp_UpdatePhoneID(
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String com_scd,
+			@ApiParam(value = "STI_CD", required=true, example = "YA551")
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			@ApiParam(value = "PHONE_ID", required=true, example = "ciOBoXqaQ1qPDcVL5CraXk:APA91bFaBEPkasZlm0L9e2d_C6QYYDj6CTXs6XHT3QlPCiMOee47SE-a_rb0VzQAc_OCsuR0rVzQKNJRZ3DYcUHsVVqs7pfor2OQuc0RcKiOsqvVJc8g7cp3AHDfWcaWKSo6Uv9FCy--")
+			@RequestParam(name="phone_id", required=true) String phone_id
+			) {
+		       
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		
+		try {
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("sti_cd", sti_cd);
+			params.put("com_scd", com_scd);
+			params.put("phone_id", phone_id);
+					
+			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
+			res = erpsigongasMapper.deleteUsedPhoneID(params);        	
+        	
+        	res = erpsigongasMapper.updatePhoneID(params);
+        	if (res < 1){
+        		txManager.rollback(status);
+        		response.setResultCode("5001");
+        		response.setResultMessage("PhoneId 변경에 실패하였습니다.");
+        		return gson.toJson(response);
+        	}
+        				
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}
+	
 	@ApiOperation(value = "erp_NotifyList", notes = "알림리스트")
 	@GetMapping("/erp_NotifyList")  
 	public String erp_NotifyList (
