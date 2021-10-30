@@ -5993,7 +5993,7 @@ public class ApiErpController {
 	public String erp_sigongmiguelRecreateAutoProc (
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@RequestParam(name="req_as_dt", required=true) String req_as_dt
+			@RequestParam(name="req_resigong_dt", required=true) String req_resigong_dt
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -6006,146 +6006,171 @@ public class ApiErpController {
 			HashMap<String,Object> params = new HashMap<String, Object>();
 	        params.put("plm_no", plm_no);
 
-	        //AS요청을위한 기본 정보 select1
-	        dataResult = sCheduleMainListMapper.selectAsReqBasicInfomation(params);	
-	        
-	        if (dataResult == null) {
-	        	txManager.rollback(status);
-	        	response.setResultCode("5001");
-	        	response.setResultMessage("selectAsReqBasicInfomation 오류");
-	        	return gson.toJson(response);
-	        }	        
-	        
-	        String com_agsec = "";
-	        String com_scd = "";
-	        String com_brand = "";
-	        String sti_cd = "";
-	        String town_cd = "";
-	       
-	        com_agsec = dataResult.getData1();
-	        com_scd = dataResult.getData2();
-	        com_brand = dataResult.getData3();
-	        sti_cd = dataResult.getData4();
-	        town_cd = dataResult.getData5();
-	        
-	      //AS요청을위한 기본 정보 select2
-	        
-	        dataResult = sCheduleMainListMapper.selectAsReqBasicInfomation2(params);	
-	        
-	        if (dataResult == null) {
-	        	txManager.rollback(status);
-	        	response.setResultCode("5001");
-	        	response.setResultMessage("selectAsReqBasicInfomation2 오류");
-	        	return gson.toJson(response);
-	        }		        
-	        
-	        String road_addr = "";
-	        String orm_gpost = "";
-	        String orm_gaddr = "";
-	        String agt_cd = "";
-	        String vnd_nm = "";
-	        
-	        road_addr = dataResult.getData1();
-	        orm_gpost = dataResult.getData2();		
-	        orm_gaddr = dataResult.getData3();
-	        agt_cd = dataResult.getData4();
-	        vnd_nm = dataResult.getData5();
-	        
-	        //실 수행 AS팀 정보 select
-	        params.put("com_agsec", com_agsec);
-	        params.put("com_brand", com_brand);
-	        params.put("town_cd", town_cd);
-	        params.put("com_scd", com_scd);
-	        params.put("sti_cd", sti_cd);
-	        
-	        dataResult = sCheduleMainListMapper.selectExcuteAsTeamInfo(params);	
+	        //재일정 요청을 위한 기본 정보 가져오기 1
+	        dataResult = sCheduleMainListMapper.selectSigongReqBasicInfomation(params);	
 
 	        if (dataResult == null) {
 	        	txManager.rollback(status);
 	        	response.setResultCode("5001");
-	        	response.setResultMessage("selectExcuteAsTeamInfo 오류");
+	        	response.setResultMessage("selectSigongReqBasicInfomation 오류");
 	        	return gson.toJson(response);
-	        }		        
+	        }	
 	        
-	        String as_sti_cd = "";
-	        String as_com_scd = "";
-	        String as_sti_nm = "";
+	        String org_com_agsec = "";
+	        String org_com_brand = "";
+	        String org_com_scd = "";
+	        String org_sti_cd = "";
+	        String org_orm_no = "";
 	        
-	        as_sti_cd = dataResult.getData1();
-	        as_sti_nm = dataResult.getData2();
-	        as_com_scd = dataResult.getData3();
+	        org_com_agsec = dataResult.getData1();
+	        org_com_brand = dataResult.getData2();
+	        org_com_scd = dataResult.getData3();
+	        org_sti_cd = dataResult.getData4(); 
+	        org_orm_no = dataResult.getData5();	        
 	        
-	        //AS요청사항 가져오기
-	        
-	        dataResult = sCheduleMainListMapper.selectExcuteAsReqBasicInfo(params);	
+	        //재일정 요청을 위한 기본 정보 가져오기 2
+	        dataResult = sCheduleMainListMapper.selectSigongReqBasicInfomation2(params);	
 
 	        if (dataResult == null) {
 	        	txManager.rollback(status);
 	        	response.setResultCode("5001");
-	        	response.setResultMessage("selectExcuteAsReqBasicInfo 오류");
+	        	response.setResultMessage("selectSigongReqBasicInfomation2 오류");
 	        	return gson.toJson(response);
-	        }	        
+	        }		        
 	        
-	        String org_orm_nm = dataResult.getData1();
-	        String org_sti_nm = dataResult.getData2();
-	        String org_plm_cdt = dataResult.getData3();
-	        String org_mob_remark = dataResult.getData4();
-	        String org_orm_no = dataResult.getData5();
+	        String org_agt_cd = "";
+	        String org_orm_gpost = "";
+	        String org_town_cd = "";
+	        String org_orm_gaddr = "";
+	        String org_rem_dt = "";
+	    
+	        org_agt_cd = dataResult.getData1();
+	        org_orm_gpost = dataResult.getData2();
+	        org_town_cd = dataResult.getData3();
+	        org_orm_gaddr = dataResult.getData4(); 	        
+	        org_rem_dt = dataResult.getData5();
 	        
-	        String as_req_remark = "";
+	        //신규 시공번호 채번
 	        
-	        as_req_remark = "원시공팀 "+org_sti_nm+" 시공팀의 시공건으로, AS미결이 발생한 건입니다.\r\n\r\n" +
-					 "1) 수주건명 : "+""+org_orm_nm+"\r\n"+
-					 "2) 수주번호 : "+""+org_orm_no+"\r\n"+
-					 "3) 시공일자 : "+""+org_plm_cdt+"\r\n"+
-					 "4) 요청사항 : "+""+org_mob_remark+"";	        
-	         
-			dataResult = sCheduleMainListMapper.executePraFaRptno(params);
+	        params.put("org_com_agsec", org_com_agsec);
+	        params.put("org_com_brand", org_com_brand);
+	        params.put("org_com_scd", org_com_scd);
+	        params.put("org_sti_cd", org_sti_cd);
+	        params.put("org_orm_no", org_orm_no);
+	        params.put("org_agt_cd", org_agt_cd);
+	        params.put("org_orm_gpost", org_orm_gpost);
+	        params.put("org_town_cd", org_town_cd);
+	        params.put("org_orm_gaddr", org_orm_gaddr);
+	        params.put("org_rem_dt", org_rem_dt);
+	        params.put("req_resigong_dt", req_resigong_dt);
+	        
+			dataResult = sCheduleMainListMapper.executePraFaAseqrem(params);
 			
 	        if (dataResult == null) {
 	        	txManager.rollback(status);
 	        	response.setResultCode("5001");
-	        	response.setResultMessage("selectExcuteAsReqBasicInfo 오류");
+	        	response.setResultMessage("executePraFaAseqrem 오류");
 	        	return gson.toJson(response);
 	        }	    		
 	        
-	        String new_rpt_no = "";
-	        new_rpt_no = dataResult.getData1();
+	        String new_plm_no = "";
+	        new_plm_no = dataResult.getData1();	        
 	        
-        
-//	        //AS신규 요청정보 저장 
-	        params.put("as_sti_cd", as_sti_cd);
-	        params.put("as_sti_nm", as_sti_nm);
-	        params.put("as_com_scd", as_com_scd);
-	        params.put("road_addr", road_addr);
-	        params.put("orm_gpost", orm_gpost);
-	        params.put("orm_gaddr", orm_gaddr);
-	        params.put("agt_cd", agt_cd);
-	        params.put("vnd_nm", vnd_nm);
-	        params.put("new_rpt_no", new_rpt_no);
-	        params.put("req_as_dt", req_as_dt);
-	        params.put("as_req_remark", as_req_remark);
-	        
-        	res = sCheduleMainListMapper.insertSigongMigeulAsRequest(params);
+	        //신규 tc_planmst insert
+	        params.put("new_plm_no", new_plm_no);
+        	res = sCheduleMainListMapper.insertSigongMigeulReRequest(params);
         	
 			if (res < 1) {    				
 	        	txManager.rollback(status);
 	        	response.setResultCode("5001");
-	        	response.setResultMessage("insertSigongMigeulAsRequest 오류");
+	        	response.setResultMessage("insertSigongMigeulReRequest 오류");
 	        	return gson.toJson(response);
 			}	 	        
 	        
-	        //tc_plandtl AS접수정보 update
-	        
-			res = sCheduleMainListMapper.updateSigongAsConfirmInform(params);
-			
+	        //신규 tc_plandtl insert
+	        params.put("new_plm_no", new_plm_no);
+        	res = sCheduleMainListMapper.insertSigongMigeulDetailReRequest(params);
+        	
 			if (res < 1) {    				
 	        	txManager.rollback(status);
 	        	response.setResultCode("5001");
-	        	response.setResultMessage("updateSigongAsConfirmInform 오류");
+	        	response.setResultMessage("insertSigongMigeulDetailReRequest 오류");
+	        	return gson.toJson(response);
+			}		        
+	        
+			//재시공 품목 정보 update
+			res = sCheduleMainListMapper.updateSigonReConfirmInform(params);
+			 
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateSigonReConfirmInform 오류");
 	        	return gson.toJson(response);
 			}
 			
+			//신규 tc_resmst의 rem_seq 채번
+			dataResult = sCheduleMainListMapper.selectRemSeqNowNo(params);
+			
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("selectRemSeqNowNo 오류");
+	        	return gson.toJson(response);
+	        }	    			
+			
+			int now_rem_seq = dataResult.getValue1();
+			
+			params.put("now_rem_seq", now_rem_seq);
+			res = sCheduleMainListMapper.updateTcSeqnoInfReCreate(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateTcSeqnoInfReCreate 오류");
+	        	return gson.toJson(response);
+			}		
+			
+			String new_rem_seq = "";
+			
+			if(org_com_agsec.equals("C02I")) {
+				new_rem_seq = "IC" +  String.format( "%1$03d" , now_rem_seq ) ;		
+			}else if (org_com_agsec.equals("C02P")) {
+				new_rem_seq = "FC" +  String.format( "%1$03d" , now_rem_seq ) ;
+			}else if (org_com_agsec.equals("C02F")) {
+				new_rem_seq = "PC" +  String.format( "%1$03d" , now_rem_seq ) ;
+			}
+			
+			params.put("new_rem_seq", new_rem_seq);
+	        //신규 tc_resmst insert
+        	res = sCheduleMainListMapper.insertNewTcResmst(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertNewTcResmst 오류");
+	        	return gson.toJson(response);
+			}				
+			
+			
+        	res = sCheduleMainListMapper.insertNewTcResdtl(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertNewTcResdtl 오류");
+	        	return gson.toJson(response);
+			}			
+			
+			
+			res = sCheduleMainListMapper.modifyOrmPsts_U(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("modifyOrmPsts_U 오류");
+	        	return gson.toJson(response);
+			}	
+
 		} catch (Exception e) {
 			txManager.rollback(status);
 			System.out.println(e.toString());			
