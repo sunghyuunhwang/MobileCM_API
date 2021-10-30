@@ -145,10 +145,10 @@
 			,COM_RDSEC = 'C13N' /* 결과구분 */
 			,USR_CD = #{USER_CD}
 		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_FQTY)">
-			,PLD_CFAMT = PLD_FAMT / PLD_FQTY * (PLD_FQTY - #{PLD_FQTY}) /* */
+			,PLD_CFAMT = #{PLD_CFAMT} /* */
 		</if>
 		<if test="@com.fursys.mobilecm.utils.StringUtil@notEmpty(PLD_FQTY)">
-			,PLD_FQTY = PLD_FQTY - #{PLD_FQTY}/* 확정수량 */
+			,PLD_FQTY = #{PLD_FQTY}/* 확정수량 */
 		</if>
 		,MOB_REMARK = #{MOB_REMARK}
 		,SYS_DT = GETDATE()

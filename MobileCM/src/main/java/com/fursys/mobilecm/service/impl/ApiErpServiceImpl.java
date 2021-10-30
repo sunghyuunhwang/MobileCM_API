@@ -687,10 +687,10 @@ public class ApiErpServiceImpl  implements ApiErpService {
         			//상차전반품인 경우 확정수량 0으로 변경
         			else if("C52B01".equals(undsec)){
         				
-        				//Map2.put("PLD_FQTY", "0");
-        				//Map2.put("PLD_CFAMT", "0");
+        				Map.put("PLD_FQTY", "0");
+        				Map.put("PLD_CFAMT", "0");
         				
-        				Map.put("PLD_FQTY", pld_fqty_arr1[i]);
+//        				Map.put("PLD_FQTY", pld_fqty_arr1[i]);
         				
         			}
         			
@@ -741,10 +741,10 @@ public class ApiErpServiceImpl  implements ApiErpService {
         			//상차전반품인 경우 확정수량 0으로 변경
         			else if("C52B01".equals(undsec)){
         				
-        				//Map2.put("PLD_FQTY", "0");
-        				//Map2.put("PLD_CFAMT", "0");
+        				Map2.put("PLD_FQTY", "0");
+        				Map2.put("PLD_CFAMT", "0");
         				
-        				Map2.put("PLD_FQTY", pld_fqty_arr2[j]);
+//       				Map2.put("PLD_FQTY", pld_fqty_arr2[j]);
         				
         			}
         			
@@ -794,10 +794,10 @@ public class ApiErpServiceImpl  implements ApiErpService {
         			//상차전반품인 경우 확정수량 0으로 변경
         			else if("C52B01".equals(undsec)){
         				
-        				//Map2.put("PLD_FQTY", "0");
-        				//Map2.put("PLD_CFAMT", "0");
+        				Map3.put("PLD_FQTY", "0");
+        				Map3.put("PLD_CFAMT", "0");
         				
-        				Map3.put("PLD_FQTY", pld_fqty_arr3[x]);
+//        				Map3.put("PLD_FQTY", pld_fqty_arr3[x]);
         				
         			}
         			
