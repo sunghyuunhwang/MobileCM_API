@@ -449,27 +449,27 @@ public class ApiErpController {
 			 * 통행비 * 2 지급
 			 */
 			int total_amt = 0;
-			int total_move_km = 0;
+			int compute_move_km = 0;
 			
 			if (move_km < 50) {
 //				System.out.println("1111111111111");
-				total_move_km = 0 ;
+				compute_move_km = 0 ;
 			} else if (move_km >= 50  && move_km < 100) {
 //				System.out.println("2222222222222");
-				total_move_km = (int) (move_km * 0.7) ;
+				compute_move_km = (int) (move_km * 0.7) ;
 			} else if (move_km >= 100 && move_km < 150) {
 //				System.out.println("3333333333333");
-				total_move_km = (int) (move_km * 1) ;
+				compute_move_km = (int) (move_km * 1) ;
 			} else if (move_km >= 150 && move_km < 200) {
 //				System.out.println("4444444444444");
-				total_move_km = (int) (move_km * 1.4) ;
+				compute_move_km = (int) (move_km * 1.4) ;
 //				System.out.println("5555555555555");
 			} else if (move_km >= 200) {
 //				System.out.println("6666666666666");
-				total_move_km = (int) (move_km * 2) ;
+				compute_move_km = (int) (move_km * 2) ;
 			} else {
 //				System.out.println("777777777777");
-				total_move_km = (int) (move_km * 1) ;
+				compute_move_km = (int) (move_km * 1) ;
 			}
 
 			params = new HashMap<String, Object>();
@@ -478,7 +478,7 @@ public class ApiErpController {
 			params.put("rem_dt", rem_dt);
 			params.put("usr_cd", usr_cd);
 			params.put("move_km", ""+move_km);
-			params.put("total_move_km", total_move_km);
+			params.put("compute_move_km", compute_move_km);
 			params.put("move_amt", "0");
 			params.put("toll_fee", route_response.getProperties().getTotalFare());
 			params.put("proc_status", "N");
