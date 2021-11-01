@@ -108,4 +108,15 @@ public interface ScheduleMainListMapper {
 	public DataResult selectExcuteAsReqBasicInfo(HashMap<String,Object> params); 
 	public int updateSigongAsConfirmInform(HashMap<String,Object> params);
 	
+	public DataResult selectSigongReqBasicInfomation(HashMap<String,Object> params);
+	public DataResult selectSigongReqBasicInfomation2(HashMap<String,Object> params);
+	public DataResult executePraFaAseqrem(HashMap<String,Object> params);
+	public int insertSigongMigeulReRequest(HashMap<String,Object> params);
+	public int insertSigongMigeulDetailReRequest(HashMap<String,Object> params);
+	public int updateSigonReConfirmInform(HashMap<String,Object> params);
+	public DataResult selectRemSeqNowNo(HashMap<String,Object> params); 
+	public int updateTcSeqnoInfReCreate(HashMap<String,Object> params);
+	public int insertNewTcResmst(HashMap<String,Object> params);
+	public int insertNewTcResdtl(HashMap<String,Object> params);
+	public int modifyOrmPsts_U(HashMap<String,Object> params);
 }

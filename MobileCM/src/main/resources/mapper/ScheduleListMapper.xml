@@ -2240,12 +2240,466 @@ INSERT INTO TA_RPTREQ
 
 <update id="updateSigongAsConfirmInform" parameterType="HashMap">
 <![CDATA[
-	UPDATE TC_PLANDTL SET COM_UNPSEC = 'C23A', USR_CD = 'YA521' ,SYS_DT = GETDATE()
+	UPDATE TC_PLANDTL SET COM_UNPSEC = 'C23A', SYS_DT = GETDATE()
 	WHERE PLM_NO = #{plm_no}
 	   AND COM_RDSEC ='C13N'
 	   AND COM_PLDSEC IN('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
 
 ]]>
 </update>
+
+
+<select id="selectSigongReqBasicInfomation" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+
+	SELECT
+		TCP.COM_AGSEC AS DATA1,
+		TCP.COM_BRAND AS DATA2, 
+		TCP.COM_SCD AS DATA3,
+		TCP.STI_CD AS DATA4,
+		TCP.ORM_NO AS DATA5
+	  FROM TC_PLANMST TCP WITH (NOLOCK)
+	 WHERE TCP.PLM_NO = #{plm_no}
+
+]]>
+</select>
+
+<select id="selectSigongReqBasicInfomation2" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+
+	SELECT
+		TCP.AGT_CD AS DATA1,
+		TCP.ORM_GPOST AS DATA2, 
+		TCP.TOWN_CD AS DATA3,
+		TCP.ORM_GADDR AS DATA4,
+		TCP.PLM_CDT AS DATA5
+	  FROM TC_PLANMST TCP WITH (NOLOCK)
+	 WHERE TCP.PLM_NO = #{plm_no}
+
+]]>
+</select>
+
+<select id="executePraFaAseqrem" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	
+	DECLARE @PLM_NO VARCHAR(20)
+	DECLARE @RET_CODE VARCHAR(20)    
+           SET @RET_CODE = ''
+	EXECUTE PRA_FA_ASEQREM #{org_com_agsec}, '', #{req_resigong_dt}, 'PLM', NULL, @RET_CODE = @PLM_NO OUTPUT
+	SELECT @PLM_NO AS DATA1
+	
+]]>
+</select>
+
+
+<insert id="insertSigongMigeulReRequest" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_PLANMST 
+			(
+				 PLM_NO
+				,ORM_NO
+				,PRJ_CD
+				,COM_SCD
+				,COM_AGSEC
+				,AGT_CD
+				,COM_CTSEC
+				,STI_CD
+				,STM_NO
+				,SAC_CD
+				,ORM_ORDDT
+				,ORM_RDT
+				,PLM_CDT
+				,PLM_FIXEDT
+				,PLM_ENDDT
+				,ORM_PURCST
+				,ORM_NM
+				,ORM_GEMP
+				,DET_CD
+				,ORM_GEMPTEL
+				,ORM_HDPHONE
+				,PLM_PTM
+				,PLM_FTM
+				,PLM_ETM
+				,COM_PLMFG
+				,ORM_GPOST
+				,ORM_GADDR
+				,ORM_GSPC
+				,PLM_EVT
+				,PLM_CMPYN
+				,PLM_ITR
+				,ORM_SALEMP
+				,ORM_AGTEMP
+				,PLM_HCALLYN
+				,PLM_RMK
+				,COM_RMFG
+				,COM_UNMSEC
+				,USR_CD
+				,SYS_DT 
+				,PLM_RCSEC
+				,PLM_PNO
+				,ORM_GOOD
+				,PLM_CSEC 
+				,FST_USR
+				,FST_SYS_DT
+			)
+	
+		SELECT 
+				 #{new_plm_no}
+				,ORM_NO
+				,PRJ_CD
+				,COM_SCD
+				,COM_AGSEC
+				,AGT_CD
+				,COM_CTSEC
+				,STI_CD
+				,STM_NO
+				,SAC_CD
+				,ORM_ORDDT
+				,ORM_RDT
+				,#{req_resigong_dt}
+				,NULL
+				,NULL
+				,ORM_PURCST
+				,ORM_NM
+				,ORM_GEMP
+				,DET_CD
+				,ORM_GEMPTEL
+				,ORM_HDPHONE
+				,PLM_PTM
+				,PLM_FTM
+				,NULL
+				,'C101' 
+				,ORM_GPOST
+				,ORM_GADDR
+				,ORM_GSPC
+				,PLM_EVT
+				,PLM_CMPYN
+				,PLM_ITR
+				,ORM_SALEMP
+				,ORM_AGTEMP
+				,PLM_HCALLYN
+				,PLM_RMK
+				,'C13W'
+				,NULL
+				,USR_CD  
+				,GETDATE()
+				,'2'
+				,#{plm_no}
+				,ORM_GOOD
+				,'Y' 		
+				,FST_USR
+				,GETDATE()		
+		FROM TC_PLANMST WITH (NOLOCK)
+		WHERE PLM_NO = #{plm_no}
+]]>
+</insert> 
+ 
+
+<insert id="insertSigongMigeulDetailReRequest" parameterType="HashMap">
+<![CDATA[
+INSERT INTO TC_PLANDTL  
+				( 
+				 PLM_NO
+				,COM_PLDSEC
+				,ORD_SSEQ
+				,ORD_ISEQ
+				,ITM_CD
+				,COL_CD
+				,SET_CD
+				,COL_SCD
+				,PLD_EQTY
+				,PLD_FQTY
+				,ITM_CBM
+				,ITM_TOTWGT
+				,PLD_FAMT
+				,PLD_CRAMT
+				,PLD_CFAMT
+				,PLD_CUSAMT
+				,BMT_SGRADE
+				,COM_TRSEC
+				,ITM_STCCD
+				,PLD_ASSMYN
+				,ITM_OVERCMP
+				,TRS_SEC
+				,COM_STKSEC
+				,COM_RDSEC
+				,COM_UNDSEC
+				,COM_UNPSEC
+				,PLD_RCDT
+				,PLD_RASDT
+				,PLD_RMK
+				,USR_CD
+				,SYS_DT
+				,WTR_NO
+				,WTR_SEQNO
+				,WTI_NO
+				,WTP_NO 
+				,PLD_CSEC
+				,trs_sec_2
+				,FST_USR
+				,FST_SYS_DT
+				)
+                 
+		SELECT  
+				 #{new_plm_no}
+				,COM_PLDSEC
+				,ORD_SSEQ
+				,ORD_ISEQ
+				,ITM_CD
+				,COL_CD
+				,SET_CD
+				,COL_SCD
+				,CASE WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY ELSE PLD_EQTY - PLD_FQTY END 
+				,CASE WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY ELSE PLD_EQTY - PLD_FQTY END 
+				,ITM_CBM
+				,ITM_TOTWGT
+				,PLD_FAMT
+				,CASE WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY * PLD_FAMT ELSE (PLD_EQTY - PLD_FQTY) * PLD_FAMT  END 
+				,CASE WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY * PLD_FAMT ELSE (PLD_EQTY - PLD_FQTY) * PLD_FAMT  END 
+				,PLD_CUSAMT
+				,BMT_SGRADE
+				,COM_TRSEC
+				,ITM_STCCD
+				,PLD_ASSMYN
+				,ITM_OVERCMP
+				,TRS_SEC
+				,COM_STKSEC
+				,NULL
+				,NULL
+				,NULL
+				,NULL
+				,NULL
+				,PLD_RMK
+				,USR_CD
+				,GETDATE()
+				,NULL
+				,NULL
+				,NULL
+				,NULL
+				,'Y'  
+				,trs_sec_2
+				,FST_USR
+				,GETDATE()
+		  FROM TC_PLANDTL WITH (NOLOCK)
+		 WHERE 1=1
+		   AND PLM_NO		= #{plm_no}
+		   AND (COM_PLDSEC	<= 'C096' OR COM_PLDSEC = 'C09A')
+		   AND COM_RDSEC	= 'C13N'
+		   AND PLD_RCDT		> '' 
+		
+]]>
+</insert> 
+ 
+<update id="updateSigonReConfirmInform" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_PLANDTL SET COM_UNPSEC = 'C23R', SYS_DT = GETDATE()
+	WHERE PLM_NO = #{plm_no}
+	   AND COM_RDSEC ='C13N'
+	   AND COM_PLDSEC IN('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
+
+]]>
+</update> 
+
+<select id="selectRemSeqNowNo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+
+    	SELECT ISNULL(MAX(SEQ_NO), 0) + 1 AS VALUE1
+		  FROM TC_SEQNOINF 
+		 WHERE COM_AGSEC = #{org_com_agsec}
+		   AND COM_NOSEC = 'C08CRS'
+		   AND SEQ_SETDT = #{req_resigong_dt}
+
+]]>
+</select>
+
+<update id="updateTcSeqnoInfReCreate" parameterType="HashMap">
+<![CDATA[
+    MERGE INTO TC_SEQNOINF SI
+    	 USING (SELECT #{org_com_agsec} AS COM_AGSEC
+    	              ,#{req_resigong_dt} AS SEQ_SETDT) A
+       		ON SI.COM_AGSEC = A.COM_AGSEC
+       	   AND SI.SEQ_SETDT = A.SEQ_SETDT
+       	   AND SI.COM_NOSEC = 'C08CRS'
+          WHEN MATCHED THEN
+            UPDATE 
+               SET SEQ_NO = #{now_rem_seq}
+          WHEN NOT MATCHED THEN
+		    INSERT
+		      	  (COM_AGSEC
+		      	  ,COM_NOSEC
+		      	  ,SEQ_SETDT
+		      	  ,SEQ_NO
+		      	  ,USR_CD
+		      	  ,SYS_DT
+		          )    
+			VALUES(#{org_com_agsec}
+			      ,'C08CRS'
+			      ,#{req_resigong_dt}
+			      ,#{now_rem_seq}
+			      ,NULL
+			      ,GETDATE()
+			      );
+
+]]>
+</update> 
+
+<insert id="insertNewTcResmst" parameterType="HashMap">
+<![CDATA[
+      INSERT INTO TC_RESMST
+           (REM_DT		  /* 서비스예약일 */	
+           ,REM_SEQ       /* 예약순번 */
+           ,PLM_NO        /* 시공번호 */
+           ,ORM_NO        /* 수주번호 */
+           ,PRJ_CD        /* 프로젝트번호 */
+           ,REM_PTM       /* 요청시간 */
+           ,REM_FTM       /* 확정시간 */
+           ,REM_TMFYN     /* 시간업수건수 */
+           ,REM_NTM       /* 예상소요시간 */
+           ,PLM_ETM       /* 종료시간 */
+           ,PLM_FIXEDT    /* 확정종료일 */
+           ,COM_AGSEC     /* 회사 */
+           ,COM_SSEC      /* 서비스구분 */
+           ,STI_CD        /* 시공팀코드 */
+           ,COM_CTSEC     /* 시공팀구분 */
+           ,SAC_CD        /* 서비스지역코드 */
+           ,ORM_AMT       /* 수주금액 */
+           ,ORM_PURCST    /* 구매고객코드 */
+           ,ORM_NM        /* 수주건명 */
+           ,REM_CLAMT     /* 시공난이도금액 */
+           ,COM_SCD       /* 서비스센터코드 */
+           ,STM_NO        /* 서비스팀원번호 */
+           ,AGT_CD        /* 대리점코드 */
+           ,COM_RFG       /* 예약상태 */
+           ,REM_ASNO      /* AS접수순번 */
+           ,REM_RMK       /* 비고 */
+           ,ZIP_CD        /* 우편번호 */
+           ,USR_CD        /* 최종변경자 */
+           ,SYS_DT        /* 최종변경일시 */
+           ,REM_EXTYN     /* 추가요청건유무 */
+           ,REM_CASYN     /* AS건시공예약유무 */
+           ,REM_CSEC      /* 생성구분 */
+           ,REM_VTM       /* 계획시간 */
+           ,TREQ_TIME     /* 운송요청시간 */
+           ,STI_REQTM     /* 시공팀변경요청시간 */
+           ,SCHDIV_YN     /* 서비스예약정보 */
+           ,SIGN_DT       /* 전자서명등록일시 */
+           ,REM_PTM_2     /* 요청시간2 */
+           ,REM_FTM_2     /* 확정시간2 */
+           ,TOWN_CD       /* 법정동코드 */
+           ,COM_BRAND     /* 브랜드 */
+           ,FST_USR       /* 최초등록자 */
+           ,FST_SYS_DT    /* 최초등록일시 */
+           )
+    VALUES (#{req_resigong_dt}
+           ,#{new_rem_seq}
+           ,#{new_plm_no}
+           ,#{org_orm_no}
+           ,''
+           ,'C4133'
+           ,'C4133'
+           ,'N'
+           ,'0'
+           ,NULL
+           ,NULL
+           ,#{org_com_agsec}
+           ,'C18C'
+           ,#{org_sti_cd}
+           ,'C06L'
+           ,NULL
+           ,(SELECT TCR.ORM_AMT
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,(SELECT TCR.ORM_PURCST
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,(SELECT TCR.ORM_NM
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,(SELECT TCR.REM_CLAMT
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,#{org_com_scd}
+           ,'01'
+           ,#{org_agt_cd}
+           ,'C141'
+           ,NULL
+           ,NULL
+           ,#{org_orm_gpost}
+           ,#{sti_cd}
+           ,GETDATE()
+           ,'Y'
+           ,'N'
+           ,'Y'
+           ,NULL
+           ,NULL
+           ,NULL
+           ,NULL
+           ,NULL
+           ,'C4133'
+           ,'C4133'
+           ,#{org_town_cd}
+           ,#{org_com_brand}
+           ,#{org_sti_cd}
+           ,GETDATE()    
+           )
+		
+]]>
+</insert> 
+
+
+<insert id="insertNewTcResdtl" parameterType="HashMap">
+<![CDATA[
+    INSERT 
+      INTO TC_RESDTL  
+		   (REM_DT          /* 서비스예약일 */   
+		   ,REM_SEQ         /* 예약순번 */
+		   ,RED_CELNO       /* cell순번 */
+		   ,RED_CELTM       /* cell시간 */
+		   ,REM_TMFYN       /* 시간엄수구분 */
+		   ,USR_CD          /* 최종변경자 */
+		   ,SYS_DT          /* 최종변경일시 */
+		   )  
+	VALUES (#{req_resigong_dt}
+		   ,#{new_rem_seq}
+		   ,'0001' 
+		   ,'C4133'
+		   ,'N'
+		   ,#{sti_cd}  
+		   ,GETDATE()
+		   )
+]]>
+</insert> 
+
+<update id="modifyOrmPsts_U" parameterType="HashMap">
+<![CDATA[
+    UPDATE /* OOR0010.modifyOrmPsts_U : 수주예약상태 수정 */ O
+       SET O.ORM_PSTS = 'E'    /* 예약상태 */
+          ,O.USR_CD   = #{sti_cd}
+          ,O.SYS_DT   = GETDATE()     /* 최종변경일시 */
+		 ,O.PAY_DUE_DT = (SELECT CASE WHEN ISNULL(O.PAY_DUE_DT,'') != '' AND ISNULL(O.ORM_CDT,'') != ''
+		 									AND O.ORM_CDT > DBO.FN_GET_PAY_DUE_DT(O.VND_CD,O.ORM_CDT,O.COM_BRD)
+		 									AND NOT EXISTS (SELECT 1
+		 													FROM TC_RESMST A
+		 													INNER JOIN TC_PLANMST B ON A.ORM_NO = B.ORM_NO AND A.REM_DT = B.PLM_CDT
+															WHERE A.ORM_NO = O.ORM_NO AND  A.COM_SSEC = 'C18C' AND  A.COM_RFG = 'C141' AND B.PLM_PNO IS NOT NULL)
+		 							THEN
+							  				CONVERT(DATETIME,CONCAT(CONVERT(CHAR(10),CONVERT(DATE, DBO.FN_GET_PAY_DUE_DT(O.VND_CD,O.ORM_CDT,O.COM_BRD) ),120),' 23:59:59.990'))
+							  		ELSE
+							  				O.PAY_DUE_DT
+							   		END)
+		   
+	  FROM TO_ORDMAS O
+     WHERE O.ORM_NO = #{org_orm_no}
+
+]]>
+</update> 
 
 </mapper>
