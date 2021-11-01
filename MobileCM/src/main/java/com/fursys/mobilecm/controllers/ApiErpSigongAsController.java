@@ -42,6 +42,65 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@ApiOperation(value = "erp_Test", notes = "TEST")
+	@GetMapping("/erp_Test")
+	@RequestMapping(value = "/erp_Test", method = RequestMethod.GET)
+	public String erp_Test(
+			@ApiParam(value = "MOVE_KM", required=true, example = "72")
+			@RequestParam(name="move_km", required=true) int move_km
+			) {
+		       
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		
+		try {
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("move_km", move_km);
+			
+			int total_amt = 0;
+			int total_move_km = 0;
+			int total_move_km_new = 0;
+			float flovar1 = 0.0f;
+			
+			if (move_km < 50) {
+				System.out.println("1111111111111");
+				total_move_km = 0 ;
+			} else if (move_km >= 50  && move_km < 100) {
+				System.out.println("2222222222222");
+				total_move_km = (int) (move_km * 0.7);
+				flovar1 = (float) (move_km * 0.7);
+			} else if (move_km >= 100 && move_km < 150) {
+				System.out.println("3333333333333");
+				total_move_km = (int) (move_km * 1) ;
+			} else if (move_km >= 150 && move_km < 200) {
+				System.out.println("4444444444444");
+				total_move_km = (int) (move_km * 1.4) ;
+				System.out.println("5555555555555");
+			} else if (move_km >= 200) {
+				System.out.println("6666666666666");
+				total_move_km = (int) (move_km * 2) ;
+			} else {
+				System.out.println("777777777777");
+				total_move_km = (int) (move_km * 1) ;
+			}
+			
+			System.out.println("total_move_km =====>" + total_move_km);
+			System.out.println("flovar1 =====>" + flovar1);
+					
+			
+        				
+		} catch (Exception e) {
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}
+	
 	@ApiOperation(value = "erp_UpdatePhoneID", notes = "Phone ID UPDATE")
 	@GetMapping("/erp_UpdatePhoneID")
 	@RequestMapping(value = "/erp_UpdatePhoneID", method = RequestMethod.GET)
@@ -66,7 +125,9 @@ public class ApiErpSigongAsController {
 					
 			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
 			res = erpsigongasMapper.deleteUsedPhoneID(params);        	
-        	
+			txManager.commit(status);
+			
+			status = txManager.getTransaction(new DefaultTransactionDefinition());
         	res = erpsigongasMapper.updatePhoneID(params);
         	if (res < 1){
         		txManager.rollback(status);
@@ -277,7 +338,7 @@ public class ApiErpSigongAsController {
         params.put("message", as_message);
         params.put("user_id", as_user_id);
         
-		response = apiErpService.erp_Fcm_SendNotify(params);
+		//response = apiErpService.erp_Fcm_SendNotify(params);
 				
 		return gson.toJson(response);
 		

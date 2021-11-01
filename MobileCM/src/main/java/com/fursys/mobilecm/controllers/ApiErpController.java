@@ -471,7 +471,7 @@ public class ApiErpController {
 //				System.out.println("777777777777");
 				total_move_km = (int) (move_km * 1) ;
 			}
-			
+
 			params = new HashMap<String, Object>();
 			params.put("com_scd", com_scd);
 			params.put("sti_cd", sti_cd);

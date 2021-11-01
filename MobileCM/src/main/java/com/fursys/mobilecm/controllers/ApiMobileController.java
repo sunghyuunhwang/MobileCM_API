@@ -189,7 +189,6 @@ public class ApiMobileController {
 			@RequestParam(name="id", required=false) String id,
 			@RequestParam(name="phone_id", required=false) String phone_id) { 
 		
-		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		UserInfoResponse userInfoResponse = new UserInfoResponse();
 		int res = 0;
 		
@@ -227,11 +226,15 @@ public class ApiMobileController {
         	user.setCom_stsec(com_stec.get("COM_STSEC").toString());
         	
         	if (!"".equals(phone_id)) {
-	        	params.put("phone_id", phone_id);
+        		params.put("phone_id", phone_id);
 	        	
+        		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+        			        	
 	        	//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
 	        	res = erpsigongasMapper.deleteUsedPhoneID(params);
+	        	txManager.commit(status);
 	        	
+	        	status = txManager.getTransaction(new DefaultTransactionDefinition());
 	        	res = erpsigongasMapper.updatePhoneID(params);
 	        	if (res < 1){
 	        		txManager.rollback(status);
@@ -239,10 +242,11 @@ public class ApiMobileController {
 	        		userInfoResponse.setResultMessage("PhoneId 변경에 실패하였습니다.");
 	        		return gson.toJson(userInfoResponse);
 	        	}
+	        	txManager.commit(status);
+	    		
         	}
         	
-        	txManager.commit(status);
-    		userInfoResponse.setUser(user);
+        	userInfoResponse.setUser(user);
     		userInfoResponse.setResultCode("200");
     	}
 		System.out.println(userInfoResponse.getUser().toString());
