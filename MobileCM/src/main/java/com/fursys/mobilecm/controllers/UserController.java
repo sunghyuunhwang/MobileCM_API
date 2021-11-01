@@ -45,7 +45,7 @@ public class UserController {
     		{
         		txManager.rollback(status);
         		return "redirect:/v1/areamaster/scheduling";
-     			
+     			 
     		}
     		
     	} catch (Exception e) {
