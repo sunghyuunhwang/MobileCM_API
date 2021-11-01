@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,8 @@ import lombok.AllArgsConstructor;
 public class UserController {
 	@Autowired
 	UserMapper userMapper;
+	
+	@Autowired private PlatformTransactionManager txManager;
 
     @GetMapping("/login")
     public String login(HttpSession session) {
@@ -28,9 +33,29 @@ public class UserController {
     
     @GetMapping("/login/result")
     public String result(@AuthenticationPrincipal User user) {
-    	//로그인 이력 추가, 20211025, hong
-		userMapper.insertLoginHistory(user.getUsername());
-    	return "redirect:/v1/areamaster/scheduling";
+    	
+    	TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+    	int res = 0;
+    	
+    	try {
+        	//로그인 이력 추가, 20211025, hong
+    		res = userMapper.insertLoginHistory(user.getUsername()); 
+    		
+    		if (res < 1)
+    		{
+        		txManager.rollback(status);
+        		return "redirect:/v1/areamaster/scheduling";
+     			
+    		}
+    		
+    	} catch (Exception e) {
+			txManager.rollback(status);			
+			return "redirect:/v1/areamaster/scheduling";
+		}
+		
+		txManager.commit(status);
+		return "redirect:/v1/areamaster/scheduling";
+
 //        return "redirect:/v1/areamaster/areamina";
     }
 
