@@ -546,7 +546,7 @@ $('#assgnSub_lst li').remove();
     			        assgn_lst += "<span class='assgnRqagt'>"+vnd_nm+"</span>";
     			        assgn_lst += "<span class='assgnRqschdivyn'>"+schdiv_yn+"</font></span>";
     			        assgn_lst += "<span class='assgnRqcomrfg'>"+com_rfg+"</span>";
-    			        assgn_lst += "<input type='hidden' value="+com_rfg+" name='comrfg/>"
+    			        assgn_lst += "<input type='hidden' value="+com_rfg+" name='comrfg'/>"
                        	assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
                        	assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
     			        assgn_lst += "</dd>";
