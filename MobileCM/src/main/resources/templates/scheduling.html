@@ -103,15 +103,16 @@ function addMarkersTooMuch(list) {
     <link rel="stylesheet" type="text/css" href="/css/common_MblCm.css" />
     <link rel="stylesheet" href="http://static.fursys.com/drctSources/css/fonts/font-NotoSansKR.css">
     <script src="/js/jquery-3.4.1.min.js"></script>
-    <script src="/js/jquery-ui.js"></script><!-- 달력 -->
+    <script src="/js/jquery-ui.js"></script><!--  달력 -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
     <script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
     <script>
        $(function () {//날짜
             var today = new Date();
-             $(".datepicker").val($.datepicker.formatDate("m월    dd일", new Date()));
-             $(".apiDtPckr").val($.datepicker.formatDate("yymmdd", new Date()));
+             $('.datepicker').val($.datepicker.formatDate("m월    dd일", new Date()));
+             $('.apiDtPckr').val($.datepicker.formatDate("yymmdd", new Date()));
              $('.nxtDayBtn').on("click", function () {
                   var date = $('.datepicker').datepicker('getDate');
                   var dtt = $('.apiDtPckr').datepicker('getDate');

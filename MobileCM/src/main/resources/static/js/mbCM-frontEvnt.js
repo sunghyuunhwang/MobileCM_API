@@ -8,13 +8,19 @@ function datepicker() {//달력 한글화
       //dateFormat:"yymmdd",
       dateFormat:"m월    dd일",
       showMonthAfterYear: true,
-      yearSuffix: '년'
+      yearSuffix: '년',
+      onSelect: function (dateText, inst) {
+		$('.apiDtPckr').datepicker("setDate",  $('.datepicker').datepicker('getDate'));
+		//$(".apiDtPckr").val($.datepicker.formatDate("yymmdd", dateText));
+       	allRset();//리셋(프론트엔드부분만)
+        assgnCll();//다시 불러오기
+      }, 
   }).datepicker("setDate", new Date());
   $( ".apiDtPckr" ).datepicker({
    changeMonth: true,
    dateFormat:"yymmdd",
    showMonthAfterYear: true,
-   yearSuffix: '년'
+   yearSuffix: '년',
  }).datepicker("setDate", new Date());
 
 }

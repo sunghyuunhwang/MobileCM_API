@@ -1,6 +1,6 @@
 @charset "utf-8";
-.datepicker{pointer-events: none;}
-.ui-datepicker{display: none;visibility: hidden;opacity: 0;}
+/* .datepicker{pointer-events: none;} */
+/* .ui-datepicker{display: none;visibility: hidden;opacity: 0;} */
 
 /*공통레이아웃*/
 .dlLft,.dlLft > dt,.dlLft > dd{display: inline-block;float: left;}
