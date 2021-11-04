@@ -3411,10 +3411,11 @@ public class ApiErpController {
 			HashMap<String,Object> params = new HashMap<String, Object>();
 	        params.put("plm_no", plm_no);
 	        System.out.println("com_ssec: " + com_ssec);
-	        if("시공".equals(com_ssec)) {
-	        	res = sCheduleMainListMapper.updateAddSigongStartTime(params);
-	        }else {
+	        if("AS".equals(com_ssec)) {
 	        	res = sCheduleMainListMapper.updateAddAsStartTime(params);
+	        	
+	        }else {
+	        	res = sCheduleMainListMapper.updateAddSigongStartTime(params);
 	        }
 			
 			if (res < 1) {
