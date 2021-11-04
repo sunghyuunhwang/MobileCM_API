@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping("/v1/api/erp_sigongas")
 public class ApiErpSigongAsController {
 	
-	@Autowired ApiErpSigongAsService apiErpSigongAsService;
+	@Autowired ApiErpSigongAsService apiErpSigongAsService;	
 	@Autowired ErpSigongAsMapper erpsigongasMapper;	
 	@Autowired private PlatformTransactionManager txManager;
 	private SqlSession sql;
@@ -336,9 +336,9 @@ public class ApiErpSigongAsController {
         params.put("title", as_title);
         params.put("message", as_message);
         params.put("user_id", as_user_id);
-        
-		//response = apiErpService.erp_Fcm_SendNotify(params);
-				
+    
+		response = apiErpSigongAsService.erp_Fcm_SendNotify(params);
+
 		return gson.toJson(response);
 		
 	}
