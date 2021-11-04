@@ -159,7 +159,7 @@
 <![CDATA[
 	INSERT INTO TC_TRVALLOWANCE (
 	       REM_DT, STI_CD, COM_SCD, MOVE_KM, REAL_MOVEKM, MOVE_AMT, TOLL_FEE, PROC_STATUS, USR_CD, SYS_DT, FST_USR_CD, FST_SYS_DT)	       	
-	SELECT #{rem_dt}, #{sti_cd}, #{com_scd}, #{compute_move_km}, #{move_km}, ((ISNULL(#{compute_move_km}, '0') * CONVERT(INT, REF_1)) + (CONVERT(INT, #{toll_fee})*1)), (CONVERT(INT, #{toll_fee})*2), #{proc_status}, #{usr_cd},  GETDATE(), #{usr_cd},  GETDATE()	
+	SELECT #{rem_dt}, #{sti_cd}, #{com_scd}, #{compute_move_km}, #{move_km}, ((ISNULL(#{compute_move_km}, '0') * CONVERT(INT, REF_1)) + (CONVERT(INT, #{toll_fee})*2)), (CONVERT(INT, #{toll_fee})*2), #{proc_status}, #{usr_cd},  GETDATE(), #{usr_cd},  GETDATE()	
 	FROM TT_COMCD WITH (NOLOCK)
 	WHERE CCD_YN = 'Y'
 	AND CCD_CD = 'C76001'
@@ -184,7 +184,7 @@
 	UPDATE TC_TRVALLOWANCE
 	   SET MOVE_KM = #{compute_move_km},
 	       REAL_MOVEKM = #{move_km},
-	       MOVE_AMT = (SELECT ((ISNULL(#{compute_move_km}, '0') * CONVERT(INT, REF_1)) + (CONVERT(INT, #{toll_fee})*1)) FROM TT_COMCD WITH (NOLOCK) WHERE CCD_YN = 'Y' AND CCD_CD = 'C76001' AND CDX_CD = 'C76' ),
+	       MOVE_AMT = (SELECT ((ISNULL(#{compute_move_km}, '0') * CONVERT(INT, REF_1)) + (CONVERT(INT, #{toll_fee})*2)) FROM TT_COMCD WITH (NOLOCK) WHERE CCD_YN = 'Y' AND CCD_CD = 'C76001' AND CDX_CD = 'C76' ),
 	       TOLL_FEE = #{toll_fee} * 2,
 	       PROC_STATUS = #{proc_status},
 	    USR_CD = #{usr_cd},
