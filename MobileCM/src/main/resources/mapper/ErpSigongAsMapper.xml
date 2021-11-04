@@ -3,6 +3,28 @@
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
 
+<select id="selectScheduledtFcmNotifyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPFcmNotify">
+<![CDATA[
+
+	 SELECT DISTINCT
+	       'mobilecm' AS SEND_FROM_SYSTEM,
+	       'mobilecm' AS SEND_TO_SYSTEM,
+		   tcr.sti_cd AS COM_SCD,
+		   '상차전 반품 등록 내용 알람' AS TITLE,
+		   '1)납기: ' + convert(varchar, tcr.rem_dt, 102)
+		   + CHAR(13) + CHAR(10) + '2)수주번호: ' + tww.orm_no 
+		   + CHAR(13) + CHAR(10) + '3)수주건명: ' + tcr.orm_nm 
+		   + CHAR(13) + CHAR(10) + '4)대리점: ' + (select ttv.vnd_nm from tt_vendor ttv where ttv.vnd_cd = tcr.agt_cd ) AS MESSAGE,
+		   '' AS USER_ID
+	  FROM tw_wtrecpl tww with (nolock), tc_resmst tcr with (nolock)
+	 WHERE tww.orm_no = tcr.orm_no
+	   AND tcr.com_ssec = 'C18C'
+	   AND tcr.rem_dt = convert(char(8), getdate(), 112)
+	 ORDER BY tcr.sti_cd
+
+]]>
+</select>
+
 <select id="selectNotifyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 	SELECT SEND_TEXT AS DATA1

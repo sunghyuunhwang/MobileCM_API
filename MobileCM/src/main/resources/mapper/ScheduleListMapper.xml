@@ -2158,6 +2158,7 @@ INSERT INTO TA_RPTREQ
 		,RPT_USRID		
 		,PLM_NO
 		,CTM_ADDR2
+		,RPT_URG		
 		) 
 	VALUES
 		(
@@ -2211,7 +2212,9 @@ INSERT INTO TA_RPTREQ
 		,'Y'
 		,#{sti_cd}
 		,#{plm_no}
-		,''								
+		,''
+		,#{rpt_urg}
+		
 		)	 
 ]]>
 </insert> 

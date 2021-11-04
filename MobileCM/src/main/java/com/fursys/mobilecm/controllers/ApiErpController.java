@@ -5818,7 +5818,8 @@ public class ApiErpController {
 	public String erp_sigongmiguelasAutoProc (
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@RequestParam(name="req_as_dt", required=true) String req_as_dt
+			@RequestParam(name="req_as_dt", required=true) String req_as_dt,
+			@RequestParam(name="rpt_urg", required=true) String rpt_urg
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -5950,6 +5951,7 @@ public class ApiErpController {
 	        params.put("new_rpt_no", new_rpt_no);
 	        params.put("req_as_dt", req_as_dt);
 	        params.put("as_req_remark", as_req_remark);
+	        params.put("rpt_urg", rpt_urg);	        
 	        
         	res = sCheduleMainListMapper.insertSigongMigeulAsRequest(params);
         	
