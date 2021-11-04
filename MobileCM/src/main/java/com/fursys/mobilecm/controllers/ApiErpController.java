@@ -3261,10 +3261,11 @@ public class ApiErpController {
  
         ERPResultFinishynCheck allItems = null;
         
-        if("시공".equals(com_ssec)) {
-        	allItems = sCheduleMainListMapper.selectFinishYnCheckSigong(params);
-        }else {
+        if("AS".equals(com_ssec)) {
         	allItems = sCheduleMainListMapper.selectFinishYnCheckAs(params);
+        	
+        }else {
+        	allItems = sCheduleMainListMapper.selectFinishYnCheckSigong(params);
         }
         
 		return gson.toJson(allItems);
@@ -4877,13 +4878,13 @@ public class ApiErpController {
         
         ArrayList<ERPSigongSearchDetailInfo> arList = null;
         
-        if("시공".equals(com_ssec)) {
+        if("AS".equals(com_ssec)) {
+        	arList = sCheduleMainListMapper.selectAsSearchDetailInfo(params);
         	
-        	arList = sCheduleMainListMapper.selectSigongSearchDetailInfo(params);
         	
         }else {
         	
-        	arList = sCheduleMainListMapper.selectAsSearchDetailInfo(params);
+        	arList = sCheduleMainListMapper.selectSigongSearchDetailInfo(params);
         	
         }
         
