@@ -2644,7 +2644,7 @@ INSERT INTO TC_PLANDTL
            ,NULL
            ,NULL
            ,NULL
-           ,NULL
+           ,'N'
            ,NULL
            ,'C4133'
            ,'C4133'
