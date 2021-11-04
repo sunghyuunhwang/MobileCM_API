@@ -6138,9 +6138,9 @@ public class ApiErpController {
 			
 			if(org_com_agsec.equals("C02I")) {
 				new_rem_seq = "IC" +  String.format( "%1$03d" , now_rem_seq ) ;		
-			}else if (org_com_agsec.equals("C02P")) {
-				new_rem_seq = "FC" +  String.format( "%1$03d" , now_rem_seq ) ;
 			}else if (org_com_agsec.equals("C02F")) {
+				new_rem_seq = "FC" +  String.format( "%1$03d" , now_rem_seq ) ;
+			}else if (org_com_agsec.equals("C02P")) {
 				new_rem_seq = "PC" +  String.format( "%1$03d" , now_rem_seq ) ;
 			}
 			

@@ -2594,7 +2594,7 @@ INSERT INTO TC_PLANDTL
            ,FST_SYS_DT    /* 최초등록일시 */
            )
     VALUES (#{req_resigong_dt}
-           ,#{new_rem_seq}
+           ,RTRIM(#{new_rem_seq})
            ,#{new_plm_no}
            ,#{org_orm_no}
            ,''
