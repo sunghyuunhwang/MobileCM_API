@@ -318,7 +318,7 @@ public class ApiErpSigongAsController {
 			@RequestParam(name="send_from_system", required=true) String as_send_from_system,
 			@ApiParam(value = "SEND_TO_SYSTEM", required=true, example = "MOBILECM")
 			@RequestParam(name="send_to_system", required=true) String as_send_to_system,
-			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@ApiParam(value = "COM_SCD", required=true, example = "YA521")
 			@RequestParam(name="com_scd", required=true) String as_com_scd,
 			@ApiParam(value = "TITLE", required=true, example = "This is Title")
 			@RequestParam(name="title", required=true) String as_title,

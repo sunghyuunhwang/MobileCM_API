@@ -3154,11 +3154,13 @@ public class ApiErpController {
 	@ApiOperation(value = "selectAsItemPage", notes = "As품목 상세페이지")
 	@GetMapping("/selectAsItemPage")  
 	public String erp_selectAsItemInfoPage(
-			@RequestParam(name="plm_no", required=true) String plm_no
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="orm_no", required=true) String orm_no
 		) { 
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("plm_no",plm_no);
+        params.put("orm_no",orm_no);
         
 		ArrayList<ERPAsItemPage> allItems = sCheduleMainListMapper.selectAsItemPage(params);
 		

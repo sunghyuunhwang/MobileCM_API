@@ -29,46 +29,69 @@ public class DemoSchedulerCronTab {
 	//"0 0 9-17 * * MON-FRI" = 오전 9시부터 오후 5시까지 주중(월~금)에 실행한다.
 	//"0 0 0 25 12 ?" = every Christmas Day at midnight
 	
-	//@Scheduled(cron = "*/10 * * * * *")
-	
-	@Scheduled(cron = "0 0 7 * * MON-SAT")	// 월~토 오전 7시	
+	@Scheduled(cron = "0 0 7 * * MON-SAT")	// 월~토 오전 7시
 	public void cronJobSch() {
-
-/*		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		Date now = new Date();
-		String strDate = sdf.format(now);
-		System.out.println("Java cron job expression:: " + strDate);
-
-		//String isScheduledRun
-		System.out.println("Scheduled is run? ===>" + environment.getProperty("scheduled.run"));
-		
-		System.out.println("Scheduled work1 ===>" + environment.getProperty("scheduled.work1"));
-*/
-		
-		//if 
-/*		
-		BaseResponse response = new BaseResponse();
-		
+				
 		try {
-			HashMap<String, Object> params = new HashMap<String, Object>();				
-//			response = apiErpSigongAsService.erp_selectScheduledtFcmNotifyList(params);			
-			if (!"200".equals(response.getResultCode())) {	        		
-        		return ;
-        	}
-			        				
-		} catch (Exception e) {
-			System.out.println(e.toString());			
-			response.setResultCode("5001");
-			response.setResultMessage(e.toString());
-			return;
+			String isRun = environment.getProperty("scheduled.run");
+	
+			if (!"yes".equals(isRun)) return;
+	
+			String job1 = environment.getProperty("scheduled.job1");
+	
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			Date now = new Date();
+			String strDate = sdf.format(now);
+	
+			if ("erp_selectScheduledtFcmNotifyList".equals(job1)) {
+				BaseResponse response = new BaseResponse();			
+				try {					
+					System.out.println(String.format("Scheduled %s is run on %s", job1, strDate));				
+					HashMap<String, Object> params = new HashMap<String, Object>();				
+					response = apiErpSigongAsService.erp_selectScheduledtFcmNotifyList(params);			
+					if (!"200".equals(response.getResultCode())) {	        		
+		        		return ;
+		        	}					        			
+				} catch (Exception e) {
+					System.out.println(e.toString());			
+					response.setResultCode("5001");
+					response.setResultMessage(e.toString());
+					return;
+				}			
+				response.setResultCode("200");			
+			}
+
+		} catch(Exception e) {
+			System.out.println(e.toString());
+			
 		}
 		
-		response.setResultCode("200");
-*/		
-		return;
-		
-				
+		return;					
    }
+
+//	
+//	@Scheduled(cron = "*/10 * * * * *")	
+//	public void cronJobSch2() {
+//				
+//		try {
+//			String isRun = environment.getProperty("scheduled.run");
+//	
+//			if (!"yes".equals(isRun)) return;
+//	
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+//			Date now = new Date();
+//			String strDate = sdf.format(now);
+//	
+//			System.out.println(String.format("Scheduled is run on %s", strDate));
+//			
+//
+//		} catch(Exception e) {
+//			System.out.println(e.toString());
+//			
+//		}
+//		
+//		return;						
+//   }
+//
 	
 }
