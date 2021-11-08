@@ -69,6 +69,8 @@ public class DemoSchedulerCronTab {
 		return;					
    }
 
+	
+	
 //	
 //	@Scheduled(cron = "*/10 * * * * *")	
 //	public void cronJobSch2() {
