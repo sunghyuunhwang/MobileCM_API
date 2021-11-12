@@ -37,6 +37,7 @@
 ]]>
 </insert>
 
+
 <select id="selectScheduledtFcmNotifyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPFcmNotify">
 <![CDATA[
 

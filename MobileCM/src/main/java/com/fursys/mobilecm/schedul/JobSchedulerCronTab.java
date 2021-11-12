@@ -31,6 +31,7 @@ public class JobSchedulerCronTab {
 	
 	
 	@Scheduled(cron = "0 0 7 * * MON-SAT")	// 월~토 오전 7시
+//	@Scheduled(cron = "*/10 * * * * *")	// 월~토 오전 7시	
 	public void cronJobSch() {
 			
 		BaseResponse response = new BaseResponse();
