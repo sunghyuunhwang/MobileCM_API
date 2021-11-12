@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="Popup_close" width="24" height="24" viewBox="0 0 24 24">
+    <defs>
+        <style>
+            .cls-2{stroke-width:2px;fill:none;stroke:#3c3c3c;stroke-linecap:round}
+        </style>
+    </defs>
+    <g id="그룹_4771" transform="translate(-5435.682 -5254.999)">
+        <path id="선_35" d="M0 0L0.001 16.97" class="cls-2" transform="rotate(-45 9071.43 -3938.191)"/>
+        <path id="선_36" d="M0 0L16.97 0.001" class="cls-2" transform="rotate(-45 9085.915 -3932.191)"/>
+    </g>
+</svg>

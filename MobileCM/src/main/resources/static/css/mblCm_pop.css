@@ -5,9 +5,12 @@
 
    .fssMblCmPop.pop_assgnStrtBx.opn,
    .fssMblCmPop.alrtPop.opn{display: inline-flex;align-items: center;justify-content: center;}
+   .fssMblCmPop .clsBtn.icn{position: absolute;top: 8px;right: 8px;width: 25px;height: 25px;}
+      .fssMblCmPop .clsBtn.icn::before{display: block;width: 25px;height: 25px;}
 
 
  .fssMblCmPop.bgBlck{background-color: rgba(0,0,0,0.4);}
+ .popSmllTtl{display: inline-block;float: left;width: 100%;margin: 0 0 10px 0;}
 
  .popCntnts{position: relative;}
 .popCntnts.wid{width: calc(100% - 240px);height:calc(100% - 92px);border-radius: 16px;background-color: #f1f2f3;}
@@ -101,3 +104,11 @@
 .alrtPop.opn .loding .ldingTxt::before{animation: ldinMtn 3s infinite;animation-timing-function: linear;z-index: 1;}
 @keyframes ldinMtn {
 100% {transform:rotate(360deg);}
+}
+
+.popPage.opn{display: flex;align-items: center;justify-content: center;}
+.srchBox{display: inline-block;width: 100%;padding: 0 0 10px 0;margin: 0 0 10px 0; border-bottom: #ddd 1px solid;}
+.srchBox .dateBx {display: inline-block;float: left;}
+.srchBox .dateBx .datepicker{}
+/*시공건팝*/
+.cnstrctLstBx{position: relative;width: calc(100% - 20px);height: calc(100% - 20px);padding:40px 20px 20px 20px;border-radius: 16px;background: #fff;box-shadow: 0 -2px 6px 0 rgb(0 0 0 / 16%);box-sizing: border-box;}

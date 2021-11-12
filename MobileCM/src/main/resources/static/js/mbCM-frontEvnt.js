@@ -2,6 +2,22 @@
 //작업자 이커머스팀 : 심민아
 //백엔드에 필요한 이벤트는 함수 혹은 함수안의 이벤트를 사용해 주시고
 //백엔드에 사용한 프론트엔드이벤트가 $(document).ready(function()에서 필요 없을경우 주석 처리해주세요.*주석 처리시설명필수표시
+function cnstrctLstPop() {//시공건 팝업
+     $('.cnstrctLstBtn').click(function() {
+       $('.cnstrctLstPop').addClass('opn');
+     });
+}
+function ulLftlst() {//리스트표시
+     $('.ulLftlst').each(function() {
+      var ulLftlst = $(this);
+      $(this).click(function() {
+           if(! $(this).hasClass('_index')){
+           $('.ulLftlst').removeClass('on');
+           $(this).addClass('on');
+           }
+      });
+    });
+}
 function datepicker() {//달력 한글화
    $( ".datepicker" ).datepicker({
       changeMonth: true,
@@ -16,6 +32,17 @@ function datepicker() {//달력 한글화
    showMonthAfterYear: true,
    yearSuffix: '년'
  }).datepicker("setDate", new Date());
+ $( ".nmldatepicker" ).datepicker({
+ changeMonth: true,
+ dateFormat:"yymmdd",
+ showMonthAfterYear: true,
+ yearSuffix: '년'
+}).datepicker("setDate", new Date());
+if($('.innmldate').hasClass('opn')){
+     $('.ui-datepicker').addClass('nml');
+}else{
+     $('.ui-datepicker').removeClass('nml');
+}
 
 }
 function cmma() { // 세자리수 콤마찍기 - 읽기 전용
@@ -299,24 +326,24 @@ function chngTmDonPop() {//팀 변경 완료팝업
 		alert("변경할 수주건을 체크해주세요.");
 		return;
 	   };
-	   
+
 	   var isSelected = $('.chngTm').hasClass('don');
 	   if(!isSelected) {
 		alert("변경할 팀을 선택해주세요.");
 		return;
-	   };   
+	   };
 	   var check = true;
 	   $('input:checkbox[name="fromsti2"]:checked').each(function () {
 			var com_rfg = $(this).closest('li').find('input[name=comrfg]').val();
 			var com_ssec = $(this).closest('li').find('input[name=from_com_ssec]').val();
 			if(com_rfg === "예약확정") {
-			   check = false;			
+			   check = false;
 			}
 	   	});
 	   if(!check) {
 	       $('.alrtPop').addClass('opn');
-	       $('#chngTmDonPopFail').addClass('on');	
-	       return;	
+	       $('#chngTmDonPopFail').addClass('on');
+	       return;
 	   }
        $('.alrtPop').addClass('opn');
        $('#chngTmDonPop').addClass('on');
@@ -467,5 +494,6 @@ $(document).ready(function(){
       assgnDonPop();//분배확정팝업
       rsvtnStrtPop();//예약확정 팝업
       logoutPop();//로그아웃 팝업
-
+      ulLftlst();//리스트표시
+     cnstrctLstPop();//시공건 팝업
 });

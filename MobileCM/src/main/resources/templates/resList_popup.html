@@ -1,10 +1,90 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="EUC-KR">
-<title>Insert title here</title>
-</head>
-<body>
-
-</body>
-</html>
+<aside class="popPage fssMblCmPop cnstrctLstPop innmldate" th:fragment="resList_popup">
+     <section class="cnstrctLstBx">
+          <button class="clsBtn icn icnClose_Blck">취소</button>
+          <article class="srchBox">
+               <div class="dateBx">
+                    예약일자
+                    <input type="text" name="" id="nmldate1" class="nmldatepicker inptBx hThin" value="" readonly/>
+                    ~
+                    <input type="text" name="" id="nmldate2" class="nmldatepicker inptBx hThin" value="" readonly/>
+               </div>
+               <label for="cnstrctNm" class="inptTtl hThin mLft20px">건명</label>
+               <input type="text" name="orm_nm" id="cnstrctNm" class="inptBx hThin w270px"/>
+               <label for="codeNm" class="inptTtl hThin mLft20px">단품코드</label>
+               <input type="text" name="itm_cd" id="codeNm" class="inptBx hThin w190px" />
+               <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="cnstrctLst()">조회</button>
+          </article>
+          <div class="inSrchFtBx">
+               <article class="hHrfBx _top">
+                    <h2 class="popSmllTtl">시공/AS 정보</h2>
+                    <div class="scrll _inTtl" id="cnstrctLst">
+                         <ul class="ulLftlst _index">
+                              <li class="w110px">예약일</li>
+                              <li class="w100px tAlgnCntr">시공/AS 구분</li>
+                              <li class="w100px">브랜드</li>
+                              <li class="w150px">수주번호/접수번호</li>
+                              <li class="w300px">건명/고객명</li>
+                              <li class="w150px">수주금액</li>
+                              <li class="w500px">주소</li>
+                              <li class="w150px">서비스팀</li>
+                         </ul>
+                         <!--나중에 주석처리할 부분-->
+                         <ul class='ulLftlst' onclick='cnstrctLst_dtlInf()'>
+                              <li class='w110px'>2021-10-14</li>
+                              <li class='w100px tAlgnCntr'>시공</li>
+                              <li class='w100px'>데스커드</li>
+                              <li class='w150px'>I20211021000101</li>
+                              <li class='w300px'>경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고</li>
+                              <li class='w150px'>
+                                   <span class="numTxt"></span>
+                                   <input type='text' name='' value='125,000' class='innmbr nmCmma w100p'>
+                              </li>
+                              <li class='w500px'>경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고</li>
+                              <li class='w150px'>경북공고고경북공고고경북공고고</li>
+                         </ul>
+                         <!--나중에 주석처리할 부분-->
+                    </div>
+               </article>
+               <article class="hHrfBx _bttm">
+                    <h2 class="popSmllTtl">상세정보</h2>
+                    <div class="scrll _inTtl" id="cnstrctLst_dtlInf">
+                         <ul class="ulLftlst _index">
+                              <li class="w150px">단품코드</li>
+                              <li class="w150px tAlgnCntr">색상</li>
+                              <li class="w100px tAlgnCntr">수량</li>
+                              <li class="wCal550px">단품명칭</li>
+                              <li class="w150px tAlgnRght">금액</li>
+                         </ul>
+                         <!--나중에 주석처리할 부분-->
+                         <ul class='ulLftlst'>
+                              <li class="w150px">FAD00102</li>
+                              <li class="w150px tAlgnCntr">ww</li>
+                              <li class="w100px tAlgnCntr">
+                                   <span class="numTxt"></span>
+                                   <input type='text' name='' value='11' class='innmbr nmCmma w100p'>
+                              </li>
+                              <li class="wCal550px">코너형 리딩하우스 커튼봉</li>
+                              <li class="w150px tAlgnRght">
+                                   <span class="numTxt"></span>
+                                   <input type='text' name='' value='75,000' class='innmbr nmCmma w100p'>
+                              </li>
+                         </ul>
+                         <ul class='ulLftlst'>
+                              <li class="w150px">FAD00102</li>
+                              <li class="w150px tAlgnCntr">ww</li>
+                              <li class="w100px tAlgnCntr">
+                                   <span class="numTxt"></span>
+                                   <input type='text' name='' value='11' class='innmbr nmCmma w100p'>
+                              </li>
+                              <li class="wCal550px">코너형 리딩하우스 커튼봉</li>
+                              <li class="w150px tAlgnRght">
+                                   <span class="numTxt"></span>
+                                   <input type='text' name='' value='75,000' class='innmbr nmCmma w100p'>
+                              </li>
+                         </ul>
+                         <!--나중에 주석처리할 부분-->
+                    </div>
+               </article>
+          </div>
+     </section>
+</aside>
