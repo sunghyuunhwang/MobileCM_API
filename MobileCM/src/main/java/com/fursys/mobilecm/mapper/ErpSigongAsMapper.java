@@ -13,6 +13,8 @@ import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	public int finishScheduleHistory(HashMap<String,Object> params);
+	public int startScheduleHistory(HashMap<String,Object> params);
 	public ArrayList<ERPFcmNotify> selectScheduledtFcmNotifyList(HashMap<String,Object> params);
 	public ArrayList<DataResult> selectNotifyList(HashMap<String,Object> params);	
 	public int insertSigonWorkTimeOverAcc(HashMap<String,Object> params);

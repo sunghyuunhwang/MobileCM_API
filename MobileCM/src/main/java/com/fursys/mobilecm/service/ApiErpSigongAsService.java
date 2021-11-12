@@ -9,6 +9,8 @@ import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 
 public interface ApiErpSigongAsService {
 
+	public BaseResponse erp_finishScheduleResult(HashMap<String, Object> param);
+	public BaseResponse erp_startScheduleResult(HashMap<String, Object> param);
 	public BaseResponse erp_selectScheduledtFcmNotifyList(HashMap<String, Object> param);
 	public ArrayList<DataResult> erp_NotifyList(HashMap<String, Object> param);	
 	public BaseResponse erp_Fcm_SendNotify(HashMap<String, Object> param);	

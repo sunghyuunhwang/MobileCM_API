@@ -2197,7 +2197,7 @@ INSERT INTO TA_RPTREQ
 		,#{sti_cd}
 		,GETDATE()
 		,'A11003'
-		,'A12004'
+		, CASE #{inconsistent_yn} WHEN 'Y' THEN 'A12011' ELSE 'A12004' END
 		,''	
 		,''	
 		,''

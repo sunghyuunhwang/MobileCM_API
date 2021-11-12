@@ -2,6 +2,40 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
+<update id="finishScheduleHistory" parameterType="HashMap">
+<![CDATA[
+	UPDATE TT_SCHEDULE_HISTORY
+	   SET END_TIME = GETDATE(),
+           RESULT = #{result},
+           REMARK = #{remark}
+	 WHERE SEQ_NO = #{seq_no}
+]]>
+</update> 
+
+<insert id="startScheduleHistory" parameterType="HashMap">
+<selectKey keyProperty="seq_no" resultType="Integer" order="AFTER"> 
+	SELECT IDENT_CURRENT('TT_SCHEDULE_HISTORY')
+</selectKey>
+<![CDATA[
+	INSERT INTO TT_SCHEDULE_HISTORY (
+           SCHEDULE_SERVER,
+           SCHEDULE_ID,
+           SCHEDULE_NAME,
+           START_TIME,
+           END_TIME,
+           RESULT,
+           REMARK )
+	VALUES (
+           #{schedule_server},
+           #{schedule_id},
+           #{schedule_name},
+           GETDATE(),
+           GETDATE(), 
+           #{result},
+           #{remark} )
+
+]]>
+</insert>
 
 <select id="selectScheduledtFcmNotifyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPFcmNotify">
 <![CDATA[

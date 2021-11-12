@@ -5823,7 +5823,8 @@ public class ApiErpController {
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
 			@RequestParam(name="req_as_dt", required=true) String req_as_dt,
-			@RequestParam(name="rpt_urg", required=true) String rpt_urg
+			@RequestParam(name="rpt_urg", required=true) String rpt_urg,
+			@RequestParam(name="inconsistent_yn", required=false) String inconsistent_yn
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -5928,8 +5929,12 @@ public class ApiErpController {
 					 "1) 수주건명 : "+""+org_orm_nm+"\r\n"+
 					 "2) 수주번호 : "+""+org_orm_no+"\r\n"+
 					 "3) 시공일자 : "+""+org_plm_cdt+"\r\n"+
-					 "4) 요청사항 : "+""+org_mob_remark+"";	        
-	         
+					 "4) 요청사항 : "+""+org_mob_remark+"";
+	        
+	        if ("Y".equals(inconsistent_yn)) {
+	        	as_req_remark = as_req_remark +"\r\n"+"내부부적합으로 인해 발생된 AS접수건입니다.";
+	        }
+	        
 			dataResult = sCheduleMainListMapper.executePraFaRptno(params);
 			
 	        if (dataResult == null) {
@@ -5955,7 +5960,8 @@ public class ApiErpController {
 	        params.put("new_rpt_no", new_rpt_no);
 	        params.put("req_as_dt", req_as_dt);
 	        params.put("as_req_remark", as_req_remark);
-	        params.put("rpt_urg", rpt_urg);	        
+	        params.put("rpt_urg", rpt_urg);
+	        params.put("inconsistent_yn", inconsistent_yn);
 	        
         	res = sCheduleMainListMapper.insertSigongMigeulAsRequest(params);
         	
@@ -5976,6 +5982,12 @@ public class ApiErpController {
 	        	response.setResultMessage("updateSigongAsConfirmInform 오류");
 	        	return gson.toJson(response);
 			}
+			
+			
+			
+			
+			
+			
 			
 		} catch (Exception e) {
 			txManager.rollback(status);

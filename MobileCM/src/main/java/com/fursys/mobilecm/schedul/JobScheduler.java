@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DemoScheduler {
+public class JobScheduler {
 
-	private static Logger logger = LoggerFactory.getLogger(DemoScheduler.class);
+	private static Logger logger = LoggerFactory.getLogger(JobScheduler.class);
 	
 /*	
 	@Scheduled(fixedDelay = 5000)

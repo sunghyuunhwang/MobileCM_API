@@ -35,6 +35,98 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	Gson gson = new Gson();
 	
 	@Override
+	public BaseResponse erp_finishScheduleResult(HashMap<String, Object> param) {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		BaseResponse response = new BaseResponse();
+		HashMap<String, Object> params;		
+		int res = 1;
+		
+		try {
+			
+			String seq_no = (String) param.get("seq_no");
+			String result = (String) param.get("result");
+			String remark = (String) param.get("remark");
+						
+			params = new HashMap<String, Object>();
+			params.put("seq_no", seq_no);
+			params.put("result", result);
+			params.put("remark", remark);
+			
+    		res = erpsigongasMapper.finishScheduleHistory(params);
+    		if (res < 1) {
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("erp_finishScheduleResult finishScheduleHistory 오류 [" + res + "]");
+				return response;
+			}
+    		    		
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return response;
+		}
+
+		txManager.commit(status);		
+		response.setResultCode("200");		
+		return response;
+
+	}
+	
+	@Override
+	public BaseResponse erp_startScheduleResult(HashMap<String, Object> param) {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		BaseResponse response = new BaseResponse();
+		HashMap<String, Object> params;		
+		int res = 1;
+		
+		try {
+			String schedule_server = (String) param.get("schedule_server");
+			String schedule_id = (String) param.get("schedule_id");
+			String schedule_name = (String) param.get("schedule_name");
+			String result = (String) param.get("result");
+			String remark = (String) param.get("remark");
+			
+			if (result == null) result = "";
+			if (remark == null) remark = "";
+			
+			params = new HashMap<String, Object>();
+			params.put("schedule_server", schedule_server);
+			params.put("schedule_id", schedule_id);
+			params.put("schedule_name", schedule_name);
+			params.put("result", result);
+			params.put("remark", remark);
+			
+    		res = erpsigongasMapper.startScheduleHistory(params);
+    		if (res < 1) {
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("erp_startScheduleResult startScheduleHistory 오류 [" + res + "]");
+				return response;
+			}
+    		
+    		int seq_no = (int) params.get("seq_no");
+    		
+    		System.out.println(String.format("erp_startScheduleResult return is %d", seq_no));
+    		
+    	    response.setResultCount(String.format("%d", seq_no));
+    		
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return response;
+		}
+
+		txManager.commit(status);		
+		response.setResultCode("200");		
+		return response;
+
+	}
+	
+	@Override
 	public BaseResponse erp_selectScheduledtFcmNotifyList(HashMap<String, Object> param) {
 		BaseResponse response = new BaseResponse();
 		ArrayList<ERPFcmNotify> allitems;
@@ -96,9 +188,9 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		BaseResponse response = new BaseResponse();
 		DataResult dataResult = new DataResult();
-		HashMap<String, Object> params;
-		
+		HashMap<String, Object> params;		
 		int res = 1;
+		int send = 0;
 		
 		try {
 			
@@ -114,7 +206,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			String send_dt = "";
 			StringBuffer send_text = new StringBuffer();
 			int noti_seqno = 0;
-						
+
 			params = new HashMap<String, Object>();
 			params.put("com_scd", as_com_scd);
 	        
@@ -126,6 +218,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			ArrayList<ERPPushMessage> allItems = erpsigongasMapper.selectPhoneID(params);
 			if (allItems != null) {
     			for(int i=0; i<allItems.size(); i++) {
+    				send++;
     				send_text = new StringBuffer();
     				send_text.append(as_command);
     				send_text.append(DELIMETER + noti_seqno);
@@ -185,6 +278,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			return response;
 		}
 
+		response.setResultCount(String.format("%d", send));
 		txManager.commit(status);		
 		response.setResultCode("200");		
 		return response;
