@@ -2655,13 +2655,15 @@ INSERT INTO TC_PLANDTL
            ,#{org_agt_cd}
            ,'C141'
            ,NULL
-           ,NULL
+           ,ISNULL((SELECT TCP.MOB_REMARK 
+                      FROM TC_PLANMST TCP WITH (NOLOCK) 
+                     WHERE TCP.PLM_NO = #plm_no# ), '')
            ,#{org_orm_gpost}
            ,#{sti_cd}
            ,GETDATE()
            ,'Y'
            ,'N'
-           ,'Y'
+           ,'R'
            ,NULL
            ,NULL
            ,NULL
