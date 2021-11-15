@@ -88,3 +88,11 @@
           </div>
      </section>
 </aside>
+<script type="text/javascript">
+     function showDays() {
+         var start = $('.cnstrctLstBx #nmldate1').datepicker('getDate');
+         var end   = $('.cnstrctLstBx #nmldate2').datepicker('getDate');
+     }
+     $('.cnstrctLstBx #nmldate1').datepicker({ dateFormat: 'yymmdd', onSelect: showDays });
+	$('.cnstrctLstBx #nmldate2').datepicker({ dateFormat: 'yymmdd', onSelect: showDays });
+</script>

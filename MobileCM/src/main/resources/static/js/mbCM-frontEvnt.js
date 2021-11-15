@@ -5,6 +5,7 @@
 function cnstrctLstPop() {//시공건 팝업
      $('.cnstrctLstBtn').click(function() {
        $('.cnstrctLstPop').addClass('opn');
+       datepicker();
      });
 }
 function ulLftlst() {//리스트표시
@@ -34,8 +35,15 @@ function datepicker() {//달력 한글화
  }).datepicker("setDate", new Date());
  $( ".nmldatepicker" ).datepicker({
  changeMonth: true,
+ prevText:"이전달",
+ nextText:"다음달",
  dateFormat:"yymmdd",
  showMonthAfterYear: true,
+ monthNames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+ monthNamesShort: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 
+ dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+ dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+ dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
  yearSuffix: '년'
 }).datepicker("setDate", new Date());
 if($('.innmldate').hasClass('opn')){

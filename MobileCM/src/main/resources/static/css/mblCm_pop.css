@@ -34,7 +34,7 @@
     .popCntnts.wid .dfBx .assgnLst{margin: 0;padding: 0 24px;box-sizing: border-box;}
 
 
-    .popCntnts.alrtBx .btnBx{padding: 0 14px;margin: 15px 0 0 0;height: auto;box-sizing: border-box;}
+    .popCntnts.alrtBx .btnBx{padding: 0 14px;margin: 15px 0;height: auto;box-sizing: border-box;}
 
     .fssMblCmPop .btnBx{height: 90px;}
    .fssMblCmPop .btnBx.bttm{position: absolute;left: 0px;bottom: 0px;border-radius: 0 0 16px 16px;box-shadow: 0 -3px 3px 0 rgba(0, 0, 0, 0.1);background-color: #f1f2f3;}
