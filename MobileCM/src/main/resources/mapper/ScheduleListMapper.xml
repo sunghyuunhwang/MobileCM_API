@@ -2134,6 +2134,7 @@ INSERT INTO TA_RPTREQ
 		,CTM_CD
 		,CTM_ZIP
 		,CTM_ADDR
+		,CTM_ADDR2
 		,COM_AGSEC
 		,STI_CD
 		,USR_ID
@@ -2189,6 +2190,7 @@ INSERT INTO TA_RPTREQ
 		,''								
 		,#{orm_gpost}
 		,#{orm_gaddr}
+		,(SELECT TCP.ADDR_DTL FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
 		,#{com_agsec}
 		,#{as_sti_cd}
 		,#{sti_cd}
@@ -2202,8 +2204,8 @@ INSERT INTO TA_RPTREQ
 		,''	
 		,''
 		,(SELECT TCP.ORM_NM FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
-		,''
-		,''
+		,(SELECT TCP.ORM_GEMPTEL FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
+		,(SELECT TCP.ORM_HDPHONE FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
 		,''
 		,#{agt_cd}
 		,#{agt_cd}
