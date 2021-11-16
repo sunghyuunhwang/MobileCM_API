@@ -2186,7 +2186,9 @@ INSERT INTO TA_RPTREQ
 		 #{new_rpt_no}
 		,'01'									
 		,CONVERT(CHAR(8), GETDATE(), 112)		
-		,''								
+		,(SELECT TOO.ORM_PURCST 
+		    FROM TO_ORDAMS TOO WITH (NOLOCK)
+		   WHERE TOO.ORM_NO = (SELECT TCP.ORM_NO FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} ) )							
 		,#{orm_gpost}
 		,#{orm_gaddr}
 		,(SELECT TCP.ADDR_DTL FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
