@@ -2659,7 +2659,7 @@ INSERT INTO TC_PLANDTL
            ,NULL
            ,ISNULL((SELECT TCP.MOB_REMARK 
                       FROM TC_PLANMST TCP WITH (NOLOCK) 
-                     WHERE TCP.PLM_NO = #plm_no# ), '')
+                     WHERE TCP.PLM_NO = #{plm_no} ), '')
            ,#{org_orm_gpost}
            ,#{sti_cd}
            ,GETDATE()
