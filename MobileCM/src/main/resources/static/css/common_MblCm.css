@@ -28,7 +28,7 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .dfBx{display: inline-block;float: left;width: 100%;}
 .dfBx.flxBtwn{display: inline-flex;}
 .flxBtwn{justify-content: space-between;}
-.dfBx.flxBtwn.allcheck{    
+.dfBx.flxBtwn.allcheck{
 	/*margin: 0px 0px 0px 0px; */
     /* justify-content: inherit; */
     position: relative;
@@ -42,15 +42,42 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .w100p{width: 100%;}
 
 .w45px{width: 45px;}
+.w60px{width: 60px;}
 .w78px{width: 78px;}
+.w80px{width: 80px;}
+.w90px{width: 90px;}
 .w100px{width: 100px;}
+.w110px{width: 110px;}
+.w120px{width: 120px;}
 .w125px{width: 125px;}
+.w130px{width: 130px;}
+.w135px{width: 135px;}
+.w150px{width: 150px;}
+.w190px{width: 190px;}
+.w200px{width: 200px;}
+.w210px{width: 210px;}
 .w270px{width: 270px;}
+.w300px{width: 300px;}
 .w328px{width: 328px;}
+.w400px{width: 400px;}
+.w500px{width: 500px;}
+.w540px{width: 540px;}
+
+.wCal550px{width: calc(100% - 550px);}
+
+.minW100px{min-width: 100px;}
+.minW150px{min-width: 150px;}
+.minW300px{min-width: 300px;}
+
+.maxW210px{min-width: 210px;}
+.maxW540px{min-width: 540px;}
+.maxW920px{min-width: 920px;}
 
 /*높이*/
 .h54px{height: 54px;}
 
+
+.mLft20px{margin-left: 20px;}
 
 /*글씨색*/
 .clrBlck{color: #242020;}
@@ -61,9 +88,13 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .fnt500{font-weight: 500;}
 .fntBld{font-weight:bold;}
 
+.tAlgnCntr{text-align:center; }
+.tAlgnRght{text-align:right;}
+
 .fllGry{background-color: #ebebeb;}
 .txtIcn{height: 17px;font-size: 9px;font-weight: bold;line-height: 17px;text-align: center;border-radius: 9px;}
 /* 공통 아이콘 */
+.icn{font-size: 0;line-height: 0;background-repeat: no-repeat;}
 .icnChck_wht::before{content: ''; background-image: url('/img/icnChck_wht.svg');}/*체크-흰색*/
 .icnChck_gry::before{content: ''; background-image: url('/img/icnChck_gry.svg');}/*체크-회색*/
 .icnChck_blck::before{content: ''; background-image: url('/img/icnChck_blck.svg');}/*체크-검은색*/
@@ -74,6 +105,8 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .icnLogout::before{content: ''; background-image: url('/img/icnLogout.svg');}/*로그아웃*/
 .icnWidBx::before{content: ''; background-image: url('/img/icnWidBx.svg');}/*박스 넓게*/
 .icnNrrwBx::before{content: ''; background-image: url('/img/icnNrrwBx.svg');}/*박스 좁게*/
+.icnTopMenuOpn::before{content: ''; background-image: url('/img/icnTopMenuOpn.svg');}
+.icnClose_Blck::before{content: ''; background-image: url('/img/icn_close_Blck.svg');}
 
 .nrrwBtn,.widBtn{background-repeat: no-repeat;background-size: 100% auto;background-position: center;}
 .nrrwBtn.on{background-image: url('/img/icnMnlist.svg');}

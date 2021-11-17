@@ -39,6 +39,8 @@ import com.fursys.mobilecm.vo.mobile.response.UserInfoResponse;
 import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPResdtl;
+import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
@@ -1017,18 +1019,88 @@ public class ApiTmsErpController {
 	}	
 	
 		
+	@ApiOperation(value="/getResmstList", notes="tms시공건검색")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공건검색실패") })
+	@GetMapping("/getResmstList")
+	@RequestMapping(value="/getResmstList",method=RequestMethod.GET)
+	public String getResmstList(
+			@AuthenticationPrincipal User user,
+			@ApiParam(value = "from_dt", required = true, example = "20211003")
+			@RequestParam(name = "from_dt", required = true) String from_dt,
+			@ApiParam(value = "to_dt", required = true, example = "20211013")
+			@RequestParam(name = "to_dt", required = true) String to_dt,
+			//@ApiParam(value = "com_scd", required = true, example = "C16YA")
+			//@RequestParam(name = "com_scd", required = true) String com_scd,
+			//@ApiParam(value = "ksti_cd", required = true, example = "YA601")
+			//@RequestParam(name = "ksti_cd", required = true) String ksti_cd,
+			@ApiParam(value = "orm_nm", required = false, example = "김")
+			@RequestParam(name = "orm_nm", required = false) String orm_nm,
+			@ApiParam(value = "itm_cd", required = false, example = "")
+			@RequestParam(name = "itm_cd", required = false) String itm_cd
+			) {
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPResmst> resList = null;
+		try {
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("com_scd", etc.getCom_scd());
+				params.put("ksti_cd", etc.getSti_cd());
+				//params.put("com_scd", "C16YA");
+				//params.put("ksti_cd", "YA601");
+				params.put("from_dt", from_dt);
+				params.put("to_dt", to_dt);
+				params.put("orm_nm", orm_nm);
+				params.put("itm_cd", itm_cd);
+				
+				resList = tmserpScheduling.selectResmstList(params);
+				return gson.toJson(resList);			
+			} else {
+				//return gson.toJson(resList);
+			}			
+		} catch(Exception e) {
+			return gson.toJson(resList);				
+		} finally {
+			return gson.toJson(resList);				
+		}
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@ApiOperation(value="/getResdtlList", notes="tms시공건상세검색")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공건검색실패") })
+	@GetMapping("/getResdtlList")
+	@RequestMapping(value="/getResdtlList",method=RequestMethod.GET)
+	public String getResdtlList(
+			@AuthenticationPrincipal User user,
+			@ApiParam(value = "com_ssec", required = true, example = "C18C")
+			@RequestParam(name = "com_ssec", required = true) String com_ssec,
+			@ApiParam(value = "orm_no", required = false, example = "I20210922138300")
+			@RequestParam(name = "orm_no", required = false) String orm_no,
+			@ApiParam(value = "rpt_no", required = false, example = "I202109180059")
+			@RequestParam(name = "rpt_no", required = false) String rpt_no,
+			@ApiParam(value = "rpt_seq", required = false, example = "01")
+			@RequestParam(name = "rpt_seq", required = false) String rpt_seq
+			) {
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPResdtl> resDtlList = null;
+		try {
+			if (user != null) {
+				if(com_ssec.equals("C18C")) {
+					params.put("orm_no", orm_no);
+					resDtlList = tmserpScheduling.selectSigongResdtlList(params);
+				} else if (com_ssec.equals("C18A")) {
+					params.put("rpt_no", rpt_no);
+					params.put("rpt_seq", rpt_seq);
+					resDtlList = tmserpScheduling.selectAsResdtlList(params);
+				} else {
+					
+				}
+				return gson.toJson(resDtlList);				
+			}		
+		} catch(Exception e) {
+			return gson.toJson(resDtlList);				
+		} finally {
+			return gson.toJson(resDtlList);				
+		}		
+	}
 	
 	
 }
