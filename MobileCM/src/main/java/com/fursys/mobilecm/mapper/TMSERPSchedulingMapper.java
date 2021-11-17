@@ -17,6 +17,8 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPCenterList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPOrderList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPResdtl;
+import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
 
 @Mapper
 public interface TMSERPSchedulingMapper {
@@ -69,6 +71,10 @@ public interface TMSERPSchedulingMapper {
 	public int updateSticdTaPlanmst(HashMap<String,Object> params);
 	public int updateSticdTaOtpMinf(HashMap<String,Object> params);
 	
+	//2021-10 모바일 CM 확장
 	public ArrayList<TMSERPKstiList> selectKstiTeamSelectList(HashMap<String,Object> params);
+	public ArrayList<TMSERPResmst> selectResmstList(HashMap<String,Object> params);
+	public ArrayList<TMSERPResdtl> selectSigongResdtlList(HashMap<String,Object> params);
+	public ArrayList<TMSERPResdtl> selectAsResdtlList(HashMap<String,Object> params);
 	
 }

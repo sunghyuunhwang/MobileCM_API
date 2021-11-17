@@ -1,6 +1,8 @@
 <aside class="popPage fssMblCmPop cnstrctLstPop innmldate" th:fragment="resList_popup">
-     <section class="cnstrctLstBx">
-          <button class="clsBtn icn icnClose_Blck">취소</button>
+     <section class="cnstrctLstBx popCntnts">
+                      <h2 class="ttl"> 시공건검색</h2>
+                 <button class="clsBtn icnCls_blck"></button>
+<!--           <button class="clsBtn icn icnClose_Blck">취소</button> -->
           <article class="srchBox">
                <div class="dateBx">
                     예약일자
@@ -28,7 +30,7 @@
                               <li class="w500px">주소</li>
                               <li class="w150px">서비스팀</li>
                          </ul>
-                         <!--나중에 주석처리할 부분-->
+                         <!--나중에 주석처리할 부분
                          <ul class='ulLftlst' onclick='cnstrctLst_dtlInf()'>
                               <li class='w110px'>2021-10-14</li>
                               <li class='w100px tAlgnCntr'>시공</li>
@@ -41,7 +43,7 @@
                               </li>
                               <li class='w500px'>경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고경북공고고</li>
                               <li class='w150px'>경북공고고경북공고고경북공고고</li>
-                         </ul>
+                         </ul>-->
                          <!--나중에 주석처리할 부분-->
                     </div>
                </article>
@@ -53,9 +55,10 @@
                               <li class="w150px tAlgnCntr">색상</li>
                               <li class="w100px tAlgnCntr">수량</li>
                               <li class="wCal550px">단품명칭</li>
-                              <li class="w150px tAlgnRght">금액</li>
+                              <li class="w150px tAlgnRght">수주단가</li>
+                              <li class="w150px tAlgnRght">수주금액</li>
                          </ul>
-                         <!--나중에 주석처리할 부분-->
+                         <!--나중에 주석처리할 부분
                          <ul class='ulLftlst'>
                               <li class="w150px">FAD00102</li>
                               <li class="w150px tAlgnCntr">ww</li>
@@ -81,7 +84,7 @@
                                    <span class="numTxt"></span>
                                    <input type='text' name='' value='75,000' class='innmbr nmCmma w100p'>
                               </li>
-                         </ul>
+                         </ul>-->
                          <!--나중에 주석처리할 부분-->
                     </div>
                </article>
@@ -93,6 +96,6 @@
          var start = $('.cnstrctLstBx #nmldate1').datepicker('getDate');
          var end   = $('.cnstrctLstBx #nmldate2').datepicker('getDate');
      }
-     $('.cnstrctLstBx #nmldate1').datepicker({ dateFormat: 'yymmdd', onSelect: showDays });
-	$('.cnstrctLstBx #nmldate2').datepicker({ dateFormat: 'yymmdd', onSelect: showDays });
+     $('.cnstrctLstBx #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
+	$('.cnstrctLstBx #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
 </script>

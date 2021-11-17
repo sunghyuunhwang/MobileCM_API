@@ -15,9 +15,26 @@ function ulLftlst() {//리스트표시
            if(! $(this).hasClass('_index')){
            $('.ulLftlst').removeClass('on');
            $(this).addClass('on');
+           resetUlLftdtllst();
+           cnstrctLst_dtlInf(this);
            }
       });
     });
+}
+function resetUlLftlst() {
+    $('#cnstrctLst .ulLftlst').each(function() {
+    	if(! $(this).hasClass('_index')){
+ 				$(this).remove();
+           }
+      });
+}
+function resetUlLftdtllst() {
+     $('#cnstrctLst_dtlInf .ulLftlst').each(function() {
+     	if(! $(this).hasClass('_index')){
+ 				$(this).remove();
+           }
+      	});
+	
 }
 function datepicker() {//달력 한글화
    $( ".datepicker" ).datepicker({
@@ -25,7 +42,13 @@ function datepicker() {//달력 한글화
       //dateFormat:"yymmdd",
       dateFormat:"m월    dd일",
       showMonthAfterYear: true,
-      yearSuffix: '년'
+	  yearSuffix: '년',
+      onSelect: function (dateText, inst) {
+		$('.apiDtPckr').datepicker("setDate",  $('.datepicker').datepicker('getDate'));
+		//$(".apiDtPckr").val($.datepicker.formatDate("yymmdd", dateText));
+       	allRset();//리셋(프론트엔드부분만)
+        assgnCll();//다시 불러오기
+      }, 
   }).datepicker("setDate", new Date());
   $( ".apiDtPckr" ).datepicker({
    changeMonth: true,
@@ -37,7 +60,7 @@ function datepicker() {//달력 한글화
  changeMonth: true,
  prevText:"이전달",
  nextText:"다음달",
- dateFormat:"yymmdd",
+ dateFormat:"yy-mm-dd",
  showMonthAfterYear: true,
  monthNames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
  monthNamesShort: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 
@@ -66,6 +89,18 @@ function cmma() { // 세자리수 콤마찍기 - 읽기 전용
       }
     }
     $(this).val(cmmaVal);
+  });
+}
+
+function hipun() { // 세자리수 콤마찍기 - 읽기 전용
+  $('.hipun').each(function() {
+    var employ = $(this).val();
+    var formatNum = "";
+    employ = employ.replace(/,/g, '');
+    if(employ.length == 8) {
+		formatNum = employ.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+		}
+    $(this).val(formatNum);
   });
 }
 
@@ -290,15 +325,23 @@ function assgnsubInf() {//선택팀 상세
                      });
 //                     map.setZoom(16);
                      $('.crld').parent().css({'margin':'-35px 0 0 -22px','border':'0','background':'none'});
-                      console.log(strLat,strLng); //잘들어갔나 뽑아봄
+                     //console.log(strLat,strLng); //잘들어갔나 뽑아봄
      });
 }
-function mrkLvlClck() {//마커 클릭시 해달 리스트 표시
-	var mrkLvl = $('.fssMblCm._Map #map_div img');
-     mrkLvl.click(function() {
-          alert('test');
-     });
-}
+//function mrkLvlClck(param) {//마커 클릭시 해달 리스트 표시
+//    var pos = param.getPosition();
+//    var clat = pos.lat();
+//    var clng =  Math.round(pos.lng()*1000000)/1000000;
+//	$('#assgnSub_lst > li').each(function(idx) {
+//		var lat = $(this).find('input[class=latitudeNbr]').val();
+//		var lng = $(this).find('input[class=longitudeNbr]').val();
+//		alert( "idx : " + idx +" clat : " + clat + " lat " + lat + " clng : " + clng + " lng " + lng + " lat? " + (clat == lat) + " lng? "  + (clng == lng));
+//		if(clat == lat && clng == lng) {
+//			$('input:checkbox[id="chks_'+idx+'"]').prop("checked", true);
+//			return;
+//		}
+//	});
+//}
 function assgnsubInfOnly() {//선택팀 상세팝업팀변경 액션
 	$('.chngTmBx1').addClass('chng');
 	$('.chngTmLstBx').addClass('chng');
@@ -503,5 +546,5 @@ $(document).ready(function(){
       rsvtnStrtPop();//예약확정 팝업
       logoutPop();//로그아웃 팝업
       ulLftlst();//리스트표시
-     cnstrctLstPop();//시공건 팝업
+      cnstrctLstPop();//시공건 팝업
 });

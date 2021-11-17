@@ -16,7 +16,6 @@ function assgnCll(sqty,samt,constcst_sum) {//총건수 불러오기
               sqty = response.sqty;
               samt = response.samt;
               const_amt = response.const_amt;
-              console.log(response);
 	    	   $("#sqty").val(sqty);
              $("#samt").val(samt);
              $("#const_amt").val(const_amt);
@@ -51,8 +50,8 @@ function lalngCll(resultCode,resultCount,resultMessage) {//위도경도
                   resultCount = response.resultCount;
                   resultMessage = response.resultMessage;
                  mbCMmapCll();//스케줄 불러오기
-                $('.alrtPop').removeClass('opn');
-                $('#lodingPop').removeClass('on');
+                //$('.alrtPop').removeClass('opn');
+                //$('#lodingPop').removeClass('on');
 
 	    },
          //complete:function{
@@ -146,13 +145,14 @@ function mbCMmapCll(rem_dt,com_scd,sti_cd,sti_nm,orm_qty,orm_amt, constcst_sum,r
 		      assgnLstCkck();// 할당리스트 클릭시
 		      onoffBxCls(); // 박스 열고닫기
 		      inNrrwWid();//f리스트 스타일 바꾸기
-                $('.alrtPop').removeClass('opn');
-                $('#lodingPop').removeClass('on');
+                //$('.alrtPop').removeClass('opn');
+                //$('#lodingPop').removeClass('on');
 
 	    },
-         //complete:function{
-
-         //},
+         complete:function(){
+                $('.alrtPop').removeClass('opn');
+                $('#lodingPop').removeClass('on');
+         },
 	    error: function (request, status, error){
               console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
               alert('데이터를 불러올수 없습니다.');
@@ -305,10 +305,7 @@ function tmsrpAllcStrt(resultCode,resultCount,resultMessage,mappingKey) {//분�
 
 
 function tmsrpAllcRply(resultCode,resultCount,resultMessage,mappingKey) {//1분단위요청
-console.log("TTTTTTTTTTTTTTTTTT");
      var dateapi = $('#date2').val();//현재 조정한 날짜
-
-     console.log('1111111'+mappingKey);
 	 var sticd_list = '';
 	 var sticd_list_from = '';
 
@@ -809,7 +806,7 @@ function chngTmDon(resultCode,resultCount,resultMessage) {//팀 변경 완료
 }
 
 function assgninfLstdt(_this,rem_dt,com_scd,sti_cd,sti_nm,orm_qty,orm_amt, constcst_sum) {//시공품목리스트
-     assgnsubInf();
+    assgnsubInf();
 	var plm_no2 = $(_this).find('.assgnSbInfBx .txt').attr("data-plm-no");
 	var com_ssec2 = $(_this).find('.assgnSbInfBx .txt').attr("data-com-ssec");
 	$('#assgnInfLstPop').removeClass('smll');//품목리스트 숨기기
@@ -892,6 +889,153 @@ function rsvtnconfirm() {//예약확정후 프론트엔드 이벤트
           $('.rsvtnStrt').removeClass('on');
           $('.scdlAllDon').addClass('on');
 }
+function cnstrctLst() {//시공건 검색 리스트
+
+	var from_dt = $('.cnstrctLstBx #nmldate1').val();//시작일
+	var to_dt = $('.cnstrctLstBx #nmldate2').val();//종료일
+	var orm_nm = $('input[name=orm_nm]').val();//건명
+	var itm_cd = $('input[name=itm_cd]').val();//단품코드
+	var start = $('.cnstrctLstBx #nmldate1').datepicker('getDate');
+	var end   = $('.cnstrctLstBx #nmldate2').datepicker('getDate');
+	if(!start || !end)
+	    return;
+	var days = (end - start)/1000/60/60/24;
+	if((orm_nm.length < 1 && itm_cd.length < 1) || days >= 30){
+		 $('.alrtPop').addClass('opn');
+		 $('#resList_popFail').addClass('on');
+	} else {
+		resetUlLftlst();
+		resetUlLftdtllst();
+		$('.alrtPop').addClass('opn');
+		$('#lodingPop').addClass('on');
+		$.ajax({
+		    url: "/v1/api/tmserp/getResmstList",
+		    type: "GET",
+		    cache: false,
+		    dataType: "json",
+	        data: {
+	         	 //from_dt: '20210910',
+	             //to_dt:'20211020',
+	             //com_scd: 'C16YA',
+	             //ksti_cd: 'YA521',
+	             //orm_nm: '(임)윤미주',
+	             //itm_cd: 'DASDQEW2'
+	         	 from_dt: from_dt,
+	             to_dt:to_dt,
+	             //com_scd: 'C16YA',
+	             //ksti_cd: 'YA521',
+	             orm_nm: orm_nm,
+	             itm_cd: itm_cd
+		    },
+		    success: function(list){
+			    $.each(list, function(idx, response) {
+		                   var rem_dt = response.rem_dt;
+				           var com_ssec_nm = response.com_ssec_nm;
+		                   var com_brand = response.com_brand;
+		                   var orm_no = response.orm_no;
+		                   var orm_nm = response.orm_nm;
+		                   var orm_amt = response.orm_amt;
+		                   var orm_addr = response.address;
+		                   var sti_nm = response.sti_nm;
+		                   var com_ssec = response.com_ssec;
+		                   var rpt_no =  response.rpt_no;
+		                   var rpt_seq = response.rpt_seq;
+	
+				    //var cnstrctLst = "<ul class='ulLftlst' onclick='cnstrctLst_dtlInf()'>";
+				    var cnstrctLst = "<ul class='ulLftlst'>";
+				           //cnstrctLst += "<li class='w110px nmldatepicker'>"+response.rem_dt+"</li>";
+				           cnstrctLst += "<li class='w100px'><input type='text' class='hipun' value='"+response.rem_dt+"' readonly/>";
+	                       cnstrctLst += "<li class='w100px'>"+response.com_ssec_nm+"</li>";
+	                       cnstrctLst += "<li class='w100px'>"+response.com_brand+"</li>";
+	                       cnstrctLst += "<li class='w150px'>"+response.orm_no+"</li>";
+	                       cnstrctLst += "<li class='w300px'>"+response.orm_nm+"</li>";
+	                       cnstrctLst += "<li class='w150px'><span class='numTxt'></span><input type='text' name='' value='"+response.orm_amt+"' class='innmbr nmCmma w100p'></li>";
+	                       cnstrctLst += "<li class='w500px'>"+response.address+"</li>";
+	                       cnstrctLst += "<li class='w150px'>"+response.sti_nm+"</li>";
+	                       cnstrctLst += "<input type='hidden' name = 'com_ssec' value='"+com_ssec+"'/>";
+	                       cnstrctLst += "<input type='hidden' name = 'orm_no' value='"+orm_no+"'/>";
+	                       cnstrctLst += "<input type='hidden' name = 'rpt_no' value='"+rpt_no+"'/>";
+	                       cnstrctLst += "<input type='hidden' name = 'rpt_seq' value='"+rpt_seq+"'/>";
+	                       cnstrctLst += "</ul>";
+		  		     $('#cnstrctLst').append(cnstrctLst);
+				 console.log(response);
+	 	          });
+	                 cmma();//콤마
+	                 innmbr();//인풋값 스팬으로 넘기기
+	                 hipun();
+	                 ulLftlst();
+	                 if(list.length > 0){
+		                var datalist = $('#cnstrctLst ul.ulLftlst').not('._index');
+		                $(datalist[0]).addClass('on');
+		                cnstrctLst_dtlInf(datalist[0]);
+	                }
+		    },
+	         complete:function(){
+	                $('.alrtPop').removeClass('opn');
+	                $('#lodingPop').removeClass('on');
+	         },
+		    error: function (request, status, error){
+	              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+	              alert('데이터를 불러올수 없습니다.');
+		    }
+		  });
+	}
+
+}
+function cnstrctLst_dtlInf(_this) {//상세정보
+	resetUlLftdtllst();
+	var $selected_to = $(_this);
+	//alert("this ? " + $selected_to.attr("class"));
+	var $selected_com_ssec = $selected_to.find('input[name=com_ssec]').val();
+	var $selected_orm_no = $selected_to.find('input[name=orm_no]').val();
+	var $selected_rpt_no = $selected_to.find('input[name=rpt_no]').val();
+	var $selected_rpt_seq = $selected_to.find('input[name=rpt_seq]').val();
+	
+	$.ajax({
+	    url: "/v1/api/tmserp/getResdtlList",
+	    type: "GET",
+	    cache: false,
+	    dataType: "json",
+         data: {
+			   com_ssec: $selected_com_ssec,
+         	   orm_no: $selected_orm_no,
+         	   rpt_no: $selected_rpt_no,
+         	   rpt_seq: $selected_rpt_seq
+	    },
+	    success: function(list){
+		    $.each(list, function(idx, response) {
+	                   var itm_cd = response.itm_cd;
+			           var col_cd = response.col_cd;
+	                   var ord_qty = response.ord_qty;
+	                   var itm_nm = response.itm_nm;
+	                   var itm_cst = response.itm_cst;
+	                   var all_cst = response.all_cst;
+
+			    var cnstrctLst_dtlInf = "<ul class='ulLftlst'>";
+			        cnstrctLst_dtlInf += "<li class='w150px'>"+itm_cd+"</li>";
+                    cnstrctLst_dtlInf += "<li class='w150px tAlgnCntr'>"+col_cd+"</li>";
+                    cnstrctLst_dtlInf += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+ord_qty+"' class='innmbr nmCmma w100p'></li>";
+                    cnstrctLst_dtlInf += "<li class='wCal550px'>"+itm_nm+"</li>";
+                    cnstrctLst_dtlInf += "<li class='w150px tAlgnRght'><span class='numTxt'></span><input type='text' name='' value='"+itm_cst+"' class='innmbr nmCmma w100p'></li>";
+                    cnstrctLst_dtlInf += "<li class='w150px tAlgnRght'><span class='numTxt'></span><input type='text' name='' value='"+all_cst+"' class='innmbr nmCmma w100p'></li>";
+                    cnstrctLst_dtlInf += "</ul>";
+	  		     $('#cnstrctLst_dtlInf').append(cnstrctLst_dtlInf);
+			 console.log(response);
+ 	          });
+                 cmma();//콤마
+                 innmbr();//인풋값 스팬으로 넘기기
+	    },
+         //complete:function{
+
+         //},
+	    error: function (request, status, error){
+              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+              alert('데이터를 불러올수 없습니다.');
+	    }
+	  });
+
+}
+
 $(document).ready(function(){
      if($('.loginBx').length < 1){
           assgnCll();//총건수 불러오기
