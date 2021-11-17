@@ -2072,7 +2072,7 @@
 	]]>
     </select>
     
-    <select id="selectResmstList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPResmst">        
+    <select id="selectResmstList_back" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPResmst">        
 		SELECT			
 				REM_DT
 			   ,COM_SSEC
@@ -2157,6 +2157,7 @@
 			  FROM TC_RESMST A WITH (NOLOCK)
 				   INNER JOIN TC_STINF STI WITH (NOLOCK)
 				   ON A.STI_CD = STI.STI_CD
+				   AND A.COM_SCD = STI.COM_SCD
 				   ,TA_RPTREQ B WITH (NOLOCK)
 				   INNER JOIN TA_ASTITEM C WITH (NOLOCK)
 				   ON B.RPT_NO = C.RPT_NO
@@ -2217,15 +2218,112 @@
 				,CD.CCD_NM
 				,TEMP.ORM_NO	        
     </select>
+
+
+    <select id="selectResmstList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPResmst">        
+		SELECT DISTINCT a.rem_dt,
+		                a.orm_no,
+		                a.orm_nm,
+		                a.sti_cd,
+		                a.com_ssec,
+		                (SELECT ccd_nm
+		                 FROM   tt_comcd with (nolock)
+		                 WHERE  ccd_cd = a.com_brand)        AS com_brand,
+		                (SELECT tcs.sti_nm
+		                 FROM   tc_stinf tcs with (nolock)
+		                 WHERE  tcs.sti_cd = a.sti_cd
+		                        AND tcs.com_scd = a.com_scd) AS sti_nm,
+		                ''                                   AS rpt_no,
+		                ''                                   AS rpt_seq,
+		                '시공'								 AS com_ssec_nm,
+		                CASE c.vnd_cd
+		                  WHEN 'T01I' THEN (SELECT Sum(too.ord_qty * tti.iop_salcst)
+		                                    FROM   to_orddet too with (nolock),
+		                                           tt_itmcop tti with (nolock)
+		                                    WHERE  too.orm_no = d.orm_no
+		                                           AND too.itm_cd = tti.itm_cd
+		                                           AND too.col_cd = tti.col_cd
+		                                           AND tti.com_cmp = c.vnd_cd)
+		                  ELSE (SELECT Sum(too.ord_qty * tti.iop_mnfcst)
+		                        FROM   to_orddet too with (nolock),
+		                               tt_itmcop tti with (nolock)
+		                        WHERE  too.orm_no = d.orm_no
+		                               AND too.itm_cd = tti.itm_cd
+		                               AND too.col_cd = tti.col_cd
+		                               AND tti.com_cmp = c.vnd_cd)
+		                END                                  AS orm_amt,
+		                Isnull(C.orm_gaddr, '')
+		                + Isnull(C.addr_dtl, '')             AS ADDRESS
+		FROM   tc_resmst a with (nolock),
+		       tc_stinf b with (nolock),
+		       to_ordmas c with (nolock),
+		       to_orddet d with (nolock)
+		WHERE  a.rem_dt BETWEEN #{from_dt} AND #{to_dt}
+		       AND a.sti_cd = b.sti_cd
+		       AND a.com_scd = b.com_scd
+		       AND b.k_sti_cd = #{ksti_cd}
+		       AND a.com_ssec = 'C18C'
+		       AND a.orm_no = c.orm_no
+		       AND c.orm_no = d.orm_no
+			   <if test="orm_nm != null and orm_nm != ''">
+			   AND A.ORM_NM LIKE '%' + #{orm_nm} + '%'
+			   </if>
+			   <if test="itm_cd != null and itm_cd != ''">
+			   AND d.ITM_CD LIKE #{itm_cd} + '%'
+			   </if>
+	UNION ALL
+		SELECT DISTINCT a.rem_dt,
+		                a.orm_no,
+		                a.orm_nm,
+		                a.sti_cd,
+		                a.com_ssec,
+		                (SELECT ccd_nm
+		                 FROM   tt_comcd
+		                 WHERE  ccd_cd = a.com_brand)        AS com_brand,
+		                (SELECT tcs.sti_nm
+		                 FROM   tc_stinf tcs
+		                 WHERE  tcs.sti_cd = a.sti_cd
+		                        AND tcs.com_scd = a.com_scd) AS sti_nm,
+		                c.rpt_no,
+		                c.rpt_seq,
+		                'AS'                                 AS com_ssec_nm,
+		                '0'                                  AS orm_amt,
+		                Isnull(C.ctm_addr, '')
+		                + Isnull(C.ctm_addr2, '')            AS ADDRESS
+		FROM   tc_resmst a with (nolock),
+		       tc_stinf b with (nolock) ,
+		       ta_rptreq c with (nolock),
+		       ta_astitem d with (nolock)
+		WHERE  a.rem_dt BETWEEN #{from_dt} AND #{to_dt}
+		       AND a.sti_cd = b.sti_cd
+		       AND a.com_scd = b.com_scd
+		       AND b.k_sti_cd = #{ksti_cd}
+		       AND a.com_ssec = 'C18A'
+		       AND a.orm_no = c.rpt_no + c.rpt_seq
+		       AND c.rpt_no = d.rpt_no
+		       AND c.rpt_seq = d.rpt_seq
+			   <if test="orm_nm != null and orm_nm != ''">
+			   AND c.ctm_nm LIKE '%' + #{orm_nm} + '%'
+			   </if>
+			   <if test="itm_cd != null and itm_cd != ''">
+			   AND d.BMT_ITEM LIKE #{itm_cd} + '%'
+			   </if>
+	order by a.rem_dt
+			,a.orm_no
+			,a.orm_nm
+			,a.sti_cd
+			,a.com_ssec
+    </select>
+    
     <select id="selectSigongResdtlList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPResdtl">
 		SELECT 
 			 DET.ORM_NO AS ORM_NO
 			,DET.ITM_CD AS ITM_CD
 			,DET.COL_CD AS COL_CD
-			,ORD_QTY AS ORD_QTY
+			,SUM(ORD_QTY) AS ORD_QTY
 			,IM.ITM_NM AS ITM_NM
 			,(CASE MAS.VND_CD WHEN 'T01I' THEN COP.IOP_SALCST ELSE COP.IOP_MNFCST END) AS ITM_CST
-			,(CASE MAS.VND_CD WHEN 'T01I' THEN COP.IOP_SALCST ELSE COP.IOP_MNFCST END) * ORD_QTY AS ALL_CST 
+			,(CASE MAS.VND_CD WHEN 'T01I' THEN COP.IOP_SALCST ELSE COP.IOP_MNFCST END) * SUM(ORD_QTY) AS ALL_CST 
 		FROM TO_ORDDET DET WITH (NOLOCK)
 			INNER JOIN TO_ORDMAS MAS WITH (NOLOCK)
 			ON DET.ORM_NO = MAS.ORM_NO
