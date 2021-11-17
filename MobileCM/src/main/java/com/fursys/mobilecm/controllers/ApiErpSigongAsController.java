@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fursys.mobilecm.mapper.CRS0010_M01Mapper;
 import com.fursys.mobilecm.mapper.ErpSigongAsMapper;
 import com.fursys.mobilecm.service.ApiErpService;
+import com.fursys.mobilecm.service.ApiErpSigongAsService;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
@@ -31,10 +32,8 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping("/v1/api/erp_sigongas")
 public class ApiErpSigongAsController {
 	
-	@Autowired ApiErpService apiErpService;
-	@Autowired ErpSigongAsMapper erpsigongasMapper;
-	@Autowired CRS0010_M01Mapper crs0010_m01Mapper;
-	
+	@Autowired ApiErpSigongAsService apiErpSigongAsService;	
+	@Autowired ErpSigongAsMapper erpsigongasMapper;	
 	@Autowired private PlatformTransactionManager txManager;
 	private SqlSession sql;
 	
@@ -160,7 +159,7 @@ public class ApiErpSigongAsController {
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("sti_cd", as_sti_cd);
         
-        ArrayList<DataResult> allItems = apiErpService.erp_NotifyList(params);
+        ArrayList<DataResult> allItems = apiErpSigongAsService.erp_NotifyList(params);
         
 		return gson.toJson(allItems);
 	}
@@ -319,7 +318,7 @@ public class ApiErpSigongAsController {
 			@RequestParam(name="send_from_system", required=true) String as_send_from_system,
 			@ApiParam(value = "SEND_TO_SYSTEM", required=true, example = "MOBILECM")
 			@RequestParam(name="send_to_system", required=true) String as_send_to_system,
-			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@ApiParam(value = "COM_SCD", required=true, example = "YA521")
 			@RequestParam(name="com_scd", required=true) String as_com_scd,
 			@ApiParam(value = "TITLE", required=true, example = "This is Title")
 			@RequestParam(name="title", required=true) String as_title,
@@ -337,9 +336,9 @@ public class ApiErpSigongAsController {
         params.put("title", as_title);
         params.put("message", as_message);
         params.put("user_id", as_user_id);
-        
-		//response = apiErpService.erp_Fcm_SendNotify(params);
-				
+    
+		response = apiErpSigongAsService.erp_Fcm_SendNotify(params);
+
 		return gson.toJson(response);
 		
 	}
@@ -357,7 +356,7 @@ public class ApiErpSigongAsController {
         params.put("attch_file_id", as_attch_file_id);
         params.put("attch_div_cd", as_attch_div_cd);
 		
-        ArrayList<ERPAttachFileList> allItems = apiErpService.erp_AttachFileList(params);
+        ArrayList<ERPAttachFileList> allItems = apiErpSigongAsService.erp_AttachFileList(params);
         
 		return gson.toJson(allItems);
 	}
@@ -374,7 +373,6 @@ public class ApiErpSigongAsController {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		int res = 0;
 		BaseResponse response = new BaseResponse();
-		DataResult dataResult = new DataResult();
 		
 		try {
 			HashMap<String, Object> params = new HashMap<String, Object>();

@@ -449,27 +449,27 @@ public class ApiErpController {
 			 * 통행비 * 2 지급
 			 */
 			int total_amt = 0;
-			int total_move_km = 0;
+			int compute_move_km = 0;
 			
 			if (move_km < 50) {
 //				System.out.println("1111111111111");
-				total_move_km = 0 ;
+				compute_move_km = 0 ;
 			} else if (move_km >= 50  && move_km < 100) {
 //				System.out.println("2222222222222");
-				total_move_km = (int) (move_km * 0.7) ;
+				compute_move_km = (int) (move_km * 0.7) ;
 			} else if (move_km >= 100 && move_km < 150) {
 //				System.out.println("3333333333333");
-				total_move_km = (int) (move_km * 1) ;
+				compute_move_km = (int) (move_km * 1) ;
 			} else if (move_km >= 150 && move_km < 200) {
 //				System.out.println("4444444444444");
-				total_move_km = (int) (move_km * 1.4) ;
+				compute_move_km = (int) (move_km * 1.4) ;
 //				System.out.println("5555555555555");
 			} else if (move_km >= 200) {
 //				System.out.println("6666666666666");
-				total_move_km = (int) (move_km * 2) ;
+				compute_move_km = (int) (move_km * 2) ;
 			} else {
 //				System.out.println("777777777777");
-				total_move_km = (int) (move_km * 1) ;
+				compute_move_km = (int) (move_km * 1) ;
 			}
 
 			params = new HashMap<String, Object>();
@@ -478,7 +478,7 @@ public class ApiErpController {
 			params.put("rem_dt", rem_dt);
 			params.put("usr_cd", usr_cd);
 			params.put("move_km", ""+move_km);
-			params.put("total_move_km", total_move_km);
+			params.put("compute_move_km", compute_move_km);
 			params.put("move_amt", "0");
 			params.put("toll_fee", route_response.getProperties().getTotalFare());
 			params.put("proc_status", "N");
@@ -3154,11 +3154,13 @@ public class ApiErpController {
 	@ApiOperation(value = "selectAsItemPage", notes = "As품목 상세페이지")
 	@GetMapping("/selectAsItemPage")  
 	public String erp_selectAsItemInfoPage(
-			@RequestParam(name="plm_no", required=true) String plm_no
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="orm_no", required=true) String orm_no
 		) { 
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("plm_no",plm_no);
+        params.put("orm_no",orm_no);
         
 		ArrayList<ERPAsItemPage> allItems = sCheduleMainListMapper.selectAsItemPage(params);
 		
@@ -3261,10 +3263,11 @@ public class ApiErpController {
  
         ERPResultFinishynCheck allItems = null;
         
-        if("시공".equals(com_ssec)) {
-        	allItems = sCheduleMainListMapper.selectFinishYnCheckSigong(params);
-        }else {
+        if("AS".equals(com_ssec)) {
         	allItems = sCheduleMainListMapper.selectFinishYnCheckAs(params);
+        	
+        }else {
+        	allItems = sCheduleMainListMapper.selectFinishYnCheckSigong(params);
         }
         
 		return gson.toJson(allItems);
@@ -3411,10 +3414,11 @@ public class ApiErpController {
 			HashMap<String,Object> params = new HashMap<String, Object>();
 	        params.put("plm_no", plm_no);
 	        System.out.println("com_ssec: " + com_ssec);
-	        if("시공".equals(com_ssec)) {
-	        	res = sCheduleMainListMapper.updateAddSigongStartTime(params);
-	        }else {
+	        if("AS".equals(com_ssec)) {
 	        	res = sCheduleMainListMapper.updateAddAsStartTime(params);
+	        	
+	        }else {
+	        	res = sCheduleMainListMapper.updateAddSigongStartTime(params);
 	        }
 			
 			if (res < 1) {
@@ -4876,13 +4880,13 @@ public class ApiErpController {
         
         ArrayList<ERPSigongSearchDetailInfo> arList = null;
         
-        if("시공".equals(com_ssec)) {
+        if("AS".equals(com_ssec)) {
+        	arList = sCheduleMainListMapper.selectAsSearchDetailInfo(params);
         	
-        	arList = sCheduleMainListMapper.selectSigongSearchDetailInfo(params);
         	
         }else {
         	
-        	arList = sCheduleMainListMapper.selectAsSearchDetailInfo(params);
+        	arList = sCheduleMainListMapper.selectSigongSearchDetailInfo(params);
         	
         }
         
@@ -5818,7 +5822,9 @@ public class ApiErpController {
 	public String erp_sigongmiguelasAutoProc (
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@RequestParam(name="req_as_dt", required=true) String req_as_dt
+			@RequestParam(name="req_as_dt", required=true) String req_as_dt,
+			@RequestParam(name="rpt_urg", required=true) String rpt_urg,
+			@RequestParam(name="inconsistent_yn", required=false) String inconsistent_yn
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -5923,8 +5929,12 @@ public class ApiErpController {
 					 "1) 수주건명 : "+""+org_orm_nm+"\r\n"+
 					 "2) 수주번호 : "+""+org_orm_no+"\r\n"+
 					 "3) 시공일자 : "+""+org_plm_cdt+"\r\n"+
-					 "4) 요청사항 : "+""+org_mob_remark+"";	        
-	         
+					 "4) 요청사항 : "+""+org_mob_remark+"";
+	        
+	        if ("Y".equals(inconsistent_yn)) {
+	        	as_req_remark = as_req_remark +"\r\n"+"내부부적합으로 인해 발생된 AS접수건입니다.";
+	        }
+	        
 			dataResult = sCheduleMainListMapper.executePraFaRptno(params);
 			
 	        if (dataResult == null) {
@@ -5950,6 +5960,8 @@ public class ApiErpController {
 	        params.put("new_rpt_no", new_rpt_no);
 	        params.put("req_as_dt", req_as_dt);
 	        params.put("as_req_remark", as_req_remark);
+	        params.put("rpt_urg", rpt_urg);
+	        params.put("inconsistent_yn", inconsistent_yn);
 	        
         	res = sCheduleMainListMapper.insertSigongMigeulAsRequest(params);
         	
@@ -5970,6 +5982,12 @@ public class ApiErpController {
 	        	response.setResultMessage("updateSigongAsConfirmInform 오류");
 	        	return gson.toJson(response);
 			}
+			
+			
+			
+			
+			
+			
 			
 		} catch (Exception e) {
 			txManager.rollback(status);
@@ -6133,11 +6151,11 @@ public class ApiErpController {
 			String new_rem_seq = "";
 			
 			if(org_com_agsec.equals("C02I")) {
-				new_rem_seq = "IC" +  String.format( "%1$03d" , now_rem_seq ) ;		
-			}else if (org_com_agsec.equals("C02P")) {
-				new_rem_seq = "FC" +  String.format( "%1$03d" , now_rem_seq ) ;
+				new_rem_seq = "IC" +  String.format( "%1$04d" , now_rem_seq ) ;		
 			}else if (org_com_agsec.equals("C02F")) {
-				new_rem_seq = "PC" +  String.format( "%1$03d" , now_rem_seq ) ;
+				new_rem_seq = "FC" +  String.format( "%1$04d" , now_rem_seq ) ;
+			}else if (org_com_agsec.equals("C02P")) {
+				new_rem_seq = "PC" +  String.format( "%1$04d" , now_rem_seq ) ;
 			}
 			
 			params.put("new_rem_seq", new_rem_seq);

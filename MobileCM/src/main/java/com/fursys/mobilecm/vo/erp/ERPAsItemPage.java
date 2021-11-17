@@ -14,7 +14,7 @@ public class ERPAsItemPage {
 	private String bmt_nm ;
 	private String bmtcd_col ;
 	private Integer pld_fqty ; 
-
+	private Integer total_cost ;
 }
 
 

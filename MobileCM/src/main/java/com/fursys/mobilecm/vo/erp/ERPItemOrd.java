@@ -19,4 +19,5 @@ public class ERPItemOrd {
     private Integer return_qty;
     private String item_col;
     private String delay_yn;
+    private String inpbit;
 }

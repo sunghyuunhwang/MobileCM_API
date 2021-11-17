@@ -146,11 +146,12 @@
 		CONVERT(INT, A.ARRIVAL_SEQ) AS ARRIVAL_SEQ,
 		0 AS PLD_SUM
 	FROM TC_RESMST A WITH (NOLOCK)
+	LEFT OUTER JOIN TA_PLANMST BB WITH (NOLOCK) ON A.PLM_NO = BB.PLM_NO AND A.REM_ASNO = BB.RPT_SEQ AND SUBSTRING(A.ORM_NO, 1, 13) = BB.RPT_NO 
 	WHERE A.COM_SCD = #{com_scd}
 	  AND A.STI_CD = #{sti_cd}	
 	  AND A.REM_DT = #{date}
 	  AND A.COM_SSEC = 'C18A'
-	  AND (SELECT COUNT(1) FROM TA_PLANDTL TP WHERE TP.PLM_NO = A.PLM_NO ) > 0	  
+	  /* AND (SELECT COUNT(1) FROM TA_PLANDTL TP WHERE TP.PLM_NO = A.PLM_NO ) > 0 */
 	ORDER BY CONVERT(INT, A.ARRIVAL_SEQ), REM_FTMNM
 
 ]]>
@@ -323,7 +324,7 @@
     
 	SELECT
 		'분해설치' AS 'PLD_SSEC',
-		(SELECT MAX(TCR.TRI_INM) FROM TC_TRINF TCR WITH (NOLOCK) WHERE TCR.TRI_ICD = A.ITM_CD AND TCR.COM_AGSEC = B.COM_AGSEC AND TCR.COM_BRAND = B.COM_BRAND ) AS ITM_NM,
+		(SELECT MAX(TCR.TRI_INM) FROM TC_TRINF TCR WITH (NOLOCK) WHERE TCR.TRI_ICD = A.ITM_CD AND TCR.COM_AGSEC = B.COM_AGSEC AND TCR.COM_BRAND = B.COM_BRAND AND TCR.TRS_SEC = A.trs_sec_2 ) AS ITM_NM,
 		A.ITM_CD AS 'ITMCD_COL',
 		A.ITM_CD AS 'SETCD_COL',
 		A.PLD_FQTY AS PLD_FQTY,
@@ -337,7 +338,7 @@
 
 	SELECT
 		'폐기장' AS 'PLD_SSEC',
-		(SELECT TCR.TRI_INM FROM TC_TRINF TCR WITH (NOLOCK) WHERE TCR.TRI_ICD = A.ITM_CD AND TCR.COM_AGSEC = B.COM_AGSEC AND TCR.COM_BRAND = B.COM_BRAND ) AS ITM_NM,
+		(SELECT TCR.TRI_INM FROM TC_TRINF TCR WITH (NOLOCK) WHERE TCR.TRI_ICD = A.ITM_CD AND TCR.COM_AGSEC = B.COM_AGSEC AND TCR.COM_BRAND = B.COM_BRAND AND TCR.TRS_SEC = A.trs_sec_2 ) AS ITM_NM,
 		A.ITM_CD AS 'ITMCD_COL',
 		A.ITM_CD AS 'SETCD_COL',
 		A.PLD_FQTY AS PLD_FQTY,
@@ -622,6 +623,26 @@
 </select>
 
 <select id="selectAsItemPage" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsItemPage">         
+<![CDATA[ 
+	SELECT
+		(SELECT TTI.BMT_NM
+		   FROM TT_BOMMST TTI WITH (NOLOCK)
+	     WHERE TTI.BMT_ITEM = A.BMT_ITEM
+	       AND TTI.COL_CD = A.COL_CD ) AS BMT_NM,
+	A.BMT_ITEM + '-' + A.COL_CD AS 'BMTCD_COL',
+	SUM(A.PLD_FQTY) AS PLD_FQTY,
+	SUM((B.AST_QQTY * B.BMT_SAMT) * 1.1) AS TOTAL_COST
+	FROM TA_PLANDTL A WITH (NOLOCK) LEFT OUTER JOIN 
+	(SELECT A.BMT_ITEM, A.COL_CD, A.AST_QQTY, A.BMT_SAMT
+	  FROM TA_ASTITEM A WITH(NOLOCK)
+	 WHERE A.RPT_NO = SUBSTRING(#{orm_no}, 1, 13)
+	AND A.RPT_SEQ = SUBSTRING(#{orm_no}, 14, 15)) B ON A.BMT_ITEM = B.BMT_ITEM AND A.COL_CD = B.COL_CD
+	WHERE A.PLM_NO = #{plm_no} /*plm_no*/ 
+	GROUP BY A.BMT_ITEM, A.COL_CD
+]]>
+</select> 
+
+<select id="selectAsItemPage_" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsItemPage">         
 <![CDATA[ 
 	SELECT
 		(SELECT TTI.BMT_NM
@@ -2113,6 +2134,7 @@ INSERT INTO TA_RPTREQ
 		,CTM_CD
 		,CTM_ZIP
 		,CTM_ADDR
+		,CTM_ADDR2
 		,COM_AGSEC
 		,STI_CD
 		,USR_ID
@@ -2157,16 +2179,19 @@ INSERT INTO TA_RPTREQ
 		,TRS_YN
 		,RPT_USRID		
 		,PLM_NO
-		,CTM_ADDR2
+		,RPT_URG		
 		) 
 	VALUES
 		(
 		 #{new_rpt_no}
 		,'01'									
 		,CONVERT(CHAR(8), GETDATE(), 112)		
-		,''								
+		,(SELECT TOO.ORM_PURCST 
+		    FROM TO_ORDMAS TOO WITH (NOLOCK)
+		   WHERE TOO.ORM_NO = (SELECT TCP.ORM_NO FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} ) )							
 		,#{orm_gpost}
 		,#{orm_gaddr}
+		,(SELECT TCP.ADDR_DTL FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
 		,#{com_agsec}
 		,#{as_sti_cd}
 		,#{sti_cd}
@@ -2175,13 +2200,13 @@ INSERT INTO TA_RPTREQ
 		,#{sti_cd}
 		,GETDATE()
 		,'A11003'
-		,'A12004'
+		, CASE #{inconsistent_yn} WHEN 'Y' THEN 'A12011' ELSE 'A12004' END
 		,''	
 		,''	
 		,''
 		,(SELECT TCP.ORM_NM FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
-		,''
-		,''
+		,(SELECT TCP.ORM_GEMPTEL FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
+		,(SELECT TCP.ORM_HDPHONE FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no} )
 		,''
 		,#{agt_cd}
 		,#{agt_cd}
@@ -2211,7 +2236,8 @@ INSERT INTO TA_RPTREQ
 		,'Y'
 		,#{sti_cd}
 		,#{plm_no}
-		,''								
+		,#{rpt_urg}
+		
 		)	 
 ]]>
 </insert> 
@@ -2591,7 +2617,7 @@ INSERT INTO TC_PLANDTL
            ,FST_SYS_DT    /* 최초등록일시 */
            )
     VALUES (#{req_resigong_dt}
-           ,#{new_rem_seq}
+           ,RTRIM(#{new_rem_seq})
            ,#{new_plm_no}
            ,#{org_orm_no}
            ,''
@@ -2631,17 +2657,19 @@ INSERT INTO TC_PLANDTL
            ,#{org_agt_cd}
            ,'C141'
            ,NULL
-           ,NULL
+           ,ISNULL((SELECT TCP.MOB_REMARK 
+                      FROM TC_PLANMST TCP WITH (NOLOCK) 
+                     WHERE TCP.PLM_NO = #{plm_no} ), '')
            ,#{org_orm_gpost}
            ,#{sti_cd}
            ,GETDATE()
            ,'Y'
            ,'N'
-           ,'Y'
+           ,'R'
            ,NULL
            ,NULL
            ,NULL
-           ,NULL
+           ,'N'
            ,NULL
            ,'C4133'
            ,'C4133'

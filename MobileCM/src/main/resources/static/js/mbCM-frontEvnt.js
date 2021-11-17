@@ -54,7 +54,7 @@ function datepicker() {//달력 한글화
    changeMonth: true,
    dateFormat:"yymmdd",
    showMonthAfterYear: true,
-   yearSuffix: '년'
+   yearSuffix: '년',
  }).datepicker("setDate", new Date());
  $( ".nmldatepicker" ).datepicker({
  changeMonth: true,
@@ -314,18 +314,17 @@ function assgnsubInf() {//선택팀 상세
                     var strLat= latitudeNbr.val();
                     var strLng= longitudeNbr.val();
                        lonlat =  new Tmapv2.LatLng(strLat,strLng);
-                       map.setCenter(lonlat);
+                       //map.setCenter(lonlat);
                        var idxNbr = $('#assgn_lst li').index($('#assgn_lst li[class="clck"]'));
                        var content =	"<div class='crld crclLnds"+idxNbr+"'><span class='mrkLvlTxt'>"+cinfTxt+"</span></div>"; // 라벨 내용 지정
                        var popup = new Tmapv2.InfoWindow({
                             position : new Tmapv2.LatLng(strLat,strLng), //Popup 이 표출될 맵 좌표
                             content : content, //Popup 크기는 스타일로 지정, Popup 표시될 text
                             type : 2, // 팝업 타입
-                             map: map // 지도 객체
+                            map: map // 지도 객체
                      });
 //                     map.setZoom(16);
                      $('.crld').parent().css({'margin':'-35px 0 0 -22px','border':'0','background':'none'});
-                     //console.log(strLat,strLng); //잘들어갔나 뽑아봄
      });
 }
 //function mrkLvlClck(param) {//마커 클릭시 해달 리스트 표시

@@ -110,7 +110,8 @@
 		USR_CD,
 		SYS_DT,
 		FST_USR,
-		FST_SYS_DT
+		FST_SYS_DT,
+		CARDAPPLY_YMD
 	)
 	VALUES
 	(
@@ -134,7 +135,8 @@
 		#{sti_cd},
 		GETDATE(),
 		#{sti_cd},
-		GETDATE()
+		GETDATE(),
+		CONVERT(CHAR(8), GETDATE(), 112)
 	)
 ]]>
 </insert>
