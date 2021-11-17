@@ -948,10 +948,10 @@ function cnstrctLst() {//시공건 검색 리스트
 	                       cnstrctLst += "<li class='w100px'>"+response.com_ssec_nm+"</li>";
 	                       cnstrctLst += "<li class='w100px'>"+response.com_brand+"</li>";
 	                       cnstrctLst += "<li class='w150px'>"+response.orm_no+"</li>";
+	                       cnstrctLst += "<li class='w150px'>"+response.sti_nm+"</li>";
 	                       cnstrctLst += "<li class='w300px'>"+response.orm_nm+"</li>";
 	                       cnstrctLst += "<li class='w150px'><span class='numTxt'></span><input type='text' name='' value='"+response.orm_amt+"' class='innmbr nmCmma w100p'></li>";
 	                       cnstrctLst += "<li class='w500px'>"+response.address+"</li>";
-	                       cnstrctLst += "<li class='w150px'>"+response.sti_nm+"</li>";
 	                       cnstrctLst += "<input type='hidden' name = 'com_ssec' value='"+com_ssec+"'/>";
 	                       cnstrctLst += "<input type='hidden' name = 'orm_no' value='"+orm_no+"'/>";
 	                       cnstrctLst += "<input type='hidden' name = 'rpt_no' value='"+rpt_no+"'/>";
@@ -1015,9 +1015,9 @@ function cnstrctLst_dtlInf(_this) {//상세정보
 			        cnstrctLst_dtlInf += "<li class='w150px'>"+itm_cd+"</li>";
                     cnstrctLst_dtlInf += "<li class='w150px tAlgnCntr'>"+col_cd+"</li>";
                     cnstrctLst_dtlInf += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+ord_qty+"' class='innmbr nmCmma w100p'></li>";
-                    cnstrctLst_dtlInf += "<li class='wCal550px'>"+itm_nm+"</li>";
                     cnstrctLst_dtlInf += "<li class='w150px tAlgnRght'><span class='numTxt'></span><input type='text' name='' value='"+itm_cst+"' class='innmbr nmCmma w100p'></li>";
                     cnstrctLst_dtlInf += "<li class='w150px tAlgnRght'><span class='numTxt'></span><input type='text' name='' value='"+all_cst+"' class='innmbr nmCmma w100p'></li>";
+                    cnstrctLst_dtlInf += "<li class='wCal550px'>"+itm_nm+"</li>";
                     cnstrctLst_dtlInf += "</ul>";
 	  		     $('#cnstrctLst_dtlInf').append(cnstrctLst_dtlInf);
 			 console.log(response);

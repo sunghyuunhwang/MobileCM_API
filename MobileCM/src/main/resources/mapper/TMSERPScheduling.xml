@@ -2073,17 +2073,18 @@
     </select>
     
     <select id="selectResmstList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPResmst">        
-		SELECT  REM_DT
+		SELECT			
+				REM_DT
 			   ,COM_SSEC
 			   ,CD.CCD_NM AS COM_BRAND
-			   ,ORM_NO
+			   ,TEMP.ORM_NO
 			   ,ORM_NM
 			   ,ADDR + ADDR_DTL AS ADDRESS
 			   ,STI_NM
-			   ,RPT_NO
-			   ,RPT_SEQ
+			   ,TEMP.RPT_NO
+			   ,TEMP.RPT_SEQ
 			   ,CD2.CCD_NM AS COM_SSEC_NM
-			   ,ORM_AMT AS ORM_AMT
+			   ,SUM((CASE TEMP.VND_CD WHEN 'T01I' THEN ISNULL(COP.IOP_SALCST,0) ELSE ISNULL(COP.IOP_MNFCST,0) END) * ISNULL(ORD_QTY,0)) ORM_AMT
 		FROM 
 		(
 		    SELECT 
@@ -2099,7 +2100,7 @@
 				  ,A.COM_SCD AS COM_SCD
 				  ,'' AS RPT_NO
 				  ,'' AS RPT_SEQ
-				  ,SUM((CASE B.VND_CD WHEN 'T01I' THEN COP.IOP_SALCST ELSE COP.IOP_MNFCST END) * ORD_QTY) AS ORM_AMT 
+				  ,B.VND_CD
 			  FROM TC_RESMST A WITH (NOLOCK)
 				   INNER JOIN TO_ORDMAS B WITH (NOLOCK)
 				   ON A.ORM_NO = B.ORM_NO
@@ -2113,7 +2114,7 @@
 				   AND COP.COM_CMP = B.VND_CD
 			 WHERE  
 			   A.COM_SSEC = 'C18C'
-			   AND C.ORD_QTY != 0
+			   AND C.ORD_QTY <![CDATA[>]]> 0
 			   AND A.REM_DT <![CDATA[>=]]> #{from_dt} 
 			   AND A.REM_DT <![CDATA[<=]]> #{to_dt}
 			   AND A.COM_SCD = #{com_scd}
@@ -2121,22 +2122,23 @@
 			   AND STI.K_STI_CD = #{ksti_cd}
 			   AND STI.STI_RANK = 'Y'
 			   <if test="orm_nm != null and orm_nm != ''">
-			   AND A.ORM_NM LIKE #{orm_nm} + '%'
+			   AND A.ORM_NM LIKE '%' + #{orm_nm} + '%'
 			   </if>
 			   <if test="itm_cd != null and itm_cd != ''">
 			   AND C.ITM_CD LIKE #{itm_cd} + '%'
 			   </if>
-	GROUP BY 
-			   	   A.REM_DT
+			   GROUP BY
+				   A.REM_DT 
 				  ,A.COM_SSEC 
 				  ,A.COM_BRAND 
 				  ,A.ORM_NO 
 				  ,B.ORM_NM 
 				  ,B.ORM_GADDR
 				  ,B.ADDR_DTL
-				  ,A.STI_CD 
+				  ,A.STI_CD
 				  ,STI.STI_NM 
 				  ,A.COM_SCD 
+				  ,B.VND_CD
 	  UNION ALL
 		    SELECT
 				   A.REM_DT AS REM_DT
@@ -2151,7 +2153,7 @@
 				  ,A.COM_SCD AS COM_SCD
 				  ,B.RPT_NO AS RPT_NO
 				  ,B.RPT_SEQ AS RPT_SEQ
-				  ,'0' AS ORM_AMT
+				  ,'' AS VND_CD
 			  FROM TC_RESMST A WITH (NOLOCK)
 				   INNER JOIN TC_STINF STI WITH (NOLOCK)
 				   ON A.STI_CD = STI.STI_CD
@@ -2168,20 +2170,20 @@
 			   AND STI.K_STI_CD = #{ksti_cd}
 			   AND STI.STI_RANK = 'Y'
 			   <if test="orm_nm != null and orm_nm != ''">
-			   AND B.CTM_NM LIKE #{orm_nm} + '%'
+			   AND B.CTM_NM LIKE '%' + #{orm_nm} + '%'
 			   </if>
 			   <if test="itm_cd != null and itm_cd != ''">
 			   AND C.BMT_ITEM LIKE #{itm_cd} + '%'
 			   </if>
-		GROUP BY
-				   A.REM_DT 
+			    GROUP BY
+			   		A.REM_DT
 				  ,A.COM_SSEC 
 				  ,A.COM_BRAND 
 				  ,A.ORM_NO
 				  ,B.CTM_NM 
 				  ,B.CTM_ADDR
 				  ,B.CTM_ADDR2
-				  ,A.STI_CD
+				  ,A.STI_CD 
 				  ,STI.STI_NM 
 				  ,A.COM_SCD 
 				  ,B.RPT_NO 
@@ -2191,7 +2193,29 @@
 		ON CD.CCD_CD = TEMP.COM_BRAND
 		INNER JOIN TT_COMCD CD2 WITH (NOLOCK)
 		ON CD2.CCD_CD = TEMP.COM_SSEC
-		ORDER BY REM_DT, COM_SSEC, CD.CCD_NM, ORM_NO	        
+		LEFT OUTER JOIN TO_ORDDET DET WITH (NOLOCK)
+		ON DET.ORM_NO = TEMP.ORM_NO
+		LEFT OUTER JOIN TT_ITMCOP COP WITH (NOLOCK)
+		ON DET.ITM_CD = COP.ITM_CD
+		AND DET.COL_CD = COP.COL_CD
+		AND TEMP.VND_CD = COP.COM_CMP
+		GROUP BY 
+				REM_DT
+			   ,COM_SSEC
+			   ,CD.CCD_NM 
+			   ,TEMP.ORM_NO
+			   ,ORM_NM
+			   ,ADDR 
+			   ,ADDR_DTL
+			   ,STI_NM
+			   ,TEMP.RPT_NO
+			   ,TEMP.RPT_SEQ
+			   ,CD2.CCD_NM
+		ORDER BY 
+				 REM_DT 
+				,COM_SSEC
+				,CD.CCD_NM
+				,TEMP.ORM_NO	        
     </select>
     <select id="selectSigongResdtlList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPResdtl">
 		SELECT 

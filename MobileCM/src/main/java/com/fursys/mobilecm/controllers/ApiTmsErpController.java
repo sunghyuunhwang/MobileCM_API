@@ -1055,7 +1055,7 @@ public class ApiTmsErpController {
 				resList = tmserpScheduling.selectResmstList(params);
 				return gson.toJson(resList);			
 			} else {
-				//return gson.toJson(resList);
+				return gson.toJson(resList);
 			}			
 		} catch(Exception e) {
 			return gson.toJson(resList);				
@@ -1091,7 +1091,7 @@ public class ApiTmsErpController {
 					params.put("rpt_seq", rpt_seq);
 					resDtlList = tmserpScheduling.selectAsResdtlList(params);
 				} else {
-					
+					return gson.toJson(resDtlList);
 				}
 				return gson.toJson(resDtlList);				
 			}		
