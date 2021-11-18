@@ -97,6 +97,7 @@
 <select id="selectBusinessTrip" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPBusinessTrip">
 <![CDATA[
 	SELECT ISNULL(MOVE_KM, 0) AS MOVE_KM,
+		   ISNULL(REAL_MOVEKM, 0) AS REAL_MOVEKM,
 	       ISNULL(MOVE_AMT ,0) AS MOVE_AMT,
 	       ISNULL(TOLL_FEE, 0) AS TOLL_FEE,
 	       PROC_STATUS
