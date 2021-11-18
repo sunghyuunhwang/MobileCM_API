@@ -20,6 +20,7 @@ public class ERPBusinessTrip {
 	private String proc_status = "";
 	private String total_count = "";
 	private String total_move = "";
+	private String real_movekm = "";
 }
 
 
