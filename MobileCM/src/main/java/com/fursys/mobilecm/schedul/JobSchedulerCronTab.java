@@ -128,7 +128,7 @@ public class JobSchedulerCronTab {
    }
 
 	
-	@Scheduled(cron = "*/10 * * * * *")	
+	//@Scheduled(cron = "*/10 * * * * *")	
 	public void cronJobSch2() {
 				
 		BaseResponse response = new BaseResponse();
