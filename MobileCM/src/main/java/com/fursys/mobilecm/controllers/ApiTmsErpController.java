@@ -1037,9 +1037,10 @@ public class ApiTmsErpController {
 			@RequestParam(name = "orm_nm", required = false) String orm_nm,
 			@ApiParam(value = "itm_cd", required = false, example = "")
 			@RequestParam(name = "itm_cd", required = false) String itm_cd
-			) {
+			) throws Exception {
 		HashMap<String,Object> params = new HashMap<String, Object>();
 		ArrayList<TMSERPResmst> resList = null;
+		
 		try {
 			if (user != null) {
 				UserEtc etc = getUserEtc(user);
@@ -1047,21 +1048,21 @@ public class ApiTmsErpController {
 				params.put("ksti_cd", etc.getSti_cd());
 				//params.put("com_scd", "C16YA");
 				//params.put("ksti_cd", "YA601");
-				params.put("from_dt", from_dt);
-				params.put("to_dt", to_dt);
+				params.put("from_dt", from_dt.replace("-", ""));
+				params.put("to_dt", to_dt.replace("-", ""));
 				params.put("orm_nm", orm_nm);
 				params.put("itm_cd", itm_cd);
 				
 				resList = tmserpScheduling.selectResmstList(params);
-				return gson.toJson(resList);			
+				return gson.toJson(resList);	
 			} else {
-				return gson.toJson(resList);
+				//return gson.toJson(resList);
+				throw new Exception();
 			}			
 		} catch(Exception e) {
-			return gson.toJson(resList);				
-		} finally {
-			return gson.toJson(resList);				
-		}
+			//return gson.toJson(resList);
+			throw new Exception();
+		} 
 	}
 	
 	@ApiOperation(value="/getResdtlList", notes="tms시공건상세검색")
@@ -1078,9 +1079,10 @@ public class ApiTmsErpController {
 			@RequestParam(name = "rpt_no", required = false) String rpt_no,
 			@ApiParam(value = "rpt_seq", required = false, example = "01")
 			@RequestParam(name = "rpt_seq", required = false) String rpt_seq
-			) {
+			) throws Exception {
 		HashMap<String,Object> params = new HashMap<String, Object>();
 		ArrayList<TMSERPResdtl> resDtlList = null;
+		
 		try {
 			if (user != null) {
 				if(com_ssec.equals("C18C")) {
@@ -1091,15 +1093,17 @@ public class ApiTmsErpController {
 					params.put("rpt_seq", rpt_seq);
 					resDtlList = tmserpScheduling.selectAsResdtlList(params);
 				} else {
-					return gson.toJson(resDtlList);
+					throw new Exception();
 				}
 				return gson.toJson(resDtlList);				
-			}		
+			} else {
+				//return gson.toJson(resList);
+				throw new Exception();
+			}			
 		} catch(Exception e) {
-			return gson.toJson(resDtlList);				
-		} finally {
-			return gson.toJson(resDtlList);				
-		}		
+			//return gson.toJson(resDtlList);
+			throw new Exception();
+		}
 	}
 	
 	
