@@ -11,6 +11,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.tms.TmsViaPoints;
 import com.fursys.mobilecm.vo.tmserp.TMSERPCenterList;
@@ -76,5 +77,6 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPResmst> selectResmstList(HashMap<String,Object> params);
 	public ArrayList<TMSERPResdtl> selectSigongResdtlList(HashMap<String,Object> params);
 	public ArrayList<TMSERPResdtl> selectAsResdtlList(HashMap<String,Object> params);
+	public ArrayList<TMSERPVndBanpum> selectVndBanpumList(HashMap<String,Object> params);
 	
 }

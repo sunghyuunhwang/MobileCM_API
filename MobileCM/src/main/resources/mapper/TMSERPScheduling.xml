@@ -2363,4 +2363,123 @@
 		WHERE AST.RPT_NO = #{rpt_no}
 		AND AST.RPT_SEQ = #{rpt_seq}   
     </select>
+    <select id="selectVndBanpumList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum">
+		SELECT B.plm_cdt,
+		       B.com_agsec,
+		       B.orm_no,
+		       B.com_brand,
+		       (SELECT ccd_nm
+		        FROM   tt_comcd WITH (nolock)
+		        WHERE  ccd_cd = b.com_brand)   AS COM_BRAND_NM,
+		       (SELECT vnd_nm
+		        FROM   tt_vendor WITH (nolock)
+		        WHERE  vnd_cd = Max(B.agt_cd)) AS VND_NM,
+		       B.sti_cd,
+		       A.itm_cd,
+		       A.col_cd,
+		       Sum(A.wtp_planqty)              AS WTP_PLANQTY,
+		       B.orm_nm,
+		       A.wtp_entdt
+		       /*대리점에서 등록하는 반품의뢰등로은 위탁의뢰일자와(WTP_REQDT)와 등록일시(WTP_ENTDT)가 무조건 같다고 판단되어, 시간이 포함되어 있는 WTP_ENTDT로 변경. 2018.08.27 유효종*/,
+		       (SELECT sti_nm
+		        FROM   tc_stinf WITH (nolock)
+		        WHERE  sti_cd = B.sti_cd
+		               AND com_scd = B.com_scd)AS STI_NM,
+		       B.plm_no,
+		       C.rem_dt,
+		       A.wtp_finish,
+		       (SELECT ccd_nm
+		        FROM   tt_comcd
+		        WHERE  ref_1 = A.wtp_finish
+		               AND cdx_cd = 'W51')     AS wtp_finish_nm,
+		       D.set_cd,
+		       D.col_scd,
+		       D.ord_qty,
+		       E.com_rdsec,
+		       (SELECT ccd_nm
+		        FROM   tt_comcd WITH (nolock)
+		        WHERE  ccd_cd = e.com_rdsec)   AS com_rdsec_nm,
+		       E.com_undsec,
+		       (SELECT ccd_nm
+		        FROM   tt_comcd WITH (nolock)
+		        WHERE  ccd_cd = e.com_undsec)  AS com_undsec_nm
+		/*쿼리튜닝으로 속도를 올리기 위해 조회조건과 FROM 절 새로 만듬 */
+		FROM   (SELECT itm_cd,
+		               col_cd,
+		               wtp_planqty,
+		               wtp_reqdt,
+		               wtp_entdt,
+		               wtp_no,
+		               wtp_owncd,
+		               orm_no,
+		               wtp_finish,
+		               ord_sseq,
+		               ord_iseq
+		        FROM   tw_wtrecpl WITH (nolock)
+		        WHERE  wtp_no > ''
+		               AND wtp_owncd > ''
+		               AND inout_gubn = 'W50002'
+		               AND wtp_finish <![CDATA[<>]]> '3'
+		               AND wtp_entdt BETWEEN Dateadd(month, -10, CONVERT(DATETIME,LEFT(#{from_dt},4) + Substring(#{from_dt},5,2) + RIGHT(#{from_dt}, 2))) AND Getdate()
+		               ) AS A,
+		       (SELECT a.com_scd,
+		               a.plm_cdt,
+		               a.com_agsec,
+		               a.orm_no,
+		               a.com_brand,
+		               a.agt_cd,
+		               a.sti_cd,
+		               a.orm_nm,
+		               a.plm_no
+		        FROM   tc_planmst a,
+		               tc_stinf b WITH (nolock)
+		        WHERE  plm_no > ''
+		               AND a.plm_cdt BETWEEN #{from_dt} AND #{to_dt}
+		               AND a.com_scd = #{com_scd}
+		               AND b.k_sti_cd = #{ksti_cd}
+		               AND a.sti_cd = b.sti_cd) AS B,
+		       tc_resmst AS C,
+		       to_orddet AS D,
+		       tc_plandtl AS E
+		WHERE  ( A.orm_no IS NOT NULL
+		         AND A.orm_no = B.orm_no )
+		       AND B.plm_no = C.plm_no
+		       AND A.wtp_owncd = B.agt_cd
+		       AND D.orm_no = A.orm_no
+		       AND C.orm_no = D.orm_no
+		       AND D.ord_sseq = A.ord_sseq
+		       AND D.ord_iseq = A.ord_iseq
+		       AND E.plm_no = B.plm_no
+		       AND E.ord_sseq = A.ord_sseq
+		       AND E.ord_iseq = A.ord_iseq
+		GROUP  BY B.com_scd,
+		          B.plm_cdt,
+		          B.com_agsec,
+		          B.orm_no,
+		          B.com_brand,
+		          B.sti_cd,
+		          A.itm_cd,
+		          A.col_cd,
+		          B.orm_nm,
+		          A.wtp_entdt,
+		          B.plm_no,
+		          C.rem_dt,
+		          A.wtp_finish,
+		          D.set_cd,
+		          D.col_scd,
+		          D.ord_qty,
+		          E.com_rdsec,
+		          E.com_undsec
+		ORDER  BY B.com_scd,
+		          B.plm_cdt,
+		          B.com_agsec,
+		          B.com_brand,
+		          B.orm_nm,
+		          B.orm_no,
+		          vnd_nm,
+		          sti_nm,
+		          A.itm_cd,
+		          A.col_cd,
+		          A.wtp_entdt  
+    </select>
 </mapper>
