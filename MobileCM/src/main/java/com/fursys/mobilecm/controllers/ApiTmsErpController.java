@@ -45,6 +45,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
 import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiOperation;
@@ -1084,6 +1085,7 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPResdtl> resDtlList = null;
 		
 		try {
+			System.out.println("user : "+user);
 			if (user != null) {
 				if(com_ssec.equals("C18C")) {
 					params.put("orm_no", orm_no);
@@ -1106,5 +1108,35 @@ public class ApiTmsErpController {
 		}
 	}
 	
-	
+	@ApiOperation(value="/getVndBanpum", notes="tms대리점반품의뢰현황조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getVndBanpum")
+	@RequestMapping(value="/getVndBanpum",method=RequestMethod.GET)
+	public String getVntBanpum(
+			@AuthenticationPrincipal User user,
+			@ApiParam(value = "from_dt", required = true, example = "20211001")
+			@RequestParam(name = "from_dt", required = true) String from_dt,
+			@ApiParam(value = "to_dt", required = true, example = "20211019")
+			@RequestParam(name = "to_dt", required = true) String to_dt
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPVndBanpum> vndBanpumList = null;
+		
+		try {
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("com_scd", etc.getCom_scd());
+				params.put("ksti_cd", etc.getSti_cd());
+				params.put("from_dt", from_dt.replace("-", ""));
+				params.put("to_dt", to_dt.replace("-", ""));
+				vndBanpumList = tmserpScheduling.selectVndBanpumList(params);
+				return gson.toJson(vndBanpumList);				
+			} else {
+				throw new Exception();
+			}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
 }
