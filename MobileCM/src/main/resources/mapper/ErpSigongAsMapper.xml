@@ -2,6 +2,165 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
+<select id="selectLgsStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+	  SELECT ISNULL(A.LGS_STAT, '') DATA1
+	     FROM  TC_PLANMST A WITH (NOLOCK)
+	    WHERE  PLM_NO = #{plm_no}
+	    
+]]>
+</select>
+
+<update id="updateDropSpot" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_PLANMST
+	   SET DROP_SPOT = #{drop_spot},
+	       DROP_RMK = #{drop_rmk}
+	 WHERE PLM_NO = #{plm_no}
+]]>
+</update> 
+
+<select id="selectPendencyItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPConstructionItemPage">
+<![CDATA[
+	  SELECT 
+	          (SELECT TTI.ITM_NM FROM TT_ITMMST TTI WITH (NOLOCK) WHERE TTI.ITM_CD = A.ITM_CD AND TTI.COL_CD = A.COL_CD ) AS ITM_NM
+		     , ITM_CD AS ITMCD_COL
+		     , SET_CD AS SETCD_COL
+			 , CASE WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY ELSE PLD_EQTY - PLD_FQTY END PLD_FQTY
+	     FROM  TC_PLANDTL A WITH (NOLOCK)
+	    WHERE  COM_PLDSEC IN('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
+	      AND  COM_RDSEC ='C13N'
+	      AND  PLM_NO = #{plm_no}
+	 ORDER BY  1
+
+]]>
+</select>
+
+<select id="selectPendencyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPendencyList">
+<![CDATA[
+  
+    SELECT DISTINCT
+	         '시공' COM_SSEC
+		   , COM_BRAND
+		   , PLM_NO		/*시공번호PK*/
+		   , ORM_NO		/*수주번호*/
+		   , ORM_NM
+		   , STI_NM
+		   , PLM_CDT
+		   , PLD_RCDT		/*재일정요청일자*/
+		   , DROP_SPOT	/*하차장소*/
+		   , DROP_SPOT_NM
+		   , DROP_RMK
+		   , LGS_STAT		/*입고상태*/
+		   , INP_RMK		/*입고특이사항*/
+		   , COM_UNDSEC
+		   , FILE_CNT
+		   ,(CASE WHEN  sum(A) > 0	 THEN 'Y' ELSE '' END ) AS AS_YN
+		   ,(CASE WHEN  sum(B) > 0	 THEN 'Y' ELSE '' END ) AS RE_YN
+		   ,(CASE WHEN  sum(C) > 0	 THEN 'Y' ELSE '' END ) AS RETURN_YN
+		   --,(CASE WHEN  sum(D) > 0	 THEN 'Y' ELSE '' END ) AS D
+		   --,(CASE WHEN  sum(E) > 0	 THEN 'Y' ELSE '' END ) AS E
+       FROM (SELECT  A.PLM_NO		/*시공번호PK*/
+	               , A.ORM_NM		/*수주건명*/
+				   , C.PLD_RCDT		/*재일정요청일자*/
+				   , A.DROP_SPOT	/*하차장소*/
+				   , (SELECT CCD_NM FROM TT_COMCD WITH (NOLOCk) WHERE CDX_CD = 'C77' AND CCD_YN = 'Y' AND CCD_CD = A.DROP_SPOT) AS DROP_SPOT_NM
+				   , A.DROP_RMK 
+				   , (SELECT CCD_NM FROM TT_COMCD WITH (NOLOCk) WHERE CDX_CD = 'C78' AND CCD_YN = 'Y' AND CCD_CD = A.LGS_STAT) AS LGS_STAT		/*입고상태*/
+				   , A.INP_RMK		/*입고특이사항*/
+				   , (SELECT CCD_NM FROM TT_COMCD WITH (NOLOCk) WHERE CDX_CD = 'C52' AND CCD_YN = 'Y' AND REF_1 = 'C23R' AND CCD_CD = C.COM_UNDSEC) COM_UNDSEC
+				   , (SELECT COUNT(ATTCH_FILE_ID) FROM TY_ATTCHFILE WITH(NOLOCK) WHERE ATTCH_FILE_ID = 'proof' + A.PLM_NO AND ATTCH_DIV_CD = 'C') FILE_CNT 
+				   , A.ORM_NO		/*수주번호*/
+				   , A.PRJ_CD		/*프로젝트번호*/
+				   , A.COM_SCD		/*서비스센터코드*/
+				   , A.COM_AGSEC	/*회사*/
+				   , ( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = COM_BRAND ) AS COM_BRAND
+				   --, A.COM_BRAND	/*브랜드*/
+				   , A.AGT_CD		/*대리점코드*/
+				   , A.COM_CTSEC	/*서비스팀구분*/
+				   , A.STI_CD		/*시공팀코드*/
+				   , A.STM_NO		/*서비스팀원번호*/
+				   , A.SAC_CD		/*서비스지역코드*/
+				   , A.ORM_ORDDT	/*주문일시*/
+				   , A.ORM_RDT		/*요청납기일*/
+				   , A.PLM_CDT		/*확정납기일*/
+				   , A.PLM_FIXEDT	/*확정종료일*/
+				   , A.PLM_ENDDT	/*시공종료일*/
+				   , ISNULL(A.ORM_PURCST,'') AS ORM_PURCST	/*구매고객코드*/
+				   --, A.ORM_NM		/*수주건명*/
+				   , A.ORM_GEMP		/*납품처담당*/
+				   , A.DET_CD		/*부서코드*/
+				   , A.ORM_GEMPTEL	/*담당전화번호*/
+				   , A.ORM_HDPHONE	/*담당HP*/
+				   , A.PLM_PTM		/*요청시간*/
+				   , A.PLM_FTM		/*확정시간*/
+				   , A.PLM_ETM		/*종료시간*/
+				   , A.COM_PLMFG	/*진행상태*/
+				   , A.ORM_GPOST	/*납품처우편번호*/
+				   , A.ORM_GADDR	/*납품처주소*/
+				   , A.ORM_GSPC		/*납품처특이사항*/
+				   , A.PLM_EVT		/*엘레베이터유뮤*/
+				   , A.PLM_CMPYN	/*매장경유유무*/
+				   , A.PLM_ITR		/*인테리어공사상태*/
+				   , A.ORM_SALEMP	/*본사영업담당사원*/
+				   , A.ORM_AGTEMP	/*대리점영업담당사원*/
+				   , A.PLM_HCALLYN	/*해피콜유무*/
+				   , A.PLM_RMK		/*시공특기사항*/
+				   , A.COM_RMFG		/*결과등록상태*/
+				   , A.COM_UNMSEC	/*미결사유구분*/
+				   , A.ORM_GOOD		/*납품처명*/
+				   , C.COM_UNPSEC
+				   , C.PLD_RMK
+				   , CASE WHEN((SELECT COUNT(*) FROM TC_PLANDTL C WITH (NOLOCK) WHERE C.COM_RDSEC ='C13N' AND C.PLM_NO = A.PLM_NO	 AND ISNULL(C.COM_TDSEC, '') = '' AND ISNULL(C.COM_UNPSEC,'') = '' ) = 0)THEN 1 ELSE 2 END AS COM_UNPEC	/*미결완료구분*/
+				   , B.STI_NM		/*시공팀명*/
+				   , (SELECT VND_NM FROM TT_VENDOR WITH (NOLOCK) WHERE A.AGT_CD = VND_CD) AS VND_NM		/*대리점이름*/
+				   , A.AGT_CD AS VND_CD
+				   ,(CASE WHEN COM_UNPSEC= 'C23A' OR (ISNULL(COM_UNPSEC,'') = '' AND PLD_RASDT > 0 ) THEN 1 ELSE 0 END ) AS A
+				   ,(CASE WHEN ISNULL(COM_UNPSEC,'') = 'C23R' OR (ISNULL(COM_UNPSEC,'') = '' AND PLD_RCDT > 0 ) THEN 1 ELSE 0 END ) AS B
+				   ,(CASE WHEN ISNULL(COM_UNPSEC,'') = 'C23E' OR (ISNULL(COM_UNPSEC,'') = '' AND ISNULL(PLD_RCDT,'') = '' AND ISNULL(PLD_RASDT,'') = '' ) THEN 1 ELSE 0 END ) AS C
+ 				   ,(CASE WHEN ISNULL(COM_UNPSEC,'') = 'C23T'  THEN 1 ELSE 0 END ) AS D
+				   ,(CASE WHEN ISNULL(COM_UNPSEC,'') = 'C23C' OR (PLD_RMK = '시공') THEN 1 ELSE 0 END ) AS E
+		   			,A.TOWN_CD /* 2018.03.29 AS접수 필요 파라미터 추가 */
+			   FROM  TC_PLANMST A WITH (NOLOCK)
+				   , TC_STINF B WITH (NOLOCK)
+				   , TC_PLANDTL C WITH (NOLOCK)
+			  WHERE  A.COM_PLMFG >='C103'
+				AND  A.COM_RMFG ='C13N'
+				AND  C.PLM_NO = A.PLM_NO
+				/*2018.06.05 |주요한| 폐기장 코드 추가 */
+				/*AND  C.COM_PLDSEC IN ('C090','C091','C092','C093','C094','C095','C096','C0930') */
+				AND  C.COM_PLDSEC IN ('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
+				AND  C.COM_RDSEC ='C13N'
+				AND  A.STI_CD = B.STI_CD
+				AND  A.COM_SCD = #{com_scd}
+				--AND  C.PLD_RCDT  >= '20211101'
+				--AND  C.PLD_RCDT  <= '20211101'
+				AND  A.PLM_CDT  >= #{fr_date}
+				AND  A.PLM_CDT  <= #{to_date}
+				AND  CASE WHEN((SELECT COUNT(*) FROM TC_PLANDTL C WITH (NOLOCK) WHERE C.COM_RDSEC ='C13N' AND C.PLM_NO = A.PLM_NO	 AND ISNULL(C.COM_TDSEC, '') = '' AND ISNULL(C.COM_UNPSEC,'') = '' ) = 0)THEN 1 ELSE 2 END  = 1
+				)A
+	 WHERE A.A > 0 OR A.B > 0 OR A.C > 0
+   	GROUP BY  COM_BRAND
+   	       , PLM_NO		/*시공번호PK*/
+		   , ORM_NO		/*수주번호*/
+		   , ORM_NM
+		   , PLD_RCDT		/*재일정요청일자*/
+		   , DROP_SPOT	/*하차장소*/
+		   , DROP_SPOT_NM
+		   , DROP_RMK
+		   , LGS_STAT		/*입고상태*/
+		   , INP_RMK		/*입고특이사항*/
+		   , STI_NM
+		   , PLM_CDT
+		   , COM_UNDSEC
+		   , FILE_CNT
+   ORDER BY  STI_NM
+		   , PLM_CDT
+
+]]>
+</select>
+
 <update id="finishScheduleHistory" parameterType="HashMap">
 <![CDATA[
 	UPDATE TT_SCHEDULE_HISTORY
@@ -36,7 +195,6 @@
 
 ]]>
 </insert>
-
 
 <select id="selectScheduledtFcmNotifyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPFcmNotify">
 <![CDATA[

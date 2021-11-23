@@ -7,12 +7,19 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
+import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	
+	public DataResult selectLgsStat(HashMap<String,Object> params);
+	public int updateDropSpot(HashMap<String,Object> params);
+	public ArrayList<ERPConstructionItemPage> selectPendencyItemList(HashMap<String,Object> params);
+	public ArrayList<ERPPendencyList> selectPendencyList(HashMap<String,Object> params);
 	public int finishScheduleHistory(HashMap<String,Object> params);
 	public int startScheduleHistory(HashMap<String,Object> params);
 	public ArrayList<ERPFcmNotify> selectScheduledtFcmNotifyList(HashMap<String,Object> params);

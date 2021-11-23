@@ -23,6 +23,8 @@ import com.fursys.mobilecm.service.ApiErpSigongAsService;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPPendencyList;
+import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
 import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiOperation;
@@ -40,6 +42,117 @@ public class ApiErpSigongAsController {
 	Gson gson = new Gson();
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@ApiOperation(value = "erp_UpdateDropSpot", notes = "하차장소 UPDATE")
+	@GetMapping("/erp_UpdateDropSpot")
+	@RequestMapping(value = "/erp_UpdateDropSpot", method = RequestMethod.GET)
+	public String erp_UpdateDropSpot(
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String com_scd,
+			@ApiParam(value = "STI_CD", required=true, example = "YA551")
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			@ApiParam(value = "PLM_NO", required=true, example = "I202110023382")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "DROP_SPOT", required=true, example = "C77999")
+			@RequestParam(name="drop_spot", required=true) String drop_spot,
+			@ApiParam(value = "DROP_RMK", required=false, example = "창고옆")
+			@RequestParam(name="drop_rmk", required=false) String drop_rmk
+			) {
+		       
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		DataResult dataResult = new DataResult();
+		
+		try {
+			String lgs_stat = "";
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("sti_cd", sti_cd);
+			params.put("com_scd", com_scd);
+			params.put("plm_no", plm_no);
+			params.put("drop_spot", drop_spot);
+			
+			if ("C77999".equals(drop_spot)) {
+				params.put("drop_rmk", drop_rmk);
+			} else {
+				params.put("drop_rmk", "");
+			}
+			
+			dataResult = erpsigongasMapper.selectLgsStat(params);
+    		if (dataResult != null) {
+    			lgs_stat = dataResult.getData1();
+    		}
+    		
+    		if (!"".equals(lgs_stat)) {
+    			txManager.rollback(status);
+        		response.setResultCode("5001");
+        		response.setResultMessage("입고상태가 등록되어, 하차장소를 변경할 수 없습니다.");
+        		return gson.toJson(response);	
+    		}
+    		
+			res = erpsigongasMapper.updateDropSpot(params);        				
+        	if (res < 1){
+        		txManager.rollback(status);
+        		response.setResultCode("5001");
+        		response.setResultMessage("하차장소 변경에 실패하였습니다.");
+        		return gson.toJson(response);
+        	}
+        				
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "erp_selectPendecyDetailList", notes = "미결상세리스트")
+	@GetMapping("/erp_selectPendecyDetailList")  
+	public String erp_selectPendecyDetailList (
+			@ApiParam(value = "PLM_NO", required=true, example = "P202111010894")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "ATTCH_FILE_ID", required=true, example = "proofF202109060125")
+			@RequestParam(name="attch_file_id", required=true) String attch_file_id,
+			@ApiParam(value = "ATTCH_DIV_CD", required=true, example = "C")
+			@RequestParam(name="attch_div_cd", required=true) String attch_div_cd
+		) { 	
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();		
+        params.put("plm_no", plm_no);
+        params.put("attch_file_id", attch_file_id);
+        params.put("attch_div_cd", attch_div_cd);
+		        
+        PendencyDetailListResponse response = apiErpSigongAsService.erp_selectPendencyDetailList(params);
+        
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "erp_selectPendencyList", notes = "미결리스트")
+	@GetMapping("/erp_selectPendencyList")  
+	public String erp_selectPendencyList (
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String com_scd,
+			@ApiParam(value = "FR_DATE", required=true, example = "20211101")
+			@RequestParam(name="fr_date", required=true) String fr_date,
+			@ApiParam(value = "TO_DATE", required=true, example = "20211101")
+			@RequestParam(name="to_date", required=true) String to_date
+		) { 	
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("com_scd", com_scd);
+        params.put("fr_date", fr_date);
+        params.put("to_date", to_date);        
+        
+        ArrayList<ERPPendencyList> allItems = apiErpSigongAsService.erp_selectPendencyList(params);
+        
+		return gson.toJson(allItems);
+	}
 	
 	@ApiOperation(value = "erp_Test", notes = "TEST")
 	@GetMapping("/erp_Test")

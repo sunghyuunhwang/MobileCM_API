@@ -19,9 +19,15 @@ import com.fursys.mobilecm.utils.FcmMessage;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
+import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
+import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
 import com.google.gson.Gson;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Service
 public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
@@ -33,7 +39,66 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
-	
+
+	@Override		
+	public PendencyDetailListResponse erp_selectPendencyDetailList(HashMap<String, Object> param) {
+		PendencyDetailListResponse reponse = new PendencyDetailListResponse();
+		DataResult dataResult = new DataResult();
+		ArrayList<ERPAttachFileList> file_list;
+		ArrayList<ERPConstructionItemPage> item_list;
+		HashMap<String, Object> params;
+		
+		try {
+			String plm_no = (String) param.get("plm_no");
+			String attch_file_id = (String) param.get("attch_file_id");
+			String attch_div_cd = (String) param.get("attch_div_cd");
+			
+			params = new HashMap<String, Object>();
+	        params.put("plm_no", plm_no);
+	        params.put("attch_file_id", attch_file_id);
+	        params.put("attch_div_cd", attch_div_cd);
+
+	        dataResult = erpsigongasMapper.selectLgsStat(params);
+    		
+	        file_list = erpsigongasMapper.selectSigongAttachFileList(params);
+	        
+	        item_list = erpsigongasMapper.selectPendencyItemList(params);
+	        
+	        reponse.setDataResult(dataResult);
+	        reponse.setFile_list(file_list);
+	        reponse.setItem_list(item_list);
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return reponse;
+	}
+		
+	@Override		
+	public ArrayList<ERPPendencyList> erp_selectPendencyList(HashMap<String, Object> param) {
+		ArrayList<ERPPendencyList> allitems;
+		HashMap<String, Object> params;
+		
+		try {
+			String com_scd = (String) param.get("com_scd");
+			String fr_date = (String) param.get("fr_date");
+			String to_date = (String) param.get("to_date");
+			
+			params = new HashMap<String, Object>();
+	        params.put("com_scd", com_scd);
+	        params.put("fr_date", fr_date);
+	        params.put("to_date", to_date);
+
+	        allitems = erpsigongasMapper.selectPendencyList(params);		
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return allitems;
+	}
+		
 	@Override
 	public BaseResponse erp_finishScheduleResult(HashMap<String, Object> param) {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());

@@ -71,7 +71,7 @@
 	FROM TT_COMCD WITH (NOLOCk)
 	WHERE CDX_CD = #{CDX_CD} --'C67'
 	  AND CCD_YN = 'Y'
-	  AND REF_1 = #{REF_1} --'ASRE'
+	  AND ISNULL(REF_1, '') = #{REF_1} --'ASRE'
 ]]>
 </select>
 
