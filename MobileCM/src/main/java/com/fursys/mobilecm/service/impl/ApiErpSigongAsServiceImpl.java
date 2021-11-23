@@ -82,11 +82,13 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 		
 		try {
 			String com_scd = (String) param.get("com_scd");
+			String sti_cd = (String) param.get("sti_cd");
 			String fr_date = (String) param.get("fr_date");
 			String to_date = (String) param.get("to_date");
 			
 			params = new HashMap<String, Object>();
-	        params.put("com_scd", com_scd);
+			params.put("com_scd", com_scd);
+			params.put("sti_cd", sti_cd);
 	        params.put("fr_date", fr_date);
 	        params.put("to_date", to_date);
 

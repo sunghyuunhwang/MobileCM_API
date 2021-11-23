@@ -23,10 +23,11 @@
 
 <select id="selectPendencyItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPConstructionItemPage">
 <![CDATA[
+
 	  SELECT 
-	          (SELECT TTI.ITM_NM FROM TT_ITMMST TTI WITH (NOLOCK) WHERE TTI.ITM_CD = A.ITM_CD AND TTI.COL_CD = A.COL_CD ) AS ITM_NM
-		     , ITM_CD AS ITMCD_COL
-		     , SET_CD AS SETCD_COL
+	           ISNULL((SELECT TTI.ITM_NM FROM TT_ITMMST TTI WITH (NOLOCK) WHERE TTI.ITM_CD = A.ITM_CD AND TTI.COL_CD = A.COL_CD ), '') AS ITM_NM
+		     , ISNULL(ITM_CD, '') AS ITMCD_COL
+		     , ISNULL(SET_CD, '') AS SETCD_COL
 			 , CASE WHEN PLD_EQTY = PLD_FQTY THEN PLD_FQTY ELSE PLD_EQTY - PLD_FQTY END PLD_FQTY
 	     FROM  TC_PLANDTL A WITH (NOLOCK)
 	    WHERE  COM_PLDSEC IN('C090','C091','C092','C093','C094','C095','C096','C0930','C09A')
@@ -39,7 +40,7 @@
 
 <select id="selectPendencyList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPendencyList">
 <![CDATA[
-  
+
     SELECT DISTINCT
 	         '시공' COM_SSEC
 		   , COM_BRAND
@@ -134,6 +135,7 @@
 				AND  C.COM_RDSEC ='C13N'
 				AND  A.STI_CD = B.STI_CD
 				AND  A.COM_SCD = #{com_scd}
+				AND  A.STI_CD = #{sti_cd}
 				--AND  C.PLD_RCDT  >= '20211101'
 				--AND  C.PLD_RCDT  <= '20211101'
 				AND  A.PLM_CDT  >= #{fr_date}

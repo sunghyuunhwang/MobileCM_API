@@ -138,6 +138,8 @@ public class ApiErpSigongAsController {
 	public String erp_selectPendencyList (
 			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
 			@RequestParam(name="com_scd", required=true) String com_scd,
+			@ApiParam(value = "STI_CD", required=true, example = "YA521")
+			@RequestParam(name="sti_cd", required=true) String sti_cd,			
 			@ApiParam(value = "FR_DATE", required=true, example = "20211101")
 			@RequestParam(name="fr_date", required=true) String fr_date,
 			@ApiParam(value = "TO_DATE", required=true, example = "20211101")
@@ -146,6 +148,7 @@ public class ApiErpSigongAsController {
         
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("com_scd", com_scd);
+        params.put("sti_cd", sti_cd);
         params.put("fr_date", fr_date);
         params.put("to_date", to_date);        
         
