@@ -6039,12 +6039,14 @@ public class ApiErpController {
 	        String org_com_scd = "";
 	        String org_sti_cd = "";
 	        String org_orm_no = "";
+	        String org_plm_cdt = "";
 	        
 	        org_com_agsec = dataResult.getData1();
 	        org_com_brand = dataResult.getData2();
 	        org_com_scd = dataResult.getData3();
 	        org_sti_cd = dataResult.getData4(); 
-	        org_orm_no = dataResult.getData5();	        
+	        org_orm_no = dataResult.getData5();
+	        org_plm_cdt = dataResult.getData6();
 	        
 	        //재일정 요청을 위한 기본 정보 가져오기 2
 	        dataResult = sCheduleMainListMapper.selectSigongReqBasicInfomation2(params);	
@@ -6189,6 +6191,43 @@ public class ApiErpController {
 	        	return gson.toJson(response);
 			}	
 
+			String com_agsec = "";
+			if ("C02F".equals(org_com_agsec)) {
+				com_agsec = "T01F";
+			} else if ("C02I".equals(org_com_agsec)) {
+				com_agsec = "T01I";
+			} else if ("C02P".equals(org_com_agsec)) {
+				com_agsec = "T01P";
+			} else {
+				com_agsec = org_com_agsec;
+			}
+			
+			params = new HashMap<String, Object>();
+			params.put("plm_no", plm_no);
+			params.put("com_agsec", com_agsec);
+			params.put("com_scd", org_com_scd);
+			params.put("plm_cdt", org_plm_cdt);
+			
+			dataResult = sCheduleMainListMapper.selectFinalResult(params);
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("재일정, 반품 기준일자 조회 오류");
+	        	return gson.toJson(response);
+	        }
+	
+			String final_result = dataResult.getData1();
+			
+			params.put("final_result", final_result);			
+			//재시공 update
+			res = sCheduleMainListMapper.updateFinalResult(params);
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateFinalResult 오류");
+	        	return gson.toJson(response);
+			}
+			
 		} catch (Exception e) {
 			txManager.rollback(status);
 			System.out.println(e.toString());			

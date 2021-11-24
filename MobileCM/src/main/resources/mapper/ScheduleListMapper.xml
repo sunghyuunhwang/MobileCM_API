@@ -2,6 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ScheduleMainListMapper">
 
+<update id="updateFinalResult" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_PLANMST
+	   SET FINAL_RESULT = #{final_result}
+	 WHERE PLM_NO = #{plm_no}
+
+]]>
+</update> 
+
+<select id="selectFinalResult" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT CASE WHEN #{req_resigong_dt} > A.CAL_YMD THEN 'C79002' ELSE 'C79001' END AS DATA1
+	FROM TT_CALENDAR A, TT_CALENDAR B
+	WHERE A.COM_CMP = #{com_agsec}  -- 회사코드
+	AND A.COM_CSEC = 'T32001'
+	AND A.CAL_YMD >= #{plm_cdt} -- 원 시공건의 PLM_CDT
+	AND A.CAL_SEC = 'T33N'
+	AND B.COM_CMP = #{com_agsec} -- 회사코드
+	AND B.COM_CSEC = 'T32001'
+	AND B.CAL_YMD >= #{plm_cdt}   -- 원 시공건의 PLM_CDT
+	AND B.CAL_SEC = 'T33N'
+	AND A.CAL_YMD >= B.CAL_YMD
+	GROUP BY A.CAL_YMD
+	HAVING COUNT(*) = (SELECT REF_8 FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = #{com_scd})
+   
+]]>
+</select>
 
 <select id="selectStiList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSti">        
 <![CDATA[ 
@@ -2283,7 +2310,8 @@ INSERT INTO TA_RPTREQ
 		TCP.COM_BRAND AS DATA2, 
 		TCP.COM_SCD AS DATA3,
 		TCP.STI_CD AS DATA4,
-		TCP.ORM_NO AS DATA5
+		TCP.ORM_NO AS DATA5,
+		TCP.PLM_CDT AS DATA6
 	  FROM TC_PLANMST TCP WITH (NOLOCK)
 	 WHERE TCP.PLM_NO = #{plm_no}
 

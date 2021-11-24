@@ -34,6 +34,8 @@ import com.fursys.mobilecm.vo.erp.ERPScheduleCount;
 @Mapper
 public interface ScheduleMainListMapper {
 	
+	public int updateFinalResult(HashMap<String,Object> params);
+	public DataResult selectFinalResult(HashMap<String,Object> params);
 	public ArrayList<ERPSti> selectStiList(HashMap<String,Object> params); 
 	public ArrayList<ERPSti> selectKStiList(HashMap<String,Object> params);
 	public ArrayList<ERPScheduleList> selectScheduleMainList(HashMap<String,Object> params); 
