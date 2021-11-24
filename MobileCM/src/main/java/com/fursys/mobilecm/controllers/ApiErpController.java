@@ -6207,6 +6207,7 @@ public class ApiErpController {
 			params.put("com_agsec", com_agsec);
 			params.put("com_scd", org_com_scd);
 			params.put("plm_cdt", org_plm_cdt);
+			params.put("req_resigong_dt",req_resigong_dt);
 			
 			dataResult = sCheduleMainListMapper.selectFinalResult(params);
 	        if (dataResult == null) {
