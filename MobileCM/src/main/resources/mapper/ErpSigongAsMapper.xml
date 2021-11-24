@@ -140,7 +140,7 @@
 				--AND  C.PLD_RCDT  <= '20211101'
 				AND  A.PLM_CDT  >= #{fr_date}
 				AND  A.PLM_CDT  <= #{to_date}
-				AND  CASE WHEN((SELECT COUNT(*) FROM TC_PLANDTL C WITH (NOLOCK) WHERE C.COM_RDSEC ='C13N' AND C.PLM_NO = A.PLM_NO	 AND ISNULL(C.COM_TDSEC, '') = '' AND ISNULL(C.COM_UNPSEC,'') = '' ) = 0)THEN 1 ELSE 2 END  = 1
+				--AND  CASE WHEN((SELECT COUNT(*) FROM TC_PLANDTL C WITH (NOLOCK) WHERE C.COM_RDSEC ='C13N' AND C.PLM_NO = A.PLM_NO	 AND ISNULL(C.COM_TDSEC, '') = '' AND ISNULL(C.COM_UNPSEC,'') = '' ) = 0)THEN 1 ELSE 2 END  = 1
 				)A
 	 WHERE A.A > 0 OR A.B > 0 OR A.C > 0
    	GROUP BY  COM_BRAND
@@ -161,6 +161,7 @@
 		   , PLM_CDT
 
 ]]>
+
 </select>
 
 <update id="finishScheduleHistory" parameterType="HashMap">
