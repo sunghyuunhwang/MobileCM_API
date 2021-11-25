@@ -6244,5 +6244,155 @@ public class ApiErpController {
 		
 	}	
 	
+
+	@ApiOperation(value = "asPaymentPageKakaoAlarm", notes = "카카오알림톡 발송")
+	@GetMapping("/asPaymentPageKakaoAlarm")  
+	public String asPaymentPageKakaoAlarm (
+			@RequestParam(name="com_brand_cd", required=false) String com_brand_cd,
+			@RequestParam(name="orm_no", required=true) String orm_no,
+			@RequestParam(name="orm_hdphone", required=true) String orm_hdphone,
+			@RequestParam(name="orm_nm", required=true) String orm_nm,
+			@RequestParam(name="sti_nm", required=true) String sti_nm,
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			@RequestParam(name="pay_url", required=true) String pay_url
+		) { 
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		AsResultResponse response = new AsResultResponse();
+		String res_msg = "";
+		DataResult dataResult = new DataResult(); 
+		
+		try {
+
+	    	JSONObject obj = new JSONObject();
+	    	JSONArray jArray = new JSONArray(); //배열이 필요할때
+	    	 
+	    	JSONObject api_token = new JSONObject();
+	    	JSONObject sendList = new JSONObject();	    	 
+	    	JSONObject sObject = new JSONObject();//배열 내에 들어갈 json
+	    	
+	    	String templateCode = "";
+	    	String senderkey = "";
+	    	String title = "AS유상결제영수증";
+	    	String subject = "AS유상결제영수증";
+	    	String from_no = "";
+	    	String message_type = "";
+	    	String biztalkmessage = "";
+	    	biztalkmessage = "안녕하세요.\r\n\r\n" + 
+	    			"아래 링크에서 결제영수증을 확인하세요.\r\n\r\n" + 
+	    			"※ 결제영수증 확인 링크\r\n" + 
+	    			pay_url;
 	
+	    	//퍼시스브랜드
+	    	if("T60F01".equals(com_brand_cd)) {
+	    		senderkey = "8615d8c99db78a8ec996e0c0d659ed11313eb781";
+	    		from_no = "1588-1244";
+	    		templateCode = "fursysasreceiptalarm";
+	
+	    	}
+	    	
+	    	//일룸브랜드
+	    	if("T60I01".equals(com_brand_cd)) {
+	    		senderkey = "dbf8669a88dd7926fd653ff3ff9b23d331fbbb4c";
+	    		from_no = "1577-5670";	    		
+	    		templateCode = "iloomasreceiptalarm";
+    		
+	    		
+	    	}	    	
+	    	
+	    	//데스커브랜드
+	    	if("T60I02".equals(com_brand_cd)) {
+	    		senderkey = "9917d09567d2ebf1acc89662d7f9ff10db1488d7";
+	    		from_no = "1588-1662";
+	    		templateCode = "deskerasreceiptalarm";    			    		
+	    	}	   
+	    	
+	    	//슬로우브랜드
+	    	if("T60I03".equals(com_brand_cd)) {	    		
+	    		senderkey = "3ed320702f733d0b5a31e99a3ba931d9f2f9f960";
+	    		from_no = "1899-8588";
+	    		
+	    		templateCode = "slouasreceiptalarm";
+	    		   		
+	    	}	    	
+	    	
+	    	//시디즈브랜드
+	    	if("T60P01".equals(com_brand_cd)) {
+	    		
+	    		senderkey = "6b94c758a1f689223024765ae6e2b0aede351955";
+	    		from_no = "1577-5674";
+	    		templateCode = "sidizasreceiptalarm";   		
+	    	}	    	
+	    	
+	    	//알로소브랜드
+	    	if("T60P02".equals(com_brand_cd)) {
+	    		
+	    		senderkey = "a75beb8ed88e9fa60be384f82eeeafe2f3dccc9a";
+	    		from_no = "1577-1641";
+	    		templateCode = "allosoasreceiptalarm";
+	    		   		
+	    	}		    	
+ 	
+	    	sendList.put("authKey", "D62D413F25CD43B3BD06636F2B3F570ABFB5008BD727901E341F041448D22C3A6593D58D45C68E60171F7FB2B2C345459361A08D20298BAE6A3A1B74196A95C3");
+			
+	       	 for (int i = 0; i < 1; i++)//배열
+	       	 {
+		        	 
+		        	 
+		        	 sObject.put("sendDiv", "BIZTALK" );
+		        	 sObject.put("title", title);
+		        	 sObject.put("subject", subject );		  
+		        	 sObject.put("message","");
+		        	 sObject.put("fromNm", orm_nm );
+		        	 sObject.put("toNm", sti_nm );
+		        	 sObject.put("fromNo", from_no ); 
+		        	 sObject.put("toNo", orm_hdphone);
+		        	 sObject.put("companyCd", "T01B" );		        	 
+		        	 sObject.put("fstUsr", sti_cd );
+		        	 sObject.put("systemNm", "mobilecm" );
+		        	 sObject.put("sendType", "SMTP" );
+		        	 sObject.put("reserveDiv","I");
+		        	 sObject.put("reserveDt", "" );
+		        	 sObject.put("keyNo", orm_no);
+		        	 sObject.put("msgType", message_type );		        	 
+		        	 sObject.put("senderKey", senderkey);
+		        	 sObject.put("templateCode", templateCode );
+		        	 sObject.put("bizTalkMessage", biztalkmessage );
+		        	 sObject.put("comBrd", com_brand_cd );
+//		        	 sObject.put("bizTalkMessage", biztalkmessage );
+		        	 jArray.add(sObject);
+	       	 }        	 
+        	
+        			
+        	sendList.put("list" ,jArray);  
+        	 
+//        	RestCall("http://localhost:8082/intgmsg.do",sendList);
+//			https://msg-api.fursys.com/v1/api/message/SendMsg
+//			"http://erp-api.fursys.com/intgmsg.do"
+        	
+        	BaseResponse kakao_res = RestCall("https://msg-api.fursys.com/v1/api/message/SendMsg",sendList);	
+        	if (!"200".equals(kakao_res.getResultCode())) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("알림톡전송결과 오류  [" + kakao_res.getResultMessage() + "]");
+				return gson.toJson(response);
+			}
+        	
+		}	
+		
+		catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}				
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);        
+        
+	}	
 }
