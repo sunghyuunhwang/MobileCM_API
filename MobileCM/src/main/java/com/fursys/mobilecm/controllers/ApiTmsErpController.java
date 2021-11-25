@@ -1,5 +1,11 @@
 package com.fursys.mobilecm.controllers;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,8 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +38,7 @@ import com.fursys.mobilecm.config.TMapInfo;
 import com.fursys.mobilecm.mapper.ErpCommMapper;
 import com.fursys.mobilecm.mapper.TMSERPSchedulingMapper;
 import com.fursys.mobilecm.mapper.UserMapper;
+import com.fursys.mobilecm.schedul.JobScheduler;
 import com.fursys.mobilecm.security.FursysPasswordEncoder;
 import com.fursys.mobilecm.service.ApiErpService;
 import com.fursys.mobilecm.service.ApiTmsErpService;
@@ -37,6 +51,7 @@ import com.fursys.mobilecm.vo.erp.ERPScheduleList;
 import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.UserInfoResponse;
 import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
+import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPResdtl;
@@ -63,8 +78,11 @@ public class ApiTmsErpController {
 	@Autowired private UserMapper userMapper;
 	@Autowired private TMSERPSchedulingMapper tmserpScheduling;
 	@Autowired private ApiTmsController mApiTmsController;
+	@Autowired Environment environment; 
 	
 	@Autowired private PlatformTransactionManager txManager;
+	
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Value("${spring.datasource.url}")
     private String mDBUrl;
@@ -1139,4 +1157,176 @@ public class ApiTmsErpController {
 			throw new Exception();
 		}
 	}
+	
+	@ApiOperation(value="/getFilelist", notes="tms첨부파일 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getFilelist")
+	@RequestMapping(value="/getFilelist",method=RequestMethod.GET)
+	public String getFilelist(
+			@AuthenticationPrincipal User user,
+			@ApiParam(value = "plm_no", required = true, example = "plm_no")
+			@RequestParam(name = "plm_no", required = true) String plm_no
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPFile> fileList = null;
+		
+		try {
+			String file_id;
+			if (user != null) {
+				
+				file_id = "cresult" + plm_no;				
+				params.put("file_id", file_id);
+				
+				fileList = tmserpScheduling.selectFileList(params);
+				return gson.toJson(fileList);				
+			} else {
+				throw new Exception();
+			}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+
+	@ApiOperation(value="/fileDownload", notes="tms첨부파일 다운로드")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/fileDownload")
+	@RequestMapping(value="/fileDownload",method=RequestMethod.GET)
+	public String fileDownload(HttpServletRequest request,  
+			HttpServletResponse response,
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "file_id", required = true, example = "")
+			@RequestParam(name = "file_id", required = true) String file_id,
+			@ApiParam(value = "file_snum", required = true, example = "")
+			@RequestParam(name = "file_snum", required = true) String file_snum
+			) throws Exception {
+		
+	    InputStream in = null;
+	    OutputStream os = null;	
+	    HashMap<String,Object> params = new HashMap<String, Object>();
+	    TMSERPFile fileMap = null;
+	    
+		try {
+			
+	        if ("".equals(file_id)) {
+	        	throw new Exception();
+	        }
+			
+	        params.put("file_id", file_id);
+	        params.put("file_snum", Integer.parseInt(file_snum));        
+	        fileMap = tmserpScheduling.searchFileInfo(params);
+
+	        if (fileMap == null) {
+	        	throw new Exception();
+	        }
+	
+			String uploadBasePath =  environment.getProperty("file.upload.directory");
+
+			logger.debug("new File Path = " + uploadBasePath + "/" + fileMap.getAttch_file_path());
+			logger.debug("new File Name = " + fileMap.getVirtual_attch_file_name());
+			logger.debug("new File Real Name = " + fileMap.getReal_attch_file_name());
+
+			File downloadFile = new File (uploadBasePath + "/" + fileMap.getAttch_file_path(), fileMap.getVirtual_attch_file_name());
+			logger.debug(uploadBasePath + "/" + fileMap.getAttch_file_path() + fileMap.getVirtual_attch_file_name());
+			int fSize = (int) downloadFile.length();
+
+			logger.debug("fSize = " + fSize);
+
+			if (fSize > 0) {
+				
+				String fullPath = downloadFile.getAbsolutePath();
+				logger.debug("fullPath=" + fullPath);
+
+				// get absolute path of the application
+	            ServletContext context = request.getSession().getServletContext();
+
+	            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(downloadFile));
+
+	            // get MIME type of the file
+	            String mimeType = context.getMimeType(fullPath);
+	            if (mimeType == null) {
+	                // set to binary type if MIME mapping not found
+	                mimeType = "application/octet-stream";
+	            }
+	            logger.debug("MIME type: " + mimeType);
+
+				response.setBufferSize(fSize);
+				response.setContentType("utf-8");
+				response.setContentType("application/octet;charset=utf-8");
+				response.setContentType(mimeType);
+
+				String disposition = getDisposition(fileMap.getReal_attch_file_name(), getBrowser(request), "", mimeType);
+				logger.debug("==disposition="+disposition);
+				response.addHeader("Content-disposition", disposition);
+				response.setContentLength(fSize);
+
+
+				// get output stream of the response
+	            OutputStream outStream = response.getOutputStream();
+
+	            byte[] buffer = new byte[8*1024];
+	            int bytesRead = -1;
+
+	            // write bytes read from the input stream into the output stream
+	            while ((bytesRead = inputStream.read(buffer)) != -1) {
+	                outStream.write(buffer, 0, bytesRead);
+	            }
+
+	            inputStream.close();
+	            outStream.close();
+	            return null;
+			} else {
+				//예외처리
+				throw new Exception();
+			}
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+		
+	private String getBrowser(HttpServletRequest request) {
+	        String header = request.getHeader("User-Agent");
+	        if (header.indexOf("MSIE") > -1) {
+	            return "MSIE";
+	        } else if (header.indexOf("Chrome") > -1) {
+	            return "Chrome";
+	        } else if (header.indexOf("Opera") > -1) {
+	            return "Opera";
+	        } else if (header.indexOf("Trident/7.0") > -1){ //IE 11 이상 //IE 버전 별 체크 >> Trident/6.0(IE 10) , Trident/5.0(IE 9) , Trident/4.0(IE 8) return "MSIE";
+	        	return "MSIE";
+	        }
+	        return "Firefox";
+	    }
+	
+    private String getDisposition(String filename, String browser, String requestType, String mimeType) throws Exception {
+
+    	String dispositionPrefix = String.format("attachment; filename=", filename);
+        if (requestType.equals("inline")) {
+            if (!mimeType.equals("application/octet-stream")) {
+            	dispositionPrefix = String.format("inline; filename=", filename);
+            }
+        }
+        String encodedFilename = "";
+        if (browser.equals("MSIE")) {
+            encodedFilename = URLEncoder.encode(filename, "UTF-8").replaceAll("\\+", "%20");
+        } else if (browser.equals("Firefox")) {
+            encodedFilename = "\"" + new String(filename.getBytes("UTF-8"), "8859_1") + "\"";
+        } else if (browser.equals("Opera")) {
+            encodedFilename = "\"" + new String(filename.getBytes("UTF-8"), "8859_1") + "\"";
+        } else if (browser.equals("Chrome")) {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < filename.length(); i++) {
+                char c = filename.charAt(i);
+                if (c > '~') {
+                    sb.append(URLEncoder.encode("" + c, "UTF-8"));
+                } else {
+                    sb.append(c);
+                }
+            }
+            encodedFilename = sb.toString();
+        } else {
+            throw new UnsupportedOperationException("Not supported browser");
+        }
+        return dispositionPrefix + encodedFilename;
+    }
 }

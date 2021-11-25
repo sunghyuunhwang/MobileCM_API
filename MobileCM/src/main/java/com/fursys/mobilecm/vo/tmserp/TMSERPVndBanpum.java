@@ -29,7 +29,7 @@ public class TMSERPVndBanpum{
 	public String com_rdsec_nm;
 	public String com_undsec; // 품목별세부상태
 	public String com_undsec_nm;
-	public String fileId;
+	public String file_yn;
 }
 
 
