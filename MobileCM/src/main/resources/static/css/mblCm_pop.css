@@ -2,11 +2,13 @@
 .fssMblCmPop{position: fixed;display: none;top: 0px;left: 0px;width: 100%;height: 100%;z-index: 1000;}
    .fssMblCmPop.chsAssgnInfBx{top: 14px;left: initial;right: 14px;max-width: 374px;height:auto;z-index: 900;}
    .fssMblCmPop.opn{display: block;}
+   .fssMblCmPop._cnter.opn{display: flex;align-items: center;justify-content: center;}
 
    .fssMblCmPop.pop_assgnStrtBx.opn,
    .fssMblCmPop.alrtPop.opn{display: inline-flex;align-items: center;justify-content: center;}
    .fssMblCmPop .clsBtn.icn{position: absolute;top: 8px;right: 8px;width: 25px;height: 25px;}
       .fssMblCmPop .clsBtn.icn::before{display: block;width: 25px;height: 25px;}
+      .fssMblCmPop .clsBtn.bgBlck{position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;background-color: rgba(0,0,0,0.4);}
 
 
  .fssMblCmPop.bgBlck{background-color: rgba(0,0,0,0.4);}
@@ -14,17 +16,19 @@
 
  .popCntnts{position: relative;}
 .popCntnts.wid{width: calc(100% - 240px);height:calc(100% - 92px);border-radius: 16px;background-color: #f1f2f3;}
-.popCntnts.mddl{width:590px;min-height:297px;height: auto;max-height:calc(100% - 92px);border-radius: 16px;background-color: #fff;}
+.popCntnts.mddl{width:590px;min-height:297px;height: auto;max-height:calc(100% - 92px);border-radius: 16px;background-color: #fff;z-index: 900;}
+.popCntnts.smll{display: inline-block;float: left;width:400px;height: auto;max-height:calc(100% - 92px);padding: 20px;border-radius: 16px;background-color: #fff;box-sizing: border-box;z-index: 900;}
 .popCntnts.alrtBx{width:360px;min-height:200px;height: auto;max-height:calc(100% - 92px); border-radius: 16px;background-color: #fff;}
 
   .popCntnts .ttl{display: inline-block;float: left;width: 100%;padding: 18px 95px 18px 32px;font-size: 22px;font-weight: bold;line-height: 33px;color: #000000;box-sizing: border-box;}
+  .popCntnts.smll .ttl{padding: 5px 0px 10px 0px;}
   .popCntnts .ttl._f19px{font-size: 19px;text-align: center;line-height: 28px;}
   .popCntnts .ttl._32px{padding: 0;margin:32px 0 0 0;}
   .popCntnts .ttl._24px{padding: 0;margin:24px 0 0 0;}
   .popCntnts .ttl._fwNml{font-weight: normal;}
 .popCntnts .ttlInf{display: inline-block;float: left;width: 100%;padding: 0;margin: 13px 0 24px 0;font-size: 16px;font-weight: normal;text-align: center;line-height: 24px;}
 
-    .popCntnts .clsBtn.icnCls_blck{position: absolute;top:22px;right: 27px;width: 24px;height: 24px;background: url('/img/icnCls_blck.svg') no-repeat center;background-size: cover;}
+    .popCntnts .clsBtn.icnCls_blck{position: absolute;top:22px;right: 20px;width: 24px;height: 24px;background: url('/img/icnCls_blck.svg') no-repeat center;background-size: cover;}
        .ttl .dateSm{font-weight: normal;}
   .popCntnts .ttlMenu{display: inline-block;float: left;width: 100%;margin: 18px 0;padding: 0 32px;box-sizing: border-box;}
     .popCntnts .ttlMenu li{display: inline-block;line-height: 16px;color: #808080;}
@@ -110,5 +114,12 @@
 .srchBox{display: inline-block;width: 100%;padding: 0 0 10px 0;margin: 0 0 10px 0; border-bottom: #ddd 1px solid;}
 .srchBox .dateBx {display: inline-block;float: left;}
 .srchBox .dateBx .datepicker{}
+
 /*시공건팝*/
-.cnstrctLstBx{position: relative;width: calc(100% - 20px);height: calc(100% - 20px);padding:40px 20px 20px 20px;border-radius: 16px;background: #fff;box-shadow: 0 -2px 6px 0 rgb(0 0 0 / 16%);box-sizing: border-box;}
+.cnstrctLstBx{position: relative;width: calc(100% - 20px);height: calc(100% - 20px);padding:20px;border-radius: 16px;background: #fff;box-shadow: 0 -2px 6px 0 rgb(0 0 0 / 16%);box-sizing: border-box;}
+.cnstrctLstBx.popCntnts .ttl{padding: 0px 95px 15px 0px;font-size: 18px;}
+
+/*추가 팝업 메뉴*/
+.topMenuPopLst{position: absolute;top: 55px;left: 15px;width: 253px;padding: 10px 0px;border-radius: 8px;background-color: #000;box-shadow: 2px 3px 6px 0 rgba(0, 0, 0, 0.3); z-index: 900;}
+  .topMenuPopLst > li{display: inline-block;float: left; width: 100%;}
+  .topMenuPopLst .lstLnk{display: inline-block;float: left;width: 100%;padding:15px 30px 15px 20px;text-align: left;font-size: 16px;color: #fff;background-image: url('/img/icnArrwHd_wht.svg');background-repeat: no-repeat;background-size: 12px;background-position: right 12px center; box-sizing: border-box;}

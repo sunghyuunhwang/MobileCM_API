@@ -94,19 +94,22 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .fllGry{background-color: #ebebeb;}
 .txtIcn{height: 17px;font-size: 9px;font-weight: bold;line-height: 17px;text-align: center;border-radius: 9px;}
 /* 공통 아이콘 */
-.icn{font-size: 0;line-height: 0;background-repeat: no-repeat;}
-.icnChck_wht::before{content: ''; background-image: url('/img/icnChck_wht.svg');}/*체크-흰색*/
-.icnChck_gry::before{content: ''; background-image: url('/img/icnChck_gry.svg');}/*체크-회색*/
-.icnChck_blck::before{content: ''; background-image: url('/img/icnChck_blck.svg');}/*체크-검은색*/
-.icnArrwHd_gry_prv::before{content: ''; background-image: url('/img/icnArrwHd_gry.svg');}/*화살표 머리-이전,왼쪽*/
-.icnArrwHd_gry_nxt::before{content: ''; background-image: url('/img/icnArrwHd_gry.svg');transform: rotate(180deg);}/*화살표 머리-오른쪽*/
-.icnArrwHd_blck_prv::before{content: ''; background-image: url('/img/icnArrwHd_blck.svg');}/*화살표 머리-이전,왼쪽*/
-.icnArrwHd_blck_nxt::before{content: ''; background-image: url('/img/icnArrwHd_blck.svg');transform: rotate(180deg);}/*화살표 머리-오른쪽*/
-.icnLogout::before{content: ''; background-image: url('/img/icnLogout.svg');}/*로그아웃*/
-.icnWidBx::before{content: ''; background-image: url('/img/icnWidBx.svg');}/*박스 넓게*/
-.icnNrrwBx::before{content: ''; background-image: url('/img/icnNrrwBx.svg');}/*박스 좁게*/
-.icnTopMenuOpn::before{content: ''; background-image: url('/img/icnTopMenuOpn.svg');}
-.icnClose_Blck::before{content: ''; background-image: url('/img/icn_close_Blck.svg');}
+.icnBtn::before,.icn::before,.icn::after{content: '';font-size: 0;line-height: 0;background-repeat: no-repeat;}
+.bfafNn{background-repeat: no-repeat;}
+.bfafNn::before,.bfafNn::after{display: none !important;background-repeat: no-repeat;}
+.icnChck_wht::before{background-image: url('/img/icnChck_wht.svg');}/*체크-흰색*/
+.icnChck_gry::before{background-image: url('/img/icnChck_gry.svg');}/*체크-회색*/
+.icnChck_blck::before{background-image: url('/img/icnChck_blck.svg');}/*체크-검은색*/
+.icnArrwHd_gry_prv::before{background-image: url('/img/icnArrwHd_gry.svg');}/*화살표 머리-이전,왼쪽*/
+.icnArrwHd_gry_nxt::before{ background-image: url('/img/icnArrwHd_gry.svg');transform: rotate(180deg);}/*화살표 머리-오른쪽*/
+.icnArrwHd_blck_prv::before{background-image: url('/img/icnArrwHd_blck.svg');}/*화살표 머리-이전,왼쪽*/
+.icnArrwHd_blck_nxt::before{background-image: url('/img/icnArrwHd_blck.svg');transform: rotate(180deg);}/*화살표 머리-오른쪽*/
+.icnLogout::before{background-image: url('/img/icnLogout.svg');}/*로그아웃*/
+.icnWidBx::before{background-image: url('/img/icnWidBx.svg');}/*박스 넓게*/
+.icnNrrwBx::before{background-image: url('/img/icnNrrwBx.svg');}/*박스 좁게*/
+.icnTopMenuOpn::before{background-image: url('/img/icnTopMenuOpn.svg');}
+.icnClose_Blck::before{background-image: url('/img/icn_close_Blck.svg');}
+.icnDown::before,.icnDown{background-image: url('/img/icn_down.svg');}
 
 .nrrwBtn,.widBtn{background-repeat: no-repeat;background-size: 100% auto;background-position: center;}
 .nrrwBtn.on{background-image: url('/img/icnMnlist.svg');}

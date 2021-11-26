@@ -10,7 +10,7 @@
     <title>모바일CM-권역장스케쥴링</title>
     <script type="text/javascript" src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx965cfaee1f4c47608284f1271eccb662"></script>
     <script type="text/javascript">
- 
+
 
     var mytime;
     var map;
@@ -50,7 +50,7 @@ function addMarkersTooMuch(list) {
                  icon: "/img/mrk_"+idxNbr+".svg", //Marker의 아이콘.
                  iconSize : new Tmapv2.Size(24, 24),
                  title: list[i].orm_nm //Marker의 라벨.
-                 
+
              });
              map.setZoom(12);
              marker.setMap(map); //Marker가 표시될 Map 설정.
@@ -81,10 +81,10 @@ function addMarkersTooMuch(list) {
          					$('#assgnSub_lst').animate({scrollTop: offset.top}, 400);
          					return;
          				}
-         				
-         			}); 
-         			
-          		 });            	 
+
+         			});
+
+          		 });
              }
              markers.push(marker);
        }
@@ -104,7 +104,8 @@ function addMarkersTooMuch(list) {
     <link rel="stylesheet" href="http://static.fursys.com/drctSources/css/fonts/font-NotoSansKR.css">
     <script src="/js/jquery-3.4.1.min.js"></script>
     <script src="/js/jquery-ui.js"></script><!--  달력 -->
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
+    <!--디자인 수정하려면 위에처럼 저희 서버에 두고 해야해서 수정했어요~-->
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
     <script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
