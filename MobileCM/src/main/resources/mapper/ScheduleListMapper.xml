@@ -13,6 +13,7 @@
 
 <select id="selectFinalResult" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
+
 	SELECT CASE WHEN #{req_resigong_dt} > A.CAL_YMD THEN 'C79002' ELSE 'C79001' END AS DATA1
 	FROM TT_CALENDAR A, TT_CALENDAR B
 	WHERE A.COM_CMP = #{com_agsec}  -- 회사코드
@@ -25,7 +26,7 @@
 	AND B.CAL_SEC = 'T33N'
 	AND A.CAL_YMD >= B.CAL_YMD
 	GROUP BY A.CAL_YMD
-	HAVING COUNT(*) = (SELECT REF_8 FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = #{com_scd})
+	HAVING COUNT(*) = (SELECT CASE #{com_undsec} WHEN 'C52A01' THEN REF_8 ELSE REF_9 END FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = #{com_scd})
    
 ]]>
 </select>

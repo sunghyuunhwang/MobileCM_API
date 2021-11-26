@@ -6011,7 +6011,8 @@ public class ApiErpController {
 	public String erp_sigongmiguelRecreateAutoProc (
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@RequestParam(name="req_resigong_dt", required=true) String req_resigong_dt
+			@RequestParam(name="req_resigong_dt", required=true) String req_resigong_dt,
+			@RequestParam(name="com_undsec", required=true) String com_undsec
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -6208,6 +6209,7 @@ public class ApiErpController {
 			params.put("com_scd", org_com_scd);
 			params.put("plm_cdt", org_plm_cdt);
 			params.put("req_resigong_dt",req_resigong_dt);
+			params.put("com_undsec", com_undsec);
 			
 			dataResult = sCheduleMainListMapper.selectFinalResult(params);
 	        if (dataResult == null) {
