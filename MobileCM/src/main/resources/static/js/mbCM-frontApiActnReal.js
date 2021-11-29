@@ -1043,7 +1043,7 @@ function getVndBanpum() {//대리점 반품
 	var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
 	if(!start || !end) return;
 	var days = (end - start)/1000/60/60/24;
-	if(days >= 30){
+	if(days >= 100){
 		 $('.alrtPop').addClass('opn');
 		 $('#vndBSs_popFail').addClass('on');
 	} else {
