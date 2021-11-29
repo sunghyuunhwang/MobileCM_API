@@ -1705,7 +1705,6 @@
 	      FROM TC_PLANDTL A WITH (NOLOCK)
 	     WHERE A.PLM_NO = #{plm_no} /*plm_no*/ 
 	     GROUP BY A.ITM_CD, A.COL_CD, A.COL_SCD, A.PLM_NO, A.COM_PLDSEC, A.PLD_EQTY, A.COM_UNDSEC, A.PLD_FQTY, A.PLM_NO
-
 	]]>
     </select>
 
@@ -1761,7 +1760,6 @@
 	      FROM TC_PLANDTL A WITH (NOLOCK)
 	     WHERE A.PLM_NO = #{plm_no} /*plm_no*/ 
 	     GROUP BY A.ITM_CD, A.COL_CD, A.COL_SCD, A.PLM_NO, A.COM_PLDSEC, A.PLD_EQTY, A.COM_UNDSEC, A.PLD_FQTY, A.PLM_NO, A.TRS_SEC_2
-
 	]]>
     </select>
 
@@ -2515,5 +2513,277 @@
 		WHERE  attch_file_id = #{file_id}
 		       AND attch_file_snum = #{file_snum}
 		ORDER  BY A.attch_file_snum 
+	</select>
+	<select id="selectMigyeolReportInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo">
+	<![CDATA[	/*CRS0050.selectMigel_sigong 시공팀별*/ 
+		SELECT com_agsec,
+		       com_ctsec,
+		       com_brand,
+		       k_sti_cd,
+		       sti_cd,
+		       k_nm,
+		       sti_nm,
+		       com_scd,
+		       Count(plm_no) as tot_cnt,
+		       Sum(CASE
+		             WHEN com_unpsec_a > 0 THEN 1
+		             ELSE 0
+		           END) AS COM_UNPSEC_A,
+		       Sum(CASE
+		             WHEN com_unpsec_e > 0 THEN 1
+		             ELSE 0
+		           END) AS COM_UNPSEC_E,
+		       Sum(CASE
+		             WHEN com_unpsec_c > 0 THEN 1
+		             ELSE 0
+		           END) AS COM_UNPSEC_C,
+		       Sum(CASE
+		             WHEN com_unpsec_r > 0 THEN 1
+		             ELSE 0
+		           END) AS COM_UNPSEC_R
+		FROM   (SELECT A.plm_no,
+		               A.com_agsec,
+		               A.com_ctsec,
+		               A.com_brand,
+		               A.com_scd,
+		               Isnull(D.k_sti_cd, A.sti_cd)                         AS K_STI_CD,
+		               A.sti_cd,
+		               Isnull((SELECT TOP 1 sti_nm
+		                       FROM   tc_stinf WITH (nolock)
+		                       WHERE  com_scd = D.com_scd
+		                              AND k_sti_cd = D.k_sti_cd), D.sti_nm) AS K_NM,
+		               D.sti_nm,
+		               Sum(CASE
+		                     WHEN B.com_unpsec = 'C23A' THEN 1
+		                     ELSE 0
+		                   END)                                             COM_UNPSEC_A
+		               ,
+		               Sum(CASE
+		                     WHEN B.com_unpsec = 'C23E' THEN 1
+		                     ELSE 0
+		                   END)                                             COM_UNPSEC_E
+		               ,
+		               Sum(CASE
+		                     WHEN B.com_unpsec = 'C23C' THEN 1
+		                     ELSE 0
+		                   END)                                             COM_UNPSEC_C
+		               ,
+		               Sum(CASE
+		                     WHEN B.com_unpsec = 'C23R' THEN 1
+		                     ELSE 0
+		                   END)                                             COM_UNPSEC_R
+		        FROM   tc_planmst A WITH (nolock),
+		               tc_plandtl B WITH (nolock),
+		               to_ordmas C WITH (nolock),
+		               tc_stinf D WITH (nolock)
+		        WHERE  A.plm_no = B.plm_no
+		               AND A.orm_no = C.orm_no
+		               /*2018.04.26 |주요한| 통합테스트 총건수 미결외도 보이게 조건삭제  */ /*AND B.COM_RDSEC = 'C13N' */
+		               AND A.com_plmfg <> 'C101'
+		               AND A.sti_cd = D.sti_cd
+		               AND A.com_scd = D.com_scd
+		               AND A.com_ctsec = D.com_ctsec
+		               AND A.sti_cd = D.sti_cd
+		               AND A.plm_cdt >= #{from_dt}
+		               AND A.plm_cdt <= #{to_dt}
+		               AND D.k_sti_cd = #{ksti_cd}
+		               AND A.com_scd = #{com_scd}
+		        GROUP  BY A.plm_no,
+		                  A.com_agsec,
+		                  A.com_ctsec,
+		                  A.com_brand,
+		                  D.k_sti_cd,
+		                  D.com_scd,
+		                  D.sti_nm,
+		                  A.plm_cdt,
+		                  A.sti_cd,
+		                  A.com_scd,
+		                  Isnull(D.k_sti_cd, A.sti_cd)
+		       )AS A
+		GROUP  BY com_agsec,
+		          com_ctsec,
+		          com_brand,
+		          k_sti_cd,
+		          sti_cd,
+		          k_nm,
+		          sti_nm,
+		          com_scd
+		ORDER  BY com_scd,
+		          com_agsec,
+		          com_brand,
+		          com_ctsec,
+		          k_nm,
+		          sti_nm 
+	]]>
+	</select>
+	<select id="selectMigyeolInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolInfo">
+	<![CDATA[
+		/*CRS0020.sigoungresult */ SELECT plm_no /*시공번호PK*/,
+		       orm_no /*수주번호*/,
+		       com_brand /*브랜드*/,
+		       com_brand_nm,
+		       agt_cd /*대리점코드*/,
+		       sti_cd /*시공팀코드*/,
+		       plm_cdt /*확정납기일*/,
+		       orm_nm /*수주건명*/,
+		       sti_nm,
+		       vnd_nm,
+		       vnd_cd,
+		       ( CASE
+		           WHEN Sum(a) > 0 THEN 'Y'
+		           ELSE ''
+		         END ) AS unpsec_a_yn,
+		       ( CASE
+		           WHEN Sum(b) > 0 THEN 'Y'
+		           ELSE ''
+		         END ) AS unpsec_r_yn,
+		       ( CASE
+		           WHEN Sum(c) > 0 THEN 'Y'
+		           ELSE ''
+		         END ) AS unpsec_e_yn,
+		       ( CASE
+		           WHEN Sum(e) > 0 THEN 'Y'
+		           ELSE ''
+		         END ) AS unpsec_c_yn,
+		       file_yn,
+		       mob_remark
+		FROM   (SELECT 'C13C'                        AS com_ssec,
+		               A.plm_no /*시공번호PK*/,
+		               A.orm_no /*수주번호*/,
+		               A.com_brand /*브랜드*/,
+		               (SELECT ccd_nm
+		                FROM   tt_comcd
+		                WHERE  ccd_cd = a.com_brand) AS com_brand_nm,
+		               A.agt_cd /*대리점코드*/,
+		               A.sti_cd /*시공팀코드*/,
+		               A.plm_cdt /*확정납기일*/,
+		               A.orm_nm /*수주건명*/,
+		               B.sti_nm /*시공팀명*/,
+		               (SELECT vnd_nm
+		                FROM   tt_vendor WITH (nolock)
+		                WHERE  A.agt_cd = vnd_cd)    AS VND_NM /*대리점이름*/,
+		               A.agt_cd                      AS VND_CD,
+		               ( CASE
+		                   WHEN com_unpsec = 'C23A'
+		                         OR ( Isnull(com_unpsec, '') = ''
+		                              AND pld_rasdt > 0 ) THEN 1
+		                   ELSE 0
+		                 END )                       AS A,
+		               ( CASE
+		                   WHEN Isnull(com_unpsec, '') = 'C23R'
+		                         OR ( Isnull(com_unpsec, '') = ''
+		                              AND pld_rcdt > 0 ) THEN 1
+		                   ELSE 0
+		                 END )                       AS B,
+		               ( CASE
+		                   WHEN Isnull(com_unpsec, '') = 'C23E'
+		                         OR ( Isnull(com_unpsec, '') = ''
+		                              AND Isnull(pld_rcdt, '') = ''
+		                              AND Isnull(pld_rasdt, '') = '' ) THEN 1
+		                   ELSE 0
+		                 END )                       AS C,
+		               ( CASE
+		                   WHEN Isnull(com_unpsec, '') = 'C23C'
+		                         OR ( pld_rmk = '시공' ) THEN 1
+		                   ELSE 0
+		                 END )                       AS E,
+		               ( CASE
+		                   WHEN (SELECT Count(*)
+		                         FROM   ty_attchfile atc WITH (nolock)
+		                         WHERE  atc.attch_file_id = 'cresult' + a.plm_no
+		                                AND atc.attch_div_cd = 'C') > 0 THEN 'Y'
+		                   ELSE 'N'
+		                 END )                       AS file_yn,
+		               A.mob_remark
+		        FROM   tc_planmst A WITH (nolock),
+		               tc_stinf B WITH (nolock),
+		               tc_plandtl C WITH (nolock)
+		        WHERE  A.com_plmfg >= 'C103'
+		               AND A.com_rmfg = 'C13N'
+		               AND C.plm_no = A.plm_no
+		               /*2018.06.05 |주요한| 폐기장 코드 추가 */
+		               /*AND  C.COM_PLDSEC IN ('C090','C091','C092','C093','C094','C095','C096','C0930') */
+		               AND C.com_pldsec IN ( 'C090', 'C091', 'C092', 'C093',
+		                                     'C094', 'C095', 'C096', 'C0930', 'C09A' )
+		               AND C.com_rdsec = 'C13N'
+		               AND A.sti_cd = B.sti_cd
+		               AND A.plm_cdt >= #{from_dt}
+		               AND A.plm_cdt <= #{to_dt}
+		               AND A.sti_cd = #{sti_cd}
+		               AND A.com_scd = #{com_scd})A
+		GROUP  BY plm_no /*시공번호PK*/,
+		          orm_no /*수주번호*/,
+		          com_brand /*브랜드*/,
+		          agt_cd /*대리점코드*/,
+		          sti_cd /*시공팀코드*/,
+		          plm_cdt /*확정납기일*/,
+		          orm_nm /*수주건명*/,
+		          sti_nm,
+		          vnd_nm,
+		          vnd_cd,
+		          file_yn,
+		          a.mob_remark,
+		          com_brand_nm
+		ORDER  BY sti_nm,
+		          plm_cdt,
+		          com_brand,
+		          vnd_nm
+	]]> 
+	</select>
+	<select id="selectMigyeolDetailInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolDetailInfo">
+	<![CDATA[
+		/*CRS0020.sigoungresultDetail*/ 
+		SELECT plm_no,
+		       com_pldsec,
+		       (SELECT TTC.ccd_nm
+		        FROM   tt_comcd TTC WITH (nolock)
+		        WHERE  TTC.ccd_cd = A.com_pldsec) AS COM_PLDSEC_NM,
+		       A.itm_cd,
+		       A.col_cd,
+		       Sum(CASE
+		             WHEN pld_eqty = pld_fqty THEN pld_fqty
+		             ELSE pld_eqty - pld_fqty
+		           END)                           PLD_EQTY /*요청수량*/,
+		       CASE
+		         WHEN A.com_pldsec IN ( 'C09A', 'C094' ) THEN
+		         (SELECT tri_inm
+		          FROM   tc_trinf AA WITH (nolock)
+		          WHERE  1 = 1
+		                 AND AA.trs_sec =
+		                     A.trs_sec_2
+		                 AND AA.tri_icd = A.itm_cd)
+		         ELSE Isnull((SELECT Isnull(TTI.itm_nm, '')
+		                      FROM   tt_itmmst TTI WITH (nolock)
+		                      WHERE  TTI.itm_cd = A.itm_cd
+		                             AND TTI.col_cd = A.col_cd), '')
+		       END                                AS ITM_NM,
+		       pld_famt /*공장도가*/,
+		       CASE
+		         WHEN com_pldsec = 'C094' THEN pld_cfamt
+		         ELSE pld_famt * pld_eqty
+		       END                                AS PLD_CRAMT2 /*예상금액2*/,
+		       pld_rmk,
+		       com_undsec,
+		       (SELECT ccd_nm
+		        FROM   tt_comcd
+		        WHERE  ccd_cd = com_undsec)       AS com_undsec_nm
+		FROM   tc_plandtl A WITH (nolock)
+		WHERE  A.plm_no = #{plm_no} /*plm_no*/
+		       AND com_rdsec = 'C13N'
+		GROUP  BY A.plm_no,
+		          A.itm_cd,
+		          A.col_cd,
+		          A.col_scd,
+		          A.com_pldsec,
+		          A.pld_eqty,
+		          A.com_undsec,
+		          A.pld_fqty,
+		          A.trs_sec_2,
+		          A.pld_rmk,
+		          A.com_undsec,
+		          A.pld_famt,
+		          A.pld_fqty,
+		          A.pld_cfamt 
+	]]> 
 	</select>
 </mapper>

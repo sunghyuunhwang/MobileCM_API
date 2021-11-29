@@ -53,14 +53,18 @@ import com.fursys.mobilecm.vo.erp.ERPScheduleList;
 import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.UserInfoResponse;
 import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
+import com.fursys.mobilecm.vo.tmserp.TMSERPAllMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolDetailInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPResdtl;
 import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
 import com.google.gson.Gson;
@@ -1323,5 +1327,210 @@ public class ApiTmsErpController {
         }
         return dispositionPrefix + encodedFilename;
     }
-   
+    
+	@ApiOperation(value="/getMigyeolReportInfo", notes="tms미결현황요약정보")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getMigyeolReportInfo")
+	@RequestMapping(value="/getMigyeolReportInfo",method=RequestMethod.GET)
+	public String getMigyeolReportInfo(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "from_dt", required = true, example = "20211003")
+			@RequestParam(name = "from_dt", required = true) String from_dt,
+			@ApiParam(value = "to_dt", required = true, example = "20211013")
+			@RequestParam(name = "to_dt", required = true) String to_dt
+			) throws Exception {
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPTeamMigyeolRepo> teamMigyeolRepoList = null;
+		TMSERPTeamMigyeolRepo migyeolInfo = null;
+		TMSERPAllMigyeolRepo allInfo = new TMSERPAllMigyeolRepo();
+		HashMap<Object, Object> result = new HashMap();
+		
+		int tot_cnt = 0;
+		int migyeol_cnt = 0;
+		int comp_cnt = 0;
+		int com_unpsec_a = 0;
+		int com_unpsec_e = 0;
+		int com_unpsec_c = 0;
+		int com_unpsec_r = 0;
+		double comp_per = 0;
+		double migyeol_per = 0;
+		double com_unpsec_a_per = 0;
+		double com_unpsec_e_per = 0;
+		double com_unpsec_c_per = 0;
+		double com_unpsec_r_per = 0;
+		
+		int all_tot_cnt = 0;
+		int all_migyeol_cnt = 0;
+		int all_comp_cnt = 0;
+		int all_com_unpsec_a = 0;
+		int all_com_unpsec_e = 0;
+		int all_com_unpsec_c = 0;
+		int all_com_unpsec_r = 0;
+		double all_comp_per = 0;
+		double all_migyeol_per = 0;
+		double all_com_unpsec_a_per = 0;
+		double all_com_unpsec_e_per = 0;
+		double all_com_unpsec_c_per = 0;
+		double all_com_unpsec_r_per = 0;
+		
+		try {
+			//if (user != null) {
+				//UserEtc etc = getUserEtc(user);
+				//params.put("com_scd", etc.getCom_scd());
+				//params.put("ksti_cd", etc.getSti_cd());
+			    params.put("com_scd", "C16YA");
+			    params.put("ksti_cd", "YA601");
+				params.put("from_dt", from_dt.replace("-", ""));
+				params.put("to_dt", to_dt.replace("-", ""));
+				
+				teamMigyeolRepoList = tmserpScheduling.selectMigyeolReportInfo(params);
+				if(teamMigyeolRepoList.size() == 0) {
+					return null;
+				}
+				
+				for(int i=0; i<teamMigyeolRepoList.size(); i++) {					
+					migyeolInfo = teamMigyeolRepoList.get(i);
+					tot_cnt = migyeolInfo.getTot_cnt();
+					com_unpsec_a = migyeolInfo.getCom_unpsec_a();
+					com_unpsec_e = migyeolInfo.getCom_unpsec_c();
+					com_unpsec_c = migyeolInfo.getCom_unpsec_e();
+					com_unpsec_r = migyeolInfo.getCom_unpsec_r();
+					
+					migyeol_cnt = com_unpsec_a + com_unpsec_e + com_unpsec_c + com_unpsec_r;
+					comp_cnt = tot_cnt - migyeol_cnt;
+					
+					all_tot_cnt += tot_cnt;
+					all_migyeol_cnt += migyeol_cnt;
+					all_comp_cnt += comp_cnt;
+					all_com_unpsec_a += com_unpsec_a;
+					all_com_unpsec_e += com_unpsec_e;
+					all_com_unpsec_c += com_unpsec_c;
+					all_com_unpsec_r += com_unpsec_r;
+										
+					if(tot_cnt > 0) {
+						
+						migyeol_per = (double)migyeol_cnt/(double)tot_cnt*100;
+						comp_per = (double)comp_cnt/(double)tot_cnt*100;
+						
+					}
+					
+					if(migyeol_cnt > 0) {
+						com_unpsec_a_per = (double)com_unpsec_a/(double)migyeol_cnt*100;
+						com_unpsec_e_per = (double)com_unpsec_e/(double)migyeol_cnt*100;
+						com_unpsec_c_per = (double)com_unpsec_c/(double)migyeol_cnt*100;
+						com_unpsec_r_per = (double)com_unpsec_r/(double)migyeol_cnt*100;	
+					}
+					
+					migyeolInfo.setMigyeol_cnt(migyeol_cnt);
+					migyeolInfo.setComp_cnt(comp_cnt);
+					migyeolInfo.setMigyeol_per(migyeol_per);
+					migyeolInfo.setComp_per(comp_per);
+					migyeolInfo.setCom_unpsec_a_per(com_unpsec_a_per);
+					migyeolInfo.setCom_unpsec_c_per(com_unpsec_c_per);
+					migyeolInfo.setCom_unpsec_e_per(com_unpsec_e_per);
+					migyeolInfo.setCom_unpsec_r_per(com_unpsec_r_per);
+					
+				}
+				if(all_tot_cnt > 0) {
+					all_migyeol_per = (double)all_migyeol_cnt/(double)all_tot_cnt*100;
+					all_comp_per = (double)all_comp_cnt/(double)all_tot_cnt*100;					
+				}
+
+				if(all_migyeol_cnt > 0) {
+					all_com_unpsec_a_per = (double)all_com_unpsec_a/(double)all_migyeol_cnt*100;
+					all_com_unpsec_e_per = (double)all_com_unpsec_e/(double)all_migyeol_cnt*100;
+					all_com_unpsec_c_per = (double)all_com_unpsec_c/(double)all_migyeol_cnt*100;
+					all_com_unpsec_r_per = (double)all_com_unpsec_r/(double)all_migyeol_cnt*100;	
+				}
+				
+				allInfo.setCom_unpsec_a(all_com_unpsec_a);
+				allInfo.setCom_unpsec_c(all_com_unpsec_c);
+				allInfo.setCom_unpsec_e(all_com_unpsec_e);
+				allInfo.setCom_unpsec_r(all_com_unpsec_r);
+				allInfo.setTot_cnt(all_tot_cnt);
+				allInfo.setMigyeol_cnt(all_migyeol_cnt);
+				allInfo.setComp_cnt(all_comp_cnt);
+				allInfo.setMigyeol_per(all_migyeol_per);
+				allInfo.setComp_per(all_comp_per);
+				allInfo.setCom_unpsec_a_per(all_com_unpsec_a_per);
+				allInfo.setCom_unpsec_c_per(all_com_unpsec_c_per);
+				allInfo.setCom_unpsec_e_per(all_com_unpsec_e_per);
+				allInfo.setCom_unpsec_r_per(all_com_unpsec_r_per);	
+				
+				result.put("allInfo", allInfo);
+				result.put("info", teamMigyeolRepoList);
+				
+				return gson.toJson(result);	
+			//} else {
+				//return gson.toJson(resList);
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			//return gson.toJson(resList);
+			e.printStackTrace();
+			throw new Exception();
+		} 
+	} 
+	
+	@ApiOperation(value="/getMigyeolnfo", notes="tms미결정보조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getMigyeolnfo")
+	@RequestMapping(value="/getMigyeolnfo",method=RequestMethod.GET)
+	public String getMigyeolnfo(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "from_dt", required = true, example = "20211003")
+			@RequestParam(name = "from_dt", required = true) String from_dt,
+			@ApiParam(value = "to_dt", required = true, example = "20211013")
+			@RequestParam(name = "to_dt", required = true) String to_dt,
+			@ApiParam(value = "sti_cd", required = true, example = "YA611")
+			@RequestParam(name = "sti_cd", required = true) String sti_cd
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPMigyeolInfo> migyeolInfoList = null;
+		
+		try {
+
+			//if (user != null) {
+				//UserEtc etc = getUserEtc(user);
+				//params.put("com_scd", etc.getCom_scd());
+				params.put("sti_cd", sti_cd);
+			    params.put("com_scd", "C16YA");
+				params.put("from_dt", from_dt.replace("-", ""));
+				params.put("to_dt", to_dt.replace("-", ""));				
+				migyeolInfoList = tmserpScheduling.selectMigyeolInfo(params);
+				return gson.toJson(migyeolInfoList);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+	
+	@ApiOperation(value="/getMigyeoDetaillnfo", notes="tms미결상세정보조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getMigyeoDetaillnfo")
+	@RequestMapping(value="/getMigyeoDetaillnfo",method=RequestMethod.GET)
+	public String getMigyeoDetaillnfo(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "plm_no", required = true, example = "I202111010031")
+			@RequestParam(name = "plm_no", required = true) String plm_no
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPMigyeolDetailInfo> migyeolInfoList = null;
+		
+		try {
+			//if (user != null) {
+				params.put("plm_no", plm_no);
+				migyeolInfoList = tmserpScheduling.selectMigyeolDetailInfo(params);
+				return gson.toJson(migyeolInfoList);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
 }

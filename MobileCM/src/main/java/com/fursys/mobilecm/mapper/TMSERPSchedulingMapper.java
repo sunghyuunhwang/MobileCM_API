@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
 import com.fursys.mobilecm.vo.DataResult;
@@ -18,6 +19,8 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPCenterList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolDetailInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPOrderList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPResdtl;
 import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
@@ -81,5 +84,8 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPVndBanpum> selectVndBanpumList(HashMap<String,Object> params);
 	public ArrayList<TMSERPFile> selectFileList(HashMap<String,Object> params);
 	public TMSERPFile searchFileInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPTeamMigyeolRepo> selectMigyeolReportInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPMigyeolInfo> selectMigyeolInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPMigyeolDetailInfo> selectMigyeolDetailInfo(HashMap<String,Object> params);
 	
 }
