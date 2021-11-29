@@ -16,7 +16,6 @@
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
     <script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
-    <script src="/js/mbCM-frontApiActnReal_front.js"></script><!-- 2021신규 -->
 </head>
 
 <body>
@@ -28,15 +27,15 @@
                          <li>
                             <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
                          </li>
-                         <li>
+<!--                          <li>
                             <a class="lstLnk" href="">미결 현황 관리</a>
-                         </li>
+                         </li> -->
                          <li>
                             <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
                          </li>
-                         <li>
+<!--                          <li>
                             <a class="lstLnk">하자 내역 조회</a>
-                         </li>
+                         </li> -->
                     </menu>
                     <button class="clsBtn bgBlck"><!--배경닫기--></button>
                </aside>
@@ -44,7 +43,7 @@
            <h1 class="insubPgTopBx ttl">대리점 반품 의뢰</h1>
            <article class="srchBox">
                 <div class="dateBx">
-                     예약일자
+                     시공확정일자
                      <input type="text" name="" id="nmldate1" class="nmldatepicker inptBx hThin" value="" readonly/>
                      ~
                      <input type="text" name="" id="nmldate2" class="nmldatepicker inptBx hThin" value="" readonly/>
@@ -52,7 +51,7 @@
                 <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="getVndBanpum()">조회</button>
            </article>
            <article class="inSrchFtBx">
-                     <h2 class="popSmllTtl">시공/AS 정보</h2>
+                     <h2 class="popSmllTtl">대리점 반품 정보</h2>
                      <div class="scrll _inTtl" id="getVndBanpumLst">
                           <ul class="ulLftlst _index">
                                <li class="w110px">시공확정일</li>
@@ -139,12 +138,18 @@
                      </li>-->
                 </menu>
                 <div class="btnBx">
-                     <button class="clsBtn btn btnSzHrf lft btnGry h54px">취소</button>
+                     <button class="clsBtn btn btnSzHrf lft btnGry h54px">닫기</button>
                 </div>
            </article>
           <button class="clsBtn bgBlck"><!--배경닫기--></button>
      </aside>
      <aside class="fssMblCmPop bgBlck alrtPop">
+             <article class="popCntnts alrtBx loding" id="lodingPop">
+		          <h2 class="ttl _f19px _24px _fwNml">
+		               <strong>데이터</strong>를 불러오고 있습니다.
+		          </h2>
+		          <span class="ldingTxt">평균 1분이내로 소요됩니다.</span>
+              </article>
               <article class="popCntnts alrtBx" id="vndBSs_popFail"><!-- 시공건팝업 -->
                    <h2 class="ttl _f19px _32px">
                         조회조건을 확인해주세요.
@@ -162,11 +167,11 @@
           $('.ui-datepicker').addClass('nml');
      });
           function showDays() {
-              var start = $('.cnstrctLstBx #nmldate1').datepicker('getDate');
-              var end   = $('.cnstrctLstBx #nmldate2').datepicker('getDate');
+              var start = $('.vndBanpumStatus #nmldate1').datepicker('getDate');
+              var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
           }
           $('.vndBanpumStatus #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
-     	$('.vndBanpumStatus #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
+     	 $('.vndBanpumStatus #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
      </script>
 </body>
 </html>

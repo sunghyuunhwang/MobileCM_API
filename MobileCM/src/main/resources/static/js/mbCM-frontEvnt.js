@@ -17,14 +17,24 @@ function topMenuPopBox() {//팝업메뉴 팝업
 function vndBSsFilePop() {//첨부파일
      $('.vndBSsBtn').click(function() {
        $('.vndBSsFilePop').addClass('opn');
-       getAttachFileList();
+       var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
+       getAttachFileList(plm_no);
      });
 }
+
+function vndFileDown() {//파일 다운로드
+     $('.icnDown').click(function() {
+       var file_id = $(this).closest('ul').find('input[name=file_id]').val();
+       var file_snum = $(this).closest('ul').find('input[name=file_snum]').val();
+       fileDownload(file_id, file_snum);
+     });
+}
+
 function ulLftlst() {//리스트표시
-     $('.ulLftlst').each(function() {
+      $('.ulLftlst').each(function() {
       var ulLftlst = $(this);
       $(this).click(function() {
-           if(! $(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
+           if(!$(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
            $('.ulLftlst').removeClass('on');
            $(this).addClass('on');
            resetUlLftdtllst();
@@ -37,7 +47,8 @@ function ulLftlst() {//리스트표시
     });
 }
 function resetUlLftlst() {
-    $('#cnstrctLst .ulLftlst').each(function() {
+    //$('#cnstrctLst .ulLftlst').each(function() {
+    $('.ulLftlst').each(function() {
     	if(! $(this).hasClass('_index')){
  				$(this).remove();
            }
@@ -50,6 +61,13 @@ function resetUlLftdtllst() {
            }
       	});
 
+}
+function resetFilelst() {
+    $('.fileLst .ulLftlst').each(function() {
+    	if(! $(this).hasClass('_index')){
+ 				$(this).remove();
+           }
+      });	
 }
 function datepicker() {//달력 한글화
    $( ".datepicker" ).datepicker({
@@ -108,8 +126,8 @@ function cmma() { // 세자리수 콤마찍기 - 읽기 전용
   });
 }
 
-function hipun() { // 세자리수 콤마찍기 - 읽기 전용
-  $('.hipun').each(function() {
+function dateformatting() { // 세자리수 콤마찍기 - 읽기 전용
+  $('.dateformat').each(function() {
     var employ = $(this).val();
     var formatNum = "";
     employ = employ.replace(/,/g, '');

@@ -2,15 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
 <head>
-    <meta charset="UTF-8">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>모바일CM-권역장스케쥴링</title>
     <script type="text/javascript" src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx965cfaee1f4c47608284f1271eccb662"></script>
     <script type="text/javascript">
-
 
     var mytime;
     var map;
@@ -32,64 +30,61 @@
      var keyboardControl = new Tmapv2.extension.KeyboardControl();
 		keyboardControl.setMap(map);
 }
-// 표시 확일을 위한 100개의 랜덤 바크 형성
-function addMarkersTooMuch(list) {
-     removeMarkers();
-     for (var i = 0; i < list.length; i++) {
-                     var strLat= Number(list[i].latitude);
-                      var strLng= Number(list[i].longitude);
-           //var strLat= list[i].latitude;
-           //var strLng= list[i].longitude;]
-             //Marker 객체 생성.
-             //latlng = new Tmapv2.LatLng(37.566481622437934,126.98502302169841);
-             lonlat =  new Tmapv2.LatLng(list[0].latitude,list[0].longitude);
-             map.setCenter(lonlat);
-             var idxNbr = $('#assgn_lst li').index($('#assgn_lst li[class="clck"]'));
-             var marker = new Tmapv2.Marker({
-                 position: new Tmapv2.LatLng(strLat, strLng), //Marker의 중심좌표 설정.
-                 icon: "/img/mrk_"+idxNbr+".svg", //Marker의 아이콘.
-                 iconSize : new Tmapv2.Size(24, 24),
-                 title: list[i].orm_nm //Marker의 라벨.
-
-             });
-             map.setZoom(12);
-             marker.setMap(map); //Marker가 표시될 Map 설정.
-             addmarker(marker, marker.getPosition());
-             function addmarker(marker, pos) {
-         		 marker.addListener("click", function(evt) {
-         		    var clat =  Math.round(pos.lat()*1000000)/1000000;
-         		    var clng =  Math.round(pos.lng()*1000000)/1000000;
-         			$('#assgnSub_lst > li').each(function(idx) {
-         				var lat = $(this).find('input[class=latitudeNbr]').val();
-         				var lng = $(this).find('input[class=longitudeNbr]').val();
-         				//alert( "idx : " + idx +" clat : " + clat + " lat " + lat + " clng : " + clng + " lng " + lng + " lat? " + (clat == lat) + " lng? "  + (clng == lng));
-         				if(clat == lat && clng == lng) {
-         					var chk = $('#assgnSub_lst > li input:checkbox[id="chks_'+idx+'"]');
-         					if(chk.is(':checked')) {
-         						chk.prop('checked', false);
-         					} else {
-         						chk.prop('checked', true);
-             					//var pos = window.pageYOffset + chk.getBoundingClientRect().top;
-             					//$('#assgnSub_lst').animate({scrollTop: pos}, 400);
-         					}
-         					var target = $(this).find('dl');
-         					target.trigger('click');
-         					var offset = chk.offset();
-         					//alert("offset : " + offset.top);
-         					//var newPos = $('#assgnSub_lst').scrollTop() - offset.top;
-         					//alert("newPos : " + newPos);
-         					$('#assgnSub_lst').animate({scrollTop: offset.top}, 400);
-         					return;
-         				}
-
-         			});
-
-          		 });
-             }
-             markers.push(marker);
-       }
-        console.log(markers); //잘들어갔나 뽑아봄
- }
+ // 표시 확일을 위한 100개의 랜덤 바크 형성
+    function addMarkersTooMuch(list) {
+         removeMarkers();
+         for (var i = 0; i < list.length; i++) {
+                         var strLat= Number(list[i].latitude);
+                          var strLng= Number(list[i].longitude);
+               //var strLat= list[i].latitude;
+               //var strLng= list[i].longitude;]
+                 //Marker 객체 생성.
+                 //latlng = new Tmapv2.LatLng(37.566481622437934,126.98502302169841);
+                 lonlat =  new Tmapv2.LatLng(list[0].latitude,list[0].longitude);
+                 map.setCenter(lonlat);
+                 var idxNbr = $('#assgn_lst li').index($('#assgn_lst li[class="clck"]'));
+                 var marker = new Tmapv2.Marker({
+                     position: new Tmapv2.LatLng(strLat, strLng), //Marker의 중심좌표 설정.
+                     icon: "/img/mrk_"+idxNbr+".svg", //Marker의 아이콘.
+                     iconSize : new Tmapv2.Size(24, 24),
+                     title: list[i].orm_nm //Marker의 라벨.
+                 });
+                 map.setZoom(12);
+                 marker.setMap(map); //Marker가 표시될 Map 설정.
+                 addmarker(marker, marker.getPosition());
+                 function addmarker(marker, pos) {
+             		 marker.addListener("click", function(evt) {
+             		    var clat =  Math.round(pos.lat()*1000000)/1000000;
+             		    var clng =  Math.round(pos.lng()*1000000)/1000000;
+             			$('#assgnSub_lst > li').each(function(idx) {
+             				var lat = $(this).find('input[class=latitudeNbr]').val();
+             				var lng = $(this).find('input[class=longitudeNbr]').val();
+             				//alert( "idx : " + idx +" clat : " + clat + " lat " + lat + " clng : " + clng + " lng " + lng + " lat? " + (clat == lat) + " lng? "  + (clng == lng));
+             				if(clat == lat && clng == lng) {
+             					var chk = $('#assgnSub_lst > li input:checkbox[id="chks_'+idx+'"]');
+             					if(chk.is(':checked')) {
+             						chk.prop('checked', false);
+             					} else {
+             						chk.prop('checked', true);
+                 					//var pos = window.pageYOffset + chk.getBoundingClientRect().top;
+                 					//$('#assgnSub_lst').animate({scrollTop: pos}, 400);
+             					}
+             					var target = $(this).find('dl');
+             					target.trigger('click');
+             					var offset = chk.offset();
+             					//alert("offset : " + offset.top);
+             					//var newPos = $('#assgnSub_lst').scrollTop() - offset.top;
+             					//alert("newPos : " + newPos);
+             					$('#assgnSub_lst').animate({scrollTop: offset.top}, 400);
+             					return;
+             				}
+             			});
+              		 });
+                 }
+                 markers.push(marker);
+           }
+            console.log(markers); //잘들어갔나 뽑아봄
+     }
 
    // 모든 마커를 제거하는 함수입니다.
    function removeMarkers() {
@@ -101,19 +96,18 @@ function addMarkersTooMuch(list) {
 
     </script>
     <link rel="stylesheet" type="text/css" href="/css/common_MblCm.css" />
+    <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
     <link rel="stylesheet" href="http://static.fursys.com/drctSources/css/fonts/font-NotoSansKR.css">
     <script src="/js/jquery-3.4.1.min.js"></script>
-    <script src="/js/jquery-ui.js"></script><!--  달력 -->
-    <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
-    <!--디자인 수정하려면 위에처럼 저희 서버에 두고 해야해서 수정했어요~-->
+    <script src="/js/jquery-ui.js"></script><!-- 달력 -->
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
     <script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
     <script>
        $(function () {//날짜
             var today = new Date();
-             $('.datepicker').val($.datepicker.formatDate("m월    dd일", new Date()));
-             $('.apiDtPckr').val($.datepicker.formatDate("yymmdd", new Date()));
+             $(".datepicker").val($.datepicker.formatDate("m월    dd일", new Date()));
+             $(".apiDtPckr").val($.datepicker.formatDate("yymmdd", new Date()));
              $('.nxtDayBtn').on("click", function () {
                   var date = $('.datepicker').datepicker('getDate');
                   var dtt = $('.apiDtPckr').datepicker('getDate');
@@ -216,6 +210,23 @@ function addMarkersTooMuch(list) {
                            <button class="icnBtn icnTopMenuOpn">메뉴</button>
                            <button class="btn btnSzSmll btnBlckLn w120px cnstrctLstBtn">시공건 검색</button>
                            <button class="icnBtn icnLogout">로그아웃</button>
+                           <aside class="fssMblCmPop topMenuPopBox">
+                                <menu class="topMenuPopLst">
+                                     <li>
+                                         <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
+                                     </li>
+<!--                                      <li>
+                                         <a class="lstLnk">미결 현황 관리</a>
+                                     </li> -->
+                                     <li>
+                                         <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
+                                     </li>
+<!--                                      <li>
+                                         <a class="lstLnk">하자 내역 조회</a>
+                                     </li> -->
+                                </menu>
+                                <button class="clsBtn bgBlck"><!--배경닫기--></button>
+                           </aside>
                       </div>
                       <!-- 로그아웃 처리시 팝업 닫힘은
                          $('.alrtPop').removeClass('opn');
@@ -426,26 +437,26 @@ function addMarkersTooMuch(list) {
             <p id="result"></p>
 	      <section id="map_div">
                   <!--pc에서는 마우스 드레그 이동 안됩니다-->
-          </section>
+           </section>
        </main>
        <!-- alert 박스 모음 -->
        <aside class="fssMblCmPop bgBlck alrtPop">
                 <article class="popCntnts alrtBx loding" id="lodingPop">
                      <h2 class="ttl _f19px _24px _fwNml">
                           <strong>데이터</strong>를 불러오고 있습니다.
-                     </h3>
+                     </h2>
                      <span class="ldingTxt">평균 1분이내로 소요됩니다.</span>
                 </article>
                 <article class="popCntnts alrtBx loding" id="lodingSchdlPop">
                      <h2 class="ttl _f19px _24px _fwNml">
                           <strong>스케줄링</strong>를 불러오고 있습니다.
-                     </h3>
+                     </h2>
                      <span class="ldingTxt">스케줄링은 평균 10분이내로 소요됩니다.</span>
                 </article>
                 <article class="popCntnts alrtBx" id="chngTmDonPop">
                      <h2 class="ttl _f19px _32px">
                           팀변경을 진행하시겠습니까?
-                     </h3>
+                     </h2>
                      <h4 class="ttlInf">
                           완료버튼을 누르면 팀변경이 완료됩니다.
                      </h4>
@@ -479,7 +490,7 @@ function addMarkersTooMuch(list) {
                 <article class="popCntnts alrtBx" id="assgnDonPop">
                      <h2 class="ttl _f19px _32px">
                           분배확정을 진행하시겠습니까?
-                     </h3>
+                     </h2>
                      <h4 class="ttlInf">
                           진행버튼을 누르면 분배확정 처리됩니다.
                      </h4>
@@ -491,7 +502,7 @@ function addMarkersTooMuch(list) {
                 <article class="popCntnts alrtBx" id="rsvtnStrtPop">
                      <h2 class="ttl _f19px _32px">
                           예약확정을 진행하시겠습니까?
-                     </h3>
+                     </h2>
                      <h4 class="ttlInf">
                           확인버튼을 누르면 예약확정 처리됩니다.
                      </h4>
@@ -503,7 +514,7 @@ function addMarkersTooMuch(list) {
                 <article class="popCntnts alrtBx" id="logoutPop">
                      <h2 class="ttl _f19px _32px">
                           로그아웃 하시겠습니까?
-                     </h3>
+                     </h2>
                      <h4 class="ttlInf">
                           확인버튼을 누르면 로그아웃 처리됩니다.
                      </h4>
