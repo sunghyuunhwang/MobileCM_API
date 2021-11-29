@@ -905,7 +905,7 @@ function cnstrctLst() {//시공건 검색 리스트
 		 $('#resList_popFail').addClass('on');
 	} else {
 		resetUlLftlst();
-		resetUlLftdtllst();
+		//resetUlLftdtllst();
 		$('.alrtPop').addClass('opn');
 		$('#lodingPop').addClass('on');
 		$.ajax({
@@ -944,7 +944,7 @@ function cnstrctLst() {//시공건 검색 리스트
 				    //var cnstrctLst = "<ul class='ulLftlst' onclick='cnstrctLst_dtlInf()'>";
 				    var cnstrctLst = "<ul class='ulLftlst'>";
 				           //cnstrctLst += "<li class='w110px nmldatepicker'>"+response.rem_dt+"</li>";
-				           cnstrctLst += "<li class='w100px'><input type='text' class='hipun' value='"+response.rem_dt+"' readonly/>";
+				           cnstrctLst += "<li class='w100px'><input type='text' class='dateformat' value='"+response.rem_dt+"' readonly/>";
 	                       cnstrctLst += "<li class='w100px'>"+response.com_ssec_nm+"</li>";
 	                       cnstrctLst += "<li class='w100px'>"+response.com_brand+"</li>";
 	                       cnstrctLst += "<li class='w150px'>"+response.orm_no+"</li>";
@@ -962,14 +962,14 @@ function cnstrctLst() {//시공건 검색 리스트
 	 	          });
 	                 cmma();//콤마
 	                 innmbr();//인풋값 스팬으로 넘기기
-	                 hipun();
+	                 dateformatting();
 	                 ulLftlst();
 	                 if(list.length > 0){
 		                var datalist = $('#cnstrctLst ul.ulLftlst').not('._index');
 		                $(datalist[0]).addClass('on');
 		                cnstrctLst_dtlInf(datalist[0]);
 	                }
-		    },
+		     },
 	         complete:function(){
 	                $('.alrtPop').removeClass('opn');
 	                $('#lodingPop').removeClass('on');
@@ -980,12 +980,12 @@ function cnstrctLst() {//시공건 검색 리스트
 		    }
 		  });
 	}
-
 }
+
 function cnstrctLst_dtlInf(_this) {//상세정보
+	
 	resetUlLftdtllst();
 	var $selected_to = $(_this);
-	//alert("this ? " + $selected_to.attr("class"));
 	var $selected_com_ssec = $selected_to.find('input[name=com_ssec]').val();
 	var $selected_orm_no = $selected_to.find('input[name=orm_no]').val();
 	var $selected_rpt_no = $selected_to.find('input[name=rpt_no]').val();
@@ -1020,7 +1020,6 @@ function cnstrctLst_dtlInf(_this) {//상세정보
                     cnstrctLst_dtlInf += "<li class='wCal550px'>"+itm_nm+"</li>";
                     cnstrctLst_dtlInf += "</ul>";
 	  		     $('#cnstrctLst_dtlInf').append(cnstrctLst_dtlInf);
-			 console.log(response);
  	          });
                  cmma();//콤마
                  innmbr();//인풋값 스팬으로 넘기기
@@ -1034,6 +1033,176 @@ function cnstrctLst_dtlInf(_this) {//상세정보
 	    }
 	  });
 
+}
+
+function getVndBanpum() {//대리점 반품
+
+	var from_dt = $('.vndBanpumStatus #nmldate1').val();//시작일
+	var to_dt = $('.vndBanpumStatus #nmldate2').val();//종료일
+	var start = $('.vndBanpumStatus #nmldate1').datepicker('getDate');
+	var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
+	if(!start || !end) return;
+	var days = (end - start)/1000/60/60/24;
+	if(days >= 30){
+		 $('.alrtPop').addClass('opn');
+		 $('#vndBSs_popFail').addClass('on');
+	} else {
+		resetUlLftlst();
+		$('.alrtPop').addClass('opn');
+		$('#lodingPop').addClass('on');
+		$.ajax({
+	 	    url: "/v1/api/tmserp/getVndBanpum",
+	 	    type: "GET",
+	 	    cache: false,
+	 	    dataType: "json",
+	        data: {
+				from_dt: from_dt,
+	            to_dt: to_dt
+	 		},
+	 	    success: function(list){
+				$.each(list, function(idx, response) {
+	                var file_yn = response.file_yn;
+	 			    var getVndBanpum = "<ul class='ulLftlst'>";
+				        getVndBanpum += "<li class='w100px'><input type='text' class='dateformat' value='"+response.plm_cdt+"' readonly/>";
+	 			        getVndBanpum += "<li class='w150px tAlgnCntr'>"+response.sti_nm+"</li>";
+	 			        getVndBanpum += "<li class='w100px'>"+response.com_brand_nm+"</li>";
+	 			        getVndBanpum += "<li class='w150px'>"+response.vnd_nm+"</li>";
+	 			        getVndBanpum += "<li class='w200px'>"+response.orm_nm+"</li>";
+	 			        getVndBanpum += "<li class='w150px'>"+response.orm_no+"</li>";
+	 			        getVndBanpum += "<li class='w100px'>"+response.set_cd+"</li>";
+	 			        getVndBanpum += "<li class='w100px'>"+response.col_scd+"</li>";
+	 			        getVndBanpum += "<li class='w130px'>"+response.itm_cd+"</li>";
+	 			        getVndBanpum += "<li class='w100px'>"+response.col_cd+"</li>";
+	 			        getVndBanpum += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value="+response.ord_qty+" class='innmbr nmCmma w100p'></li>";
+	 			        getVndBanpum += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value="+response.wtp_planqty+" class='innmbr nmCmma w100p'></li>";
+	 			        getVndBanpum += "<li class='w130px tAlgnRght'>"+response.wtp_finish_nm+"</li>";
+	 			        getVndBanpum += "<li class='w200px'>"+response.wtp_entdt+"</li>";
+	 			    if(file_yn == "Y") {
+						getVndBanpum += "<li class='w100px tAlgnCntr'><button class='vndBSsBtn'>"+response.com_rdsec_nm+"</button></li>";		
+					}else{
+						getVndBanpum += "<li class='w100px tAlgnCntr'>"+response.com_rdsec_nm+"</li>";						
+					}    
+	 			        getVndBanpum += "<li class='w130px tAlgnRght'>"+response.com_undsec_nm+"</li>";
+	                    getVndBanpum += "<input type='hidden' name = 'plm_no' value='"+response.plm_no+"'/>";	 			        
+	 			        getVndBanpum += "</ul>";
+	 	  		     $('#getVndBanpumLst').append(getVndBanpum);
+	  	          });
+	                  cmma();//콤마
+	                  innmbr();//인풋값 스팬으로 넘기기
+	                  dateformatting();
+	                  ulLftlst();
+	                  vndBSsFilePop();//첨부파일
+	 	    },
+	         complete:function(){
+	                $('.alrtPop').removeClass('opn');
+	                $('#lodingPop').removeClass('on');
+	         },
+	 	    error: function (request, status, error){
+	               console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+	               alert('데이터를 불러올수 없습니다.');
+	 	    }
+	 	  });
+	    }
+}
+
+function getAttachFileList(plm_no) { // 대리점반품 파일
+	 resetFilelst();
+     $.ajax({
+        url: "/v1/api/tmserp/getAttachFileList",
+        type: "GET",
+        cache: false,
+        dataType: "json",
+        data: {
+			plm_no: plm_no
+        },
+        success: function(list){
+            $.each(list, function(idx, response) {
+                  var getFileList = "<ul class='ulLftlst'>";
+                  	  getFileList += "<li><button class='bfafNn icnDown'>"+response.real_attch_file_name+"</button></li>";
+	                  getFileList += "<input type='hidden' name = 'file_id' value='"+response.attch_file_id+"'/>";
+	                  getFileList += "<input type='hidden' name = 'file_snum' value='"+response.attch_file_snum+"'/>";
+	                  getFileList += "</ul>";
+                  $('#getAttachFileList').append(getFileList);
+               console.log(response);
+              });
+                 cmma();//콤마
+                 innmbr();//인풋값 스팬으로 넘기기
+                 vndFileDown();
+        },
+         //complete:function{
+
+         //},
+        error: function (request, status, error){
+              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+              alert('데이터를 불러올수 없습니다.');
+        }
+      });
+}
+function requestDownloadFile(reqObj) {
+    if (!reqObj || !reqObj.url) {
+        return;
+    }
+ 
+    var isGetMethod = reqObj.method && reqObj.method.toUpperCase() === 'GET';
+    $.ajax({
+        url: reqObj.url,
+        method: isGetMethod ? 'GET' : 'POST',
+        xhrFields: {
+            responseType: 'arraybuffer'
+        },
+        data: $.param(reqObj.data) // a=1&b=2&c=3 방식
+        // data: JSON.stringify(reqObj.data) // {a:1, b:2, c:3} JSON 방식
+ 
+    }).done(function(data, textStatus, jqXhr) {
+        if (!data) {
+            return;
+        }
+        try {
+            var blob = new Blob([data], { type: jqXhr.getResponseHeader('content-type') });
+            var fileName = getFileName(jqXhr.getResponseHeader('content-disposition'));
+            fileName = decodeURI(fileName);
+ 
+            if (window.navigator.msSaveOrOpenBlob) { // IE 10+
+                window.navigator.msSaveOrOpenBlob(blob, fileName);
+            } else { // not IE
+                var link = document.createElement('a');
+                var url = window.URL.createObjectURL(blob);
+                link.href = url;
+                link.target = '_self';
+                if (fileName) link.download = fileName;
+                document.body.append(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    });
+}
+function getFileName (contentDisposition) {
+    var fileName = contentDisposition
+        .split(';')
+        .filter(function(ele) {
+            return ele.indexOf('filename') > -1
+        })
+        .map(function(ele) {
+            return ele
+                .replace(/"/g, '')
+                .split('=')[1]
+        });
+    return fileName[0] ? fileName[0] : null
+}
+
+function fileDownload(file_no, file_snum) { // 파일 다운로드
+	requestDownloadFile({
+        url: "/v1/api/tmserp/fileDownload",
+        type: "GET",	
+        data: {
+			file_id: file_no,
+			file_snum: file_snum
+        },	
+	});
 }
 
 $(document).ready(function(){

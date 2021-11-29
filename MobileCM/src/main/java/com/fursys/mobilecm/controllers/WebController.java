@@ -146,4 +146,10 @@ public class WebController {
         
 		return "area";  
 	}
+	
+    @GetMapping("/vndBanpumStatus")
+    public String vndBanpumStatus(@AuthenticationPrincipal User user) {
+		return "vndBanpumStatus";
+    	
+    }
 }

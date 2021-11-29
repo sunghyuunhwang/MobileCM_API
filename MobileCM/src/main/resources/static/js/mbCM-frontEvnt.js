@@ -8,21 +8,47 @@ function cnstrctLstPop() {//시공건 팝업
        datepicker();
      });
 }
+function topMenuPopBox() {//팝업메뉴 팝업
+     $('.icnTopMenuOpn').click(function() {
+       $('.topMenuPopBox').addClass('opn');
+     });
+}
+
+function vndBSsFilePop() {//첨부파일
+     $('.vndBSsBtn').click(function() {
+       $('.vndBSsFilePop').addClass('opn');
+       var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
+       getAttachFileList(plm_no);
+     });
+}
+
+function vndFileDown() {//파일 다운로드
+     $('.icnDown').click(function() {
+       var file_id = $(this).closest('ul').find('input[name=file_id]').val();
+       var file_snum = $(this).closest('ul').find('input[name=file_snum]').val();
+       fileDownload(file_id, file_snum);
+     });
+}
+
 function ulLftlst() {//리스트표시
-     $('.ulLftlst').each(function() {
+      $('.ulLftlst').each(function() {
       var ulLftlst = $(this);
       $(this).click(function() {
-           if(! $(this).hasClass('_index')){
+           if(!$(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
            $('.ulLftlst').removeClass('on');
            $(this).addClass('on');
            resetUlLftdtllst();
            cnstrctLst_dtlInf(this);
-           }
+          }else if(! $(this).hasClass('_index') && $('.cnstrctLstBx').length <= 0){
+              $('.ulLftlst').removeClass('on');
+              $(this).addClass('on');
+          }
       });
     });
 }
 function resetUlLftlst() {
-    $('#cnstrctLst .ulLftlst').each(function() {
+    //$('#cnstrctLst .ulLftlst').each(function() {
+    $('.ulLftlst').each(function() {
     	if(! $(this).hasClass('_index')){
  				$(this).remove();
            }
@@ -34,7 +60,14 @@ function resetUlLftdtllst() {
  				$(this).remove();
            }
       	});
-	
+
+}
+function resetFilelst() {
+    $('.fileLst .ulLftlst').each(function() {
+    	if(! $(this).hasClass('_index')){
+ 				$(this).remove();
+           }
+      });	
 }
 function datepicker() {//달력 한글화
    $( ".datepicker" ).datepicker({
@@ -48,7 +81,7 @@ function datepicker() {//달력 한글화
 		//$(".apiDtPckr").val($.datepicker.formatDate("yymmdd", dateText));
        	allRset();//리셋(프론트엔드부분만)
         assgnCll();//다시 불러오기
-      }, 
+      },
   }).datepicker("setDate", new Date());
   $( ".apiDtPckr" ).datepicker({
    changeMonth: true,
@@ -63,7 +96,7 @@ function datepicker() {//달력 한글화
  dateFormat:"yy-mm-dd",
  showMonthAfterYear: true,
  monthNames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
- monthNamesShort: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 
+ monthNamesShort: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
  dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
@@ -74,6 +107,7 @@ if($('.innmldate').hasClass('opn')){
 }else{
      $('.ui-datepicker').removeClass('nml');
 }
+
 
 }
 function cmma() { // 세자리수 콤마찍기 - 읽기 전용
@@ -92,8 +126,8 @@ function cmma() { // 세자리수 콤마찍기 - 읽기 전용
   });
 }
 
-function hipun() { // 세자리수 콤마찍기 - 읽기 전용
-  $('.hipun').each(function() {
+function dateformatting() { // 세자리수 콤마찍기 - 읽기 전용
+  $('.dateformat').each(function() {
     var employ = $(this).val();
     var formatNum = "";
     employ = employ.replace(/,/g, '');
@@ -546,4 +580,6 @@ $(document).ready(function(){
       logoutPop();//로그아웃 팝업
       ulLftlst();//리스트표시
       cnstrctLstPop();//시공건 팝업
+      topMenuPopBox();//팝업메뉴 팝업
+      vndBSsFilePop();//첨부파일
 });

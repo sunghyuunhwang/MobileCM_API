@@ -28,7 +28,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -1158,11 +1160,11 @@ public class ApiTmsErpController {
 		}
 	}
 	
-	@ApiOperation(value="/getFilelist", notes="tms첨부파일 조회")
+	@ApiOperation(value="/getAttachFileList", notes="tms첨부파일 조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@GetMapping("/getFilelist")
-	@RequestMapping(value="/getFilelist",method=RequestMethod.GET)
-	public String getFilelist(
+	@GetMapping("/getAttachFileList")
+	@RequestMapping(value="/getAttachFileList",method=RequestMethod.GET)
+	public String getAttachFileList(
 			@AuthenticationPrincipal User user,
 			@ApiParam(value = "plm_no", required = true, example = "plm_no")
 			@RequestParam(name = "plm_no", required = true) String plm_no
@@ -1190,23 +1192,27 @@ public class ApiTmsErpController {
 
 	@ApiOperation(value="/fileDownload", notes="tms첨부파일 다운로드")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@GetMapping("/fileDownload")
-	@RequestMapping(value="/fileDownload",method=RequestMethod.GET)
-	public String fileDownload(HttpServletRequest request,  
+	@PostMapping("/fileDownload")
+	@RequestMapping(value="/fileDownload",method=RequestMethod.POST)
+	public void fileDownload(HttpServletRequest request,  
 			HttpServletResponse response,
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "file_id", required = true, example = "")
 			@RequestParam(name = "file_id", required = true) String file_id,
 			@ApiParam(value = "file_snum", required = true, example = "")
 			@RequestParam(name = "file_snum", required = true) String file_snum
 			) throws Exception {
 		
-	    InputStream in = null;
-	    OutputStream os = null;	
+	    BufferedInputStream inputStream = null;
+	    OutputStream outStream = null;	
 	    HashMap<String,Object> params = new HashMap<String, Object>();
-	    TMSERPFile fileMap = null;
+	    TMSERPFile fileMap = new TMSERPFile();
 	    
 		try {
+			
+			if(user == null) {
+				throw new Exception();
+			}
 			
 	        if ("".equals(file_id)) {
 	        	throw new Exception();
@@ -1219,28 +1225,19 @@ public class ApiTmsErpController {
 	        if (fileMap == null) {
 	        	throw new Exception();
 	        }
-	
 			String uploadBasePath =  environment.getProperty("file.upload.directory");
 
-			logger.debug("new File Path = " + uploadBasePath + "/" + fileMap.getAttch_file_path());
-			logger.debug("new File Name = " + fileMap.getVirtual_attch_file_name());
-			logger.debug("new File Real Name = " + fileMap.getReal_attch_file_name());
-
 			File downloadFile = new File (uploadBasePath + "/" + fileMap.getAttch_file_path(), fileMap.getVirtual_attch_file_name());
-			logger.debug(uploadBasePath + "/" + fileMap.getAttch_file_path() + fileMap.getVirtual_attch_file_name());
 			int fSize = (int) downloadFile.length();
-
-			logger.debug("fSize = " + fSize);
 
 			if (fSize > 0) {
 				
 				String fullPath = downloadFile.getAbsolutePath();
-				logger.debug("fullPath=" + fullPath);
 
 				// get absolute path of the application
 	            ServletContext context = request.getSession().getServletContext();
 
-	            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(downloadFile));
+	            inputStream = new BufferedInputStream(new FileInputStream(downloadFile));
 
 	            // get MIME type of the file
 	            String mimeType = context.getMimeType(fullPath);
@@ -1248,7 +1245,6 @@ public class ApiTmsErpController {
 	                // set to binary type if MIME mapping not found
 	                mimeType = "application/octet-stream";
 	            }
-	            logger.debug("MIME type: " + mimeType);
 
 				response.setBufferSize(fSize);
 				response.setContentType("utf-8");
@@ -1256,13 +1252,12 @@ public class ApiTmsErpController {
 				response.setContentType(mimeType);
 
 				String disposition = getDisposition(fileMap.getReal_attch_file_name(), getBrowser(request), "", mimeType);
-				logger.debug("==disposition="+disposition);
 				response.addHeader("Content-disposition", disposition);
 				response.setContentLength(fSize);
 
 
 				// get output stream of the response
-	            OutputStream outStream = response.getOutputStream();
+	            outStream = response.getOutputStream();
 
 	            byte[] buffer = new byte[8*1024];
 	            int bytesRead = -1;
@@ -1271,16 +1266,15 @@ public class ApiTmsErpController {
 	            while ((bytesRead = inputStream.read(buffer)) != -1) {
 	                outStream.write(buffer, 0, bytesRead);
 	            }
-
 	            inputStream.close();
-	            outStream.close();
-	            return null;
+	            outStream.flush();
 			} else {
 				//예외처리
 				throw new Exception();
 			}
 		} catch(Exception e) {
 			throw new Exception();
+		} finally {
 		}
 	}
 		
@@ -1329,4 +1323,5 @@ public class ApiTmsErpController {
         }
         return dispositionPrefix + encodedFilename;
     }
+   
 }

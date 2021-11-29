@@ -2400,12 +2400,12 @@
 		        FROM   tt_comcd WITH (nolock)
 		        WHERE  ccd_cd = e.com_rdsec)   AS com_rdsec_nm,
 		       E.com_undsec,
-		       (SELECT ccd_nm
+		       isnull((SELECT ccd_nm
 		        FROM   tt_comcd WITH (nolock)
-		        WHERE  ccd_cd = e.com_undsec)  AS com_undsec_nm,
-				(CASE WHEN (SELECT count(*) FROM ty_attchfile atc with (nolock)
-							WHERE atc.attch_file_id = 'cresult'+ b.plm_no 
-							AND atc.attch_div_cd = 'C') > 0 THEN 'Y' ELSE 'N' END) AS FILE_YN
+		        WHERE  ccd_cd = e.com_undsec),'')  AS com_undsec_nm,
+			   (CASE WHEN (SELECT count(*) FROM ty_attchfile atc with (nolock)
+						   WHERE atc.attch_file_id = 'cresult'+ b.plm_no 
+						AND atc.attch_div_cd = 'C') > 0 THEN 'Y' ELSE 'N' END) AS FILE_YN
 		/*쿼리튜닝으로 속도를 올리기 위해 조회조건과 FROM 절 새로 만듬 */
 		FROM   (SELECT itm_cd,
 		               col_cd,
@@ -2493,7 +2493,7 @@
 		       A.virtual_attch_file_name,
 		       Substring(virtual_attch_file_name, Charindex('.', virtual_attch_file_name
 		                                          , -1)
-		                                          + 1, Len(virtual_attch_file_name))AS
+		                                          + 1, Len(virtual_attch_file_name)) AS
 		       FILE_KIND,
 		       A.attch_file_path,
 		       A.attch_file_size,

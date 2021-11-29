@@ -24,12 +24,13 @@ public class TMSERPVndBanpum{
 	public String wtp_planqty;
 	public String wtp_finish;
 	public String wtp_finish_nm;
-	public String wtp_enddt; // 반품등록일시
+	public String wtp_entdt; // 반품등록일시
 	public String com_rdsec; // 모바일처리상태
 	public String com_rdsec_nm;
 	public String com_undsec; // 품목별세부상태
 	public String com_undsec_nm;
 	public String file_yn;
+	public String plm_no;
 }
 
 
