@@ -335,6 +335,7 @@
   .vndBanpumStatus .inSrchFtBx{padding: 0 20px;box-sizing: border-box;}
   .vndBanpumStatus .scrll._inTtl{position: relative;height: calc(100% - 30px);}
   .vndBSsBtn{margin: 4px 0;padding: 3px 24px 3px 8px;border-radius: 3px;border: #aaa 1px solid;background-image: url('/img/icn_file.svg');background-repeat: no-repeat;background-position: right 6px center;background-size:14px;}
+  .vndBSsBtn.non{pointer-events: none;background: none;padding: 3px 16px;border:0;}
 
 .fileLst,.fileLst > li{display: inline-block;float: left;width: 100%;}
  .fileLst > li{padding: 0 10px;margin: 0 0 5px 0;border: #ddd 1px solid;border-radius: 3px;box-sizing: border-box;}
