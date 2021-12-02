@@ -17,10 +17,10 @@ public class TMSERPAllMigyeolRepo {
 	public int tot_cnt; /*총 건수*/
 	public int migyeol_cnt; /*미결 건수*/
 	public int comp_cnt; /*완결 건수*/
-	public double comp_per;
-	public double migyeol_per;
-	public double com_unpsec_a_per;
-    public double com_unpsec_e_per;
-    public double com_unpsec_c_per;
-    public double com_unpsec_r_per;
+	public int comp_per;
+	public int migyeol_per;
+	public int com_unpsec_a_per;
+    public int com_unpsec_e_per;
+    public int com_unpsec_c_per;
+    public int com_unpsec_r_per;
 }

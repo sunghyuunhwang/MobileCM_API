@@ -1352,12 +1352,12 @@ public class ApiTmsErpController {
 		int com_unpsec_e = 0;
 		int com_unpsec_c = 0;
 		int com_unpsec_r = 0;
-		double comp_per = 0;
-		double migyeol_per = 0;
-		double com_unpsec_a_per = 0;
-		double com_unpsec_e_per = 0;
-		double com_unpsec_c_per = 0;
-		double com_unpsec_r_per = 0;
+		int comp_per = 0;
+		int migyeol_per = 0;
+		int com_unpsec_a_per = 0;
+		int com_unpsec_e_per = 0;
+		int com_unpsec_c_per = 0;
+		int com_unpsec_r_per = 0;
 		
 		int all_tot_cnt = 0;
 		int all_migyeol_cnt = 0;
@@ -1366,12 +1366,12 @@ public class ApiTmsErpController {
 		int all_com_unpsec_e = 0;
 		int all_com_unpsec_c = 0;
 		int all_com_unpsec_r = 0;
-		double all_comp_per = 0;
-		double all_migyeol_per = 0;
-		double all_com_unpsec_a_per = 0;
-		double all_com_unpsec_e_per = 0;
-		double all_com_unpsec_c_per = 0;
-		double all_com_unpsec_r_per = 0;
+		int all_comp_per = 0;
+		int all_migyeol_per = 0;
+		int all_com_unpsec_a_per = 0;
+		int all_com_unpsec_e_per = 0;
+		int all_com_unpsec_c_per = 0;
+		int all_com_unpsec_r_per = 0;
 		
 		try {
 			//if (user != null) {
@@ -1409,16 +1409,21 @@ public class ApiTmsErpController {
 										
 					if(tot_cnt > 0) {
 						
-						migyeol_per = (double)migyeol_cnt/(double)tot_cnt*100;
-						comp_per = (double)comp_cnt/(double)tot_cnt*100;
-						
+						//migyeol_per = (double)migyeol_cnt/(double)tot_cnt*100;
+						migyeol_per = calcPercentage(migyeol_cnt, tot_cnt);
+						//comp_per = (double)comp_cnt/(double)tot_cnt*100;
+						comp_per = 100 - migyeol_per;
 					}
 					
 					if(migyeol_cnt > 0) {
-						com_unpsec_a_per = (double)com_unpsec_a/(double)migyeol_cnt*100;
-						com_unpsec_e_per = (double)com_unpsec_e/(double)migyeol_cnt*100;
-						com_unpsec_c_per = (double)com_unpsec_c/(double)migyeol_cnt*100;
-						com_unpsec_r_per = (double)com_unpsec_r/(double)migyeol_cnt*100;	
+						//com_unpsec_a_per = Math.round((double)com_unpsec_a/(double)migyeol_cnt*100);
+						//com_unpsec_e_per = Math.round((double)com_unpsec_e/(double)migyeol_cnt*100);
+						//com_unpsec_c_per = Math.round((double)com_unpsec_c/(double)migyeol_cnt*100);
+						com_unpsec_a_per = calcPercentage(com_unpsec_a, migyeol_cnt);
+						com_unpsec_e_per = calcPercentage(com_unpsec_e, migyeol_cnt);
+						com_unpsec_c_per = calcPercentage(com_unpsec_c, migyeol_cnt);
+						//com_unpsec_r_per = (double)com_unpsec_r/(double)migyeol_cnt*100;
+						com_unpsec_r_per = 100 - com_unpsec_a_per - com_unpsec_e_per - com_unpsec_c_per;
 					}
 					
 					migyeolInfo.setMigyeol_cnt(migyeol_cnt);
@@ -1432,15 +1437,21 @@ public class ApiTmsErpController {
 					
 				}
 				if(all_tot_cnt > 0) {
-					all_migyeol_per = (double)all_migyeol_cnt/(double)all_tot_cnt*100;
-					all_comp_per = (double)all_comp_cnt/(double)all_tot_cnt*100;					
+					//all_migyeol_per = (double)all_migyeol_cnt/(double)all_tot_cnt*100;
+					all_migyeol_per = calcPercentage(all_migyeol_cnt, all_tot_cnt);
+					//all_comp_per = (double)all_comp_cnt/(double)all_tot_cnt*100;	
+					all_comp_per = 100 - all_migyeol_per;
 				}
 
 				if(all_migyeol_cnt > 0) {
-					all_com_unpsec_a_per = (double)all_com_unpsec_a/(double)all_migyeol_cnt*100;
-					all_com_unpsec_e_per = (double)all_com_unpsec_e/(double)all_migyeol_cnt*100;
-					all_com_unpsec_c_per = (double)all_com_unpsec_c/(double)all_migyeol_cnt*100;
-					all_com_unpsec_r_per = (double)all_com_unpsec_r/(double)all_migyeol_cnt*100;	
+					//all_com_unpsec_a_per = (double)all_com_unpsec_a/(double)all_migyeol_cnt*100;
+					//all_com_unpsec_e_per = (double)all_com_unpsec_e/(double)all_migyeol_cnt*100;
+					//all_com_unpsec_c_per = (double)all_com_unpsec_c/(double)all_migyeol_cnt*100;
+					//all_com_unpsec_r_per = (double)all_com_unpsec_r/(double)all_migyeol_cnt*100;
+					all_com_unpsec_a_per = calcPercentage(all_com_unpsec_a, all_migyeol_cnt);
+					all_com_unpsec_e_per = calcPercentage(all_com_unpsec_e, all_migyeol_cnt);
+					all_com_unpsec_c_per = calcPercentage(all_com_unpsec_c, all_migyeol_cnt);
+					all_com_unpsec_r_per = 100 - all_com_unpsec_a_per - all_com_unpsec_e_per - all_com_unpsec_c_per;
 				}
 				
 				allInfo.setCom_unpsec_a(all_com_unpsec_a);
@@ -1472,6 +1483,9 @@ public class ApiTmsErpController {
 		} 
 	} 
 	
+	private int calcPercentage(int a, int b) {
+		return (int) Math.round((double)a/(double)b*100);	
+	}
 	@ApiOperation(value="/getMigyeolnfo", notes="tms미결정보조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
 	@GetMapping("/getMigyeolnfo")
