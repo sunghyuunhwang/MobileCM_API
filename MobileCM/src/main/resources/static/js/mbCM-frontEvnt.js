@@ -67,7 +67,7 @@ function resetFilelst() {
     	if(! $(this).hasClass('_index')){
  				$(this).remove();
            }
-      });	
+      });
 }
 function datepicker() {//달력 한글화
    $( ".datepicker" ).datepicker({
@@ -75,6 +75,11 @@ function datepicker() {//달력 한글화
       //dateFormat:"yymmdd",
       dateFormat:"m월    dd일",
       showMonthAfterYear: true,
+      monthNames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      monthNamesShort: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+      dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+      dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
 	  yearSuffix: '년',
       onSelect: function (dateText, inst) {
 		$('.apiDtPckr').datepicker("setDate",  $('.datepicker').datepicker('getDate'));
@@ -126,6 +131,7 @@ function cmma() { // 세자리수 콤마찍기 - 읽기 전용
   });
 }
 
+
 function dateformatting() { // 세자리수 콤마찍기 - 읽기 전용
   $('.dateformat').each(function() {
     var employ = $(this).val();
@@ -137,7 +143,6 @@ function dateformatting() { // 세자리수 콤마찍기 - 읽기 전용
     $(this).val(formatNum);
   });
 }
-
 function innmbr() { // 인풋 넓이 조절을 위한 금액을 span에 보이기
   $('.innmbr').each(function() {
     var innmbr = $(this).val();

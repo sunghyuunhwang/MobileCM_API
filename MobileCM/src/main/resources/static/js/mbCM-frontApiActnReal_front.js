@@ -71,6 +71,14 @@ var days = (end - start)/1000/60/60/24;
                   cmma();//콤마
                   innmbr();//인풋값 스팬으로 넘기기
                   vndBSsFilePop();//첨부파일
+                  /*$('.vndBSsBtn').each(function() {
+                  var vndBSsBtntxt = $(this).text();
+                     if(vndBSsBtntxt == "완결"){
+                          $(this).addClass('non');
+                     }else{
+                          $(this).removeClass('non');
+                     }
+                });*/
  	    },
           //complete:function{
 
