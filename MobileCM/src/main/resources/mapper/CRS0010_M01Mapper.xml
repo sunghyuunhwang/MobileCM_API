@@ -986,7 +986,7 @@
 <![CDATA[	
 	/* CRS0010.modyfyTcPlanMstComple 2018.01.26 |주요한| 시공결과 정보 완결처리 */
 	UPDATE TC_PLANMST SET
-	MOB_REMARK = ISNULL(MOB_REMARK, '') + ' ' + ISNULL(CONVERT(VARCHAR(8000), #{mob_remark}), '')
+	MOB_REMARK = LEFT(ISNULL(MOB_REMARK, '') + ' ' + ISNULL(CONVERT(VARCHAR(8000), #{mob_remark}), ''), 200)
 	,COM_RMFG = #{com_rmfg_aft}
 	,COM_PLMFG = #{com_plmfg_aft}
 	,USR_CD = #{usr_id}
