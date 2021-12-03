@@ -2,6 +2,52 @@
 //작업자 이커머스팀 : 심민아
 //백엔드에 필요한 이벤트는 함수 혹은 함수안의 이벤트를 사용해 주시고
 //백엔드에 사용한 프론트엔드이벤트가 $(document).ready(function()에서 필요 없을경우 주석 처리해주세요.*주석 처리시설명필수표시
+
+function migyeolinfStl() {//미경상세화면변경
+     $('._inmigyeolInf .inFileBtn').each(function() {
+          var inFile = $(this);
+          var y = inFile.text();
+          if(y == 'Y'){
+               inFile.removeClass('non');
+          }else{
+               inFile.addClass('non');
+          }
+     });
+     $('._unpsecTxt').each(function() {
+          var txt_red = ["Y"];
+          var unpsecTxt = $(this);
+          var y = unpsecTxt.text();
+          if(y == txt_red){
+               unpsecTxt.addClass('clrRed');
+          }else{
+               unpsecTxt.removeClass('clrRed');
+          }
+     });
+}
+function migyeolPerBar() {//미결퍼센트막대기
+     $('.bar').removeClass('lst');
+     $('.bar').each(function() {
+          var b = $(this);
+          var num = b.find('.numPer').text().replace(/[^0-9]/g, "");
+          b.css('height',num+'%');
+          var h = b.height();
+          var s1 = b.find('.info').height();
+          var s2 = b.find('.numBx').height();
+          if(h < (s1+s2)){
+               b.find('.info').addClass('ttul');
+               b.find('.numBx').addClass('ttul');
+          }else{
+               b.find('.info').removeClass('ttul');
+               b.find('.numBx').removeClass('ttul');
+          }
+          if(num == 0){
+               b.addClass('non');
+               $('.bar.non:eq(0)').prev('.bar').addClass('lst');
+          }else{
+               b.removeClass('non');
+          }
+     });
+}
 function cnstrctLstPop() {//시공건 팝업
      $('.cnstrctLstBtn').click(function() {
        $('.cnstrctLstPop').addClass('opn');
@@ -22,6 +68,12 @@ function vndBSsFilePop() {//첨부파일
      });
 }
 
+function inFileBtnPop() {//미결첨부파일
+     $('.inFileBtn').click(function() {
+       $('.inFilePop').addClass('opn');
+       //getAttachFileList();
+     });
+}
 function vndFileDown() {//파일 다운로드
      $('.icnDown').click(function() {
        var file_id = $(this).closest('ul').find('input[name=file_id]').val();
@@ -520,6 +572,16 @@ function swipeActn() {//터치액션
         },
         threshold:0
      });
+    var migyeolBtn = $('.migyeolInfo .popSldBTn');
+     migyeolBtn.swipe({
+       swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
+            if( direction == "left" ){
+           }else if( direction == "right" ){
+                $('.migyeolInfo').removeClass('opn');
+           }
+        },
+        threshold:0
+     });
 }
 function assgnDonPop() {//분배확정팝업
      $('.assgnDon').click(function() {
@@ -587,4 +649,5 @@ $(document).ready(function(){
       cnstrctLstPop();//시공건 팝업
       topMenuPopBox();//팝업메뉴 팝업
       vndBSsFilePop();//첨부파일
+      inFileBtnPop();//미결첨부파일
 });
