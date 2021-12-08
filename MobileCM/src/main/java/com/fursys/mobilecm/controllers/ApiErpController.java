@@ -194,6 +194,30 @@ public class ApiErpController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@ApiOperation(value = "erp_SiGongMigeulResultSave", notes = "시공미결결과등록")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공미결결과등록 처리 실패 !!") })
+	@GetMapping("/erp_SiGongMigeulResultSave")
+	@RequestMapping(value = "/erp_SiGongMigeulResultSave", method = RequestMethod.GET)
+	public String erp_SiGongMigeulResultSave(
+			@RequestParam(name = "plm_no", required = false) String as_plm_no,
+			@RequestParam(name = "user_id", required = false) String as_usr_id,
+			@RequestParam(name = "mob_std", required = false) String mob_std,
+			@RequestParam(name = "mob_remark", required = false) String mob_remark
+			) {
+		
+		SigongResultResponse response = new SigongResultResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("plm_no", as_plm_no);
+		params.put("usr_id", as_usr_id);
+		params.put("mob_std", mob_std);
+		params.put("mob_remark", mob_remark);
+
+		response = apiErpService.erp_SiGongMigeulResultSave(params);
+		
+		System.out.println(response.toString());
+		return gson.toJson(response);
+	}
+	
 	@ApiOperation(value = "erp_requestGoGoVan", notes = "고고밴 요청")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "고고밴 요청 실패 !!") })
 	@GetMapping("/erp_requestGoGoVan")

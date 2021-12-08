@@ -23,8 +23,11 @@ import com.fursys.mobilecm.service.ApiErpSigongAsService;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
+import com.fursys.mobilecm.vo.mobile.response.AsReportResponse;
 import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
+import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
 import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiOperation;
@@ -43,6 +46,54 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	@ApiOperation(value = "erp_selectAsReport", notes = "서비스내역서")
+	@GetMapping("/erp_selectAsReport")
+	public String erp_selectAsReport (
+			@ApiParam(value = "ORM_NO", required=true, example = "F20211102007201")
+			@RequestParam(name="orm_no", required=true) String orm_no
+		) {
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("orm_no", orm_no);
+        
+        AsReportResponse response = apiErpSigongAsService.erp_selectAsReport(params);
+		        
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "erp_selectSigongReport", notes = "시공내역서")
+	@GetMapping("/erp_selectSigongReport")
+	public String erp_selectSigongReport (
+			@ApiParam(value = "PLM_NO", required=true, example = "I202111260009")
+			@RequestParam(name="plm_no", required=true) String plm_no
+		) { 	
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();		
+        params.put("plm_no", plm_no);
+        
+        SigongReportResponse response = apiErpSigongAsService.erp_selectSigongReport(params);
+		        
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "erp_selectDeliveryItemList", notes = "출고리스트출력")
+	@GetMapping("/erp_selectDeliveryItemList")
+	public String erp_selectDeliveryItemList (
+			@ApiParam(value = "STI_CD", required=true, example = "YA521")
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			@ApiParam(value = "REM_DT", required=true, example = "20211106")
+			@RequestParam(name="rem_dt", required=true) String rem_dt
+		) { 	
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();		
+        params.put("sti_cd", sti_cd);
+        params.put("rem_dt", rem_dt);
+        
+        ArrayList<ERPDeliveryItemList> allItems = apiErpSigongAsService.erp_selectDeliveryItemList(params);
+		        
+		return gson.toJson(allItems);
+	}
+	
 	@ApiOperation(value = "erp_UpdateDropSpot", notes = "하차장소 UPDATE")
 	@GetMapping("/erp_UpdateDropSpot")
 	@RequestMapping(value = "/erp_UpdateDropSpot", method = RequestMethod.GET)

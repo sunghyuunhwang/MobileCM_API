@@ -1,6 +1,294 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
+ 
+ <select id="erp_selectAsItemReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsItemReport">
+<![CDATA[
+	SELECT  A.BMT_ITEM,   
+                       A.COL_CD,   
+                       B.BMT_NM AS BMT_NM,   
+                       A.COM_RPFTYP,   
+                       A.AST_ACTQTY,   
+                       (SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = A.COM_SPYCOD ) AS COM_SPYCOD,   
+                       A.BMT_SAMT,   
+                      (CASE WHEN LEN(A.VND_CD) = 3 THEN
+                      (SELECT WHS_NM FROM TW_WHSMAS with (nolock) WHERE WHS_CD = A.VND_CD) ELSE
+                      (SELECT VND_NM FROM TT_VENDOR with (nolock) WHERE VND_CD = A.VND_CD) END) VND_CD,
+                      (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'A65'   AND CCD_CD=A.DEFECT_GUBUN) AS DEFECT_GUBUN ,
+                      (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'A66'   AND CCD_CD=A.DEFECT_TYP) AS DEFECT_TYP
+                      ,D.MOB_USEYN
+                      ,D.MOB_NOTUSEQTY
+           FROM  TA_ASTITEM A with (nolock)
+                        LEFT OUTER JOIN TA_PLANDTL D WITH (NOLOCK)
+                        ON D.PLM_NO = #{orm_no}
+                        AND D.BMT_ITEM = A.BMT_ITEM
+                        AND D.COL_CD = A.COL_CD,
+                        TT_BOMMST B with (nolock)
+          WHERE A.RPT_NO     =  SUBSTRING(#{orm_no} /*orm_no*/ , 1, 13)
+               AND A.RPT_SEQ    = '01'
+               AND A.BMT_ITEM   = B.BMT_ITEM 
+               AND A.COL_CD     = B.COL_CD   
+
+]]>
+</select> 
+
+<select id="erp_selectAsReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsReport">
+<![CDATA[
+
+	SELECT   A.RPT_NO+A.RPT_SEQ AS RPT_NO,     
+	         B.VND_NM AS VND_NM,
+	         B.VND_TELNO,
+             (CASE WHEN LEFT(A.RPT_NO,1) = 'I' THEN A.CTM_NM + ' 님' ELSE A.CTM_NM END)AS CTM_NM, 
+              (SELECT TOP 1 ZIP_PROV + ' ' + ZIP_CITY + ' ' + ZIP_TOWN FROM TC_ROADZIP with (nolock) WHERE BDONG_CD =  TOWN_CD )  AS  CTM_ADDR,   
+              A.RPT_USRNM,   
+              A.RPT_DT,   
+              A.RPT_DESC,  
+              A.RPT_DESCPLUS, 
+              A.RPT_ENDDT,
+              A.RPT_QDT,
+             (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CCD_CD = A.COM_SCD) COM_SCD_NM,
+             (SELECT STI_NM FROM TC_STINF with (nolock) WHERE STI_CD = A.STI_CD AND COM_SCD = A.COM_SCD) STI_NM,
+         (SELECT ISNULL(MOB_REMARK, '') FROM TA_PLANMST WHERE RPT_NO = A.RPT_NO AND RPT_SEQ = A.RPT_SEQ ) AS MOB_REMARK
+         FROM TA_RPTREQ A with (nolock),
+                    TT_VENDOR B with (nolock)
+     WHERE   A.RPT_NO > '' 
+          AND  A.RPT_SEQ > ''
+          AND  A.VND_SCD = B.VND_CD
+          AND  A.RPT_NO + A.RPT_SEQ = #{orm_no}
+          AND  CONVERT(NUMERIC,SUBSTRING(A.COM_SPROG,4,3)) >=2
+     ORDER BY A.STI_CD
+	    
+]]>
+</select>
+
+<select id="erp_selectSigongItemReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongItemReport">
+<![CDATA[
+	SELECT 
+                CASE WHEN C.COM_PLDSEC = 'C091' THEN (SELECT AA.WHS_NM FROM TW_WHSMAS AA with (nolock) WHERE C.ITM_STCCD = AA.WHS_CD)
+                      WHEN C.COM_PLDSEC = 'C092' THEN C.ITM_STCCD
+                      WHEN C.COM_PLDSEC = 'C095' THEN C.ITM_STCCD
+                      WHEN C.COM_PLDSEC = 'C096' THEN C.ITM_STCCD
+                      WHEN C.COM_PLDSEC = 'C093' THEN (SELECT BB.FES_SNM FROM TC_FESEC BB with (nolock) JOIN TC_FEINF CC with (nolock)  ON BB.FES_SEC = CC.FES_SEC 
+                                                                                                                                       AND BB.COM_AGSEC = CC.COM_AGSEC 
+                                                                                                        JOIN TT_ITMMST DD with (nolock) ON DD.ITM_CD = CC.ITM_CD
+                                                                                                                                       AND DD.COL_CD = CC.COL_CD      
+                                                                                                       WHERE 1=1
+                                                                                                         AND CC.FEI_CD  = C.ITM_CD
+                                                                                                         AND CC.FES_SEC = C.TRS_SEC )
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') THEN (SELECT EE.TRS_SNM FROM TC_TRSEC EE with (nolock) JOIN TC_TRINF FF with (nolock) ON EE.TRS_SEC   = FF.TRS_SEC
+                                                                                                                                                AND EE.COM_BRAND = FF.COM_BRAND
+                                                                                                                 WHERE 1=1
+                                                                                                                   AND A.COM_AGSEC = EE.COM_AGSEC
+                                                                                                                   AND A.COM_AGSEC = FF.COM_AGSEC
+                                                                                                                   AND EE.COM_BRAND  = A.COM_BRAND
+                                                                                                                   AND (C.ITM_CD = FF.TRI_ICD or  C.ITM_CD = FF.TRI_ICD_O))
+                      WHEN C.COM_PLDSEC = 'C090' THEN C.SET_CD 
+                END AS SET_CD
+                ,C.ITM_CD 
+                ,C.COL_CD 
+                ,CASE WHEN A.COM_RMFG = 'C13N' THEN C.PLD_EQTY ELSE C.PLD_FQTY END PLD_FQTY /*201116. 유은향님 요청으로 미결시 요청수량 나오게함. 금액은 상관없다고함. 변경전. ,C.PLD_FQTY */
+                ,CASE WHEN C.COM_PLDSEC = 'C090' AND  SUBSTRING(C.PLM_NO, 1, 1) = 'F'  THEN C.PLD_CUSAMT * 1.1 
+                      WHEN C.COM_PLDSEC = 'C090' AND  SUBSTRING(C.PLM_NO, 1, 1) != 'F' THEN C.PLD_CUSAMT
+                      WHEN C.COM_PLDSEC = 'C091' THEN C.PLD_CUSAMT
+                      WHEN C.COM_PLDSEC = 'C092' THEN C.PLD_CUSAMT
+                      WHEN C.COM_PLDSEC = 'C095' THEN C.PLD_CUSAMT
+                      WHEN C.COM_PLDSEC = 'C096' THEN C.PLD_CUSAMT
+                      WHEN C.COM_PLDSEC = 'C093' THEN C.PLD_FAMT
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') AND SUBSTRING(C.PLM_NO, 1, 1) = 'I' 
+                                                           AND C.ITM_CD IN ( 'D254', 'D255', 'D256', 'D257', 'D258', 'D020', 'D021', 'D022', 'D023',
+                                                                             'D024', 'D025', 'D026', 'D027', 'D028', 'D029', 'D030', 'D031', 'D032', 
+                                                                             'D041', 'D042', 'D043', 'D044', 'D045', 'D046', 'D047', 'D048', 'D049', 
+                                                                             'D050', 'D054', 'D055', 'D056', 'D057', 'D058', 'D059', 'D060', 'D061',
+                                                                             'D062', 'D063' ) THEN ROUND(ISNULL(C.PLD_FAMT, 0) * 1.1, -1)
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') AND SUBSTRING(C.PLM_NO, 1, 1) = 'I' 
+                                                           AND C.ITM_CD NOT IN ( 'D254', 'D255', 'D256', 'D257', 'D258', 'D020', 'D021', 'D022', 'D023',
+                                                                                 'D024', 'D025', 'D026', 'D027', 'D028', 'D029', 'D030', 'D031', 'D032', 
+                                                                                 'D041', 'D042', 'D043', 'D044', 'D045', 'D046', 'D047', 'D048', 'D049', 
+                                                                                 'D050', 'D054', 'D055', 'D056', 'D057', 'D058', 'D059', 'D060', 'D061',
+                                                                                 'D062', 'D063' ) THEN ROUND(( ISNULL(C.PLD_FAMT, 0) / 0.8 * 1.1 ), -1)                                                                                        
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') AND SUBSTRING(C.PLM_NO, 1, 1) != 'I' THEN 0 
+                END AS PLD_FAMT
+                ,CASE WHEN C.COM_PLDSEC = 'C090' AND  SUBSTRING(C.PLM_NO, 1, 1) = 'F'  THEN ISNULL(C.PLD_CUSAMT * 1.1,0) * ISNULL(C.PLD_FQTY, 0)   
+                      WHEN C.COM_PLDSEC = 'C090' AND  SUBSTRING(C.PLM_NO, 1, 1) != 'F' THEN ISNULL(C.PLD_CUSAMT,0) * ISNULL(C.PLD_FQTY, 0) 
+                      WHEN C.COM_PLDSEC = 'C091' THEN ISNULL(C.PLD_CUSAMT, 0) * ISNULL(C.PLD_FQTY, 0)
+                      WHEN C.COM_PLDSEC = 'C092' THEN ISNULL(C.PLD_CUSAMT, 0) * ISNULL(C.PLD_FQTY, 0)
+                      WHEN C.COM_PLDSEC = 'C095' THEN ISNULL(C.PLD_CUSAMT, 0) * ISNULL(C.PLD_FQTY, 0)
+                      WHEN C.COM_PLDSEC = 'C096' THEN ISNULL(C.PLD_CUSAMT, 0) * ISNULL(C.PLD_FQTY, 0)
+                      WHEN C.COM_PLDSEC = 'C093' THEN ISNULL(C.PLD_FAMT, 0)   * ISNULL(C.PLD_FQTY, 0)
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') AND SUBSTRING(C.PLM_NO, 1, 1) = 'I' 
+                                                           AND C.ITM_CD IN ( 'D254', 'D255', 'D256', 'D257', 'D258', 'D020', 'D021', 'D022', 'D023',
+                                                                             'D024', 'D025', 'D026', 'D027', 'D028', 'D029', 'D030', 'D031', 'D032', 
+                                                                             'D041', 'D042', 'D043', 'D044', 'D045', 'D046', 'D047', 'D048', 'D049', 
+                                                                             'D050', 'D054', 'D055', 'D056', 'D057', 'D058', 'D059', 'D060', 'D061',
+                                                                             'D062', 'D063' ) THEN ROUND(ISNULL(C.PLD_FAMT, 0) * 1.1, -1) * ISNULL(C.PLD_FQTY, 0) 
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') AND SUBSTRING(C.PLM_NO, 1, 1) = 'I' 
+                                                           AND C.ITM_CD NOT IN ( 'D254', 'D255', 'D256', 'D257', 'D258', 'D020', 'D021', 'D022', 'D023',
+                                                                                 'D024', 'D025', 'D026', 'D027', 'D028', 'D029', 'D030', 'D031', 'D032', 
+                                                                                 'D041', 'D042', 'D043', 'D044', 'D045', 'D046', 'D047', 'D048', 'D049', 
+                                                                                 'D050', 'D054', 'D055', 'D056', 'D057', 'D058', 'D059', 'D060', 'D061',
+                                                                                 'D062', 'D063' ) THEN ROUND(( ISNULL(C.PLD_FAMT, 0) / 0.8 * 1.1 ), -1) * ISNULL(C.PLD_FQTY, 0)                                                                                        
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') AND SUBSTRING(C.PLM_NO, 1, 1) != 'I' THEN 0
+                END AS PLD_CRAMT
+                ,CASE WHEN C.COM_PLDSEC = 'C093' THEN (SELECT CC.FEI_CNM FROM TC_FESEC BB with (nolock) JOIN TC_FEINF CC with (nolock)  ON BB.FES_SEC = CC.FES_SEC 
+                                                                                                                                       AND BB.COM_AGSEC = CC.COM_AGSEC 
+                                                                                                        JOIN TT_ITMMST DD with (nolock) ON DD.ITM_CD = CC.ITM_CD
+                                                                                                                                       AND DD.COL_CD = CC.COL_CD      
+                                                                                                       WHERE 1=1
+                                                                                                         AND CC.FEI_CD  = C.ITM_CD
+                                                                                                         AND CC.FES_SEC = C.TRS_SEC )
+                      WHEN C.COM_PLDSEC IN ('C094','C09A') THEN (SELECT FF.TRI_INM FROM TC_TRSEC EE with (nolock) JOIN TC_TRINF FF with (nolock) ON EE.TRS_SEC   = FF.TRS_SEC
+                                                                                                                                                AND EE.COM_BRAND = FF.COM_BRAND
+                                                                                                                 WHERE 1=1
+                                                                                                                   AND A.COM_AGSEC = EE.COM_AGSEC
+                                                                                                                   AND A.COM_AGSEC = FF.COM_AGSEC
+                                                                                                                   AND EE.COM_BRAND  = A.COM_BRAND
+                                                                                                                   AND (C.ITM_CD = FF.TRI_ICD or  C.ITM_CD = FF.TRI_ICD_O))
+                      ELSE (SELECT HH.ITM_NM FROM TT_ITMMST HH with (nolock) WHERE HH.ITM_CD = C.ITM_CD AND HH.COL_CD = C.COL_CD)
+                END AS ITM_NM
+            ,( CASE C.COM_RDSEC WHEN 'C13Y' THEN ( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = C.COM_RDSEC ) 
+                                WHEN 'C13W' THEN ( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = C.COM_RDSEC ) 
+                                ELSE ( SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = C.COM_RDSEC ) + ' / ' + ISNULL(C.MOB_REMARK, '') END ) AS COM_RDSEC
+          FROM TC_PLANMST A with (nolock) JOIN TC_PLANDTL C with (nolock) ON 1=1
+                                                                         AND C.PLM_NO = A.PLM_NO 
+                                                                         AND C.COM_PLDSEC IN ('C090','C091','C092','C095','C096','C093','C094','C09A')      
+         WHERE 1=1
+             AND A.PLM_NO = #{plm_no}
+    ORDER BY A.STI_CD ASC , A.PLM_NO ASC ,A.PLM_FTM ASC, C.COM_PLDSEC ASC, SET_CD
+    
+]]>
+</select>
+
+<select id="erp_selectSigongReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongReport">
+<![CDATA[
+
+	 SELECT P.ORM_NO, 
+	        (SELECT VND_NM 
+	         FROM   TT_VENDOR with (nolock) 
+	         WHERE  VND_CD = TO_ORDMAS.ORM_REBAGT) AS VND_NM, 
+	        P.PLM_CDT, 
+	        TO_ORDMAS.ORM_NM, 
+	        (SELECT TOP 1 ZIP_PROV + ' ' + ZIP_CITY + ' ' + (CASE WHEN ZIP_TOWN = '' THEN BDONG_NM ELSE ZIP_TOWN END) FROM TC_ROADZIP with (nolock) WHERE BDONG_CD =  P.TOWN_CD )  AS  ORM_GADDR,
+	       (SELECT STI_NM FROM TC_STINF with (nolock) WHERE STI_CD = P.STI_CD) AS STI_NM,
+	       (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CCD_CD = S.COM_SCD) AS COM_SCDNM,
+	       P.MOB_REMARK 
+	 FROM   TO_ORDMAS with (nolock) 
+	        INNER JOIN TC_PLANMST P with (nolock) 
+	                ON TO_ORDMAS.ORM_NO = P.ORM_NO 
+	        LEFT OUTER JOIN TT_CUSTOM C1 with (nolock) 
+	                     ON TO_ORDMAS.ORM_AGTCST = C1.CTM_CD 
+	        LEFT OUTER JOIN TT_CUSTOM C2 with (nolock) 
+	                     ON P.ORM_PURCST = C2.CTM_CD 
+	        LEFT OUTER JOIN TT_COMCD V2 with (nolock) 
+	                     ON TO_ORDMAS.CMP_CD = V2.CCD_CD 
+	        LEFT OUTER JOIN TT_USER U1 with (nolock) 
+	                     ON P.ORM_SALEMP = U1.USR_CD 
+	        LEFT OUTER JOIN TS_CEMPLOYEE U2 with (nolock) 
+	                     ON P.ORM_AGTEMP = U2.CEP_CD 
+	        INNER JOIN TC_STINF S with (nolock) 
+	                ON P.STI_CD = S.STI_CD 
+	        INNER JOIN TC_RESMST R with (nolock) 
+	                ON R.PLM_NO = P.PLM_NO 
+	 WHERE  1=1
+	        AND V2.CDX_CD = 'T02' 
+	        --AND P.COM_PLMFG >= 'C102' 
+	        --AND R.COM_RFG = 'C1412'
+	        AND R.COM_SCD = S.COM_SCD
+	        AND R.PLM_NO = #{plm_no}
+	 ORDER  BY P.STI_CD ASC	  
+	    
+]]>
+</select>
+
+<select id="erp_selectDeliveryItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPDeliveryItemList">
+<![CDATA[
+    
+	SELECT 
+				 AA.COM_SCD_NM
+			     ,AA.ITM_CD
+			     ,AA.COL_CD
+			     ,AA.PLD_FQTY
+			     ,AA.STI_NM
+			     ,AA.REM_DT
+			     ,AA.ORM_NM
+			      ,AA.SET_CD
+			      ,AA.COL_SCD
+				  ,AA.ITM_NM
+	              ,AA.PLMFTM_NM
+	  FROM (
+	
+	    SELECT TOP 100 A.STI_CD,
+		             A.PLM_FTM,
+					(SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'C41'	AND CCD_CD= A.PLM_FTM) AS 	PLMFTM_NM,
+			         A.COM_SCD,
+					(SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'C16'	AND CCD_CD= A.COM_SCD) AS 	COM_SCD_NM,
+			         B.ITM_CD,
+			         B.COL_CD,
+			         SUM(B.PLD_FQTY) AS PLD_FQTY,
+			         C.STI_NM,
+			         E.REM_DT,
+			         E.ORM_NO,
+			         E.ORM_NM,
+			         A.AGT_CD,
+					(SELECT VND_NM FROM TT_VENDOR with (nolock) WHERE A.AGT_CD = VND_CD) AS VND_NM,	
+			         B.SET_CD,
+			         B.COL_SCD,
+			         B.COM_STKSEC,
+					 (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD='T34' AND CCD_CD = B.COM_STKSEC) AS COM_STKSEC_NM		 ,
+			         E.REM_FTM,
+					 (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD='C41' AND CCD_CD = E.REM_FTM) AS REM_FTM_NM,
+			         B.COM_PLDSEC,
+					 (CASE WHEN B.COM_PLDSEC = 'C092' THEN '매/경'
+					             WHEN B.COM_PLDSEC = 'C091' THEN '위탁'
+					             WHEN B.COM_PLDSEC = 'C094' THEN '분/설'
+					             WHEN B.COM_PLDSEC = 'C096' THEN '반품'
+							     WHEN B.COM_PLDSEC = 'C09A' THEN '폐기장'
+					 ELSE '' END ) AS 		COM_PLDSECNM,
+			         E.REM_CSEC,
+				     (SELECT ITM_NM FROM TT_ITMMST with (nolock) WHERE ITM_CD = B.ITM_CD AND COL_CD = B.COL_CD) ITM_NM,
+				  	 ( SELECT COM_GOODCD FROM TT_ITMCOP with (nolock) WHERE ITM_CD = B.ITM_CD AND COL_CD = B.COL_CD AND COM_CMP = CASE WHEN A.COM_AGSEC = 'C02F' THEN 'T01F' WHEN A.COM_AGSEC = 'C02I' THEN 'T01I' WHEN A.COM_AGSEC = 'C02P' THEN 'T01P' WHEN A.COM_AGSEC = 'C02T' THEN 'T01T' END) AS COM_GOODCD,
+			         '' CHK
+	     FROM TC_PLANMST A with (nolock),
+			         TC_PLANDTL B with (nolock),
+			         TC_STINF C with (nolock),
+			         TC_RESMST E with (nolock)
+	    WHERE 1=1
+			 AND A.PLM_NO = B.PLM_NO
+		     AND A.COM_SCD = C.COM_SCD
+		     AND A.STI_CD = C.STI_CD
+		     AND E.PLM_NO = A.PLM_NO
+		     AND E.COM_RFG ='C142'
+		     
+		     AND A.STI_CD = #{sti_cd}
+			 AND B.COM_PLDSEC IN('C090','C091','C092','C094','C096','C095','C09A')
+	GROUP BY A.STI_CD,
+					   A.COM_SCD,
+					   B.COM_PLDSEC,
+					   B.ITM_CD,
+			           B.COL_CD,
+			           C.STI_NM,
+			           E.REM_DT,
+			           E.ORM_NO,
+			           E.ORM_NM,
+			           A.AGT_CD,
+			           B.SET_CD,
+			           B.COL_SCD,
+			           B.COM_STKSEC,
+			           E.REM_FTM,
+			           E.REM_CSEC,
+					   A.COM_AGSEC,
+					   A.PLM_FTM
+	) AA
+	WHERE PLD_FQTY > 0
+	ORDER BY   AA.STI_NM,
+	                   AA.PLM_FTM,
+					   AA.ORM_NM,
+				       AA.SET_CD,
+				       AA.COL_SCD,
+				       AA.ITM_CD,
+				       AA.COL_CD
+  
+]]>
+</select>
 
 <select id="selectLgsStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[

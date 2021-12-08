@@ -49,6 +49,7 @@ public interface CRS0010_M01Mapper {
 	public DataResult retrieveTcPlanmstComPlmfg(HashMap<String,Object> params);
 	public DataResult getActCnt(HashMap<String,Object> params);
 	public int modyfyTcPlanMstComple(Map params);
+	public int modyfyReTcPlanMstComple(Map params);
 	public List<Map> retrievesTcPlandtlCompleChk(Map params);
 	public int modyfyTcplanmstAllComplete(Map params);
 	public ds_tcPlanmstList retrievesTcPlanmstList(HashMap<String,Object> params);	

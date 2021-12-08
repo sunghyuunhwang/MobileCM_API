@@ -18,12 +18,19 @@ import com.fursys.mobilecm.service.ApiErpSigongAsService;
 import com.fursys.mobilecm.utils.FcmMessage;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
+import com.fursys.mobilecm.vo.erp.ERPAsItemReport;
+import com.fursys.mobilecm.vo.erp.ERPAsReport;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
+import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
+import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
+import com.fursys.mobilecm.vo.erp.ERPSigongReport;
+import com.fursys.mobilecm.vo.mobile.response.AsReportResponse;
 import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
+import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
 import com.google.gson.Gson;
 
 import lombok.Getter;
@@ -40,6 +47,82 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
 
+	@Override		
+	public AsReportResponse erp_selectAsReport(HashMap<String, Object> param) {
+		AsReportResponse reponse = new AsReportResponse();
+		ERPAsReport as;	
+    	ArrayList<ERPAsItemReport> list;
+    	HashMap<String, Object> params;
+		
+		try {
+			String orm_no = (String) param.get("orm_no");
+			
+			params = new HashMap<String, Object>();
+	        params.put("orm_no", orm_no);
+	            		
+	        as = erpsigongasMapper.erp_selectAsReport(params);
+	        
+	        list = erpsigongasMapper.erp_selectAsItemReport(params);
+	        
+	        reponse.setAs(as);
+	        reponse.setList(list);
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return reponse;
+	}
+
+	@Override		
+	public SigongReportResponse erp_selectSigongReport(HashMap<String, Object> param) {
+		SigongReportResponse reponse = new SigongReportResponse();
+		ERPSigongReport sigong;	
+    	ArrayList<ERPSigongItemReport> list;
+    	HashMap<String, Object> params;
+		
+		try {
+			String plm_no = (String) param.get("plm_no");
+			
+			params = new HashMap<String, Object>();
+	        params.put("plm_no", plm_no);
+	            		
+	        sigong = erpsigongasMapper.erp_selectSigongReport(params);
+	        
+	        list = erpsigongasMapper.erp_selectSigongItemReport(params);
+	        
+	        reponse.setSigong(sigong);
+	        reponse.setList(list);
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return reponse;
+	}
+	
+	@Override		
+	public ArrayList<ERPDeliveryItemList> erp_selectDeliveryItemList(HashMap<String, Object> param) {
+		ArrayList<ERPDeliveryItemList> allitems;
+		HashMap<String, Object> params;
+		
+		try {
+			String sti_cd = (String) param.get("sti_cd");
+			String rem_dt = (String) param.get("rem_dt");
+			
+			params = new HashMap<String, Object>();
+			params.put("sti_cd", sti_cd);
+	        params.put("rem_dt", rem_dt);
+
+	        allitems = erpsigongasMapper.erp_selectDeliveryItemList(params);		
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return allitems;
+	}
+	
 	@Override		
 	public PendencyDetailListResponse erp_selectPendencyDetailList(HashMap<String, Object> param) {
 		PendencyDetailListResponse reponse = new PendencyDetailListResponse();

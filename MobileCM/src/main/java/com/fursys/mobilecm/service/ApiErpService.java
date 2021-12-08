@@ -15,6 +15,7 @@ import com.fursys.mobilecm.vo.mobile.response.SigongResultResponse;
 
 public interface ApiErpService {
 		
+	public SigongResultResponse erp_SiGongMigeulResultSave(HashMap<String,Object> param);
 	public BaseResponse erp_requestGoGoVan(HashMap<String, Object> param);
 	public ERPAsCalculateMoney erp_selectAsCalculateMoney(HashMap<String, Object> param);
 	public ArrayList<ERPSigongCalculateMoneyTeam> erp_selectSigongCalculateMoneyTeam(HashMap<String, Object> param);

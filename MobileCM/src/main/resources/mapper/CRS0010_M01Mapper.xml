@@ -996,6 +996,19 @@
 ]]>	
 </update>
 
+<update id="modyfyReTcPlanMstComple" parameterType="java.util.HashMap">
+<![CDATA[	
+	/* CRS0010.modyfyReTcPlanMstComple 2018.01.26 |주요한| 시공결과 정보 완결처리 */
+	UPDATE TC_PLANMST SET
+	COM_RMFG = #{com_rmfg_aft}
+	,COM_PLMFG = #{com_plmfg_aft}
+	,USR_CD = #{usr_id}
+	,SYS_DT = GETDATE()
+	WHERE 1=1
+	AND PLM_NO = #{plm_no}
+]]>	
+</update>
+
 <select id="retrievesTcPlandtlCompleChk" parameterType="java.util.HashMap" resultType="java.util.HashMap">
 <![CDATA[
 	/* CRS0010.retrievesTcPlandtlCompleChk 2018.01.18 |주요한| 시공결과세부내용 미결 갯수 체크*/

@@ -91,6 +91,106 @@ public class ApiErpServiceImpl  implements ApiErpService {
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
 		
+	@Override		
+	public SigongResultResponse erp_SiGongMigeulResultSave(HashMap<String, Object> param) {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		SigongResultResponse response = new SigongResultResponse();
+		
+		try {			
+			int res = 0;
+			DataResult dataResult = new DataResult();
+		
+			String as_plm_no = (String) param.get("plm_no");
+			String as_usr_id = (String) param.get("usr_id");
+			String mob_std = (String) param.get("mob_std");
+			String mob_remark = (String) param.get("mob_remark");
+			HashMap<String,Object> inVar = new HashMap<String, Object>();
+
+			ds_tcPlanmstList ds_tcPlanmstList = crs0010_m01Mapper.retrievesTcPlanmstList(param);
+
+	        //월마감 확인
+	    	if ("Y".equals(ds_tcPlanmstList.med_yn)) {
+	    		txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("월마감 대상 건입니다.");
+				return response;
+	        }
+	    	
+			if("C104".equals(ds_tcPlanmstList.com_plmfg)){
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("상태가 정산완료인 건은 일괄 완결/취소 할 수 없습니다.");
+				return response;
+			}
+
+			if (!"C13W".equals(ds_tcPlanmstList.com_rmfg)) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("결과가 실행중인 건만 완결 처리할 수 있습니다.");
+				return response;
+			}	        
+	        
+            int mstUpdChk = 0;
+            int dtlUpdChk = 0;
+            
+            Map mapMst = new HashMap<String, String>();
+            mapMst.put("plm_no", as_plm_no);
+            mapMst.put("usr_id", as_usr_id);
+            mapMst.put("mob_remark", mob_remark);
+            
+        	// 실행중인경우 완결로 변경        	
+            mapMst.put("com_rdsec_aft", "C13Y");
+    		mapMst.put("gubun", "Y");    		
+    		
+    		res = crs0010_m01Mapper.modyfyTcplanmstAllComplete(mapMst);
+    		if (res < 1) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("modyfyTcplanmstAllComplete 오류 [" + res + "]");
+				return response;
+			}
+    		
+            List<Map> chkList = crs0010_m01Mapper.retrievesTcPlandtlCompleChk(mapMst);            
+            for(int x = 0 ; x < chkList.size() ; x++){
+            	Map chkMap = chkList.get(x);
+            	
+            	int nCount = Integer.parseInt(chkMap.get("C13N_COUNT").toString());
+            	int wCount = Integer.parseInt(chkMap.get("C13W_COUNT").toString());
+            	
+            	//실행중값이 0 보다 클때
+            	if (wCount > 0){
+            		mapMst.put("com_rmfg_aft", "C13W");
+            		mapMst.put("com_plmfg_aft", "C102");
+            	}
+            	//미결값이 0 보다 클떄
+            	else if(nCount > 0 ){
+            		mapMst.put("com_rmfg_aft", "C13N");
+            		mapMst.put("com_plmfg_aft", "C103");
+            	}
+            	//미결 ,실행중이 전부 0보다 작을때 전부 완결 처리 
+            	else{
+            		mapMst.put("com_rmfg_aft", "C13Y");
+            		mapMst.put("com_plmfg_aft", "C103");
+            	}
+            }
+            
+            res = crs0010_m01Mapper.modyfyReTcPlanMstComple(mapMst);
+            System.out.println("시공정보 종합 완결처리 갯수 [ "+ res+" ] ");
+            					
+            
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return response;
+		}		
+		txManager.commit(status);
+		response.setResultCode("200");		
+		return response;
+
+	}
+	
 	@Override
 	public BaseResponse erp_requestGoGoVan(HashMap<String, Object> param) {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
