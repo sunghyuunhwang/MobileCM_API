@@ -1078,7 +1078,7 @@ function getVndBanpum() {//대리점 반품
 	 			        getVndBanpum += "<li class='w130px tAlgnRght'>"+response.wtp_finish_nm+"</li>";
 	 			        getVndBanpum += "<li class='w200px'>"+response.wtp_entdt+"</li>";
 	 			    if(file_yn == "Y") {
-						getVndBanpum += "<li class='w100px tAlgnCntr'><button class='vndBSsBtn'>"+response.com_rdsec_nm+"</button></li>";		
+						getVndBanpum += "<li class='w100px tAlgnCntr'><button class='inFileBtn'>"+response.com_rdsec_nm+"</button></li>";		
 					}else{
 						getVndBanpum += "<li class='w100px tAlgnCntr'>"+response.com_rdsec_nm+"</li>";						
 					}    
@@ -1091,7 +1091,7 @@ function getVndBanpum() {//대리점 반품
 	                  innmbr();//인풋값 스팬으로 넘기기
 	                  dateformatting();
 	                  ulLftlst();
-	                  vndBSsFilePop();//첨부파일
+	                  inFileBtnPop();//첨부파일
 	 	    },
 	         complete:function(){
 	                $('.alrtPop').removeClass('opn');
@@ -1123,7 +1123,6 @@ function getAttachFileList(plm_no) { // 대리점반품 파일
 	                  getFileList += "<input type='hidden' name = 'file_snum' value='"+response.attch_file_snum+"'/>";
 	                  getFileList += "</ul>";
                   $('#getAttachFileList').append(getFileList);
-               console.log(response);
               });
                  cmma();//콤마
                  innmbr();//인풋값 스팬으로 넘기기
@@ -1204,9 +1203,192 @@ function fileDownload(file_no, file_snum) { // 파일 다운로드
         },	
 	});
 }
+function getMglSubInf(_this) {//상세상세미결현황요약정보
+     $('#getMglSubInf').find('.ulLftlst._data').remove();
+   	 $('.ulLftlst').removeClass('on');
+	 $(_this).addClass('on');
+	 var $selected_to = $(_this);
+	 var $selected_plm_no = $selected_to.find('input[name=plm_no]').val();
+     $.ajax({
+       url: "/v1/api/tmserp/getMigyeoDetaillnfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                plm_no: $selected_plm_no
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getMglSubInf = "<ul class='ulLftlst _data'>";
+/*                   getMglSubInf += "<li class='w60px _lstNum'></li>";*/
+                   getMglSubInf += "<li class='w150px'>"+response.com_pldsec_nm+"</li>";
+                   getMglSubInf += "<li class='w150px'>"+response.itm_cd+"</li>";
+                   getMglSubInf += "<li class='w150px'>"+response.col_cd+"</li>";
+                   getMglSubInf += "<li class='w250px'>"+response.itm_nm+"</li>";
+                   getMglSubInf += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+response.pld_eqty+"' class='innmbr nmCmma w100p'></li>";
+                   getMglSubInf += "<li class='w150px tAlgnRght'><span class='numTxt'></span><input type='text' name='' value='"+response.pld_famt+"' class='innmbr nmCmma w100p'></li>";
+                   getMglSubInf += "<li class='w150px'>"+response.com_undsec_nm+"</li>";
+                   getMglSubInf += "<li class='w300px'>"+response.pld_rmk+"</li>";
+                   getMglSubInf += "</ul>";
+                $('#getMglSubInf').append(getMglSubInf);
+                   cmma();//콤마
+                   innmbr();//인풋값 스팬으로 넘기기
+            });
 
-$(document).ready(function(){
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getMigyeolInfo(_this) {//상세미결현황요약정보
+     $('.migyeolInfo').addClass('opn');
+	 var from_dt = $('.migyeolReport #nmldate1').val();//시작일
+	 var to_dt = $('.migyeolReport #nmldate2').val();//종료일
+	 resetMigyeolUlLftlst();
+	 var $selected_to = $(_this);
+	 var $selected_sti_cd = $selected_to.find('input[name=sti_cd]').val();
+     $('.alrtPop').addClass('opn');
+	 $('#lodingPop').addClass('on');	
+     $.ajax({
+       url: "/v1/api/tmserp/getMigyeolnfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                from_dt: from_dt,
+                to_dt: to_dt,
+                sti_cd: $selected_sti_cd
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var mglRprtInf = "<ul class='ulLftlst _inmigyeolInf' onclick='getMglSubInf(this)'>";
+                   mglRprtInf += "<li class='w150px'>"+response.sti_nm+"</li>";
+/*                   mglRprtInf += "<li class='w100px'>"+response.com_ssec+"<input type='hidden' name='plm_no' value='"+response.plm_no+"' /></li>";
+*/                   mglRprtInf += "<li class='w110px'>"+response.plm_cdt+"</li>";
+                   mglRprtInf += "<li class='w100px'>"+response.com_brand_nm+"</li>";
+                   mglRprtInf += "<li class='w150px'>"+response.vnd_nm+"</li>";
+                   mglRprtInf += "<li class='w200px'>"+response.orm_nm+"</li>";
+                   mglRprtInf += "<li class='w150px'>"+response.orm_no+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_r_yn+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_a_yn+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_e_yn+"</li>";
+                   mglRprtInf += "<li class='w100px tAlgnCntr _unpsecTxt'>"+response.unpsec_c_yn+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn'>"+response.file_yn+"</button></li>";
+                   mglRprtInf += "<li class='w300px'>"+response.mob_remark+"</li>";
+                   mglRprtInf += "<input type='hidden' name = 'plm_no' value='"+response.plm_no+"'/>";
+                   mglRprtInf += "</ul>";
+                $('#getMigyeolInf').append(mglRprtInf);
+                migyeolinfStl() ;//미경상세화면변경
+            });
+            inFileBtnPop();
+	        if(list.length > 0){
+		        var datalist = $('#getMigyeolInf ul.ulLftlst').not('._index');
+		        $(datalist[0]).addClass('on');
+		        getMglSubInf(datalist[0]);
+	        }
+       },
+	   complete:function(){
+		$('.alrtPop').removeClass('opn');
+	    $('#lodingPop').removeClass('on');
+	   },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+
+function getMigyeolReportInfo() {//미결현황요약정보
+	var from_dt = $('.migyeolReport #nmldate1').val();//시작일
+	var to_dt = $('.migyeolReport #nmldate2').val();//종료일
+	var start = $('.migyeolReport #nmldate1').datepicker('getDate');
+	var end   = $('.migyeolReport #nmldate2').datepicker('getDate');	
+	if(!start || !end) return;
+	var days = (end - start)/1000/60/60/24;
+	if(days >= 100){
+		 $('.alrtPop').addClass('opn');
+		 $('#migyeol_popFail').addClass('on');
+	} else {
+		resetUlLftlst();
+		$('.alrtPop').addClass('opn');
+		$('#lodingPop').addClass('on');
+	    $.ajax({
+	      url: "/v1/api/tmserp/getMigyeolReportInfo",
+	      type: "GET",
+	      cache: false,
+	      dataType: "json",
+	      data: {
+	               from_dt: from_dt,
+	               to_dt:to_dt
+	      },
+	      success: function(list) {
+			//alert(JSON.stringify(list.allInfo));         
+			var response = list.allInfo;
+	           var tot_cnt = response.tot_cnt;
+	           var comp_cnt = response.comp_cnt;
+	           var migyeol_cnt = response.migyeol_cnt
+	           var comp_per = response.comp_per;
+	           var migyeol_per = response.migyeol_per;
+	           var com_unpsec_r = response.com_unpsec_r;
+	           var com_unpsec_a= response.com_unpsec_a;
+	           var com_unpsec_e = response.com_unpsec_e;
+	           var com_unpsec_c = response.com_unpsec_c;
+	           var comp_unpsec_r_per = response.com_unpsec_r_per;
+	           var comp_unpsec_a_per= response.com_unpsec_a_per;
+	           var comp_unpsec_e_per = response.com_unpsec_e_per;
+	           var comp_unpsec_c_per = response.com_unpsec_c_per;
+	           $('.ttl._tot').find('.numCnt').text(tot_cnt);
+	           $('.ttl._migyeol').find('.numCnt').text(migyeol_cnt);
+	           $('.bar._comp').find('.numCnt').text(comp_cnt);
+	           $('.bar._migyeol').find('.numCnt').text(migyeol_cnt);
+	           $('.bar._comp').find('.numPer').text(comp_per);
+	           $('.bar._migyeol').find('.numPer').text(migyeol_per);
+	           $('.bar._unpsec_r').find('.numPer').text(comp_unpsec_r_per);
+	           $('.bar._unpsec_a').find('.numPer').text(comp_unpsec_a_per);
+	           $('.bar._unpsec_e').find('.numPer').text(comp_unpsec_e_per);
+	           $('.bar._unpsec_c').find('.numPer').text(comp_unpsec_c_per);
+	           $('.bar._unpsec_r').find('.numCnt').text(com_unpsec_r);
+	           $('.bar._unpsec_a').find('.numCnt').text(com_unpsec_a);
+	           $('.bar._unpsec_e').find('.numCnt').text(com_unpsec_e);
+	           $('.bar._unpsec_c').find('.numCnt').text(com_unpsec_c);
+	           $.each(list.info, function(idx, response) {			
+	              var getMglRprtInfLst = "<ul class='ulLftlst'>";
+	                  getMglRprtInfLst += "<li class='w150px'>"+response.sti_nm+"<input type='hidden' name='sti_cd' value='"+response.sti_cd+"' /></li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght fnt500'>"+response.tot_cnt+"</li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght' >"+response.comp_cnt+" ("+response.comp_per+"%)</li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght' >"+response.migyeol_cnt+" ("+response.migyeol_per+"%)</li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_r'>"+response.com_unpsec_r+" ("+response.com_unpsec_r_per+"%)</li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_a'>"+response.com_unpsec_a+" ("+response.com_unpsec_a_per+"%)</li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_e'>"+response.com_unpsec_e+" ("+response.com_unpsec_e_per+"%)</li>";
+	                  getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_c'>"+response.com_unpsec_c+" ("+response.com_unpsec_c_per+"%)</li>";
+	                  getMglRprtInfLst += "</ul>";
+	               $('#getMigyeolRprtInfLst').append(getMglRprtInfLst);
+	           });
+	           migyeolPerBar();
+	           ulLftlst();
+	           cmma();//콤마
+	      },
+	     complete:function(){
+			$('.alrtPop').removeClass('opn');
+	        $('#lodingPop').removeClass('on');
+	      },
+	      error: function (request, status, error){
+	           console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+	           alert('조회데이터가 없습니다.');
+	      }
+   		});
+	}
+
+}
+
+/*$(document).ready(function(){
      if($('.loginBx').length < 1){
           assgnCll();//총건수 불러오기
      }
-});
+});*/

@@ -93,7 +93,6 @@
         }
         markers = [];
    }
-
     </script>
     <link rel="stylesheet" type="text/css" href="/css/common_MblCm.css" />
     <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
@@ -216,9 +215,9 @@
                                      <li>
                                          <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
                                      </li>
-<!--                                      <li>
-                                         <a class="lstLnk">미결 현황 관리</a>
-                                     </li> -->
+                                      <li>
+                                         <a class="lstLnk" href="/v1/areamaster/migyeolReport">미결 현황 관리</a>
+                                     </li>
                                      <li>
                                          <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
                                      </li>
@@ -525,5 +524,10 @@
                      </div>
                 </article>
        </aside>
+     <script type="text/javascript">
+          $(window).on('load', function() {
+        	  assgnCll();
+          });  
+     </script>
     </body >
 </html>

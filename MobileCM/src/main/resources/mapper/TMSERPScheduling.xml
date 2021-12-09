@@ -2515,15 +2515,10 @@
 		ORDER  BY A.attch_file_snum 
 	</select>
 	<select id="selectMigyeolReportInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo">
-	<![CDATA[	/*CRS0050.selectMigel_sigong 시공팀별*/ 
-		SELECT com_agsec,
-		       com_ctsec,
-		       com_brand,
-		       k_sti_cd,
+	<![CDATA[	
+		SELECT
 		       sti_cd,
-		       k_nm,
 		       sti_nm,
-		       com_scd,
 		       Count(plm_no) as tot_cnt,
 		       Sum(CASE
 		             WHEN com_unpsec_a > 0 THEN 1
@@ -2542,44 +2537,41 @@
 		             ELSE 0
 		           END) AS COM_UNPSEC_R
 		FROM   (SELECT A.plm_no,
-		               A.com_agsec,
-		               A.com_ctsec,
-		               A.com_brand,
-		               A.com_scd,
-		               Isnull(D.k_sti_cd, A.sti_cd)                         AS K_STI_CD,
 		               A.sti_cd,
-		               Isnull((SELECT TOP 1 sti_nm
-		                       FROM   tc_stinf WITH (nolock)
-		                       WHERE  com_scd = D.com_scd
-		                              AND k_sti_cd = D.k_sti_cd), D.sti_nm) AS K_NM,
 		               D.sti_nm,
 		               Sum(CASE
-		                     WHEN B.com_unpsec = 'C23A' THEN 1
+		                   WHEN com_unpsec = 'C23A' OR( com_rdsec = 'C13N'
+		                         AND ( Isnull(com_unpsec, '') = ''
+		                              AND pld_rasdt > 0 )) THEN 1
 		                     ELSE 0
 		                   END)                                             COM_UNPSEC_A
 		               ,
 		               Sum(CASE
-		                     WHEN B.com_unpsec = 'C23E' THEN 1
+		                   WHEN Isnull(com_unpsec, '') = 'C23E' OR( com_rdsec = 'C13N'
+		                         AND ( Isnull(com_unpsec, '') = ''
+		                              AND Isnull(pld_rcdt, '') = ''
+		                              AND Isnull(pld_rasdt, '') = '' )) THEN 1
 		                     ELSE 0
 		                   END)                                             COM_UNPSEC_E
 		               ,
 		               Sum(CASE
-		                     WHEN B.com_unpsec = 'C23C' THEN 1
+		                   WHEN Isnull(com_unpsec, '') = 'C23C' OR( com_rdsec = 'C13N'
+		                         AND ( pld_rmk = '시공' )) THEN 1
 		                     ELSE 0
 		                   END)                                             COM_UNPSEC_C
 		               ,
 		               Sum(CASE
-		                     WHEN B.com_unpsec = 'C23R' THEN 1
+		                   WHEN Isnull(com_unpsec, '') = 'C23R' OR( com_rdsec = 'C13N'
+		                         AND ( Isnull(com_unpsec, '') = ''
+		                              AND pld_rcdt > 0 )) THEN 1
 		                     ELSE 0
 		                   END)                                             COM_UNPSEC_R
 		        FROM   tc_planmst A WITH (nolock),
 		               tc_plandtl B WITH (nolock),
-		               to_ordmas C WITH (nolock),
 		               tc_stinf D WITH (nolock)
 		        WHERE  A.plm_no = B.plm_no
-		               AND A.orm_no = C.orm_no
 		               /*2018.04.26 |주요한| 통합테스트 총건수 미결외도 보이게 조건삭제  */ /*AND B.COM_RDSEC = 'C13N' */
-		               AND A.com_plmfg <> 'C101'
+		               AND A.com_plmfg >= 'C103'
 		               AND A.sti_cd = D.sti_cd
 		               AND A.com_scd = D.com_scd
 		               AND A.com_ctsec = D.com_ctsec
@@ -2589,36 +2581,20 @@
 		               AND D.k_sti_cd = #{ksti_cd}
 		               AND A.com_scd = #{com_scd}
 		        GROUP  BY A.plm_no,
-		                  A.com_agsec,
-		                  A.com_ctsec,
-		                  A.com_brand,
-		                  D.k_sti_cd,
-		                  D.com_scd,
 		                  D.sti_nm,
 		                  A.plm_cdt,
-		                  A.sti_cd,
-		                  A.com_scd,
-		                  Isnull(D.k_sti_cd, A.sti_cd)
+		                  A.sti_cd
 		       )AS A
-		GROUP  BY com_agsec,
-		          com_ctsec,
-		          com_brand,
-		          k_sti_cd,
+		GROUP  BY 
 		          sti_cd,
-		          k_nm,
-		          sti_nm,
-		          com_scd
-		ORDER  BY com_scd,
-		          com_agsec,
-		          com_brand,
-		          com_ctsec,
-		          k_nm,
+		          sti_nm
+		ORDER  BY 
 		          sti_nm 
 	]]>
 	</select>
 	<select id="selectMigyeolInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolInfo">
 	<![CDATA[
-		/*CRS0020.sigoungresult */ SELECT plm_no /*시공번호PK*/,
+		SELECT plm_no /*시공번호PK*/,
 		       orm_no /*수주번호*/,
 		       com_brand /*브랜드*/,
 		       com_brand_nm,
@@ -2694,7 +2670,7 @@
 		                                AND atc.attch_div_cd = 'C') > 0 THEN 'Y'
 		                   ELSE 'N'
 		                 END )                       AS file_yn,
-		               A.mob_remark
+		               isnull(A.mob_remark, '') AS mob_remark
 		        FROM   tc_planmst A WITH (nolock),
 		               tc_stinf B WITH (nolock),
 		               tc_plandtl C WITH (nolock)
@@ -2707,6 +2683,8 @@
 		                                     'C094', 'C095', 'C096', 'C0930', 'C09A' )
 		               AND C.com_rdsec = 'C13N'
 		               AND A.sti_cd = B.sti_cd
+					   AND A.com_scd = B.com_scd
+					   AND A.com_ctsec = B.com_ctsec
 		               AND A.plm_cdt >= #{from_dt}
 		               AND A.plm_cdt <= #{to_dt}
 		               AND A.sti_cd = #{sti_cd}
@@ -2732,14 +2710,13 @@
 	</select>
 	<select id="selectMigyeolDetailInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPMigyeolDetailInfo">
 	<![CDATA[
-		/*CRS0020.sigoungresultDetail*/ 
 		SELECT plm_no,
 		       com_pldsec,
 		       (SELECT TTC.ccd_nm
 		        FROM   tt_comcd TTC WITH (nolock)
 		        WHERE  TTC.ccd_cd = A.com_pldsec) AS COM_PLDSEC_NM,
 		       A.itm_cd,
-		       A.col_cd,
+		       isnull(A.col_cd, '') as col_cd,
 		       Sum(CASE
 		             WHEN pld_eqty = pld_fqty THEN pld_fqty
 		             ELSE pld_eqty - pld_fqty
@@ -2762,8 +2739,8 @@
 		         WHEN com_pldsec = 'C094' THEN pld_cfamt
 		         ELSE pld_famt * pld_eqty
 		       END                                AS PLD_CRAMT2 /*예상금액2*/,
-		       pld_rmk,
-		       com_undsec,
+		       isnull(pld_rmk, '') as pld_rmk,
+		       isnull(com_undsec, '') as com_undsec,
 		       (SELECT ccd_nm
 		        FROM   tt_comcd
 		        WHERE  ccd_cd = com_undsec)       AS com_undsec_nm
@@ -2785,5 +2762,109 @@
 		          A.pld_fqty,
 		          A.pld_cfamt 
 	]]> 
+	</select>
+	<select id="selectDefectInfoList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo">
+		SELECT com_agsec,
+		       com_brand,
+		       rpt_no,
+		       rpt_seq,
+		       vnd_snm,
+		       com_scd,
+		       sti_cd,
+		       sti_nm,
+		       ctm_nm,
+		       rpt_desc,
+		       rpt_enddt,
+		       rpt_astdesc,
+		       rpt_usrnm,
+		       rpt_rst_acttm,
+		       rpt_rst_acttm_nm,
+		       plm_cdt,
+		       (CASE allcnt
+		         WHEN rtncnt THEN 'Y'
+		         ELSE 'N'
+		       END) AS rtnsec,
+		       file_yn,
+		       '이의제기 내용입니다.' as opinion,
+		FROM   (SELECT b.com_agsec,
+		               b.com_brand,
+		               b.rpt_no,
+		               b.rpt_seq,
+		               b.vnd_snm,
+		               b.com_scd,
+		               b.sti_cd,
+		               c.sti_nm,
+		               b.ctm_nm,
+		               Isnull(b.rpt_desc, '')
+		               + Isnull(b.rpt_descplus, '') AS rpt_desc,
+		               b.rpt_enddt,
+		               b.rpt_astdesc,
+		               b.rpt_usrnm,
+		               b.rpt_rst_acttm,
+		               (select sti_nm from tc_stinf with (nolock) where sti_cd = b.rpt_rst_acttm) as rpt_rst_acttm_nm,
+		               d.plm_cdt,
+		               Isnull(Sum(CASE
+		                            WHEN A.ast_rtnyn = 'Y' THEN 1
+		                          END), 0)          AS rtncnt,
+		               Count(a.rpt_no)              AS allcnt,
+		               ( CASE
+		                   WHEN (SELECT Count(*)
+		                         FROM   ty_attchfile WITH (nolock)
+		                         WHERE  attch_file_id = Ltrim(Rtrim(b.file_id))) > 0
+		                 THEN 'Y'
+		                   ELSE ''
+		                 END )                      AS file_yn,
+		               A.defect_typ
+		        FROM   ta_astitem a WITH (nolock),
+		               ta_rptreq b WITH (nolock),
+		               tc_stinf c WITH (nolock),
+		               tc_planmst d WITH (nolock)
+		        WHERE  1 = 1
+		               AND b.com_scd = #{com_scd}
+		               AND a.com_rsfsec = 'A6434'
+		               /*AND a.defect_typ = 'A6639'*/
+		               AND b.rpt_enddt 	<![CDATA[>=]]> #{from_dt}
+		               AND b.rpt_enddt 	<![CDATA[<=]]> #{to_dt}
+		               AND b.com_sprog = 'A17008' 
+		               AND b.rpt_seq = a.rpt_seq
+		               AND b.rpt_no = a.rpt_no 
+		               AND c.sti_cd = b.sti_cd
+		               AND c.k_sti_cd = #{ksti_cd}
+		               AND d.orm_no = b.ord_no
+		       <if test="ctm_nm != null and ctm_nm != ''">
+			   		   AND b.ctm_nm LIKE #{ctm_nm} + '%'
+			   </if>
+		        GROUP  BY b.com_agsec,
+		                  b.com_brand,
+		                  b.rpt_no,
+		                  b.rpt_seq,
+		                  b.vnd_snm,
+		                  b.com_scd,
+		                  b.sti_cd,
+		                  c.sti_nm,
+		                  b.ctm_nm,
+		                  b.rpt_desc,
+		                  b.rpt_descplus,
+		                  b.rpt_enddt,
+		                  b.rpt_astdesc,
+		                  b.rpt_usrnm,
+		                  b.rpt_rst_acttm,
+		                  d.plm_cdt,
+		                  a.defect_typ,
+		                  b.file_id) X
+	</select>
+	<select id="selectDefectDetail" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail">
+		SELECT itm_cd,
+		       bmt_item,
+		       col_cd,
+		       ast_actqty,
+		       ast_rtndesc,
+		       CASE Isnull(final_file_id, 'N')
+		         WHEN 'N' THEN 'N'
+		         ELSE 'Y'
+		       END AS FILE_YN
+		FROM   ta_astitem WITH (nolock)
+		WHERE  rpt_no = #{rpt_no}
+		       AND rpt_seq = #{rpt_seq} 
 	</select>
 </mapper>

@@ -1,3 +1,153 @@
+function getMglSubInf() {//상세상세미결현황요약정보
+     $('#getMglSubInf').find('.ulLftlst._data').remove();
+     $.ajax({
+       url: "/v1/api/tmserp/getMigyeoDetaillnfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                plm_no: 'I202110202227'
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getMglSubInf = "<ul class='ulLftlst _data'>";
+                   getMglSubInf += "<li class='w60px _lstNum'></li>";
+                   getMglSubInf += "<li class='w150px'>"+response.com_pldsec+"</li>";
+                   getMglSubInf += "<li class='w150px'>"+response.itm_cd+"</li>";
+                   getMglSubInf += "<li class='w150px'>"+response.col_cd+"</li>";
+                   getMglSubInf += "<li class='w250px'><!--단품명변수--></li>";
+                   getMglSubInf += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+response.pld_eqty+"' class='innmbr nmCmma w100p'></li>";
+                   getMglSubInf += "<li class='w150px tAlgnRght'><span class='numTxt'></span><input type='text' name='' value='"+response.pld_famt+"' class='innmbr nmCmma w100p'></li>";
+                   getMglSubInf += "<li class='w150px'>"+response.com_updsec+"</li>";
+                   getMglSubInf += "<li class='w300px'>"+response.pld_rmk+"</li>";
+                   getMglSubInf += "</ul>";
+                $('#getMglSubInf').append(getMglSubInf);
+                   cmma();//콤마
+                   innmbr();//인풋값 스팬으로 넘기기
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getMigyeolInfo() {//상세미결현황요약정보
+     $('.migyeolInfo').addClass('opn');
+     $.ajax({
+       url: "/v1/api/tmserp/getMigyeolnfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                from_dt: '20210910',
+                to_dt: '20211020',
+                com_scd:'C16YA',
+                ksti_cd:'YA601',
+                sti_cd: 'YA601'
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var mglRprtInf = "<ul class='ulLftlst _inmigyeolInf'>";
+                   mglRprtInf += "<li class='w150px'><a class='lnk' onclick='getMglSubInf()'>"+response.sti_nm+"</a></li>";
+                   mglRprtInf += "<li class='w100px'>"+response.com_ssec+"<input type='hidden' name='plm_no' value='"+response.plm_no+"' /></li>";
+                   mglRprtInf += "<li class='w110px'>"+response.rem_dt+"</li>";
+                   mglRprtInf += "<li class='w100px'>"+response.com_brand+"</li>";
+                   mglRprtInf += "<li class='w150px'>"+response.agt_nm+"</li>";
+                   mglRprtInf += "<li class='w200px'>"+response.orm_nm+"</li>";
+                   mglRprtInf += "<li class='w150px'>"+response.orm_no+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_r_yn+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_a_yn+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_e_yn+"</li>";
+                   mglRprtInf += "<li class='w100px tAlgnCntr _unpsecTxt'>"+response.unpsec_c_yn+"</li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn'>"+response.file_yn+"</button></li>";
+                   mglRprtInf += "<li class='w300px'>"+response.mob_rmk+"</li>";
+                   mglRprtInf += "</ul>";
+                $('#getMigyeolInf').append(mglRprtInf);
+                migyeolinfStl() ;//미경상세화면변경
+                inFileBtnPop();
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getMigyeolReportInfo() {//미결현황요약정보
+     $.ajax({
+       url: "/v1/api/tmserp/getMigyeolReportInfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                from_dt: '20210910',
+                to_dt:'20211020',
+                com_scd:'C16YA',
+                ksti_cd:'YA601'
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+                var tot_cnt = response.tot_cnt;
+                var comp_cnt = response.comp_cnt;
+                var migyeol_cnt = response.migyeol_cnt
+                var comp_per = response.comp_per;
+                var migyeol_per = response.migyeol_per;
+                var com_unpsec_r = response.com_unpsec_r;
+                var com_unpsec_a= response.com_unpsec_a;
+                var com_unpsec_e = response.com_unpsec_e;
+                var com_unpsec_c = response.com_unpsec_c;
+                var comp_unpsec_r_per = response.com_unpsec_r_per;
+                var comp_unpsec_a_per= response.com_unpsec_a_per;
+                var comp_unpsec_e_per = response.com_unpsec_e_per;
+                var comp_unpsec_c_per = response.com_unpsec_c_per;
+               $('.ttl._tot').find('.numCnt').text(tot_cnt);
+               $('.ttl._migyeol').find('.numCnt').text(migyeol_cnt);
+               $('.bar._comp').find('.numCnt').text(comp_cnt);
+               $('.bar._migyeol').find('.numCnt').text(migyeol_cnt);
+               $('.bar._comp').find('.numPer').text(comp_per);
+               $('.bar._migyeol').find('.numPer').text(migyeol_per);
+               $('.bar._unpsec_r').find('.numPer').text(comp_unpsec_r_per);
+               $('.bar._unpsec_a').find('.numPer').text(comp_unpsec_a_per);
+               $('.bar._unpsec_e').find('.numPer').text(comp_unpsec_e_per);
+               $('.bar._unpsec_c').find('.numPer').text(comp_unpsec_c_per);
+               $('.bar._unpsec_r').find('.numCnt').text(com_unpsec_r);
+               $('.bar._unpsec_a').find('.numCnt').text(com_unpsec_a);
+               $('.bar._unpsec_e').find('.numCnt').text(com_unpsec_e);
+               $('.bar._unpsec_c').find('.numCnt').text(com_unpsec_c);
+               var getMglRprtInfLst = "<ul class='ulLftlst' onclick='getMigyeolInfo()'>";
+                   getMglRprtInfLst += "<li class='w150px'>"+response.sti_nm+"<input type='hidden' name='sti_cd' value='"+response.sti_cd+"' /></li>";
+                   getMglRprtInfLst += "<li class='w100px tAlgnCntr fnt500'>"+response.tot_cnt+"</li>";
+                   getMglRprtInfLst += "<li class='w100px'>"+response.comp_cnt+" ("+response.comp_per+"%)</li>";
+                   getMglRprtInfLst += "<li class='w100px'>"+response.migyeol_cnt+" ("+response.migyeol_per+"%)</li>";
+                   getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_r'>"+response.com_unpsec_r+" ("+response.com_unpsec_r_per+"%)</li>";
+                   getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_a'>"+response.com_unpsec_a+" ("+response.com_unpsec_a_per+"%)</li>";
+                   getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_e'>"+response.com_unpsec_e+" ("+response.com_unpsec_e_per+"%)</li>";
+                   getMglRprtInfLst += "<li class='w100px tAlgnRght clrBg_u_c'>"+response.com_unpsec_c+" ("+response.com_unpsec_c_per+"%)</li>";
+                   getMglRprtInfLst += "</ul>";
+                $('#getMigyeolRprtInfLst').append(getMglRprtInfLst);
+               migyeolPerBar();
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+
 function getAttachFileList() {//미결 파일대리점 반품
      $.ajax({
         url: "/v1/api/tmserp/getAttachFileList",
@@ -161,6 +311,7 @@ var days = (end - start)/1000/60/60/24;
 
 }
 function cnstrctLst_dtlInf() {//상세정보
+     $('#cnstrctLst_dtlInf').find('.ulLftlst._data').remove();
 	$.ajax({
 	    url: "/v1/api/tmserp/getResdtlList",
 	    type: "GET",
@@ -177,7 +328,7 @@ function cnstrctLst_dtlInf() {//상세정보
 	                   var itm_nm = response.itm_nm;
 	                   var orm_amt = response.orm_amt;
 
-			    var cnstrctLst_dtlInf = "<ul class='ulLftlst'>";
+			    var cnstrctLst_dtlInf = "<ul class='ulLftlst _data'>";
 			        cnstrctLst_dtlInf += "<li class='w150px'>"+itm_cd+"</li>";
                        cnstrctLst_dtlInf += "<li class='w150px tAlgnCntr'>"+col_cd+"</li>";
                        cnstrctLst_dtlInf += "<li class='w100px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+ord_qty+"' class='innmbr nmCmma w100p'></li>";

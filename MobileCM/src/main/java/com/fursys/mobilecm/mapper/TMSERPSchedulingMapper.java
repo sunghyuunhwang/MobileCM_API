@@ -16,6 +16,8 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.tms.TmsViaPoints;
 import com.fursys.mobilecm.vo.tmserp.TMSERPCenterList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail;
+import com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
@@ -87,5 +89,6 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPTeamMigyeolRepo> selectMigyeolReportInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPMigyeolInfo> selectMigyeolInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPMigyeolDetailInfo> selectMigyeolDetailInfo(HashMap<String,Object> params);
-	
+	public ArrayList<TMSERPDefectInfo> selectDefectInfoList(HashMap<String,Object> params);
+	public ArrayList<TMSERPDefectDetail> selectDefectDetail(HashMap<String,Object> params);
 }

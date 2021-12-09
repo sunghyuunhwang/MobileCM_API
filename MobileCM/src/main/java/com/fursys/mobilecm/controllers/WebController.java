@@ -152,4 +152,9 @@ public class WebController {
 		return "vndBanpumStatus";
     	
     }
+    @GetMapping("/migyeolReport")
+    public String migyeolReport(@AuthenticationPrincipal User user) {
+		return "migyeolReport";
+    	
+    }
 }

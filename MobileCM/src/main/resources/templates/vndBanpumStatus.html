@@ -28,9 +28,9 @@
                          <li>
                             <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
                          </li>
-<!--                          <li>
-                            <a class="lstLnk" href="">미결 현황 관리</a>
-                         </li> -->
+                         <li>
+                            <a class="lstLnk" href="/v1/areamaster/migyeolReport">미결 현황 관리</a>
+                         </li>
                          <li>
                             <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
                          </li>
@@ -128,22 +128,25 @@
                      </div>
            </article>
      </section>
-     <aside class="fssMblCmPop _cnter vndBSsFilePop">
+<!--      <aside class="fssMblCmPop _cnter vndBSsFilePop">
            <article class="popCntnts smll">
                 <h2 class="ttl">
                      파일리스트
                 </h2>
                 <menu class="fileLst" id="getAttachFileList">
-                     <!--<li>
+                     <li>
                           <a href="" class="bfafNn icnDown">202145155412325841227522.JPG</a>
-                     </li>-->
+                     </li>
                 </menu>
                 <div class="btnBx">
                      <button class="clsBtn btn btnSzHrf lft btnGry h54px">닫기</button>
                 </div>
            </article>
-          <button class="clsBtn bgBlck"><!--배경닫기--></button>
-     </aside>
+          <button class="clsBtn bgBlck">배경닫기</button>
+     </aside> -->
+     <div th:replace="fileList_popup :: fileList_popup">
+          <!--시공건 팝업 :: html로 팝업 파일 나눠주셔서 타임리프로 넣어놓긴했는데 여기에 그냥 팝업이 있는게 편하시면 전달주세요~-->
+     </div>
      <aside class="fssMblCmPop bgBlck alrtPop">
              <article class="popCntnts alrtBx loding" id="lodingPop">
 		          <h2 class="ttl _f19px _24px _fwNml">
@@ -167,12 +170,12 @@
      $( ".nmldatepicker" ).click(function() {
           $('.ui-datepicker').addClass('nml');
      });
-          function showDays() {
+/*           function showDays() {
               var start = $('.vndBanpumStatus #nmldate1').datepicker('getDate');
               var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
           }
           $('.vndBanpumStatus #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
      	 $('.vndBanpumStatus #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
-     </script>
+ */     </script>
 </body>
 </html>
