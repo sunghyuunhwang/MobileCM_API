@@ -354,7 +354,7 @@
 
    .lnPerBx .ttl{display: inline-block;float: left;width: 100%;height: 25px;margin: 0 0 5px 0;line-height: 25px; text-align: center;overflow: hidden;white-space: nowrap;}
      .lnPerBx .ttl .numCnt::before{content: '( ';}
-     .lnPerBx .ttl .numCnt::after{content: ' )';}
+     .lnPerBx .ttl .numCnt::after{content: ' 건)';}
      .lnPerBx .ttl._migyeo{color: #4a0707;}
    .lnPerBx .barLst{position: relative;display: inline-block;float: left;width: 100%;height: calc(100% - 30px);border-radius: 8px;background-color: #eee;}
     .barLst > .bar{position: relative;display:inline-flex;flex-direction: column;align-items: center;justify-content: center;float: left;width: 100%;font-size: 15px;font-weight: 500;}
@@ -370,7 +370,7 @@
     .bar._unpsec_c{color: #2e0c40;background-color: #d1c4eb;}
     .barLst > .bar .numBx::before{content: '( ';}
     .barLst > .bar .numBx::after{content: ' )';}
-    .barLst > .bar .numCnt::after{content: ',';}
+    .barLst > .bar .numCnt::after{content: '건,';}
     .barLst > .bar .numPer::after{content: '%';}
 .bar > .info.ttul{position: absolute;top: 10px;left: 15px; width: 90%; padding: 5px 5px 0 5px;border-radius: 0 5px 0 0;background-color:#f9e7e7;border: #fbd2d2 1px solid;border-bottom: 0;box-shadow: 0 -1px 2px rgb(0 0 0 / 20%);box-sizing: border-box;z-index: 700;}
 .bar > .numBx.ttul{position: absolute;top: 34px;left: 15px; width: 90%;padding: 5px; border-radius: 0 0 5px 5px;border: #fbd2d2 1px solid;border-top: 0;background-color:#f9e7e7;box-sizing: border-box;box-shadow: 0 2px 1px rgb(0 0 0 / 40%);z-index: 700;}

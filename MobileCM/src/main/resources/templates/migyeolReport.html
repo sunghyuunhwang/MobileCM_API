@@ -15,8 +15,8 @@
     <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
-   <!--  <script src="/js/mbCM-frontApiActnReal.js"></script>프론트엔드 이벤 -->
-    <script src="/js/mbCM-frontApiActnReal_front.js"></script><!-- 프론트엔드 이벤 -->
+   	<script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
+  <!--   <script src="/js/mbCM-frontApiActnReal_front.js"></script>프론트엔드 이벤 -->
 </head>
 
 <body>
@@ -49,7 +49,7 @@
                      ~
                      <input type="text" name="" id="nmldate2" class="nmldatepicker inptBx hThin" value="" readonly/>
                 </div>
-                <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="getVndBanpum()">조회</button>
+                <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="getMigyeolReportInfo()">조회</button>
            </article>
            <article class="wLft300Bx">
                 <div class="lnPerBx _allTotLst">
@@ -77,35 +77,35 @@
                 <div class="lnPerBx _migyeolLst">
                      <h2 class="ttl _migyeol">
                           미결
-                          <span class="numCnt">100</span>
+                          <span class="numCnt">0</span>
                      </h2>
                      <ul class="barLst">
                           <li class="bar _unpsec_r">
                                <span class="info">연기</span>
                                <span class="numBx">
-                                    <span class="numCnt">10</span>
-                                    <span class="numPer">20</span>
+                                    <span class="numCnt">0</span>
+                                    <span class="numPer">0</span>
                                </span>
                           </li>
                           <li class="bar _unpsec_a">
                                <span class="info">AS</span>
                                <span class="numBx">
-                                    <span class="numCnt">10</span>
-                                    <span class="numPer">40</span>
+                                    <span class="numCnt">0</span>
+                                    <span class="numPer">0</span>
                                </span>
                           </li>
                           <li class="bar _unpsec_e">
                                <span class="info">반품</span>
                                <span class="numBx">
-                                    <span class="numCnt">10</span>
-                                    <span class="numPer">20</span>
+                                    <span class="numCnt">0</span>
+                                    <span class="numPer">0</span>
                                </span>
                           </li>
                           <li class="bar _unpsec_c">
                               <span class="info">내부부적합</span>
                               <span class="numBx">
-                                   <span class="numCnt">10</span>
-                                   <span class="numPer">20</span>
+                                   <span class="numCnt">0</span>
+                                   <span class="numPer">0</span>
                               </span>
                           </li>
                      </ul>
@@ -115,9 +115,9 @@
                      <div class="scrll _inTtl" id="getMigyeolRprtInfLst">
                           <ul class="ulLftlst _index">
                                <li class="w150px">팀</li>
-                               <li class="w100px tAlgnCntr">총</li>
-                               <li class="w100px">완결</li>
-                               <li class="w100px">미결</li>
+                               <li class="w100px tAlgnRght">총</li>
+                               <li class="w100px tAlgnRght">완결</li>
+                               <li class="w100px tAlgnRght">미결</li>
                                <li class="w100px tAlgnRght">연기</li>
                                <li class="w100px tAlgnRght">AS</li>
                                <li class="w100px tAlgnRght">반품</li>
@@ -140,6 +140,25 @@
                      </div>
            </article>
      </section>
+     <aside class="fssMblCmPop bgBlck alrtPop">
+             <article class="popCntnts alrtBx loding" id="lodingPop">
+		          <h2 class="ttl _f19px _24px _fwNml">
+		               <strong>데이터</strong>를 불러오고 있습니다.
+		          </h2>
+		          <span class="ldingTxt">평균 1분이내로 소요됩니다.</span>
+              </article>
+              <article class="popCntnts alrtBx" id="migyeol_popFail"><!-- 시공건팝업 -->
+                   <h2 class="ttl _f19px _32px">
+                        조회조건을 확인해주세요.
+                   </h2>
+                   <h4 class="ttlInf">
+                        *검색가능일자는 최대 100일입니다.
+                   </h4>
+                   <div class="btnBx">
+                        <button class="clsBtn btn btnSzHrf lft btnGry h54px">닫기</button>
+                   </div>
+              </article>
+     </aside>
      <div th:replace="fileList_popup :: fileList_popup">
           <!--시공건 팝업 :: html로 팝업 파일 나눠주셔서 타임리프로 넣어놓긴했는데 여기에 그냥 팝업이 있는게 편하시면 전달주세요~-->
      </div>
@@ -148,18 +167,15 @@
      </div>
      
      <script type="text/javascript">
-          function showDays() {
-              var start = $('.vndBanpumStatus #nmldate1').datepicker('getDate');
-              var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
+/*           function showDays() {
+              var start = $('.migyeolReport #nmldate1').datepicker('getDate');
+              var end   = $('.migyeolReport #nmldate2').datepicker('getDate');
           }
-          $('.vndBanpumStatus #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
-     	 $('.vndBanpumStatus #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
-
-
-
-          $(window).on('load', function() {
-           getMigyeolReportInfo();//미결현황요약정보
-          });
+          $('.migyeolReport #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
+     	  $('.migyeolReport #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays }); */
+           $(window).on('load', function() {
+          	getMigyeolReportInfo();//미결현황요약정보
+          });  
      </script>
 </body>
 </html>

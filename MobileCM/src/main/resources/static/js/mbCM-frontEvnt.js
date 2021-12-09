@@ -60,18 +60,19 @@ function topMenuPopBox() {//팝업메뉴 팝업
      });
 }
 
-function vndBSsFilePop() {//첨부파일
+/*function vndBSsFilePop() {//첨부파일
      $('.vndBSsBtn').click(function() {
        $('.vndBSsFilePop').addClass('opn');
        var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
        getAttachFileList(plm_no);
      });
-}
+}*/
 
 function inFileBtnPop() {//미결첨부파일
      $('.inFileBtn').click(function() {
        $('.inFilePop').addClass('opn');
-       //getAttachFileList();
+       var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
+       getAttachFileList(plm_no);
      });
 }
 function vndFileDown() {//파일 다운로드
@@ -86,12 +87,17 @@ function ulLftlst() {//리스트표시
       $('.ulLftlst').each(function() {
       var ulLftlst = $(this);
       $(this).click(function() {
-           if(!$(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
-           $('.ulLftlst').removeClass('on');
-           $(this).addClass('on');
-           resetUlLftdtllst();
-           cnstrctLst_dtlInf(this);
-          }else if(! $(this).hasClass('_index') && $('.cnstrctLstBx').length <= 0){
+           if(!$(this).hasClass('_index')){
+	           $('.ulLftlst').removeClass('on');
+	           $(this).addClass('on');
+	           resetUlLftdtllst();
+	      	   if($('.cnstrctLstBx').length > 0) {
+		           cnstrctLst_dtlInf(this);
+			   } else if ($('.migyeolReport').length > 0) {
+				   getMigyeolInfo(this);				
+			   }
+          //}else if(! $(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
+		  } else if(! $(this).hasClass('_index')){
               $('.ulLftlst').removeClass('on');
               $(this).addClass('on');
           }
@@ -116,6 +122,14 @@ function resetUlLftdtllst() {
 }
 function resetFilelst() {
     $('.fileLst .ulLftlst').each(function() {
+    	if(! $(this).hasClass('_index')){
+ 				$(this).remove();
+           }
+      });
+}
+function resetMigyeolUlLftlst() {
+    //$('#cnstrctLst .ulLftlst').each(function() {
+    $('#getMigyeolInf .ulLftlst').each(function() {
     	if(! $(this).hasClass('_index')){
  				$(this).remove();
            }
@@ -648,6 +662,6 @@ $(document).ready(function(){
       ulLftlst();//리스트표시
       cnstrctLstPop();//시공건 팝업
       topMenuPopBox();//팝업메뉴 팝업
-      vndBSsFilePop();//첨부파일
+/*      vndBSsFilePop();//첨부파일*/
       inFileBtnPop();//미결첨부파일
 });

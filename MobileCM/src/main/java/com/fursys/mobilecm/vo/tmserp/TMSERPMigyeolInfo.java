@@ -21,10 +21,10 @@ public class TMSERPMigyeolInfo {
 	public String sti_nm;
 	public String vnd_nm;
 	public String vnd_cd;
-	public String unpsec_a_yn;
-	public String unpsec_e_yn;
-	public String unpsec_r_yn;
-	public String unpsec_c_yn;
+	public String unpsec_a_yn; /*as*/
+	public String unpsec_e_yn; /*반품*/
+	public String unpsec_r_yn; /*재일정(연기)*/
+	public String unpsec_c_yn; /*내부부적합*/
 	public String file_yn;
 	public String mob_remark;
 }

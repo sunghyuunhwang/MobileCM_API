@@ -54,6 +54,8 @@ import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.UserInfoResponse;
 import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
 import com.fursys.mobilecm.vo.tmserp.TMSERPAllMigyeolRepo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail;
+import com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
@@ -1333,7 +1335,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getMigyeolReportInfo")
 	@RequestMapping(value="/getMigyeolReportInfo",method=RequestMethod.GET)
 	public String getMigyeolReportInfo(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "from_dt", required = true, example = "20211003")
 			@RequestParam(name = "from_dt", required = true) String from_dt,
 			@ApiParam(value = "to_dt", required = true, example = "20211013")
@@ -1374,26 +1376,23 @@ public class ApiTmsErpController {
 		int all_com_unpsec_r_per = 0;
 		
 		try {
-			//if (user != null) {
-				//UserEtc etc = getUserEtc(user);
-				//params.put("com_scd", etc.getCom_scd());
-				//params.put("ksti_cd", etc.getSti_cd());
-			    params.put("com_scd", "C16YA");
-			    params.put("ksti_cd", "YA601");
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("com_scd", etc.getCom_scd());
+				params.put("ksti_cd", etc.getSti_cd());
+			    //params.put("com_scd", "C16YA");
+			    //params.put("ksti_cd", "YA601");
 				params.put("from_dt", from_dt.replace("-", ""));
 				params.put("to_dt", to_dt.replace("-", ""));
 				
 				teamMigyeolRepoList = tmserpScheduling.selectMigyeolReportInfo(params);
-				if(teamMigyeolRepoList.size() == 0) {
-					return null;
-				}
 				
 				for(int i=0; i<teamMigyeolRepoList.size(); i++) {					
 					migyeolInfo = teamMigyeolRepoList.get(i);
 					tot_cnt = migyeolInfo.getTot_cnt();
 					com_unpsec_a = migyeolInfo.getCom_unpsec_a();
-					com_unpsec_e = migyeolInfo.getCom_unpsec_c();
-					com_unpsec_c = migyeolInfo.getCom_unpsec_e();
+					com_unpsec_e = migyeolInfo.getCom_unpsec_e();
+					com_unpsec_c = migyeolInfo.getCom_unpsec_c();
 					com_unpsec_r = migyeolInfo.getCom_unpsec_r();
 					
 					migyeol_cnt = com_unpsec_a + com_unpsec_e + com_unpsec_c + com_unpsec_r;
@@ -1472,12 +1471,12 @@ public class ApiTmsErpController {
 				result.put("info", teamMigyeolRepoList);
 				
 				return gson.toJson(result);	
-			//} else {
-				//return gson.toJson(resList);
-			//	throw new Exception();
-			//}			
+			} else {
+				//return gson.toJson(result);
+				throw new Exception();
+			}			
 		} catch(Exception e) {
-			//return gson.toJson(resList);
+			//return gson.toJson(result);
 			e.printStackTrace();
 			throw new Exception();
 		} 
@@ -1486,12 +1485,13 @@ public class ApiTmsErpController {
 	private int calcPercentage(int a, int b) {
 		return (int) Math.round((double)a/(double)b*100);	
 	}
+	
 	@ApiOperation(value="/getMigyeolnfo", notes="tms미결정보조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
 	@GetMapping("/getMigyeolnfo")
 	@RequestMapping(value="/getMigyeolnfo",method=RequestMethod.GET)
 	public String getMigyeolnfo(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "from_dt", required = true, example = "20211003")
 			@RequestParam(name = "from_dt", required = true) String from_dt,
 			@ApiParam(value = "to_dt", required = true, example = "20211013")
@@ -1505,18 +1505,18 @@ public class ApiTmsErpController {
 		
 		try {
 
-			//if (user != null) {
-				//UserEtc etc = getUserEtc(user);
-				//params.put("com_scd", etc.getCom_scd());
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("com_scd", etc.getCom_scd());
 				params.put("sti_cd", sti_cd);
-			    params.put("com_scd", "C16YA");
+			    //params.put("com_scd", "C16YA");
 				params.put("from_dt", from_dt.replace("-", ""));
 				params.put("to_dt", to_dt.replace("-", ""));				
 				migyeolInfoList = tmserpScheduling.selectMigyeolInfo(params);
 				return gson.toJson(migyeolInfoList);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
@@ -1545,6 +1545,97 @@ public class ApiTmsErpController {
 			//}			
 		} catch(Exception e) {
 			throw new Exception();
+		}
+	}
+	
+	@ApiOperation(value="/getDefectInfoList", notes="tms하자내역조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getDefectInfoList")
+	@RequestMapping(value="/getDefectInfoList",method=RequestMethod.GET)
+	public String getDefectInfoList(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "from_dt", required = true, example = "20211001")
+			@RequestParam(name = "from_dt", required = true) String from_dt,
+			@ApiParam(value = "to_dt", required = true, example = "20211019")
+			@RequestParam(name = "to_dt", required = true) String to_dt,
+			@ApiParam(value = "ctm_nm", required = false, example = "")
+			@RequestParam(name = "ctm_nm", required = false) String ctm_nm
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPDefectInfo> defectInfoList = null;
+		
+		try {
+			//if (user != null) {
+				//UserEtc etc = getUserEtc(user);
+				//params.put("com_scd", etc.getCom_scd());
+				//params.put("ksti_cd", etc.getSti_cd());
+				params.put("com_scd", "C16YA");
+				params.put("ksti_cd", "YA601");
+				params.put("from_dt", from_dt.replace("-", ""));
+				params.put("to_dt", to_dt.replace("-", ""));
+				params.put("ctm_nm", ctm_nm);
+				defectInfoList = tmserpScheduling.selectDefectInfoList(params);
+				return gson.toJson(defectInfoList);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+	
+	@ApiOperation(value="/getDefectDetail", notes="tms하자내역상세조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@GetMapping("/getDefectDetail")
+	@RequestMapping(value="/getDefectDetail",method=RequestMethod.GET)
+	public String getDefectDetail(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "rpt_no", required = true, example = "I202109290263")
+			@RequestParam(name = "rpt_no", required = true) String rpt_no,
+			@ApiParam(value = "rpt_seq", required = true, example = "01")
+			@RequestParam(name = "rpt_seq", required = true) String rpt_seq
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPDefectDetail> defectDetail = null;
+		
+		try {
+			//if (user != null) {
+				params.put("rpt_no", rpt_no);
+				params.put("rpt_seq", rpt_seq);
+				defectDetail = tmserpScheduling.selectDefectDetail(params);
+				return gson.toJson(defectDetail);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+	
+	@ApiOperation(value="/saveOpinion", notes="tms첨부파일 다운로드")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@PostMapping("/saveOpinion")
+	@RequestMapping(value="/saveOpinion",method=RequestMethod.POST)
+	public String saveOpinion(HttpServletRequest request,  
+			HttpServletResponse response,
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "rpt_no", required = true, example = "I202109290263")
+			@RequestParam(name = "rpt_no", required = true) String rpt_no,
+			@ApiParam(value = "rpt_seq", required = true, example = "01")
+			@RequestParam(name = "rpt_seq", required = true) String rpt_seq,
+			@ApiParam(value = "opinion", required = true, example = "이의!제기내용을 수정합니다.")
+			@RequestParam(name = "opinion", required = true) String opinion		
+			) throws Exception {
+		HashMap<Object, Object> result = new HashMap();    
+		try {
+			result.put("response", "200");
+			return gson.toJson(result);
+		} catch(Exception e) {
+			throw new Exception();
+		} finally {
+			return gson.toJson(result);
 		}
 	}
 }
