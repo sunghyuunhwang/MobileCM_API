@@ -22,6 +22,7 @@ public class ERPAsItemReport {
 	private String defect_typ = "";
 	private String mob_useyn = "";
 	private int mob_notuseqty = 0;
+	private String mob_remark = "";
 	
 }
 

@@ -5,33 +5,34 @@
  <select id="erp_selectAsItemReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsItemReport">
 <![CDATA[
 	SELECT  A.BMT_ITEM,   
-                       A.COL_CD,   
-                       B.BMT_NM AS BMT_NM,   
-                       A.COM_RPFTYP,   
-                       A.AST_ACTQTY,   
-                       (SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = A.COM_SPYCOD ) AS COM_SPYCOD,   
-                       A.BMT_SAMT,   
-                      (CASE WHEN LEN(A.VND_CD) = 3 THEN
-                      (SELECT WHS_NM FROM TW_WHSMAS with (nolock) WHERE WHS_CD = A.VND_CD) ELSE
-                      (SELECT VND_NM FROM TT_VENDOR with (nolock) WHERE VND_CD = A.VND_CD) END) VND_CD,
-                      (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'A65'   AND CCD_CD=A.DEFECT_GUBUN) AS DEFECT_GUBUN ,
-                      (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'A66'   AND CCD_CD=A.DEFECT_TYP) AS DEFECT_TYP
-                      ,D.MOB_USEYN
-                      ,D.MOB_NOTUSEQTY
-           FROM  TA_ASTITEM A with (nolock)
-                        LEFT OUTER JOIN TA_PLANDTL D WITH (NOLOCK)
-                        ON D.PLM_NO = #{orm_no}
-                        AND D.BMT_ITEM = A.BMT_ITEM
-                        AND D.COL_CD = A.COL_CD,
-                        TT_BOMMST B with (nolock)
-          WHERE A.RPT_NO     =  SUBSTRING(#{orm_no} /*orm_no*/ , 1, 13)
-               AND A.RPT_SEQ    = '01'
-               AND A.BMT_ITEM   = B.BMT_ITEM 
-               AND A.COL_CD     = B.COL_CD   
+	             A.COL_CD,   
+	             B.BMT_NM AS BMT_NM,   
+	             A.COM_RPFTYP,   
+	             A.AST_ACTQTY,   
+	             (SELECT CCD_NM FROM TT_COMCD WHERE CCD_CD = A.COM_SPYCOD ) AS COM_SPYCOD,   
+	             A.BMT_SAMT,   
+	            (CASE WHEN LEN(A.VND_CD) = 3 THEN
+	            (SELECT WHS_NM FROM TW_WHSMAS with (nolock) WHERE WHS_CD = A.VND_CD) ELSE
+	            (SELECT VND_NM FROM TT_VENDOR with (nolock) WHERE VND_CD = A.VND_CD) END) VND_CD,
+	            (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'A65'   AND CCD_CD=A.DEFECT_GUBUN) AS DEFECT_GUBUN ,
+	            (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'A66'   AND CCD_CD=A.DEFECT_TYP) AS DEFECT_TYP
+	            ,D.MOB_USEYN
+	            ,D.MOB_NOTUSEQTY
+	            ,D.MOB_REMARK
+	 FROM  TA_ASTITEM A with (nolock)
+	              LEFT OUTER JOIN TA_PLANDTL D WITH (NOLOCK)
+	              ON D.PLM_NO = #{orm_no}
+	              AND D.BMT_ITEM = A.BMT_ITEM
+	              AND D.COL_CD = A.COL_CD,
+	              TT_BOMMST B with (nolock)
+	WHERE A.RPT_NO     =  SUBSTRING(#{orm_no} /*orm_no*/ , 1, 13)
+	     AND A.RPT_SEQ    = '01'
+	     AND A.BMT_ITEM   = B.BMT_ITEM 
+	     AND A.COL_CD     = B.COL_CD   
 
 ]]>
 </select> 
-
+  
 <select id="erp_selectAsReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsReport">
 <![CDATA[
 
@@ -201,17 +202,17 @@
 
 <select id="erp_selectDeliveryItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPDeliveryItemList">
 <![CDATA[
-    
+      
 	SELECT 
-				 AA.COM_SCD_NM
+				  AA.COM_SCD_NM
 			     ,AA.ITM_CD
 			     ,AA.COL_CD
 			     ,AA.PLD_FQTY
 			     ,AA.STI_NM
 			     ,AA.REM_DT
-			     ,AA.ORM_NM
-			      ,AA.SET_CD
-			      ,AA.COL_SCD
+			     ,ISNULL(AA.ORM_NM, '') AS ORM_NM
+			      ,ISNULL(AA.SET_CD, '') AS SET_CD
+			      ,ISNULL(AA.COL_SCD, '') AS COL_SCD
 				  ,AA.ITM_NM
 	              ,AA.PLMFTM_NM
 	  FROM (
@@ -257,7 +258,7 @@
 		     AND A.STI_CD = C.STI_CD
 		     AND E.PLM_NO = A.PLM_NO
 		     AND E.COM_RFG ='C142'
-		     
+		     AND E.REM_DT = #{rem_dt}
 		     AND A.STI_CD = #{sti_cd}
 			 AND B.COM_PLDSEC IN('C090','C091','C092','C094','C096','C095','C09A')
 	GROUP BY A.STI_CD,
@@ -289,7 +290,7 @@
   
 ]]>
 </select>
-
+ 
 <select id="selectLgsStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 
