@@ -2698,9 +2698,12 @@ INSERT INTO TC_PLANDTL
            ,#{org_agt_cd}
            ,'C141'
            ,NULL
-           ,ISNULL((SELECT TCP.MOB_REMARK 
-                      FROM TC_PLANMST TCP WITH (NOLOCK) 
-                     WHERE TCP.PLM_NO = #{plm_no} ), '')
+           ,LEFT((SELECT TCS.STI_NM 
+               FROM TC_STINF TCS WITH (NOLOCK) 
+              WHERE TCS.STI_CD = #{org_sti_cd} 
+                AND TCS.COM_SCD = #{org_com_scd} ) + ' 팀, 원시공일 : '+ #{org_rem_dt} + ' ' + ISNULL((SELECT TCP.MOB_REMARK 
+                      																			   FROM TC_PLANMST TCP WITH (NOLOCK) 
+                    																			  WHERE TCP.PLM_NO = #{plm_no} ), ''), 50)
            ,#{org_orm_gpost}
            ,#{sti_cd}
            ,GETDATE()

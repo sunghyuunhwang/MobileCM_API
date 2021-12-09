@@ -6188,6 +6188,7 @@ public class ApiErpController {
 			}
 			
 			params.put("new_rem_seq", new_rem_seq);
+			params.put("plm_cdt2", org_plm_cdt);
 	        //신규 tc_resmst insert
         	res = sCheduleMainListMapper.insertNewTcResmst(params);
         	
