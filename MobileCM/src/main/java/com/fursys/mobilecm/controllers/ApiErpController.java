@@ -3160,6 +3160,8 @@ public class ApiErpController {
 		
 		HashMap<String,Object> fParams = new HashMap<String, Object>();
 		fParams.put("file_id",item.getFile_id());
+		fParams.put("rem_dt",rem_dt);
+		fParams.put("rem_seq",rem_seq);
 		
 		ArrayList<ERPAsFileList> files = sCheduleMainListMapper.selectAsFileList(fParams);
 		String url = "";
