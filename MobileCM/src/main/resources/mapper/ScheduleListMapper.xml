@@ -2268,8 +2268,8 @@ INSERT INTO TA_RPTREQ
 	    ,''
 		,#{as_req_remark}
 		,#{com_brand}
-		,'4146311100'
 		,#{town_cd}
+		,''
 		,'Y'
 		,'A94002'
 		,#{as_sti_cd}
