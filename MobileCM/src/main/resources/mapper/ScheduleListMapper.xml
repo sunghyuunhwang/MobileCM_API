@@ -707,7 +707,7 @@
 		A.ATTCH_DIV_CD AS ATTCH_DIV_CD,
 		A.ATTCH_FILE_SNUM AS ATTCH_FILE_SNUM
 	 FROM TY_ATTCHFILE A
-	WHERE ATTCH_FILE_ID = (SELECT 'csresult'+TAR. PLM_NO FROM TA_RPTREQ TAR WITH (NOLOCK) WHERE TAR.RPT_NO + TAR.RPT_SEQ = (SELECT TCR.ORM_NO FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.REM_DT = #{rem_dt} AND TCR.REM_SEQ = #{rem_seq}))
+	WHERE ATTCH_FILE_ID = (SELECT 'cresult'+TAR. PLM_NO FROM TA_RPTREQ TAR WITH (NOLOCK) WHERE TAR.RPT_NO + TAR.RPT_SEQ = (SELECT TCR.ORM_NO FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.REM_DT = #{rem_dt} AND TCR.REM_SEQ = #{rem_seq}))
 
 ]]>
 </select>
@@ -2268,8 +2268,8 @@ INSERT INTO TA_RPTREQ
 	    ,''
 		,#{as_req_remark}
 		,#{com_brand}
-		,'4146311100'
 		,#{town_cd}
+		,''
 		,'Y'
 		,'A94002'
 		,#{as_sti_cd}
@@ -2698,9 +2698,12 @@ INSERT INTO TC_PLANDTL
            ,#{org_agt_cd}
            ,'C141'
            ,NULL
-           ,ISNULL((SELECT TCP.MOB_REMARK 
-                      FROM TC_PLANMST TCP WITH (NOLOCK) 
-                     WHERE TCP.PLM_NO = #{plm_no} ), '')
+           ,LEFT((SELECT TCS.STI_NM 
+               FROM TC_STINF TCS WITH (NOLOCK) 
+              WHERE TCS.STI_CD = #{org_sti_cd} 
+                AND TCS.COM_SCD = #{org_com_scd} ) + ' 팀, 원시공일 : '+ #{org_rem_dt} + ' ' + ISNULL((SELECT TCP.MOB_REMARK 
+                      																			   FROM TC_PLANMST TCP WITH (NOLOCK) 
+                    																			  WHERE TCP.PLM_NO = #{plm_no} ), ''), 50)
            ,#{org_orm_gpost}
            ,#{sti_cd}
            ,GETDATE()
