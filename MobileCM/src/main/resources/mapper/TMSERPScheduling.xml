@@ -2402,8 +2402,8 @@
 		        FROM   tt_comcd WITH (nolock)
 		        WHERE  ccd_cd = e.com_undsec),'')  AS com_undsec_nm,
 			   (CASE WHEN (SELECT count(*) FROM ty_attchfile atc with (nolock)
-						   WHERE atc.attch_file_id = 'cresult'+ b.plm_no 
-						AND atc.attch_div_cd = 'C') > 0 THEN 'Y' ELSE 'N' END) AS FILE_YN
+						   WHERE atc.attch_file_id in ( 'cresult'+ b.plm_no,  'proof'+ b.plm_no )
+						AND atc.attch_div_cd = 'C') > 0 THEN 'Y' ELSE 'N' END) AS file_yn				
 		/*쿼리튜닝으로 속도를 올리기 위해 조회조건과 FROM 절 새로 만듬 */
 		FROM   (SELECT itm_cd,
 		               col_cd,
@@ -2498,7 +2498,7 @@
 		       A.fst_usr,
 		       A.fst_sys_dt
 		FROM   ty_attchfile A with (nolock)
-		WHERE  attch_file_id = #{file_id}
+		WHERE  attch_file_id in ( #{file_id}, #{proof_file_id})
 		ORDER  BY A.attch_file_snum 
 	</select>
 	<select id="searchFileInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPFile">
@@ -2666,7 +2666,7 @@
 		               ( CASE
 		                   WHEN (SELECT Count(*)
 		                         FROM   ty_attchfile atc WITH (nolock)
-		                         WHERE  atc.attch_file_id = 'cresult' + a.plm_no
+		                         WHERE  atc.attch_file_id in ( 'cresult' + a.plm_no, 'proof' + a.plm_no)
 		                                AND atc.attch_div_cd = 'C') > 0 THEN 'Y'
 		                   ELSE 'N'
 		                 END )                       AS file_yn,

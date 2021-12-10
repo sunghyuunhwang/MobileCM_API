@@ -1181,9 +1181,13 @@ public class ApiTmsErpController {
 		
 		try {
 			String file_id;
+			String proof_file_id;
 			if (user != null) {
 				
-				file_id = "cresult" + plm_no;				
+				file_id = "cresult" + plm_no;
+				proof_file_id = "proof" + plm_no;
+				
+				params.put("proof_file_id", proof_file_id);
 				params.put("file_id", file_id);
 				
 				fileList = tmserpScheduling.selectFileList(params);
