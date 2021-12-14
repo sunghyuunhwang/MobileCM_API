@@ -1578,10 +1578,9 @@ SELECT STM_NO
 	    AND TCR.ORM_NM LIKE #{orm_nm}
 		AND TCR.STI_CD = TCS.STI_CD
 		AND TCR.COM_SCD = TCS.COM_SCD
-		AND TCS.K_STI_CD = #{sti_cd}
 ]]>
 </select>
-
+   
 <insert id="insertCooperationRequestMaster" parameterType="HashMap">
 <![CDATA[ 
     INSERT INTO TC_COOPERATION_M
