@@ -49,7 +49,7 @@
               A.RPT_QDT,
              (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CCD_CD = A.COM_SCD) COM_SCD_NM,
              (SELECT STI_NM FROM TC_STINF with (nolock) WHERE STI_CD = A.STI_CD AND COM_SCD = A.COM_SCD) STI_NM,
-         (SELECT ISNULL(MOB_REMARK, '') FROM TA_PLANMST WHERE RPT_NO = A.RPT_NO AND RPT_SEQ = A.RPT_SEQ ) AS MOB_REMARK
+         (SELECT TOP 1 ISNULL(MOB_REMARK, '') FROM TA_PLANMST WHERE RPT_NO = A.RPT_NO AND RPT_SEQ = A.RPT_SEQ AND PLM_CDT = A.RPT_ENDDT) AS MOB_REMARK
          FROM TA_RPTREQ A with (nolock),
                     TT_VENDOR B with (nolock)
      WHERE   A.RPT_NO > '' 
@@ -61,7 +61,7 @@
 	    
 ]]>
 </select>
-
+ 
 <select id="erp_selectSigongItemReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongItemReport">
 <![CDATA[
 	SELECT 
@@ -220,10 +220,13 @@
 			      ,ISNULL(AA.COL_SCD, '') AS COL_SCD
 				  ,AA.ITM_NM
 	              ,AA.PLMFTM_NM
+	              ,CASE WHEN LEN(ISNULL(AA.ADDR_DTL, '')) = 0 THEN AA.ORM_GADDR ELSE AA.ORM_GADDR + ' ' + AA.ADDR_DTL END ORM_GADDR
 	  FROM (
 	
-	    SELECT TOP 100 A.STI_CD,
+	    SELECT       A.STI_CD,
 		             A.PLM_FTM,
+		             A.ORM_GADDR,
+		             A.ADDR_DTL,
 					(SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'C41'	AND CCD_CD= A.PLM_FTM) AS 	PLMFTM_NM,
 			         A.COM_SCD,
 					(SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'C16'	AND CCD_CD= A.COM_SCD) AS 	COM_SCD_NM,
@@ -282,7 +285,9 @@
 			           E.REM_FTM,
 			           E.REM_CSEC,
 					   A.COM_AGSEC,
-					   A.PLM_FTM
+					   A.PLM_FTM,
+					   A.ORM_GADDR,
+					   A.ADDR_DTL
 	) AA
 	WHERE PLD_FQTY > 0
 	ORDER BY   AA.STI_NM,
@@ -295,7 +300,7 @@
   
 ]]>
 </select>
- 
+  
 <select id="selectLgsStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 
