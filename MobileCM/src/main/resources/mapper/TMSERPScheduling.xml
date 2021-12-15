@@ -2785,7 +2785,7 @@
 		         ELSE 'N'
 		       END) AS rtnsec,
 		       file_yn,
-		       '이의제기 내용입니다.' as opinion,
+		       '이의제기 내용입니다.' as opinion
 		FROM   (SELECT b.com_agsec,
 		               b.com_brand,
 		               b.rpt_no,
