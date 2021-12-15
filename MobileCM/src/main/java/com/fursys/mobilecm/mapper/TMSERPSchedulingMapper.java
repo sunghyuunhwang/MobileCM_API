@@ -95,5 +95,7 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPDefectDetail> selectDefectDetail(HashMap<String,Object> params);
 	public ArrayList<TMSERPStimemberInfo> selectStimemberInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPStimemberDetailInfo> selectStimemberDetailInfo(HashMap<String,Object> params);
-	
+	public int updateStimemberInfo(HashMap<String,Object> params);
+	public int insertStimemberInfo(HashMap<String,Object> params);
+	public int deleteStimemberInfo(HashMap<String,Object> params);
 }

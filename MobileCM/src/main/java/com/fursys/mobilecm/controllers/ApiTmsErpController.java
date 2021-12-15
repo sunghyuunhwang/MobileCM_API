@@ -1679,7 +1679,9 @@ public class ApiTmsErpController {
 	public String getStiMemberDetailInfo(
 			//@AuthenticationPrincipal User user,
 			@ApiParam(value = "sti_cd", required = true, example = "YA521")
-			@RequestParam(name = "sti_cd", required = true) String sti_cd
+			@RequestParam(name = "sti_cd", required = true) String sti_cd,
+			@ApiParam(value = "com_scd", required = true, example = "C16YA")
+			@RequestParam(name = "com_scd", required = true) String com_scd		
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
@@ -1688,6 +1690,7 @@ public class ApiTmsErpController {
 		try {
 			//if (user != null) {
 				params.put("sti_cd", sti_cd);
+				params.put("com_scd", com_scd);
 				stiDetailMember = tmserpScheduling.selectStimemberDetailInfo(params);
 				return gson.toJson(stiDetailMember);				
 			//} else {
@@ -1698,4 +1701,175 @@ public class ApiTmsErpController {
 		}
 	}
 	
+	
+	@ApiOperation(value = "tmserp_updatestimemberinfo", notes = "시공팀원정보 수정")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 수정 실패 !!") })
+	@GetMapping("/tmserp_updatestimemberinfo")
+	@RequestMapping(value = "/tmserp_updatestimemberinfo", method = RequestMethod.GET)
+	public String tmserp_updatestimemberinfo(
+			@ApiParam(value = "sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "sti_cd", required = true) String sti_cd,
+			@ApiParam(value = "com_scd", required = true, example = "C16YA")
+			@RequestParam(name = "com_scd", required = true) String com_scd,			
+			@ApiParam(value = "stm_no", required = true, example = "01")
+			@RequestParam(name = "stm_no", required = true) String stm_no,
+			@ApiParam(value = "stm_nm", required = true, example = "황성현팀")
+			@RequestParam(name = "stm_nm", required = true) String stm_nm,
+			@ApiParam(value = "stm_hp", required = true, example = "010-0000-0000")
+			@RequestParam(name = "stm_hp", required = true) String stm_hp,		
+			@ApiParam(value = "stm_mdt", required = true, example = "164라7028")
+			@RequestParam(name = "stm_mdt", required = true) String stm_mdt,
+			@ApiParam(value = "stm_zdt", required = true, example = "20211211")
+			@RequestParam(name = "stm_zdt", required = true) String stm_zdt,		
+			@ApiParam(value = "com_pos", required = true, example = "C112")
+			@RequestParam(name = "com_pos", required = true) String com_pos,			
+			@ApiParam(value = "stm_addr", required = true, example = "서울 서울 서울 ")
+			@RequestParam(name = "stm_addr", required = true) String stm_addr					
+			) {
+		
+		BaseResponse response = new BaseResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		int res = 0;
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		
+		try {
+			params.put("sti_cd", sti_cd);
+			params.put("com_scd", com_scd);
+			params.put("stm_no", stm_no);
+			params.put("stm_nm", stm_nm);		
+			params.put("stm_hp", stm_hp);		
+			params.put("stm_mdt", stm_mdt);		
+			params.put("stm_zdt", stm_zdt);		
+			params.put("com_pos", com_pos);		
+			params.put("stm_addr", stm_addr);		
+			
+	    	res = tmserpScheduling.updateStimemberInfo(params);
+	    	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateStimemberInfo 오류");
+	        	return gson.toJson(response);
+			}				
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "tmserp_insertstimemberinfo", notes = "시공팀원정보 등록")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 등록 실패 !!") })
+	@GetMapping("/tmserp_insertstimemberinfo")
+	@RequestMapping(value = "/tmserp_insertstimemberinfo", method = RequestMethod.GET)
+	public String tmserp_insertstimemberinfo(
+			@ApiParam(value = "sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "sti_cd", required = true) String sti_cd,
+			@ApiParam(value = "com_scd", required = true, example = "C16YA")
+			@RequestParam(name = "com_scd", required = true) String com_scd,				
+			@ApiParam(value = "stm_nm", required = true, example = "황성현팀")
+			@RequestParam(name = "stm_nm", required = true) String stm_nm,
+			@ApiParam(value = "stm_hp", required = true, example = "010-0000-0000")
+			@RequestParam(name = "stm_hp", required = true) String stm_hp,		
+			@ApiParam(value = "stm_mdt", required = true, example = "164라7028")
+			@RequestParam(name = "stm_mdt", required = true) String stm_mdt,
+			@ApiParam(value = "stm_zdt", required = true, example = "20211211")
+			@RequestParam(name = "stm_zdt", required = true) String stm_zdt,		
+			@ApiParam(value = "com_pos", required = true, example = "C112")
+			@RequestParam(name = "com_pos", required = true) String com_pos,			
+			@ApiParam(value = "stm_addr", required = true, example = "서울 서울 서울 ")
+			@RequestParam(name = "stm_addr", required = true) String stm_addr					
+			) {
+		
+		BaseResponse response = new BaseResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		int res = 0;
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		
+		try {
+			params.put("sti_cd", sti_cd);
+			params.put("com_scd", com_scd);
+			params.put("stm_nm", stm_nm);		
+			params.put("stm_hp", stm_hp);		
+			params.put("stm_mdt", stm_mdt);		
+			params.put("stm_zdt", stm_zdt);		
+			params.put("com_pos", com_pos);		
+			params.put("stm_addr", stm_addr);		
+			
+	    	res = tmserpScheduling.insertStimemberInfo(params);
+	    	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertStimemberInfo 오류");
+	        	return gson.toJson(response);
+			}				
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}	
+	
+	@ApiOperation(value = "tmserp_deletestimemberinfo", notes = "시공팀원정보 삭제")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 삭제 실패 !!") })
+	@GetMapping("/tmserp_deletestimemberinfo")
+	@RequestMapping(value = "/tmserp_deletestimemberinfo", method = RequestMethod.GET)
+	public String tmserp_deletestimemberinfo(
+			@ApiParam(value = "sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "sti_cd", required = true) String sti_cd,
+			@ApiParam(value = "com_scd", required = true, example = "C16YA")
+			@RequestParam(name = "com_scd", required = true) String com_scd,		
+			@ApiParam(value = "stm_no", required = true, example = "01")
+			@RequestParam(name = "stm_no", required = true) String stm_no			
+			) {
+		
+		BaseResponse response = new BaseResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		int res = 0;
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		
+		try {
+			params.put("sti_cd", sti_cd);
+			params.put("com_scd", com_scd);
+			params.put("stm_no", stm_no);			
+			
+	    	res = tmserpScheduling.deleteStimemberInfo(params);
+	    	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("deleteStimemberInfo 오류");
+	        	return gson.toJson(response);
+			}				
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+	}		
 }
