@@ -69,10 +69,10 @@ function topMenuPopBox() {//팝업메뉴 팝업
 }*/
 
 function inFileBtnPop() {//미결첨부파일
-     $('.inFileBtn').click(function() {
-       $('.inFilePop').addClass('opn');
-       var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
-       getAttachFileList(plm_no);
+     $(document).on("click",".inFileBtn",function(){
+            $('.inFilePop').addClass('opn');
+            var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
+            getAttachFileList(plm_no);
      });
 }
 function vndFileDown() {//파일 다운로드
@@ -94,7 +94,7 @@ function ulLftlst() {//리스트표시
 	      	   if($('.cnstrctLstBx').length > 0) {
 		           cnstrctLst_dtlInf(this);
 			   } else if ($('.migyeolReport').length > 0) {
-				   getMigyeolInfo(this);				
+				   getMigyeolInfo(this);
 			   }
           //}else if(! $(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
 		  } else if(! $(this).hasClass('_index')){

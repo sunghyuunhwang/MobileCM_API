@@ -25,6 +25,15 @@ input:focus::-webkit-input-placeholder,textarea:focus::-webkit-input-placeholder
 input:focus:-moz-placeholder,textarea:focus:-moz-placeholder,.inptBx:focus:-moz-placeholder {color:transparent;}
 input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:focus:-ms-input-placeholder {color:transparent;}
 
+.dfBx_x{display: inline-block;float: left;}
+   .dfBx_x._inSbPgBx{height: calc(100% - 112px);box-sizing: border-box;}
+      .dfBx_x._inSbPgBx._lftPd{padding: 0px 0px 0px 20px;}
+      .dfBx_x._inSbPgBx._rghtPd{padding: 0px 20px;}
+      .dfBx_x._inSbPgBx > .inSrchFtBx{height: 100%;padding: 0;}
+      ._inSbPgBx._rghtPd > .hHrfBx.nonAslt{padding: 10px;background-color: #f5f5f5;}
+         ._inSbPgBx._rghtPd > .hHrfBx._top.nonAslt{margin: 0;border-radius: 8px 8px 0 0;}
+         ._inSbPgBx._rghtPd > .hHrfBx._bttm.nonAslt{border-radius: 0 0 8px 8px;}
+
 .dfBx{display: inline-block;float: left;width: 100%;}
 .dfBx.flxBtwn{display: inline-flex;}
 .flxBtwn{justify-content: space-between;}
@@ -35,7 +44,7 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
     /* align-self: self-start; */
     display: inline-block
 }
-
+.dsplyNon{display: none;}
 .fltRght{float: right;}
 .fltLft{float: left;}
 /*넓이*/
@@ -64,7 +73,9 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .w500px{width: 500px;}
 .w540px{width: 540px;}
 
+.wCal300px{width: calc(100% - 300px);}
 .wCal550px{width: calc(100% - 550px);}
+.wCal680px{width: calc(100% - 680px);}
 
 .minW100px{min-width: 100px;}
 .minW150px{min-width: 150px;}
@@ -79,6 +90,7 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 
 
 .mLft20px{margin-left: 20px;}
+.mTop10px{margin-top: 10px;}
 
 /*글씨색*/
 .clrBlck{color: #242020;}
@@ -96,6 +108,7 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 
 .tAlgnCntr{text-align:center; }
 .tAlgnRght{text-align:right;}
+.tAlgnLft{text-align:left;}
 
 .fllGry{background-color: #ebebeb;}
 .txtIcn{height: 17px;font-size: 9px;font-weight: bold;line-height: 17px;text-align: center;border-radius: 9px;}
