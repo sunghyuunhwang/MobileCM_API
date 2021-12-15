@@ -56,6 +56,7 @@ import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
 import com.fursys.mobilecm.vo.tmserp.TMSERPAllMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKstiList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPKsticdAllList;
@@ -66,6 +67,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
@@ -1642,4 +1644,58 @@ public class ApiTmsErpController {
 			return gson.toJson(result);
 		}
 	}
+	
+	
+	@ApiOperation(value="/getStiMemberInfo", notes="시공팀원정보현황 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보현황 조회 실패") })
+	@GetMapping("/getStiMemberInfo")
+	@RequestMapping(value="/getStiMemberInfo",method=RequestMethod.GET)
+	public String getStiMemberInfo(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPStimemberInfo> stiMember = null;
+		
+		try {
+			//if (user != null) {
+				params.put("k_sti_cd", k_sti_cd);
+				stiMember = tmserpScheduling.selectStimemberInfo(params);
+				return gson.toJson(stiMember);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+	
+	@ApiOperation(value="/getStiMemberDetailInfo", notes="시공팀원정보Detail현황 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보Detail현황 조회 실패") })
+	@GetMapping("/getStiMemberDetailInfo")
+	@RequestMapping(value="/getStiMemberDetailInfo",method=RequestMethod.GET)
+	public String getStiMemberDetailInfo(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "sti_cd", required = true) String sti_cd
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPStimemberDetailInfo> stiDetailMember = null;
+		
+		try {
+			//if (user != null) {
+				params.put("sti_cd", sti_cd);
+				stiDetailMember = tmserpScheduling.selectStimemberDetailInfo(params);
+				return gson.toJson(stiDetailMember);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}
+	
 }

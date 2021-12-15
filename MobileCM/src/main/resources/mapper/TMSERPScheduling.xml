@@ -2867,4 +2867,39 @@
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 
 	</select>
+	 
+	<select id="selectStimemberInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo">
+	<![CDATA[	
+    SELECT  TCS.COM_SCD AS COM_SCD
+         ,  TCS.STI_CD AS STI_CD
+         ,  TCS.STI_NM AS STI_NM
+		 , ( SELECT COUNT(*)
+		       FROM TC_STMEMBER TCSM WITH (NOLOCK) 
+			  WHERE TCSM.STI_CD = TCS.STI_CD ) AS TOTAL_QTY
+		 ,( SELECT COUNT(*)
+			  FROM TC_STMEMBER TCSM WITH (NOLOCK) 
+			 WHERE TCSM.STI_CD = TCS.STI_CD
+			  AND ( TCSM.STM_MDT IS NOT NULL OR TCSM.STM_MDT <> '' ) ) AS CAR_QTY
+    FROM    TC_STINF TCS WITH (NOLOCK)
+    WHERE   TCS.k_STI_CD = #{k_sti_cd}
+	]]>    
+	</select>	
+	
+	<select id="selectStimemberDetailInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo">
+	<![CDATA[	
+    SELECT  TCS.COM_SCD AS COM_SCD
+         ,  TCS.STI_CD AS STI_CD
+         ,  TCS.STI_NM AS STI_NM
+		 , ( SELECT COUNT(*)
+		       FROM TC_STMEMBER TCSM WITH (NOLOCK) 
+			  WHERE TCSM.STI_CD = TCS.STI_CD ) AS TOTAL_QTY
+		 ,( SELECT COUNT(*)
+			  FROM TC_STMEMBER TCSM WITH (NOLOCK) 
+			 WHERE TCSM.STI_CD = TCS.STI_CD
+			  AND ( TCSM.STM_MDT IS NOT NULL OR TCSM.STM_MDT <> '' ) ) AS CAR_QTY
+    FROM    TC_STINF TCS WITH (NOLOCK)
+    WHERE   TCS.k_STI_CD = #{k_sti_cd}
+	]]>    
+	</select>		
+	
 </mapper>
