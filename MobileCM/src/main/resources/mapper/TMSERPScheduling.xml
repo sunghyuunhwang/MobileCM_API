@@ -2968,4 +2968,72 @@
 
 	]]>
 	</delete>		
+	
+	<select id="selectStiDueInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo">
+	<![CDATA[	
+		SELECT
+				A.STI_CD,
+				A.STI_NM,
+				A.STI_QTYCAPA,
+				A.STI_AMTCAPA,
+				SUM(A.STI_CURRENTAMT) AS STI_CURRENTAMT,
+				SUM(A.STI_CURRENTQTY) AS STI_CURRENTQTY,
+				(
+					SELECT
+						AA.STI_DUEDAY
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY = CONVERT(CHAR(8), GETDATE(), 112)
+				) AS CURRENT_DUEDAY,
+				MAX(A.STI_DUEDAY) AS MAX_DUEDAY,
+				(
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS TOTAL_DAYCNT,
+				SUM(A.STI_CURRENTAMT) / (
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS AVG_AMT,
+				SUM(A.STI_CURRENTQTY) / (
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS AVG_CNT,
+				(
+					SELECT
+						SUM(AA.STI_DUEDAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY = CONVERT(CHAR(8), GETDATE(), 112)
+				) / (
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS AVG_DUEDAY
+				
+				
+		  FROM TC_STIDUEDAY A WITH (NOLOCK), TC_STINF B WITH (NOLOCK)
+		 WHERE A.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+		   AND A.COM_SCD = B.COM_SCD
+		   AND A.STI_CD = B.STI_CD 
+		   AND B.K_STI_CD = #{k_sti_cd}
+		GROUP BY A.STI_CD, A.STI_NM, A.STI_QTYCAPA, A.STI_AMTCAPA, A.COM_SCD
+	]]>    
+	</select>		
 </mapper>

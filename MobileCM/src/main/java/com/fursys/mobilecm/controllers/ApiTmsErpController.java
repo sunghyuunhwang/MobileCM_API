@@ -67,6 +67,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
@@ -1872,4 +1873,37 @@ public class ApiTmsErpController {
 		System.out.println(response.toString());	
 		return gson.toJson(response);
 	}		
+	
+	
+	@ApiOperation(value="/getStiDuedayInformation2", notes="시공납기현황 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공납기현황 조회 실패") })
+	@GetMapping("/getStiDuedayInformation2")
+	@RequestMapping(value="/getStiDuedayInformation2",method=RequestMethod.GET)
+	public String getStiDuedayInformation2(
+			@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd,
+			@ApiParam(value = "fdt", required = true, example = "20211216")
+			@RequestParam(name = "fdt", required = true) String fdt,
+			@ApiParam(value = "tdt", required = true, example = "20211217")
+			@RequestParam(name = "tdt", required = true) String tdt			
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPSticurrentDuedateInfo> stiDueInfo = null;
+		
+		try {
+			//if (user != null) {
+				params.put("k_sti_cd", k_sti_cd);
+				params.put("fdt", tdt);
+				params.put("fdt", tdt);
+				stiDueInfo = tmserpScheduling.selectStiDueInfo(params);
+				return gson.toJson(stiDueInfo);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}	
+	
 }

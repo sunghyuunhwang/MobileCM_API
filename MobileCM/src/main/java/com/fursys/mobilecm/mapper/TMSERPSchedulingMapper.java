@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
@@ -98,4 +99,5 @@ public interface TMSERPSchedulingMapper {
 	public int updateStimemberInfo(HashMap<String,Object> params);
 	public int insertStimemberInfo(HashMap<String,Object> params);
 	public int deleteStimemberInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPSticurrentDuedateInfo> selectStiDueInfo(HashMap<String,Object> params);
 }
