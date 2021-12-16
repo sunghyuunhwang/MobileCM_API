@@ -1895,7 +1895,7 @@ public class ApiTmsErpController {
 			//if (user != null) {
 				params.put("k_sti_cd", k_sti_cd);
 				params.put("fdt", tdt);
-				params.put("fdt", tdt);
+				params.put("tdt", tdt);
 				stiDueInfo = tmserpScheduling.selectStiDueInfo(params);
 				return gson.toJson(stiDueInfo);				
 			//} else {
