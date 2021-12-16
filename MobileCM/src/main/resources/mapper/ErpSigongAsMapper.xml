@@ -72,17 +72,21 @@
 					A.STI_QTYCAPA,
 					A.STI_AMTCAPA,
 					(SELECT COUNT(*)
-					   FROM TC_RESMST TCR WITH (NOLOCK)
+					   FROM TC_RESMST TCR WITH (NOLOCK), TO_ORDMAS TOO WITH (NOLOCK)
 					  WHERE TCR.STI_CD = A.STI_CD
 						AND TCR.COM_SCD = A.COM_SCD
 						AND TCR.COM_SSEC = 'C18C'
-						AND TCR.REM_DT = convert(char(8), getdate(), 112) ) AS QTY0,
+						AND TCR.ORM_NO = TOO.ORM_NO
+						AND TOO.ORM_STAT <> 'O08003'
+						AND CONVERT(CHAR(8), TOO.ORM_ORDDT, 112) = convert(char(8), getdate(), 112) ) AS QTY0,
 					(SELECT SUM(TCR.ORM_AMT)
-					   FROM TC_RESMST TCR WITH (NOLOCK)
+					   FROM TC_RESMST TCR WITH (NOLOCK), TO_ORDMAS TOO WITH (NOLOCK)
 					  WHERE TCR.STI_CD = A.STI_CD
 						AND TCR.COM_SCD = A.COM_SCD
 						AND TCR.COM_SSEC = 'C18C'
-						AND TCR.REM_DT = convert(char(8), getdate(), 112) ) AS AMT0,
+						AND TCR.ORM_NO = TOO.ORM_NO
+						AND TOO.ORM_STAT <> 'O08003'						
+						AND CONVERT(CHAR(8), TOO.ORM_ORDDT, 112) = convert(char(8), getdate(), 112) ) AS AMT0,
 					(
 						SELECT
 							A.CAL_YMD
