@@ -223,36 +223,7 @@ public class ApiErpSigongAsController {
 			HashMap<String, Object> params = new HashMap<String, Object>();
 			params.put("move_km", move_km);
 			
-			int total_amt = 0;
-			int total_move_km = 0;
-			int total_move_km_new = 0;
-			float flovar1 = 0.0f;
-			
-			if (move_km < 50) {
-				System.out.println("1111111111111");
-				total_move_km = 0 ;
-			} else if (move_km >= 50  && move_km < 100) {
-				System.out.println("2222222222222");
-				total_move_km = (int) (move_km * 0.7);
-				flovar1 = (float) (move_km * 0.7);
-			} else if (move_km >= 100 && move_km < 150) {
-				System.out.println("3333333333333");
-				total_move_km = (int) (move_km * 1) ;
-			} else if (move_km >= 150 && move_km < 200) {
-				System.out.println("4444444444444");
-				total_move_km = (int) (move_km * 1.4) ;
-				System.out.println("5555555555555");
-			} else if (move_km >= 200) {
-				System.out.println("6666666666666");
-				total_move_km = (int) (move_km * 2) ;
-			} else {
-				System.out.println("777777777777");
-				total_move_km = (int) (move_km * 1) ;
-			}
-			
-			System.out.println("total_move_km =====>" + total_move_km);
-			System.out.println("flovar1 =====>" + flovar1);
-					
+			response = apiErpSigongAsService.erp_sigongDelivery(params);
 			
         				
 		} catch (Exception e) {
