@@ -47,6 +47,40 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
 
+	
+	@Override
+	public BaseResponse erp_sigongDelivery(HashMap<String, Object> param) {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		BaseResponse response = new BaseResponse();
+		HashMap<String, Object> params;		
+		int res = 1;
+		
+		try {
+			
+			params = new HashMap<String, Object>();
+			
+    		res = erpsigongasMapper.erp_sigongDelivery(params);
+    		if (res < 1) {
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("erp_sigongDelivery 오류 [" + res + "]");
+				return response;
+			}
+    		    		
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return response;
+		}
+
+		txManager.commit(status);		
+		response.setResultCode("200");		
+		return response;
+
+	}
+	
 	@Override		
 	public AsReportResponse erp_selectAsReport(HashMap<String, Object> param) {
 		AsReportResponse reponse = new AsReportResponse();

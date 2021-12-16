@@ -20,6 +20,7 @@ import com.fursys.mobilecm.vo.erp.ERPSigongReport;
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	public int erp_sigongDelivery(HashMap<String,Object> params);
 	public ERPAsReport erp_selectAsReport(HashMap<String,Object> params);
 	public ArrayList<ERPAsItemReport> erp_selectAsItemReport(HashMap<String,Object> params);
 	public ERPSigongReport erp_selectSigongReport(HashMap<String,Object> params);
