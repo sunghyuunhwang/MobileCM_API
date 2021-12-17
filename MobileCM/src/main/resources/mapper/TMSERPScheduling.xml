@@ -2910,7 +2910,7 @@
 	     , STM_HP = #{stm_hp}
 	     , STM_ADDR = #{stm_addr}
 	     , STM_MDT = #{stm_mdt}
-		 , STM_ZDT = #{stm_zdt}
+		 , STM_JDT = #{stm_zdt}
 		 , COM_POS = #{com_pos}
 		 , SYS_DT = GETDATE()
 		 , USR_CD = #{sti_cd}
@@ -2941,8 +2941,8 @@
                 )
         VALUES (  #{com_scd}
                 , #{sti_cd}
-			    , FORMAT(CONVERT(INT, ( SELECT FROM TC_STMEMBER A WITH (NOLOCK)
-										 WHERE A.STI_CD = TCS.STI_CD ) ) + 1, '00')
+			    , FORMAT(CONVERT(INT, ( SELECT stm_no FROM TC_STMEMBER A WITH (NOLOCK)
+										 WHERE A.STI_CD = #{sti_cd} ) ) + 1, '00')
                 , #{stm_nm}
                 , #{com_pos}
                 , #{stm_addr}

@@ -29,8 +29,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -1653,8 +1656,8 @@ public class ApiTmsErpController {
 	@RequestMapping(value="/getStiMemberInfo",method=RequestMethod.GET)
 	public String getStiMemberInfo(
 			//@AuthenticationPrincipal User user,
-			@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
-			@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd
+			//@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
+			//@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
@@ -1662,7 +1665,7 @@ public class ApiTmsErpController {
 		
 		try {
 			//if (user != null) {
-				params.put("k_sti_cd", k_sti_cd);
+				params.put("k_sti_cd", "YA521");
 				stiMember = tmserpScheduling.selectStimemberInfo(params);
 				return gson.toJson(stiMember);				
 			//} else {
@@ -1705,27 +1708,9 @@ public class ApiTmsErpController {
 	
 	@ApiOperation(value = "tmserp_updatestimemberinfo", notes = "시공팀원정보 수정")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 수정 실패 !!") })
-	@GetMapping("/tmserp_updatestimemberinfo")
-	@RequestMapping(value = "/tmserp_updatestimemberinfo", method = RequestMethod.GET)
-	public String tmserp_updatestimemberinfo(
-			@ApiParam(value = "sti_cd", required = true, example = "YA521")
-			@RequestParam(name = "sti_cd", required = true) String sti_cd,
-			@ApiParam(value = "com_scd", required = true, example = "C16YA")
-			@RequestParam(name = "com_scd", required = true) String com_scd,			
-			@ApiParam(value = "stm_no", required = true, example = "01")
-			@RequestParam(name = "stm_no", required = true) String stm_no,
-			@ApiParam(value = "stm_nm", required = true, example = "황성현팀")
-			@RequestParam(name = "stm_nm", required = true) String stm_nm,
-			@ApiParam(value = "stm_hp", required = true, example = "010-0000-0000")
-			@RequestParam(name = "stm_hp", required = true) String stm_hp,		
-			@ApiParam(value = "stm_mdt", required = true, example = "164라7028")
-			@RequestParam(name = "stm_mdt", required = true) String stm_mdt,
-			@ApiParam(value = "stm_zdt", required = true, example = "20211211")
-			@RequestParam(name = "stm_zdt", required = true) String stm_zdt,		
-			@ApiParam(value = "com_pos", required = true, example = "C112")
-			@RequestParam(name = "com_pos", required = true) String com_pos,			
-			@ApiParam(value = "stm_addr", required = true, example = "서울 서울 서울 ")
-			@RequestParam(name = "stm_addr", required = true) String stm_addr					
+	@PutMapping("/tmserp_updatestimemberinfo")
+	@RequestMapping(value = "/tmserp_updatestimemberinfo", method = RequestMethod.PUT)
+	public String tmserp_updatestimemberinfo(@RequestBody @ApiParam(value = "stimember", required = true) TMSERPStimemberDetailInfo stimember
 			) {
 		
 		BaseResponse response = new BaseResponse();
@@ -1734,15 +1719,15 @@ public class ApiTmsErpController {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		
 		try {
-			params.put("sti_cd", sti_cd);
-			params.put("com_scd", com_scd);
-			params.put("stm_no", stm_no);
-			params.put("stm_nm", stm_nm);		
-			params.put("stm_hp", stm_hp);		
-			params.put("stm_mdt", stm_mdt);		
-			params.put("stm_zdt", stm_zdt);		
-			params.put("com_pos", com_pos);		
-			params.put("stm_addr", stm_addr);		
+			params.put("sti_cd", stimember.sti_cd);
+			params.put("com_scd", stimember.com_scd);
+			params.put("stm_no", stimember.stm_no);
+			params.put("stm_nm", stimember.stm_nm);		
+			params.put("stm_hp", stimember.stm_hp);		
+			params.put("stm_mdt", stimember.stm_mdt);		
+			params.put("stm_zdt", stimember.stm_jdt);		
+			params.put("com_pos", stimember.com_pos);		
+			params.put("stm_addr", stimember.stm_addr);		
 			
 	    	res = tmserpScheduling.updateStimemberInfo(params);
 	    	
@@ -1769,25 +1754,9 @@ public class ApiTmsErpController {
 	
 	@ApiOperation(value = "tmserp_insertstimemberinfo", notes = "시공팀원정보 등록")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 등록 실패 !!") })
-	@GetMapping("/tmserp_insertstimemberinfo")
-	@RequestMapping(value = "/tmserp_insertstimemberinfo", method = RequestMethod.GET)
-	public String tmserp_insertstimemberinfo(
-			@ApiParam(value = "sti_cd", required = true, example = "YA521")
-			@RequestParam(name = "sti_cd", required = true) String sti_cd,
-			@ApiParam(value = "com_scd", required = true, example = "C16YA")
-			@RequestParam(name = "com_scd", required = true) String com_scd,				
-			@ApiParam(value = "stm_nm", required = true, example = "황성현팀")
-			@RequestParam(name = "stm_nm", required = true) String stm_nm,
-			@ApiParam(value = "stm_hp", required = true, example = "010-0000-0000")
-			@RequestParam(name = "stm_hp", required = true) String stm_hp,		
-			@ApiParam(value = "stm_mdt", required = true, example = "164라7028")
-			@RequestParam(name = "stm_mdt", required = true) String stm_mdt,
-			@ApiParam(value = "stm_zdt", required = true, example = "20211211")
-			@RequestParam(name = "stm_zdt", required = true) String stm_zdt,		
-			@ApiParam(value = "com_pos", required = true, example = "C112")
-			@RequestParam(name = "com_pos", required = true) String com_pos,			
-			@ApiParam(value = "stm_addr", required = true, example = "서울 서울 서울 ")
-			@RequestParam(name = "stm_addr", required = true) String stm_addr					
+	@PostMapping("/tmserp_insertstimemberinfo")
+	@RequestMapping(value = "/tmserp_insertstimemberinfo", method = RequestMethod.POST)
+	public String tmserp_insertstimemberinfo(@RequestBody @ApiParam(value = "stimember", required = true) TMSERPStimemberDetailInfo stimember
 			) {
 		
 		BaseResponse response = new BaseResponse();
@@ -1796,14 +1765,14 @@ public class ApiTmsErpController {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		
 		try {
-			params.put("sti_cd", sti_cd);
-			params.put("com_scd", com_scd);
-			params.put("stm_nm", stm_nm);		
-			params.put("stm_hp", stm_hp);		
-			params.put("stm_mdt", stm_mdt);		
-			params.put("stm_zdt", stm_zdt);		
-			params.put("com_pos", com_pos);		
-			params.put("stm_addr", stm_addr);		
+			params.put("sti_cd", stimember.sti_cd);
+			params.put("com_scd", stimember.com_scd);
+			params.put("stm_nm", stimember.stm_nm);		
+			params.put("stm_hp", stimember.stm_hp);		
+			params.put("stm_mdt", stimember.stm_mdt);		
+			params.put("stm_jdt", stimember.stm_jdt);		
+			params.put("com_pos", stimember.com_pos);		
+			params.put("stm_addr", stimember.stm_addr);		
 			
 	    	res = tmserpScheduling.insertStimemberInfo(params);
 	    	
@@ -1830,8 +1799,8 @@ public class ApiTmsErpController {
 	
 	@ApiOperation(value = "tmserp_deletestimemberinfo", notes = "시공팀원정보 삭제")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 삭제 실패 !!") })
-	@GetMapping("/tmserp_deletestimemberinfo")
-	@RequestMapping(value = "/tmserp_deletestimemberinfo", method = RequestMethod.GET)
+	@DeleteMapping("/tmserp_deletestimemberinfo")
+	@RequestMapping(value = "/tmserp_deletestimemberinfo", method = RequestMethod.DELETE)
 	public String tmserp_deletestimemberinfo(
 			@ApiParam(value = "sti_cd", required = true, example = "YA521")
 			@RequestParam(name = "sti_cd", required = true) String sti_cd,
