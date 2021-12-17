@@ -17,6 +17,8 @@ public class TMSERPDefectDetail{
 	public String col_cd; /*접수번호*/
 	public String ast_actqty; /*접수번호*/
 	public String file_yn; /*접수번호*/
+	public String final_file_id;
+	public String ast_rtnyn; /*회수여부*/
 }
 
 

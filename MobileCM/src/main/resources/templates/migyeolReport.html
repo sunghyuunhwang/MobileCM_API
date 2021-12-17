@@ -31,9 +31,9 @@
                <li>
                   <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
                </li>
-<!--                          <li>
-                  <a class="lstLnk">하자 내역 조회</a>
-               </li> -->
+               <li>
+                  <a class="lstLnk" href="/v1/areamaster/defectInfo">하자 내역 조회</a>
+               </li>
           </menu>
           <button class="clsBtn bgBlck"><!--배경닫기--></button>
      </aside>
@@ -165,7 +165,7 @@
      <div th:replace="migyeolnfo :: migyeolnfo">
           <!--시공건 팝업 :: html로 팝업 파일 나눠주셔서 타임리프로 넣어놓긴했는데 여기에 그냥 팝업이 있는게 편하시면 전달주세요~-->
      </div>
-     
+
      <script type="text/javascript">
 /*           function showDays() {
               var start = $('.migyeolReport #nmldate1').datepicker('getDate');
@@ -175,7 +175,7 @@
      	  $('.migyeolReport #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays }); */
            $(window).on('load', function() {
           	getMigyeolReportInfo();//미결현황요약정보
-          });  
+          });
      </script>
 </body>
 </html>

@@ -26,6 +26,7 @@ public class TMSERPDefectInfo{
 	public String rtnsec; /*회수여부*/
 	public String file_yn; /*접수파일*/
 	public String opinion; /*이의제기*/
+	public String file_id;
 }
 
 

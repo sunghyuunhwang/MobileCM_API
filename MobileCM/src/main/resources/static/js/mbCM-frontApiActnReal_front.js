@@ -1,3 +1,125 @@
+function saveOpinion() {//하자내역상새조회
+     $(document).on("click",".saveOpnnBtn",function(){
+           var rpt_no = $('.getDfctInfLst.on').find('_rpt_no').text();
+           var rpt_seq = $('.getDfctInfLst.on').find('_rpt_seq').text();
+           var opinion = $('#opinion').val();
+         $.ajax({
+               url: "/v1/api/tmserp/saveOpinion",
+               type: "POST",
+               cache: false,
+               dataType: "json",
+               data:{
+                    rpt_no: rpt_no,
+                    rpt_seq: rpt_seq,
+                    opinion: opinion
+               },
+               success : function(data){   //파일 주고받기가 성공했을 경우. data 변수 안에 값을 담아온다.
+                    alert("이의제기 내용이 저장되었습니다.");
+
+              }
+         });
+     });
+
+
+}
+function getDfctDetail() {//하자내역상새조회
+     $.ajax({
+       url: "/v1/api/tmserp/getDefectDetail",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                rpt_no: 'I202109290263',
+                rpt_seq: '01'
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getDfctDetail = "<ul class='ulLftlst'>";
+                   getDfctDetail += "<li class='w150px'>"+response.itm_cd+"</li>";
+                   getDfctDetail += "<li class='w200px'>"+response.bmt_item+"</li>";
+                   getDfctDetail += "<li class='wCal680px tAlgnCntr'>"+response.col_cd+"</li>";
+                   getDfctDetail += "<li class='w100px tAlgnCntr'>"+response.ast_actqty+"</li>";
+                   getDfctDetail += "<li class='w80px  tAlgnCntr'><button class='inFileBtn'>"+response.file_yn+"</button></li>";
+                   getDfctDetail += "</ul>";
+                $('#getDfctDetail').append(getDfctDetail);
+                inFileBtnPop();
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getDfctInf() {//하자내역조회
+     $.ajax({
+       url: "/v1/api/tmserp/getDefectInfoList",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                from_dt: '20210910',
+                to_dt: '20211020',
+                ctm_nm: ''
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getDfctInf = "<ul class='ulLftlst getDfctInfLst'>";
+                   getDfctInf += "<li class='w110px'>"+response.rpt_enddt+"</li>";
+                   getDfctInf += "<li class='w150px'><a class='lnkLn _rpt_no' onclick='getDfctDetail();'>"+response.rpt_no+"</a></li>";
+                   getDfctInf += "<li class='w80px tAlgnCntr _rpt_seq'>"+response.rpt_seq+"</li>";
+                   getDfctInf += "<li class='w300px'>"+response.vnd_snm+"</li>";
+                   getDfctInf += "<li class='w100px tAlgnLft'>"+response.ctm_nm+"</li>";
+                   getDfctInf += "<li class='w150px'>"+response.sti_nm+"<input type='hidden' value='"+response.sti_cd+"' /></li>";
+                   getDfctInf += "<li class='w110px'>"+response.plm_cdt+"</li>";
+                   getDfctInf += "<li class='w150px'>"+response.rpt_rst_acttm_nm+"<input type='hidden' value='"+response.rpt_rst_acttm+"' /></li>";
+                   getDfctInf += "<li class='w100px'>"+response.rpt_usrnm+"</li>";
+                   getDfctInf += "<li class='w80px tAlgnCntr'>"+response.rtnsec+"</li>";
+                   getDfctInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn'>"+response.file_yn+"</button></li>";
+                   getDfctInf += "<li class='dsplyNon _rpt_astdesc'>"+response.rpt_astdesc+"</li>";
+                   getDfctInf += "<li class='dsplyNon _rpt_desc'>"+response.rpt_desc+"</li>";
+                   getDfctInf += "<li class='dsplyNon _opinion'>"+response.opinion+"</li>";
+                   getDfctInf += "</ul>";
+                $('#getDfctInf').append(getDfctInf);
+                inFileBtnPop();
+                $('.getDfctInfLst').click(function() {
+                   $('.ulLftlst').removeClass('on');
+                   var rpt_astdesc = $(this).find('._rpt_astdesc').text();
+                   var rpt_desc =  $(this).find('._rpt_desc').text();
+                   var opinion =  $(this).find('._opinion').text();
+                     if(rpt_astdesc.length > 0){
+                      $('#rpt_astdesc').text(rpt_astdesc);
+                     }else{
+                       $('#rpt_astdesc').text('전달 사항이 없습니다.');
+                     }
+                     if(rpt_desc.length > 0){
+                        $('#rpt_desc').text(rpt_desc);
+                     }else{
+                        $('#rpt_desc').text('요구 내역이 없습니다.');
+                     }
+                     if(opinion.length > 0){
+                        $('#opinion').text(opinion);
+                     }else{
+                        $('#opinion').text('이의 제기내용이 없습니다.');
+                     }
+         	           $(this).addClass('on');
+                });
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
 function getMglSubInf() {//상세상세미결현황요약정보
      $('#getMglSubInf').find('.ulLftlst._data').remove();
      $.ajax({
