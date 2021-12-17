@@ -1875,4 +1875,28 @@ public class ApiTmsErpController {
 		}
 	}	
 	
+	@ApiOperation(value="/getComcdList", notes="공통코드 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "공통코드 조회 실패") })
+	@GetMapping("/getComcdList")
+	@RequestMapping(value="/getComcdList",method=RequestMethod.GET)
+	public String getComcdList(
+			@ApiParam(value = "cdx_cd", required = true, example = "C11")
+			@RequestParam(name = "cdx_cd", required = true) String cdx_cd		
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPSticurrentDuedateInfo> comCdList = null;
+		
+		try {
+			//if (user != null) {
+				params.put("cdx_cd", cdx_cd);
+				comCdList = tmserpScheduling.selectComcdList(params);
+				return gson.toJson(comCdList);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}	
 }

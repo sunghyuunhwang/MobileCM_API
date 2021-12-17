@@ -3035,5 +3035,39 @@
 		   AND B.K_STI_CD = #{k_sti_cd}
 		GROUP BY A.STI_CD, A.STI_NM, A.STI_QTYCAPA, A.STI_AMTCAPA, A.COM_SCD
 	]]>    
-	</select>		
+	</select>
+
+	<select id="selectComcdList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPComcd">
+	<![CDATA[	
+		SELECT ccd_cd,
+		       cdx_cd,
+		       ccd_nm,
+		       ccd_name,
+		       ccd_yn,
+		       usr_cd,
+		       sys_dt,
+		       ccd_rmk,
+		       sort_seq,
+		       com_cmp,
+		       ref_1,
+		       ref_2,
+		       ref_3,
+		       ref_4,
+		       ref_5,
+		       ref_6,
+		       ref_7,
+		       ref_8,
+		       ref_9,
+		       ref_10,
+		       ref_11,
+		       ref_12,
+		       ref_13,
+		       ref_14,
+		       ref_15
+		FROM   tt_comcd WITH (nolock)
+		WHERE  cdx_cd = #{cdx_cd} 
+		AND    ccd_yn = 'Y'
+		ORDER BY sort_seq
+	]]>    
+	</select>			
 </mapper>
