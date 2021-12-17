@@ -871,7 +871,11 @@
 					A.COM_SCD
 				  FROM TC_STINF A WITH (NOLOCK)
 				 WHERE A.STI_RANK = 'Y'
-				) AA
+				   AND EXISTS 
+							(SELECT  1
+							FROM    TC_TOWND B WITH (NOLOCK)
+							WHERE   B.STI_CD = A.STI_CD )
+			) AA
 		) AAA
 
 ]]>
