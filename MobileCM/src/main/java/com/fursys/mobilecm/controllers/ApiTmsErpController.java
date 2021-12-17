@@ -1178,23 +1178,26 @@ public class ApiTmsErpController {
 	@RequestMapping(value="/getAttachFileList",method=RequestMethod.GET)
 	public String getAttachFileList(
 			@AuthenticationPrincipal User user,
-			@ApiParam(value = "plm_no", required = true, example = "plm_no")
-			@RequestParam(name = "plm_no", required = true) String plm_no
+			@ApiParam(value = "plm_no", required = false, example = "plm_no")
+			@RequestParam(name = "plm_no", required = false) String plm_no,
+			@ApiParam(value = "file_id", required = false, example = "file_id")
+			@RequestParam(name = "file_id", required = false) String file_id
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
 		ArrayList<TMSERPFile> fileList = null;
 		
 		try {
-			String file_id;
 			String proof_file_id;
+			String cresult_file_id;
 			if (user != null) {
 				
-				file_id = "cresult" + plm_no;
+				cresult_file_id = "cresult" + plm_no;
 				proof_file_id = "proof" + plm_no;
 				
 				params.put("proof_file_id", proof_file_id);
-				params.put("file_id", file_id);
+				params.put("cresult_file_id", cresult_file_id);
+				params.put("file_id",file_id);
 				
 				fileList = tmserpScheduling.selectFileList(params);
 				return gson.toJson(fileList);				

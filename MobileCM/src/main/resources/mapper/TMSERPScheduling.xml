@@ -2498,7 +2498,7 @@
 		       A.fst_usr,
 		       A.fst_sys_dt
 		FROM   ty_attchfile A with (nolock)
-		WHERE  attch_file_id in ( #{file_id}, #{proof_file_id})
+		WHERE  attch_file_id in ( #{file_id}, #{proof_file_id} , #{cresult_file_id})
 		ORDER  BY A.attch_file_snum 
 	</select>
 	<select id="searchFileInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPFile">
@@ -2785,7 +2785,8 @@
 		         ELSE 'N'
 		       END) AS rtnsec,
 		       file_yn,
-		       '이의제기 내용입니다.' as opinion
+		       '이의제기 내용입니다.' as opinion,
+		       file_id
 		FROM   (SELECT b.com_agsec,
 		               b.com_brand,
 		               b.rpt_no,
@@ -2814,7 +2815,8 @@
 		                 THEN 'Y'
 		                   ELSE ''
 		                 END )                      AS file_yn,
-		               A.defect_typ
+		               A.defect_typ,
+		               b.file_id
 		        FROM   ta_astitem a WITH (nolock),
 		               ta_rptreq b WITH (nolock),
 		               tc_stinf c WITH (nolock),
@@ -2852,6 +2854,7 @@
 		                  d.plm_cdt,
 		                  a.defect_typ,
 		                  b.file_id) X
+		         ORDER  BY rpt_enddt
 	</select>
 	<select id="selectDefectDetail" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail">
 		SELECT itm_cd,
@@ -2859,10 +2862,12 @@
 		       col_cd,
 		       ast_actqty,
 		       ast_rtndesc,
-		       CASE Isnull(final_file_id, 'N')
-		         WHEN 'N' THEN 'N'
+		       CASE Isnull(final_file_id, '')
+		         WHEN '' THEN 'N'
 		         ELSE 'Y'
-		       END AS FILE_YN
+		       END AS FILE_YN,
+		       final_file_id,
+		       ast_rtnyn
 		FROM   ta_astitem WITH (nolock)
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 

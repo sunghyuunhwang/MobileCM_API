@@ -157,4 +157,9 @@ public class WebController {
 		return "migyeolReport";
     	
     }
+    @GetMapping("/defectInfo")
+    public String defectInfo(@AuthenticationPrincipal User user) {
+		return "defectInfo";
+    	
+    }
 }

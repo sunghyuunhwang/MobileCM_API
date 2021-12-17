@@ -944,7 +944,7 @@ function cnstrctLst() {//시공건 검색 리스트
 				    //var cnstrctLst = "<ul class='ulLftlst' onclick='cnstrctLst_dtlInf()'>";
 				    var cnstrctLst = "<ul class='ulLftlst'>";
 				           //cnstrctLst += "<li class='w110px nmldatepicker'>"+response.rem_dt+"</li>";
-				           cnstrctLst += "<li class='w100px'><input type='text' class='dateformat' value='"+response.rem_dt+"' readonly/>";
+				           cnstrctLst += "<li class='w100px'><input type='text' class='dateformat' value='"+response.rem_dt+"' readonly/></li>";
 	                       cnstrctLst += "<li class='w100px'>"+response.com_ssec_nm+"</li>";
 	                       cnstrctLst += "<li class='w100px'>"+response.com_brand+"</li>";
 	                       cnstrctLst += "<li class='w150px'>"+response.orm_no+"</li>";
@@ -1063,7 +1063,7 @@ function getVndBanpum() {//대리점 반품
 				$.each(list, function(idx, response) {
 	                var file_yn = response.file_yn;
 	 			    var getVndBanpum = "<ul class='ulLftlst'>";
-				        getVndBanpum += "<li class='w100px'><input type='text' class='dateformat' value='"+response.plm_cdt+"' readonly/>";
+				        getVndBanpum += "<li class='w100px'><input type='text' class='dateformat' value='"+response.plm_cdt+"' readonly/></li>";
 	 			        getVndBanpum += "<li class='w150px tAlgnCntr'>"+response.sti_nm+"</li>";
 	 			        getVndBanpum += "<li class='w100px'>"+response.com_brand_nm+"</li>";
 	 			        getVndBanpum += "<li class='w150px'>"+response.vnd_nm+"</li>";
@@ -1078,7 +1078,7 @@ function getVndBanpum() {//대리점 반품
 	 			        getVndBanpum += "<li class='w130px tAlgnRght'>"+response.wtp_finish_nm+"</li>";
 	 			        getVndBanpum += "<li class='w200px'>"+response.wtp_entdt+"</li>";
 	 			    if(file_yn == "Y") {
-						getVndBanpum += "<li class='w100px tAlgnCntr'><button class='inFileBtn'>"+response.com_rdsec_nm+"</button></li>";		
+						getVndBanpum += "<li class='w100px tAlgnCntr'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.com_rdsec_nm+"</button></li>";		
 					}else{
 						getVndBanpum += "<li class='w100px tAlgnCntr'>"+response.com_rdsec_nm+"</li>";						
 					}    
@@ -1091,7 +1091,7 @@ function getVndBanpum() {//대리점 반품
 	                  innmbr();//인풋값 스팬으로 넘기기
 	                  dateformatting();
 	                  ulLftlst();
-	                  inFileBtnPop();//첨부파일
+	                  /*inFileBtnPop();//첨부파일*/
 	 	    },
 	         complete:function(){
 	                $('.alrtPop').removeClass('opn');
@@ -1105,7 +1105,7 @@ function getVndBanpum() {//대리점 반품
 	    }
 }
 
-function getAttachFileList(plm_no) { // 대리점반품 파일
+function getAttachFileList(plm_no, file_id) { // 대리점반품 파일
 	 resetFilelst();
      $.ajax({
         url: "/v1/api/tmserp/getAttachFileList",
@@ -1113,7 +1113,8 @@ function getAttachFileList(plm_no) { // 대리점반품 파일
         cache: false,
         dataType: "json",
         data: {
-			plm_no: plm_no
+			plm_no: plm_no,
+			file_id : file_id
         },
         success: function(list){
             $.each(list, function(idx, response) {
@@ -1277,14 +1278,14 @@ function getMigyeolInfo(_this) {//상세미결현황요약정보
                    mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_a_yn+"</li>";
                    mglRprtInf += "<li class='w80px tAlgnCntr _unpsecTxt'>"+response.unpsec_e_yn+"</li>";
                    mglRprtInf += "<li class='w100px tAlgnCntr _unpsecTxt'>"+response.unpsec_c_yn+"</li>";
-                   mglRprtInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn'>"+response.file_yn+"</button></li>";
+                   mglRprtInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.file_yn+"</button></li>";
                    mglRprtInf += "<li class='w300px'>"+response.mob_remark+"</li>";
                    mglRprtInf += "<input type='hidden' name = 'plm_no' value='"+response.plm_no+"'/>";
                    mglRprtInf += "</ul>";
                 $('#getMigyeolInf').append(mglRprtInf);
                 migyeolinfStl() ;//미경상세화면변경
             });
-            inFileBtnPop();
+/*            inFileBtnPop();*/
 	        if(list.length > 0){
 		        var datalist = $('#getMigyeolInf ul.ulLftlst').not('._index');
 		        $(datalist[0]).addClass('on');
@@ -1374,7 +1375,7 @@ function getMigyeolReportInfo() {//미결현황요약정보
 	           ulLftlst();
 	           cmma();//콤마
 	      },
-	     complete:function(){
+	      complete:function(){
 			$('.alrtPop').removeClass('opn');
 	        $('#lodingPop').removeClass('on');
 	      },
@@ -1386,7 +1387,161 @@ function getMigyeolReportInfo() {//미결현황요약정보
 	}
 
 }
+function saveOpinion() {//이의제기 저장
+     $(document).on("click",".saveOpnnBtn",function(){
+           var rpt_no = $('.getDfctInfLst.on').find('_rpt_no').text();
+           var rpt_seq = $('.getDfctInfLst.on').find('_rpt_seq').text();
+           var opinion = $('#opinion').val();
+         $.ajax({
+               url: "/v1/api/tmserp/saveOpinion",
+               type: "POST",
+               cache: false,
+               dataType: "json",
+               data:{
+                    rpt_no: rpt_no,
+                    rpt_seq: rpt_seq,
+                    opinion: opinion
+               },
+               success : function(data){   //파일 주고받기가 성공했을 경우. data 변수 안에 값을 담아온다.
+                    alert("이의제기 내용이 저장되었습니다.");
 
+              }
+         });
+     });
+
+
+}
+function getDfctDetail(_this) {//하자내역상새조회
+     $('#getDfctDetail').find('.ulLftlst._data').remove();
+   	 $('.ulLftlst').removeClass('on');
+	 $(_this).addClass('on');
+	 var $selected_to = $(_this);
+	 var $selected_rpt_no = $selected_to.find('input[name=rpt_no]').val();
+ 	 var $selected_rpt_seq = $selected_to.find('input[name=rpt_seq]').val();
+     $.ajax({
+       url: "/v1/api/tmserp/getDefectDetail",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+                rpt_no: $selected_rpt_no,
+                rpt_seq: $selected_rpt_seq
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getDfctDetail = "<ul class='ulLftlst _indefectInf _data'>";
+                   getDfctDetail += "<li class='w150px'>"+response.itm_cd+"</li>";
+                   getDfctDetail += "<li class='w200px'>"+response.bmt_item+"</li>";
+                   getDfctDetail += "<li class='w200px tAlgnCntr'>"+response.col_cd+"</li>";
+                   getDfctDetail += "<li class='w100px tAlgnCntr'>"+response.ast_actqty+"</li>";
+                   getDfctDetail += "<li class='w100px tAlgnCntr'>"+response.ast_rtnyn+"</li>";
+                   getDfctDetail += "<li class='wCal550px'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.file_yn+"</button></li>";
+	               getDfctDetail += "<input type='hidden' name ='file_id' value='"+response.final_file_id+"'/>";                
+                   getDfctDetail += "</ul>";
+                $('#getDfctDetail').append(getDfctDetail);
+            });
+            defectinfStl();
+		    /*inFileBtnPop();*/
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getDfctInf() {//하자내역조회
+	var from_dt = $('.defectInfo #nmldate1').val();//시작일
+	var to_dt = $('.defectInfo #nmldate2').val();//종료일
+	var start = $('.defectInfo #nmldate1').datepicker('getDate');
+	var end   = $('.defectInfo #nmldate2').datepicker('getDate');
+	var ctm_nm = $('input[name=ctm_nm]').val();//건명	
+	if(!start || !end) return;
+	var days = (end - start)/1000/60/60/24;
+	if(days >= 100){
+		 $('.alrtPop').addClass('opn');
+		 $('#defectInfo_popFail').addClass('on');
+	} else {
+		resetUlLftlst();
+		$('.alrtPop').addClass('opn');
+		$('#lodingPop').addClass('on');
+	    $.ajax({
+	      url: "/v1/api/tmserp/getDefectInfoList",
+	      type: "GET",
+	      cache: false,
+	      dataType: "json",
+	      data: {
+	               from_dt: from_dt,
+	               to_dt: to_dt,
+	               ctm_nm: ctm_nm
+	      },
+	      success: function(list){
+	           $.each(list, function(idx, response) {
+	              var getDfctInf = "<ul class='ulLftlst getDfctInfLst _indefectInf' onclick='getDfctDetail(this);'>";
+	                  getDfctInf += "<li class='w110px'><input type='text' class='dateformat' value='"+response.rpt_enddt+"' readonly/></li>";
+	                  getDfctInf += "<li class='w150px'>"+response.rpt_no+"</li>";
+	                  getDfctInf += "<li class='w80px tAlgnCntr _rpt_seq'>"+response.rpt_seq+"</li>";
+	                  getDfctInf += "<li class='w100px'>"+response.vnd_snm+"</li>";
+	                  getDfctInf += "<li class='w300px tAlgnLft'>"+response.ctm_nm+"</li>";
+	                  getDfctInf += "<li class='w150px'>"+response.sti_nm+"<input type='hidden' value='"+response.sti_cd+"' /></li>";
+	                  getDfctInf += "<li class='w110px'><input type='text' class='dateformat' value='"+response.plm_cdt+"' readonly/></li>";
+	                  getDfctInf += "<li class='w150px'>"+response.rpt_rst_acttm_nm+"<input type='hidden' value='"+response.rpt_rst_acttm+"' /></li>";
+	                  getDfctInf += "<li class='w100px'>"+response.rpt_usrnm+"</li>";
+	                  getDfctInf += "<li class='w80px tAlgnCntr'>"+response.rtnsec+"</li>";
+	                  getDfctInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.file_yn+"</button></li>";
+	                  getDfctInf += "<li class='dsplyNon _rpt_astdesc'>"+response.rpt_astdesc+"</li>";
+	                  getDfctInf += "<li class='dsplyNon _rpt_desc'>"+response.rpt_desc+"</li>";
+	                  getDfctInf += "<li class='dsplyNon _opinion'>"+response.opinion+"</li>";
+	                  getDfctInf += "<input type='hidden' name = 'rpt_no' value='"+response.rpt_no+"'/>";
+	                  getDfctInf += "<input type='hidden' name = 'rpt_seq' value='"+response.rpt_seq+"'/>";
+	                  getDfctInf += "<input type='hidden' name = 'file_id' value='"+response.file_id+"'/>";
+	                  getDfctInf += "</ul>";
+	               $('#getDfctInf').append(getDfctInf);
+	           });
+	           if(list.length > 0){
+				   var datalist = $('#getDfctInf ul.ulLftlst').not('._index');
+				   $(datalist[0]).addClass('on');
+				   $('#rpt_astdesc').text(list[0].rpt_astdesc);
+				   $('#rpt_desc').text(list[0].rpt_desc);
+				   $('#opinion').text(list[0].opinion);
+				   getDfctDetail(datalist[0]);
+			   }
+	           $('.getDfctInfLst').click(function() {
+	              $('.ulLftlst').removeClass('on');
+	              var rpt_astdesc = $(this).find('._rpt_astdesc').text();
+	              var rpt_desc =  $(this).find('._rpt_desc').text();
+	              var opinion =  $(this).find('._opinion').text();
+	                if(rpt_astdesc.length > 0){
+	                 $('#rpt_astdesc').text(rpt_astdesc);
+	                }else{
+	                  $('#rpt_astdesc').text('전달 사항이 없습니다.');
+	                }
+	                if(rpt_desc.length > 0){
+	                   $('#rpt_desc').text(rpt_desc);
+	                }else{
+	                   $('#rpt_desc').text('요구 내역이 없습니다.');
+	                }
+	                if(opinion.length > 0){
+	                   $('#opinion').text(opinion);
+	                }else{
+	                   $('#opinion').text('이의 제기내용이 없습니다.');
+	                }
+	             $(this).addClass('on');
+	           });	
+	           dateformatting();			
+	      },
+	      complete:function(){
+			$('.alrtPop').removeClass('opn');
+	        $('#lodingPop').removeClass('on');
+	      },
+	      error: function (request, status, error){
+	           console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+	           alert('데이터를 불러올수 없습니다.');
+	      }
+   		});
+   	}
+}
 /*$(document).ready(function(){
      if($('.loginBx').length < 1){
           assgnCll();//총건수 불러오기

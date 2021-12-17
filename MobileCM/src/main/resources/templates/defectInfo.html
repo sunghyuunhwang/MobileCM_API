@@ -16,12 +16,11 @@
 <!--     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> -->
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
-   <!--  <script src="/js/mbCM-frontApiActnReal.js"></script>프론트엔드 이벤 -->
-    <script src="/js/mbCM-frontApiActnReal_front.js"></script><!-- 프론트엔드 이벤 -->
+    <script src="/js/mbCM-frontApiActnReal.js"></script><!--프론트엔드 이벤 -->
 </head>
 
 <body>
-     <section class="vndBanpumStatus innmldate">
+     <section class="defectInfo innmldate">
           <div class="subPgTopBx">
                <button class="icnBtn icnTopMenuOpn">메뉴</button>
                <aside class="fssMblCmPop topMenuPopBox">
@@ -45,16 +44,16 @@
            <h1 class="insubPgTopBx ttl">하자내역 조회</h1>
            <article class="srchBox">
                 <div class="dateBx">
-                     시공확정일자
+                     최종조치일자
                      <input type="text" name="" id="nmldate1" class="nmldatepicker inptBx hThin" value="" readonly/>
                      ~
                      <input type="text" name="" id="nmldate2" class="nmldatepicker inptBx hThin" value="" readonly/>
                 </div>
                 <label for="cstmrNm" class="inptTtl hThin mLft20px">고객명</label>
-                <input type="text" name="itm_cd" id="cstmrNm" class="inptBx hThin w190px" />
+                <input type="text" name="ctm_nm" id="cstmrNm" class="inptBx hThin w190px" />
                 <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="getDfctInf();">조회</button>
            </article>
-           <div class="dfBx_x wCal300px _inSbPgBx _lftPd">
+           <div class="dfBx_x wCal500px _inSbPgBx _lftPd">
                 <div class="inSrchFtBx">
                      <article class="hHrfBx _top">
                           <h2 class="popSmllTtl">AS 판정결과</h2>
@@ -63,8 +62,8 @@
                                     <li class="w110px">최종조치일</li>
                                     <li class="w150px">접수번호</li>
                                     <li class="w80px tAlgnCntr">순번</li>
-                                    <li class="w300px">대리점명</li>
-                                    <li class="w100px tAlgnLft">고객명</li>
+                                    <li class="w100px">대리점명</li>
+                                    <li class="w300px tAlgnLft">고객명</li>
                                     <li class="w150px">서비스팀<input type='hidden' value='' /></li>
                                     <li class="w110px">원시공일</li>
                                     <li class="w150px">의뢰시공팀</li>
@@ -98,9 +97,10 @@
                                <ul class="ulLftlst _index">
                                     <li class="w150px">단품코드</li>
                                     <li class="w200px">부품코드</li>
-                                    <li class="wCal680px tAlgnCntr">색상</li>
+                                    <li class="w200px tAlgnCntr">색상</li>
                                     <li class="w100px tAlgnCntr">조치수량</li>
-                                    <li class="w80px  tAlgnCntr">파일</li>
+                                    <li class="w100px tAlgnCntr">회수여부</li>
+                                    <li class="wCal550px">파일</li>
                                </ul>
                                <!--나중에 주석처리할 부분
                                <ul class='ulLftlst'>
@@ -116,7 +116,7 @@
                      </article>
                 </div>
            </div>
-           <div class="dfBx_x w300px _inSbPgBx _rghtPd">
+           <div class="dfBx_x w500px _inSbPgBx _rghtPd">
                 <article class="hHrfBx _hPr30 _top nonAslt">
                      <dl class="dfDl _scllDd">
                           <dt class="bldTtl">
@@ -159,7 +159,7 @@
 		          </h2>
 		          <span class="ldingTxt">평균 1분이내로 소요됩니다.</span>
               </article>
-              <article class="popCntnts alrtBx" id="vndBSs_popFail"><!-- 시공건팝업 -->
+              <article class="popCntnts alrtBx" id="defectInfo_popFail"><!-- 시공건팝업 -->
                    <h2 class="ttl _f19px _32px">
                         조회조건을 확인해주세요.
                    </h2>
@@ -172,7 +172,7 @@
               </article>
      </aside>
      <script type="text/javascript">
-saveOpinion();
+	 saveOpinion();
      $( ".nmldatepicker" ).click(function() {
           $('.ui-datepicker').addClass('nml');
      });

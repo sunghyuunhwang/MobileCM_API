@@ -3,6 +3,18 @@
 //백엔드에 필요한 이벤트는 함수 혹은 함수안의 이벤트를 사용해 주시고
 //백엔드에 사용한 프론트엔드이벤트가 $(document).ready(function()에서 필요 없을경우 주석 처리해주세요.*주석 처리시설명필수표시
 
+function defectinfStl() {//하자내역 상세 화면 변경
+     $('._indefectInf .inFileBtn').each(function() {
+          var inFile = $(this);
+          var y = inFile.text();
+          if(y == 'Y'){
+               inFile.removeClass('non');
+          }else{
+               inFile.addClass('non');
+          }
+     });
+}
+
 function migyeolinfStl() {//미경상세화면변경
      $('._inmigyeolInf .inFileBtn').each(function() {
           var inFile = $(this);
@@ -68,12 +80,14 @@ function topMenuPopBox() {//팝업메뉴 팝업
      });
 }*/
 
-function inFileBtnPop() {//미결첨부파일
-     $(document).on("click",".inFileBtn",function(){
+function inFileBtnPop(_this) {//미결첨부파일
+     //$('.inFileBtn').click(function() {
             $('.inFilePop').addClass('opn');
-            var plm_no = $(this).closest('ul').find('input[name=plm_no]').val();
-            getAttachFileList(plm_no);
-     });
+            var plm_no = $(_this).closest('ul').find('input[name=plm_no]').val();
+            var file_id = $(_this).closest('ul').find('input[name=file_id]').val();
+            //alert("file_id : " + file_id);
+            getAttachFileList(plm_no, file_id);
+     //});
 }
 function vndFileDown() {//파일 다운로드
      $('.icnDown').click(function() {
@@ -663,5 +677,5 @@ $(document).ready(function(){
       cnstrctLstPop();//시공건 팝업
       topMenuPopBox();//팝업메뉴 팝업
 /*      vndBSsFilePop();//첨부파일*/
-      inFileBtnPop();//미결첨부파일
+/*      inFileBtnPop();//미결첨부파일*/
 });
