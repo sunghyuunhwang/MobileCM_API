@@ -2,6 +2,885 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
  
+ <insert id="erp_sigongDelivery" parameterType="HashMap">
+<![CDATA[
+	INSERT INTO TC_STIDUEDAY (SCH_DAY, COM_SCD, STI_CD, STI_NM, STI_QTYCAPA, STI_AMTCAPA, STI_CURRENTQTY, STI_CURRENTAMT, STI_DUEDAY, USR_CD, SYS_DT, FST_USR, FST_SYS_DT )
+	SELECT
+		CONVERT(VARCHAR(8), GETDATE(), 112) AS SCHEDULE_DAY,
+		AAA.COM_SCD,
+		AAA.STI_CD,
+		ISNULL(AAA.STI_NM, ''),
+		ISNULL(AAA.STI_QTYCAPA, 0),
+		ISNULL(AAA.STI_AMTCAPA, 0),
+		ISNULL(AAA.QTY0, 0),
+		ISNULL(AAA.AMT0, 0),
+		( CASE WHEN ISNULL(AAA.QTY_DUEDAY, 0) >= ISNULL(AAA.AMT_DUEDAY, 0) THEN ISNULL(AAA.QTY_DUEDAY, 0) ELSE ISNULL(AAA.AMT_DUEDAY, 0) END ) AS FINAL_DUEDAY,
+		'MOBILECM',
+		GETDATE(),
+		'MOBILECM',
+		GETDATE()
+	FROM 
+	(
+		SELECT
+			AA.COM_SCD,
+			AA.STI_CD,
+			AA.STI_NM,
+			AA.STI_QTYCAPA,
+			AA.STI_AMTCAPA,
+			AA.QTY0,
+			AA.AMT0,
+			(CASE WHEN AA.STI_QTYCAPA > QTY1 THEN 4 
+				  WHEN AA.STI_QTYCAPA > QTY2 THEN 5
+				  WHEN AA.STI_QTYCAPA > QTY3 THEN 6
+				  WHEN AA.STI_QTYCAPA > QTY4 THEN 7
+				  WHEN AA.STI_QTYCAPA > QTY5 THEN 8
+				  WHEN AA.STI_QTYCAPA > QTY6 THEN 9
+				  WHEN AA.STI_QTYCAPA > QTY7 THEN 10
+				  WHEN AA.STI_QTYCAPA > QTY8 THEN 11
+				  WHEN AA.STI_QTYCAPA > QTY9 THEN 12
+				  WHEN AA.STI_QTYCAPA > QTY10 THEN 13
+				  WHEN AA.STI_QTYCAPA > QTY11 THEN 14
+				  WHEN AA.STI_QTYCAPA > QTY12 THEN 15
+				  WHEN AA.STI_QTYCAPA > QTY13 THEN 16
+				  WHEN AA.STI_QTYCAPA > QTY14 THEN 17
+				  WHEN AA.STI_QTYCAPA > QTY15 THEN 18
+				  ELSE
+					 19
+				  END ) AS QTY_DUEDAY,
+			(CASE WHEN AA.STI_AMTCAPA > AMT1 THEN 4 
+				  WHEN AA.STI_AMTCAPA > AMT2 THEN 5
+				  WHEN AA.STI_AMTCAPA > AMT3 THEN 6
+				  WHEN AA.STI_AMTCAPA > AMT4 THEN 7
+				  WHEN AA.STI_AMTCAPA > AMT5 THEN 8
+				  WHEN AA.STI_AMTCAPA > AMT6 THEN 9
+				  WHEN AA.STI_AMTCAPA > AMT7 THEN 10
+				  WHEN AA.STI_AMTCAPA > AMT8 THEN 11
+				  WHEN AA.STI_AMTCAPA > AMT9 THEN 12
+				  WHEN AA.STI_AMTCAPA > AMT10 THEN 13
+				  WHEN AA.STI_AMTCAPA > AMT11 THEN 14
+				  WHEN AA.STI_AMTCAPA > AMT12 THEN 15
+				  WHEN AA.STI_AMTCAPA > AMT13 THEN 16
+				  WHEN AA.STI_AMTCAPA > AMT14 THEN 17
+				  WHEN AA.STI_AMTCAPA > AMT15 THEN 18
+				  ELSE
+					 19
+				  END ) AS AMT_DUEDAY
+		  FROM (
+	
+				SELECT
+					A.STI_NM,
+					A.STI_QTYCAPA,
+					A.STI_AMTCAPA,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK), TO_ORDMAS TOO WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.ORM_NO = TOO.ORM_NO
+						AND TOO.ORM_STAT <> 'O08003'
+						AND CONVERT(CHAR(8), TOO.ORM_ORDDT, 112) = convert(char(8), getdate(), 112) ) AS QTY0,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK), TO_ORDMAS TOO WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.ORM_NO = TOO.ORM_NO
+						AND TOO.ORM_STAT <> 'O08003'						
+						AND CONVERT(CHAR(8), TOO.ORM_ORDDT, 112) = convert(char(8), getdate(), 112) ) AS AMT0,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 4
+					) as DAY1,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 4
+										) ) QTY1,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 4
+										) ) AMT1,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 5
+					) as DAY2,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 5
+										)  ) as QTY2,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 5
+										)  ) as AMT2,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 6
+					) as DAY3,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 6
+										) ) as QTY3,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 6
+										) ) as AMT3,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 7
+					) as DAY4,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 7
+										) ) as QTY4,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 7
+										) ) as AMT4,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 8
+					) as DAY5,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 8
+										) ) as QTY5,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 8
+										) ) as AMT5,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 9
+					) as DAY6,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 9
+										) ) as QTY6,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 9
+										) ) as AMT6,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 10
+					) as DAY7,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 10
+										) ) as QTY7,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 10
+										) ) as AMT7,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 11
+					) as DAY8,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 11
+										) ) as QTY8,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 11
+										) ) as AMT8,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 12
+					) as DAY9,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 12
+										) ) as QTY9,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 12
+										) ) as AMT9,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 13
+					) as DAY10,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 13
+										) ) as QTY10,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 13
+										) ) as AMT10,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 14
+					) as DAY11,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 14
+										) ) as QTY11,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 14
+										) ) as AMT11,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 15
+					) as DAY12,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 15
+										) ) as QTY12,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 15
+										) ) as AMT12,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 16
+					) as DAY13,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 16
+										) ) as QTY13,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 16
+										) ) as AMT13,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 17
+					) as DAY14,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 17
+										) ) as QTY14,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 17
+										) ) as AMT14,
+					(
+						SELECT
+							A.CAL_YMD
+						FROM (
+							SELECT
+								ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+								CAL_YMD
+							FROM TT_CALENDAR TTC WITH (NOLOCK)
+							WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+							  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+							  AND TTC.CAL_SEC = 'T33N'
+						) A
+						where A.NUM = 18
+					) as DAY15,
+					(SELECT COUNT(*)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 18
+										) ) as QTY15,
+					(SELECT SUM(TCR.ORM_AMT)
+					   FROM TC_RESMST TCR WITH (NOLOCK)
+					  WHERE TCR.STI_CD = A.STI_CD
+						AND TCR.COM_SCD = A.COM_SCD
+						AND TCR.COM_SSEC = 'C18C'
+						AND TCR.REM_DT = (
+											SELECT
+												A.CAL_YMD
+											FROM (
+												SELECT
+													ROW_NUMBER() OVER(ORDER BY CAL_YMD ASC) AS NUM,
+													CAL_YMD
+												FROM TT_CALENDAR TTC WITH (NOLOCK)
+												WHERE TTC.COM_CMP = 'T01I' AND TTC.COM_CSEC = 'T32001' -- AND CAL_SEC = 'T33N'
+												  AND TTC.CAL_YMD >= DATEADD(DAY, 1, CONVERT(CHAR(8), GETDATE(), 112) )
+												  AND TTC.CAL_SEC = 'T33N'
+											) A
+											where A.NUM = 18
+										) ) as AMT15,
+					A.STI_CD,
+					A.COM_SCD
+				  FROM TC_STINF A WITH (NOLOCK)
+				 WHERE A.STI_RANK = 'Y'
+				   AND EXISTS 
+							(SELECT  1
+							FROM    TC_TOWND B WITH (NOLOCK)
+							WHERE   B.STI_CD = A.STI_CD )
+			) AA
+		) AAA
+
+]]>
+</insert>
+
  <select id="erp_selectAsItemReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAsItemReport">
 <![CDATA[
 	SELECT  A.BMT_ITEM,   
@@ -49,7 +928,7 @@
               A.RPT_QDT,
              (SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CCD_CD = A.COM_SCD) COM_SCD_NM,
              (SELECT STI_NM FROM TC_STINF with (nolock) WHERE STI_CD = A.STI_CD AND COM_SCD = A.COM_SCD) STI_NM,
-         (SELECT ISNULL(MOB_REMARK, '') FROM TA_PLANMST WHERE RPT_NO = A.RPT_NO AND RPT_SEQ = A.RPT_SEQ ) AS MOB_REMARK
+         (SELECT TOP 1 ISNULL(MOB_REMARK, '') FROM TA_PLANMST WHERE RPT_NO = A.RPT_NO AND RPT_SEQ = A.RPT_SEQ AND PLM_CDT = A.RPT_ENDDT) AS MOB_REMARK
          FROM TA_RPTREQ A with (nolock),
                     TT_VENDOR B with (nolock)
      WHERE   A.RPT_NO > '' 
@@ -61,7 +940,7 @@
 	    
 ]]>
 </select>
-
+ 
 <select id="erp_selectSigongItemReport" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSigongItemReport">
 <![CDATA[
 	SELECT 
@@ -220,10 +1099,13 @@
 			      ,ISNULL(AA.COL_SCD, '') AS COL_SCD
 				  ,AA.ITM_NM
 	              ,AA.PLMFTM_NM
+	              ,CASE WHEN LEN(ISNULL(AA.ADDR_DTL, '')) = 0 THEN AA.ORM_GADDR ELSE AA.ORM_GADDR + ' ' + AA.ADDR_DTL END ORM_GADDR
 	  FROM (
 	
-	    SELECT TOP 100 A.STI_CD,
+	    SELECT       A.STI_CD,
 		             A.PLM_FTM,
+		             A.ORM_GADDR,
+		             A.ADDR_DTL,
 					(SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'C41'	AND CCD_CD= A.PLM_FTM) AS 	PLMFTM_NM,
 			         A.COM_SCD,
 					(SELECT CCD_NM FROM TT_COMCD with (nolock) WHERE CDX_CD = 'C16'	AND CCD_CD= A.COM_SCD) AS 	COM_SCD_NM,
@@ -282,7 +1164,9 @@
 			           E.REM_FTM,
 			           E.REM_CSEC,
 					   A.COM_AGSEC,
-					   A.PLM_FTM
+					   A.PLM_FTM,
+					   A.ORM_GADDR,
+					   A.ADDR_DTL
 	) AA
 	WHERE PLD_FQTY > 0
 	ORDER BY   AA.STI_NM,
@@ -295,7 +1179,7 @@
   
 ]]>
 </select>
- 
+  
 <select id="selectLgsStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 

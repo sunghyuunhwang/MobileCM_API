@@ -22,6 +22,7 @@ public class ERPDeliveryItemList {
  	private String col_scd;
  	private String itm_nm;
  	private String plmftm_nm;
+ 	private String orm_gaddr;
       
 }
 

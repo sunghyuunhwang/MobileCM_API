@@ -2867,4 +2867,207 @@
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 
 	</select>
+	 
+	<select id="selectStimemberInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo">
+	<![CDATA[	
+    SELECT  TCS.COM_SCD AS COM_SCD
+         ,  TCS.STI_CD AS STI_CD
+         ,  TCS.STI_NM AS STI_NM
+		 , ( SELECT COUNT(*)
+		       FROM TC_STMEMBER TCSM WITH (NOLOCK) 
+			  WHERE TCSM.STI_CD = TCS.STI_CD ) AS TOTAL_QTY
+		 ,( SELECT COUNT(*)
+			  FROM TC_STMEMBER TCSM WITH (NOLOCK) 
+			 WHERE TCSM.STI_CD = TCS.STI_CD
+			  AND ( TCSM.STM_MDT IS NOT NULL OR TCSM.STM_MDT <> '' ) ) AS CAR_QTY
+    FROM    TC_STINF TCS WITH (NOLOCK)
+    WHERE   TCS.k_STI_CD = #{k_sti_cd}
+	]]>    
+	</select>	
+	
+	<select id="selectStimemberDetailInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo">
+	<![CDATA[	
+    SELECT TCS.STI_CD AS STI_CD
+          , TCS.STM_NO AS STM_NO
+          , TCS.STM_NM AS STM_NM
+          , ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = TCS.COM_POS ) AS COM_POS
+          , ISNULL(TCS.STM_ADDR, '') AS STM_ADDR
+          , ISNULL(TCS.STM_HP, '') AS STM_HP
+		  , ISNULL(TCS.STM_ZIP, '') AS STM_ZIP
+          , ISNULL(TCS.STM_JDT, '') AS STM_JDT
+          , ISNULL(TCS.STM_MDT, '') AS STM_MDT
+    FROM    TC_STMEMBER TCS WITH (NOLOCK)
+    WHERE   TCS.COM_SCD = #{com_scd}
+    AND     TCS.STI_CD = #{sti_cd}
+	]]>    
+	</select>		
+
+	<update id="updateStimemberInfo" parameterType="HashMap">
+	<![CDATA[
+
+	UPDATE TC_STMEMBER 
+	   SET STM_NM = #{stm_nm}
+	     , STM_HP = #{stm_hp}
+	     , STM_ADDR = #{stm_addr}
+	     , STM_MDT = #{stm_mdt}
+		 , STM_JDT = #{stm_zdt}
+		 , COM_POS = #{com_pos}
+		 , SYS_DT = GETDATE()
+		 , USR_CD = #{sti_cd}
+     WHERE STI_CD = #{sti_cd}
+       AND STM_NO = #{stm_no}
+       AND COM_SCD = #{com_scd}
+
+	]]>
+	</update> 
+	
+	<insert id="insertStimemberInfo" parameterType="java.util.HashMap">
+	<![CDATA[
+        INSERT INTO TC_STMEMBER
+               (  COM_SCD
+                , STI_CD
+                , STM_NO
+                , STM_NM
+                , COM_POS
+                , STM_ADDR
+                , STM_HP
+                , STM_MDT
+                , STM_JDT
+                , STI_APLYYN
+                , FST_USR
+                , FST_SYS_DT
+                , USR_CD
+                , SYS_DT
+                )
+        VALUES (  #{com_scd}
+                , #{sti_cd}
+			    , FORMAT(CONVERT(INT, ( SELECT stm_no FROM TC_STMEMBER A WITH (NOLOCK)
+										 WHERE A.STI_CD = #{sti_cd} ) ) + 1, '00')
+                , #{stm_nm}
+                , #{com_pos}
+                , #{stm_addr}
+                , #{stm_hp}
+                , #{stm_mdt}
+                , #{stm_jdt}
+                , 'Y'
+                , #{sti_cd}
+                , GETDATE()
+                , #{sti_cd}
+                , GETDATE()
+                );
+	]]>
+	</insert>	
+	
+	<delete id="deleteStimemberInfo" parameterType="java.util.HashMap">
+	<![CDATA[
+		DELETE 
+		  FROM TC_STMEMBER 
+		 WHERE COM_SCD = #{com_scd}
+		   AND STM_NO = #{stm_no}
+		   AND STI_CD = #{sti_cd}
+
+	]]>
+	</delete>		
+	
+	<select id="selectStiDueInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo">
+	<![CDATA[	
+		SELECT
+				A.STI_CD,
+				A.STI_NM,
+				A.STI_QTYCAPA,
+				A.STI_AMTCAPA,
+				SUM(A.STI_CURRENTAMT) AS STI_CURRENTAMT,
+				SUM(A.STI_CURRENTQTY) AS STI_CURRENTQTY,
+				(
+					SELECT
+						AA.STI_DUEDAY
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY = CONVERT(CHAR(8), DATEADD(DAY, -1, GETDATE() ), 112)
+				) AS CURRENT_DUEDAY,
+				MAX(A.STI_DUEDAY) AS MAX_DUEDAY,
+				(
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS TOTAL_DAYCNT,
+				SUM(A.STI_CURRENTAMT) / (
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS AVG_AMT,
+				SUM(A.STI_CURRENTQTY) / (
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS AVG_CNT,
+				(
+					SELECT
+						SUM(AA.STI_DUEDAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY = CONVERT(CHAR(8), DATEADD(DAY, -1, GETDATE() ), 112)
+				) / (
+					SELECT
+						COUNT(DISTINCT AA.SCH_DAY)
+					  FROM TC_STIDUEDAY AA
+					 WHERE AA.STI_CD = A.STI_CD
+					   AND AA.COM_SCD = A.COM_SCD
+					   AND AA.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+				) AS AVG_DUEDAY
+				
+				
+		  FROM TC_STIDUEDAY A WITH (NOLOCK), TC_STINF B WITH (NOLOCK)
+		 WHERE A.SCH_DAY BETWEEN #{fdt} AND #{tdt}
+		   AND A.COM_SCD = B.COM_SCD
+		   AND A.STI_CD = B.STI_CD 
+		   AND B.K_STI_CD = #{k_sti_cd}
+		GROUP BY A.STI_CD, A.STI_NM, A.STI_QTYCAPA, A.STI_AMTCAPA, A.COM_SCD
+	]]>    
+	</select>
+
+	<select id="selectComcdList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPComcd">
+	<![CDATA[	
+		SELECT ccd_cd,
+		       cdx_cd,
+		       ccd_nm,
+		       ccd_name,
+		       ccd_yn,
+		       usr_cd,
+		       sys_dt,
+		       ccd_rmk,
+		       sort_seq,
+		       com_cmp,
+		       ref_1,
+		       ref_2,
+		       ref_3,
+		       ref_4,
+		       ref_5,
+		       ref_6,
+		       ref_7,
+		       ref_8,
+		       ref_9,
+		       ref_10,
+		       ref_11,
+		       ref_12,
+		       ref_13,
+		       ref_14,
+		       ref_15
+		FROM   tt_comcd WITH (nolock)
+		WHERE  cdx_cd = #{cdx_cd} 
+		AND    ccd_yn = 'Y'
+		ORDER BY sort_seq
+	]]>    
+	</select>			
 </mapper>

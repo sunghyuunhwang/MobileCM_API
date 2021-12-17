@@ -10,6 +10,9 @@ import org.apache.ibatis.annotations.Mapper;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
@@ -91,4 +94,11 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPMigyeolDetailInfo> selectMigyeolDetailInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPDefectInfo> selectDefectInfoList(HashMap<String,Object> params);
 	public ArrayList<TMSERPDefectDetail> selectDefectDetail(HashMap<String,Object> params);
+	public ArrayList<TMSERPStimemberInfo> selectStimemberInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPStimemberDetailInfo> selectStimemberDetailInfo(HashMap<String,Object> params);
+	public int updateStimemberInfo(HashMap<String,Object> params);
+	public int insertStimemberInfo(HashMap<String,Object> params);
+	public int deleteStimemberInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPSticurrentDuedateInfo> selectStiDueInfo(HashMap<String,Object> params);
+	public ArrayList<TMSERPSticurrentDuedateInfo> selectComcdList(HashMap<String,Object> params);
 }
