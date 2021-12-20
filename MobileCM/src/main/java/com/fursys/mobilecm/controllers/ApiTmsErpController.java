@@ -71,6 +71,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo1;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
@@ -1923,4 +1924,40 @@ public class ApiTmsErpController {
 			throw new Exception();
 		}
 	}	
+	
+	
+	@ApiOperation(value="/getStiDuedayInformation1", notes="시공실적현황 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공실적현황 조회 실패") })
+	@GetMapping("/getStiDuedayInformation1")
+	@RequestMapping(value="/getStiDuedayInformation1",method=RequestMethod.GET)
+	public String getStiDuedayInformation1(
+			@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
+			@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd,
+			@ApiParam(value = "fdt", required = true, example = "20211216")
+			@RequestParam(name = "fdt", required = true) String fdt,
+			@ApiParam(value = "tdt", required = true, example = "20211217")
+			@RequestParam(name = "tdt", required = true) String tdt,
+			@ApiParam(value = "com_scd", required = true, example = "C16YA")
+			@RequestParam(name = "com_scd", required = true) String com_scd			
+			) throws Exception {
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		ArrayList<TMSERPSticurrentDuedateInfo1> stiDueInfo1 = null;
+		
+		try {
+			//if (user != null) {
+				params.put("k_sti_cd", k_sti_cd);
+				params.put("fdt", fdt);
+				params.put("tdt", tdt);
+				params.put("com_scd", com_scd);
+				stiDueInfo1 = tmserpScheduling.selectStiDueInfo1(params);
+				return gson.toJson(stiDueInfo1);				
+			//} else {
+			//	throw new Exception();
+			//}			
+		} catch(Exception e) {
+			throw new Exception();
+		}
+	}	
+	
 }

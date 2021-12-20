@@ -3085,4 +3085,129 @@
 		       AND col_cd = #{col_cd}
 	]]>
 	</update> 
+	
+	
+	<select id="selectStiDueInfo1" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo1">
+	<![CDATA[	
+	
+		
+		SET ANSI_WARNINGS OFF
+		SET ARITHIGNORE ON
+		SET ARITHABORT OFF
+		
+			SELECT  A.REM_DT AS REM_DT
+				   ,A.COM_SCD	AS COM_SCD	 
+			       ,A.STI_CD AS STI_CD	
+			       ,A.STI_NM AS STI_NM		
+				   ,ISNULL(A.TOTAL_HAPPYCALL_CNT, 0) AS TOTAL_HAPPYCALL_CNT
+				   ,ISNULL(A.TOTAL_HAPPYCALL_SCORE, 0) AS TOTAL_HAPPYCALL_SCORE
+				   ,ISNULL(ISNULL(A.TOTAL_HAPPYCALL_SCORE, 0) / ISNULL(A.TOTAL_HAPPYCALL_CNT, 0), 0) AS HAPPYCALL_AVERAGE
+				   ,A.TOTAL_SIGONG_CNT AS TOTAL_SIGONG_CNT
+				   ,A.TOTAL_INCONSISTENT_CNT AS TOTAL_INCONSISTENT_CNT
+				   ,ISNULL((A.TOTAL_INCONSISTENT_CNT/A.TOTAL_SIGONG_CNT), 0) INCONSISTENT_AVERAGE
+				   ,A.SIGONGHAJA_CNT AS SIGONGHAJA_CNT
+				   ,ISNULL(A.SIGONGHAJA_CNT / A.TOTAL_SIGONG_CNT, 0) AS SIGONGHAJA_AVERAGE 
+			       ,ISNULL(SUM(A.SAMT), 0) AS ORM_AMT /* 총시공액 */		
+			       ,ISNULL(SUM(A.CONST_AMT),0) AS CONSTCST_SUM /* 총시공지급액 */
+				 FROM  (		
+							SELECT A.REM_DT /* 예약일 */	
+							      ,A.COM_AGSEC /* 회사 */
+							      /*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+							      /*,A.COM_BRAND  브랜드 */
+							          ,ISNULL(B.STI_CD,'') as STI_CD/* 시공팀 코드*/
+							          ,ISNULL((SELECT TOP 1 STI_NM FROM TC_STINF WITH (NOLOCK) WHERE COM_SCD = B.COM_SCD AND STI_CD = B.STI_CD ),'' )  AS  STI_NM	
+							    	  ,MAX(A.ORM_AMT) AS SAMT /* 총시공액 */		
+									  ,(CASE WHEN A.COM_AGSEC = 'C02F' THEN SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) * 1.37
+											     WHEN A.COM_AGSEC = 'C02P' THEN SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) * 1.37
+												 ELSE SUM(ISNULL(IB.ITM_CONSTCST,0)*ISNULL(IA.ORD_QTY,0)) END ) AS CONST_AMT
+		                              ,B.K_STI_CD /*권역시공팀 추가 2017.03.14 |주요한|*/
+		                              ,A.COM_SCD
+									  ,A.PLM_NO
+									  ,(SELECT SUM(THA.RES_SCORE)
+									     FROM TA_HC_ANSWERDTL THA, TC_RESMST TCR
+										WHERE THA.COM_CMP = 'T01B'
+										  AND THA.COM_AGSEC = A.COM_AGSEC
+										  AND THA.COM_SSEC = 'C18C'
+										  AND THA.PLM_NO = TCR.PLM_NO
+										  AND TCR.STI_CD = A.STI_CD
+										  AND TCR.REM_DT BETWEEN #{fdt} AND #{tdt}
+									   ) AS TOTAL_HAPPYCALL_SCORE
+									  ,(SELECT COUNT(*)
+									     FROM TA_HC_ANSWERDTL THA, TC_RESMST TCR
+										WHERE THA.COM_CMP = 'T01B'
+										  AND THA.COM_AGSEC = A.COM_AGSEC
+										  AND THA.COM_SSEC = 'C18C'
+										  AND THA.PLM_NO = TCR.PLM_NO
+										  AND TCR.STI_CD = A.STI_CD
+										  AND TCR.REM_DT BETWEEN #{fdt} AND #{tdt}
+									   ) AS TOTAL_HAPPYCALL_CNT
+									   ,(SELECT COUNT(*)
+									       FROM TC_PLANMST TCP WITH (NOLOCK)
+										  WHERE TCP.PLM_NO = A.PLM_NO
+										    AND TCP.PLM_CDT BETWEEN #{fdt} AND #{tdt}
+										 ) AS TOTAL_SIGONG_CNT
+									   ,(SELECT COUNT(*)
+									       FROM TC_PLANMST TCP WITH (NOLOCK)
+										  WHERE TCP.PLM_NO = A.PLM_NO
+										    AND TCP.PLM_CDT BETWEEN #{fdt} AND #{tdt}
+											AND TCP.INCONSISTENT_YN = 'Y'
+										 ) AS TOTAL_INCONSISTENT_CNT
+									   ,( SELECT
+												COUNT(DISTINCT TAR.RPT_NO + TAR.RPT_SEQ )
+									        FROM TA_RPTREQ TAR WITH (NOLOCK), TA_ASTITEM TAA WITH (NOLOCK)
+										   WHERE TAR.PLM_NO = A.PLM_NO
+										     AND TAR.RPT_NO = TAA.RPT_NO
+											 AND TAR.RPT_SEQ = TAA.RPT_SEQ
+											 AND TAR.COM_SPROG = 'A17008'
+											 AND TAA.COM_RSFSEC = 'A6434'
+											 AND TAA.COM_RSFTYP in ('642003', '642022')						    
+										) AS SIGONGHAJA_CNT
+							      FROM TC_RESMST A WITH (NOLOCK)
+							      LEFT OUTER JOIN TO_ORDDET IA WITH (NOLOCK) ON IA.ORM_NO = A.ORM_NO
+								  LEFT OUTER JOIN TT_ITMCOP IB WITH (NOLOCK) ON IB.ITM_CD = IA.ITM_CD
+													AND IB.COL_CD = IA.COL_CD
+													AND IB.COM_CMP = ( SELECT COM_CMP FROM TT_COMCD WITH (NOLOCK) WHERE CDX_CD = 'C02' AND CCD_CD = A.COM_AGSEC )  
+		
+								       ,TC_STINF B 
+									  
+							     WHERE A.STI_CD=B.STI_CD		
+							       AND (A.COM_SSEC = 'C18C' OR A.REM_CASYN = 'Y')
+							       AND A.COM_CTSEC = 'C06L' /*  소액*/
+							       AND A.REM_DT BETWEEN #{fdt} AND #{tdt}
+							       AND B.COM_STSEC != 'C20A'					    			
+							       AND A.COM_SCD = #{com_scd}		
+							       AND B.K_STI_CD = #{k_sti_cd}
+		       					       									       			
+							GROUP BY A.REM_DT 			
+							        ,K_STI_CD			
+							        ,B.STI_CD			
+							        ,A.STI_CD			
+									,B.COM_SCD	
+							    	,B.STI_NM
+		                            ,A.ORM_NO
+		                            ,A.COM_AGSEC
+									/*2018.06.14 |주요한| 유효종대리님 요청 브랜드삭제 */
+									/*,A.COM_BRAND*/                            
+		                            ,B.K_STI_CD
+		                            ,A.COM_SCD
+		                            ,A.COM_SSEC
+									,A.PLM_NO
+							) AS A			
+			 GROUP BY REM_DT 			
+			        ,STI_CD 			
+			    	,STI_NM 	
+					,COM_SCD
+					,TOTAL_HAPPYCALL_SCORE
+					,TOTAL_HAPPYCALL_CNT
+				    ,TOTAL_SIGONG_CNT
+				    ,TOTAL_INCONSISTENT_CNT
+					,SIGONGHAJA_CNT
+			 ORDER BY REM_DT 			
+			    	,STI_NM 	
+		            ,STI_CD
+		          ,COM_SCD
+
+	]]>    
+	</select>
+	
 </mapper>

@@ -11,6 +11,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo1;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
@@ -102,4 +103,5 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPSticurrentDuedateInfo> selectStiDueInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPSticurrentDuedateInfo> selectComcdList(HashMap<String,Object> params);
 	public int updateOpinion(HashMap<String,Object> params);
+	public ArrayList<TMSERPSticurrentDuedateInfo1> selectStiDueInfo1(HashMap<String,Object> params);
 }
