@@ -2792,15 +2792,15 @@
 		               b.vnd_snm,
 		               b.com_scd,
 		               b.sti_cd,
-		               c.sti_nm,
+					   isnull((select sti_nm from tc_stinf with (nolock) where sti_cd = b.sti_cd),'') as sti_nm,
 		               b.ctm_nm,
 		               Isnull(b.rpt_desc, '')
 		               + Isnull(b.rpt_descplus, '') AS rpt_desc,
 		               b.rpt_enddt,
 		               b.rpt_astdesc,
 		               b.rpt_usrnm,
-		               b.rpt_rst_acttm,
-		               isnull((select sti_nm from tc_stinf with (nolock) where sti_cd = b.rpt_rst_acttm),'') as rpt_rst_acttm_nm,
+					   d.sti_cd as rpt_rst_acttm,
+					   c.sti_nm as rpt_rst_acttm_nm,
 		               d.plm_cdt,
 		               ( CASE
 		                   WHEN (SELECT Count(*)
@@ -2825,9 +2825,9 @@
 		               AND b.com_sprog = 'A17008' 
 		               AND b.rpt_seq = a.rpt_seq
 		               AND b.rpt_no = a.rpt_no 
-		               AND c.sti_cd = b.sti_cd
+		               AND d.sti_cd = c.sti_cd
 		               AND c.k_sti_cd = #{ksti_cd}
-		               AND d.orm_no = b.ord_no
+		               AND d.plm_no = b.plm_no
 		       <if test="ctm_nm != null and ctm_nm != ''">
 			   		   AND b.ctm_nm LIKE #{ctm_nm} + '%'
 			   </if>) X
