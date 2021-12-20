@@ -2818,6 +2818,7 @@
 		        WHERE  1 = 1
 		               AND b.com_scd = #{com_scd}
 		               AND a.com_rsfsec = 'A6434'
+		               AND a.com_rsftyp in ('642003', '642022')
 		               /*AND a.defect_typ = 'A6639'*/
 		               AND b.rpt_enddt 	<![CDATA[>=]]> #{from_dt}
 		               AND b.rpt_enddt 	<![CDATA[<=]]> #{to_dt}
