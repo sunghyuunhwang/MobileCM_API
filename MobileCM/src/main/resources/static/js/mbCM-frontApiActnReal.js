@@ -1389,22 +1389,27 @@ function getMigyeolReportInfo() {//미결현황요약정보
 }
 function saveOpinion() {//이의제기 저장
      $(document).on("click",".saveOpnnBtn",function(){
-           var rpt_no = $('.getDfctInfLst.on').find('_rpt_no').text();
-           var rpt_seq = $('.getDfctInfLst.on').find('_rpt_seq').text();
+           var rpt_no = $('.getDfctInfLst.on').find('._rpt_no').text();
+           var rpt_seq = $('.getDfctInfLst.on').find('._rpt_seq').text();
+           var bmt_item = $('.getDfctDetail.on').find('._bmt_item').text();
+           var col_cd = $('.getDfctDetail.on').find('._col_cd').text();
            var opinion = $('#opinion').val();
          $.ajax({
                url: "/v1/api/tmserp/saveOpinion",
-               type: "POST",
+               type: "PUT",
                cache: false,
                dataType: "json",
-               data:{
+               contentType: 'application/json',
+               data:JSON.stringify ({
                     rpt_no: rpt_no,
                     rpt_seq: rpt_seq,
+                    bmt_item: bmt_item,
+                    col_cd: col_cd,                   
                     opinion: opinion
-               },
+               }),
                success : function(data){   //파일 주고받기가 성공했을 경우. data 변수 안에 값을 담아온다.
                     alert("이의제기 내용이 저장되었습니다.");
-
+                    $('.getDfctDetail.on').find('._opinion').text(opinion);
               }
          });
      });
@@ -1429,18 +1434,29 @@ function getDfctDetail(_this) {//하자내역상새조회
        },
        success: function(list){
             $.each(list, function(idx, response) {
-               var getDfctDetail = "<ul class='ulLftlst _indefectInf _data'>";
+               var getDfctDetail = "<ul class='ulLftlst _indefectInf _data getDfctDetail'>";
                    getDfctDetail += "<li class='w150px'>"+response.itm_cd+"</li>";
-                   getDfctDetail += "<li class='w200px'>"+response.bmt_item+"</li>";
-                   getDfctDetail += "<li class='w200px tAlgnCntr'>"+response.col_cd+"</li>";
+                   getDfctDetail += "<li class='w200px _bmt_item'>"+response.bmt_item+"</li>";
+                   getDfctDetail += "<li class='w200px tAlgnCntr _col_cd'>"+response.col_cd+"</li>";
                    getDfctDetail += "<li class='w100px tAlgnCntr'>"+response.ast_actqty+"</li>";
                    getDfctDetail += "<li class='w100px tAlgnCntr'>"+response.ast_rtnyn+"</li>";
+                   getDfctDetail += "<li class='dsplyNon _opinion'>"+response.opinion+"</li>";
                    getDfctDetail += "<li class='wCal550px'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.file_yn+"</button></li>";
-	               getDfctDetail += "<input type='hidden' name ='file_id' value='"+response.final_file_id+"'/>";                
+	               getDfctDetail += "<input type='hidden' name ='file_id' value='"+response.final_file_id+"'/>";		                                   
                    getDfctDetail += "</ul>";
                 $('#getDfctDetail').append(getDfctDetail);
             });
-            defectinfStl();
+
+			var datalist = $('#getDfctDetail ul.ulLftlst').not('._index');
+			$(datalist[0]).addClass('on');
+		    var opinion = list[0].opinion;
+		    if(opinion.length > 0){
+		       $('#opinion').val(opinion);
+		    }else{
+		       $('#opinion').val('이의 제기내용이 없습니다.');
+		    }
+			defectinfStl();
+
 		    /*inFileBtnPop();*/
        },
        error: function (request, status, error){
@@ -1478,9 +1494,9 @@ function getDfctInf() {//하자내역조회
 	      },
 	      success: function(list){
 	           $.each(list, function(idx, response) {
-	              var getDfctInf = "<ul class='ulLftlst getDfctInfLst _indefectInf' onclick='getDfctDetail(this);'>";
+	              var getDfctInf = "<ul class='ulLftlst _indefectInf getDfctInfLst' onclick='getDfctDetail(this);'>";
 	                  getDfctInf += "<li class='w110px'><input type='text' class='dateformat' value='"+response.rpt_enddt+"' readonly/></li>";
-	                  getDfctInf += "<li class='w150px'>"+response.rpt_no+"</li>";
+	                  getDfctInf += "<li class='w150px _rpt_no'>"+response.rpt_no+"</li>";
 	                  getDfctInf += "<li class='w80px tAlgnCntr _rpt_seq'>"+response.rpt_seq+"</li>";
 	                  getDfctInf += "<li class='w100px'>"+response.vnd_snm+"</li>";
 	                  getDfctInf += "<li class='w300px tAlgnLft'>"+response.ctm_nm+"</li>";
@@ -1492,7 +1508,6 @@ function getDfctInf() {//하자내역조회
 	                  getDfctInf += "<li class='w80px tAlgnCntr'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.file_yn+"</button></li>";
 	                  getDfctInf += "<li class='dsplyNon _rpt_astdesc'>"+response.rpt_astdesc+"</li>";
 	                  getDfctInf += "<li class='dsplyNon _rpt_desc'>"+response.rpt_desc+"</li>";
-	                  getDfctInf += "<li class='dsplyNon _opinion'>"+response.opinion+"</li>";
 	                  getDfctInf += "<input type='hidden' name = 'rpt_no' value='"+response.rpt_no+"'/>";
 	                  getDfctInf += "<input type='hidden' name = 'rpt_seq' value='"+response.rpt_seq+"'/>";
 	                  getDfctInf += "<input type='hidden' name = 'file_id' value='"+response.file_id+"'/>";
@@ -1504,14 +1519,12 @@ function getDfctInf() {//하자내역조회
 				   $(datalist[0]).addClass('on');
 				   $('#rpt_astdesc').text(list[0].rpt_astdesc);
 				   $('#rpt_desc').text(list[0].rpt_desc);
-				   $('#opinion').text(list[0].opinion);
 				   getDfctDetail(datalist[0]);
 			   }
 	           $('.getDfctInfLst').click(function() {
 	              $('.ulLftlst').removeClass('on');
 	              var rpt_astdesc = $(this).find('._rpt_astdesc').text();
 	              var rpt_desc =  $(this).find('._rpt_desc').text();
-	              var opinion =  $(this).find('._opinion').text();
 	                if(rpt_astdesc.length > 0){
 	                 $('#rpt_astdesc').text(rpt_astdesc);
 	                }else{
@@ -1522,11 +1535,11 @@ function getDfctInf() {//하자내역조회
 	                }else{
 	                   $('#rpt_desc').text('요구 내역이 없습니다.');
 	                }
-	                if(opinion.length > 0){
+/*	                if(opinion.length > 0){
 	                   $('#opinion').text(opinion);
 	                }else{
 	                   $('#opinion').text('이의 제기내용이 없습니다.');
-	                }
+	                }*/
 	             $(this).addClass('on');
 	           });	
 	           dateformatting();			

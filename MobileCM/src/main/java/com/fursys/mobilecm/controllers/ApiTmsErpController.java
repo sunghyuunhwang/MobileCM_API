@@ -1540,7 +1540,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getMigyeoDetaillnfo")
 	@RequestMapping(value="/getMigyeoDetaillnfo",method=RequestMethod.GET)
 	public String getMigyeoDetaillnfo(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "plm_no", required = true, example = "I202111010031")
 			@RequestParam(name = "plm_no", required = true) String plm_no
 			) throws Exception {
@@ -1549,13 +1549,13 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPMigyeolDetailInfo> migyeolInfoList = null;
 		
 		try {
-			//if (user != null) {
+			if (user != null) {
 				params.put("plm_no", plm_no);
 				migyeolInfoList = tmserpScheduling.selectMigyeolDetailInfo(params);
 				return gson.toJson(migyeolInfoList);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
@@ -1566,7 +1566,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getDefectInfoList")
 	@RequestMapping(value="/getDefectInfoList",method=RequestMethod.GET)
 	public String getDefectInfoList(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "from_dt", required = true, example = "20211001")
 			@RequestParam(name = "from_dt", required = true) String from_dt,
 			@ApiParam(value = "to_dt", required = true, example = "20211019")
@@ -1579,20 +1579,20 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPDefectInfo> defectInfoList = null;
 		
 		try {
-			//if (user != null) {
-				//UserEtc etc = getUserEtc(user);
-				//params.put("com_scd", etc.getCom_scd());
-				//params.put("ksti_cd", etc.getSti_cd());
-				params.put("com_scd", "C16YA");
-				params.put("ksti_cd", "YA601");
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("com_scd", etc.getCom_scd());
+				params.put("ksti_cd", etc.getSti_cd());
+				//params.put("com_scd", "C16YA");
+				//params.put("ksti_cd", "YA601");
 				params.put("from_dt", from_dt.replace("-", ""));
 				params.put("to_dt", to_dt.replace("-", ""));
 				params.put("ctm_nm", ctm_nm);
 				defectInfoList = tmserpScheduling.selectDefectInfoList(params);
 				return gson.toJson(defectInfoList);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
@@ -1603,7 +1603,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getDefectDetail")
 	@RequestMapping(value="/getDefectDetail",method=RequestMethod.GET)
 	public String getDefectDetail(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "rpt_no", required = true, example = "I202109290263")
 			@RequestParam(name = "rpt_no", required = true) String rpt_no,
 			@ApiParam(value = "rpt_seq", required = true, example = "01")
@@ -1614,42 +1614,63 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPDefectDetail> defectDetail = null;
 		
 		try {
-			//if (user != null) {
+			if (user != null) {
 				params.put("rpt_no", rpt_no);
 				params.put("rpt_seq", rpt_seq);
 				defectDetail = tmserpScheduling.selectDefectDetail(params);
 				return gson.toJson(defectDetail);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
 	}
 	
-	@ApiOperation(value="/saveOpinion", notes="tms첨부파일 다운로드")
+	@ApiOperation(value="/saveOpinion", notes="이의제기 저장")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@PostMapping("/saveOpinion")
-	@RequestMapping(value="/saveOpinion",method=RequestMethod.POST)
-	public String saveOpinion(HttpServletRequest request,  
-			HttpServletResponse response,
-			//@AuthenticationPrincipal User user,
-			@ApiParam(value = "rpt_no", required = true, example = "I202109290263")
-			@RequestParam(name = "rpt_no", required = true) String rpt_no,
-			@ApiParam(value = "rpt_seq", required = true, example = "01")
-			@RequestParam(name = "rpt_seq", required = true) String rpt_seq,
-			@ApiParam(value = "opinion", required = true, example = "이의!제기내용을 수정합니다.")
-			@RequestParam(name = "opinion", required = true) String opinion		
-			) throws Exception {
-		HashMap<Object, Object> result = new HashMap();    
+	@PutMapping("/saveOpinion")
+	@RequestMapping(value="/saveOpinion",method=RequestMethod.PUT)
+	public String saveOpinion(
+			@AuthenticationPrincipal User user,
+			@RequestBody @ApiParam(value = "defectInfo", required = true) TMSERPDefectDetail defectDetailInfo
+			) throws Exception {  
+		BaseResponse response = new BaseResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		int res = 0;		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+
 		try {
-			result.put("response", "200");
-			return gson.toJson(result);
-		} catch(Exception e) {
-			throw new Exception();
-		} finally {
-			return gson.toJson(result);
+			if (user != null) {
+				
+				params.put("rpt_no", defectDetailInfo.rpt_no);
+				params.put("rpt_seq", defectDetailInfo.rpt_seq);
+				params.put("bmt_item", defectDetailInfo.bmt_item);
+				params.put("col_cd", defectDetailInfo.col_cd);
+				params.put("opinion", defectDetailInfo.opinion);		
+
+		    	res = tmserpScheduling.updateOpinion(params);
+		    	
+				if (res < 1) {    				
+		        	txManager.rollback(status);
+		        	response.setResultCode("5001");
+		        	response.setResultMessage("saveOpinion 오류");
+		        	return gson.toJson(response);
+				}		
+			} else {	
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				return gson.toJson(response);				
+			}		
+		} catch (Exception e) {	
+			txManager.rollback(status);
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
 		}
+		txManager.commit(status);
+		response.setResultCode("200");
+		return gson.toJson(response);
 	}
 	
 	

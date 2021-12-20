@@ -8,11 +8,13 @@ function saveOpinion() {//하자내역상새조회
                type: "POST",
                cache: false,
                dataType: "json",
+               contentType: 'application/json',
                data:{
                     rpt_no: rpt_no,
                     rpt_seq: rpt_seq,
                     opinion: opinion
                },
+               data : JSON.stringify(data),
                success : function(data){   //파일 주고받기가 성공했을 경우. data 변수 안에 값을 담아온다.
                     alert("이의제기 내용이 저장되었습니다.");
 

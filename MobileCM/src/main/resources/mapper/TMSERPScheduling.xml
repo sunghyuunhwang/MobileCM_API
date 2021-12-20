@@ -2766,8 +2766,8 @@
 	<select id="selectDefectInfoList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo">
 		SELECT com_agsec,
 		       com_brand,
-		       rpt_no,
-		       rpt_seq,
+		       x.rpt_no,
+		       x.rpt_seq,
 		       vnd_snm,
 		       com_scd,
 		       sti_cd,
@@ -2780,12 +2780,10 @@
 		       rpt_rst_acttm,
 		       rpt_rst_acttm_nm,
 		       plm_cdt,
-		       (CASE allcnt
-		         WHEN rtncnt THEN 'Y'
-		         ELSE 'N'
-		       END) AS rtnsec,
-		       file_yn,
-		       '이의제기 내용입니다.' as opinion,
+		       case when Isnull(sum(CASE
+		                    WHEN ast.ast_rtnyn = 'N' THEN 1
+		                  END), 0) > 0 then 'N' else 'Y' end  AS rtnsec,
+		       x.file_yn,
 		       file_id
 		FROM   (SELECT b.com_agsec,
 		               b.com_brand,
@@ -2802,12 +2800,8 @@
 		               b.rpt_astdesc,
 		               b.rpt_usrnm,
 		               b.rpt_rst_acttm,
-		               (select sti_nm from tc_stinf with (nolock) where sti_cd = b.rpt_rst_acttm) as rpt_rst_acttm_nm,
+		               isnull((select sti_nm from tc_stinf with (nolock) where sti_cd = b.rpt_rst_acttm),'') as rpt_rst_acttm_nm,
 		               d.plm_cdt,
-		               Isnull(Sum(CASE
-		                            WHEN A.ast_rtnyn = 'Y' THEN 1
-		                          END), 0)          AS rtncnt,
-		               Count(a.rpt_no)              AS allcnt,
 		               ( CASE
 		                   WHEN (SELECT Count(*)
 		                         FROM   ty_attchfile WITH (nolock)
@@ -2835,29 +2829,32 @@
 		               AND d.orm_no = b.ord_no
 		       <if test="ctm_nm != null and ctm_nm != ''">
 			   		   AND b.ctm_nm LIKE #{ctm_nm} + '%'
-			   </if>
-		        GROUP  BY b.com_agsec,
-		                  b.com_brand,
-		                  b.rpt_no,
-		                  b.rpt_seq,
-		                  b.vnd_snm,
-		                  b.com_scd,
-		                  b.sti_cd,
-		                  c.sti_nm,
-		                  b.ctm_nm,
-		                  b.rpt_desc,
-		                  b.rpt_descplus,
-		                  b.rpt_enddt,
-		                  b.rpt_astdesc,
-		                  b.rpt_usrnm,
-		                  b.rpt_rst_acttm,
-		                  d.plm_cdt,
-		                  a.defect_typ,
-		                  b.file_id) X
-		         ORDER  BY rpt_enddt
-	</select>
+			   </if>) X
+				 inner join ta_astitem ast
+				 on ast.rpt_no = x.rpt_no
+				 and ast.rpt_seq = x.rpt_seq
+		        GROUP  BY x.com_agsec,
+		                  x.com_brand,
+		                  x.rpt_no,
+		                  x.rpt_seq,
+		                  x.vnd_snm,
+		                  x.com_scd,
+		                  x.sti_cd,
+		                  x.sti_nm,
+		                  x.ctm_nm,
+		                  x.rpt_desc,
+		                  x.rpt_enddt,
+		                  x.rpt_astdesc,
+		                  x.rpt_usrnm,
+		                  x.rpt_rst_acttm,
+		                  x.plm_cdt,
+		                  x.file_id,
+						  x.rpt_rst_acttm_nm,
+						  x.file_yn
+		         ORDER  BY rpt_enddt	
+    </select>
 	<select id="selectDefectDetail" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail">
-		SELECT itm_cd,
+		SELECT isnull(itm_cd,'') as itm_cd,
 		       bmt_item,
 		       col_cd,
 		       ast_actqty,
@@ -2867,7 +2864,8 @@
 		         ELSE 'Y'
 		       END AS FILE_YN,
 		       final_file_id,
-		       ast_rtnyn
+		       ast_rtnyn,
+		       isnull(diff_opinion,'') as opinion
 		FROM   ta_astitem WITH (nolock)
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 
@@ -3075,4 +3073,15 @@
 		ORDER BY sort_seq
 	]]>    
 	</select>			
+	
+	<update id="updateOpinion" parameterType="HashMap">
+	<![CDATA[
+		UPDATE ta_astitem
+		SET    diff_opinion = #{opinion}
+		WHERE  rpt_no = #{rpt_no}
+		       AND rpt_seq = #{rpt_seq} 
+		       AND bmt_item = #{bmt_item} 
+		       AND col_cd = #{col_cd}
+	]]>
+	</update> 
 </mapper>

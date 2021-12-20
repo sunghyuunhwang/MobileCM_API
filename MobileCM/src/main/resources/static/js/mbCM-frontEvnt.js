@@ -13,6 +13,16 @@ function defectinfStl() {//하자내역 상세 화면 변경
                inFile.addClass('non');
           }
      });
+     $('.getDfctDetail').click(function() {
+		  $(this).closest('div').find('.ulLftlst').removeClass('on');
+		   var opinion =  $(this).find('._opinion').text();
+		    if(opinion.length > 0){
+		       $('#opinion').val(opinion);
+		    }else{
+		        $('#opinion').val('이의 제기내용이 없습니다.');
+		    }
+	 	  $(this).addClass('on');
+	});	
 }
 
 function migyeolinfStl() {//미경상세화면변경

@@ -101,4 +101,5 @@ public interface TMSERPSchedulingMapper {
 	public int deleteStimemberInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPSticurrentDuedateInfo> selectStiDueInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPSticurrentDuedateInfo> selectComcdList(HashMap<String,Object> params);
+	public int updateOpinion(HashMap<String,Object> params);
 }
