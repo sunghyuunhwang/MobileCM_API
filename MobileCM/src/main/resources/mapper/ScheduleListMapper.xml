@@ -2551,6 +2551,8 @@ INSERT INTO TC_PLANDTL
 		 WHERE 1=1
 		   AND PLM_NO		= #{plm_no}
 		   AND (COM_PLDSEC	<= 'C096' OR COM_PLDSEC = 'C09A')
+		   AND COM_PLDSEC <> 'C0929'
+		   AND COM_PLDSEC <> 'C0928'
 		   AND COM_RDSEC	= 'C13N'
 		   AND PLD_RCDT		> '' 
 		
