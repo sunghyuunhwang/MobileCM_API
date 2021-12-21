@@ -31,6 +31,8 @@ public class TMSERPSigongAsList {
 	private String vnd_nm;
 	private String schdiv_yn;
 	private String com_rfg;
+	private String req_loc;
+	private String req_time;
 }
 
 

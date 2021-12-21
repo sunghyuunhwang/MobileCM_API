@@ -162,25 +162,29 @@
         .assgnSbInfBx .fao .txt{max-width: calc(100% - 86px);font-size: 17px;font-weight: bold;line-height: 25px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;}
         .assgnSbInfBx dd{margin:12px 0 0 0; }
            .assgnSbInfBx dd > .assgnSbAddInf{max-width:100%;font-size: 13px;line-height: 17px;padding: 4px 0;}
-           .assgnSbInfBx dd > .assgnRqtime,.assgnSbInfBx dd > .assgnRqtxt{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;} .assgnRqagt{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;}  .assgnRqgiveamt{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;}   .assgnRqschdivyn{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;} .assgnRqcomrfg{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;}
+           .assgnSbInfBx dd > .assgnRqtime,.assgnSbInfBx dd > .assgnRqtxt{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;} .assgnRqagt{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;}  .assgnRqgiveamt{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;}   .assgnRqschdivyn{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;} .assgnRqcomrfg{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;} .assgnReqTime{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;} .assgnReqLoc{position: relative;display: inline-block;float: left;width: 100%;min-height: 18px;margin: 12px 0 0  0;padding: 0 0 0 52px;font-size: 12px;line-height: 18px;box-sizing: border-box;}
               .assgnSbInfBx dd > .assgnRqtime{margin: 12px 0 0  0;}
               .assgnSbInfBx dd > .assgnRqagt{margin: 0px 0 0  0;}
               .assgnSbInfBx dd > .assgnRqtxt{margin: 0px 0 0  0;}
               .assgnSbInfBx dd > .assgnRqgiveamt{margin: 0px 0 0  0;}
               .assgnSbInfBx dd > .assgnRqschdivyn{margin: 0px 0 0  0;}
               .assgnSbInfBx dd > .assgnRqcomrfg{margin: 0px 0 0  0;}
+              .assgnSbInfBx dd > .assgnReqTime{margin: 0px 0 0  0;}
+              .assgnSbInfBx dd > .assgnReqLoc{margin: 0px 0 0  0;}
               .assgnSbInfBx dd > .assgnRqtime::before{content: '요청시간';}
               .assgnSbInfBx dd > .assgnRqtxt::before{content: '특이사항'; }
               .assgnSbInfBx dd > .assgnRqagt::before{content: '대리점'; }
               .assgnSbInfBx dd > .assgnRqgiveamt::before{content: '지급금액'; }
               .assgnSbInfBx dd > .assgnRqschdivyn::before{content: '진행상태'; }
               .assgnSbInfBx dd > .assgnRqcomrfg::before{content: '예약상태'; }
-              .assgnSbInfBx dd > .assgnRqtime::before,.assgnSbInfBx dd > .assgnRqtxt::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnRqagt::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnRqgiveamt::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;}  .assgnRqschdivyn::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnRqcomrfg::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;}
+              .assgnSbInfBx dd > .assgnReqTime::before{content: '요청시간(챗봇)'; }
+              .assgnSbInfBx dd > .assgnReqLoc::before{content: '고객요청장소(챗봇)'; }
+              .assgnSbInfBx dd > .assgnRqtime::before,.assgnSbInfBx dd > .assgnRqtxt::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnRqagt::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnRqgiveamt::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;}  .assgnRqschdivyn::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnRqcomrfg::before{position: absolute;top:0px;left: 0px;width: 52px;height: 18px;font-weight: bold;} .assgnReqTime::before{position: absolute;top:0px;left: 0px;width: 100px;height: 18px;font-weight: bold;}  .assgnReqLoc::before{position: absolute;top:0px;left: 0px;width: 100px;height: 18px;font-weight: bold;}
            .assgnSbInfBx dd .comSsec{display: block;float: left;width:30px;height: 15px;
     line-height: 15px;font-size: 9px;font-weight: bold;text-align: center;border-radius: 9px;border: solid 1px #242020;}
            .assgnSbInfBx dd .numTxt{display: block;float: left;min-width: calc(100% - 92px);max-width: calc(100% - 124px);margin: 0 6px;line-height: 17px;font-weight: bold;letter-spacing: -0.42px;}
                .assgnSbInfBx dd .numTxt::after{content: '원';}
-           .assgnSbInfBx dd .txtIcn.fllGry{display: inline-block;float: left;min-width: 48px;max-width: 80px;letter-spacing: -0.27px;}
+           .assgnSbInfBx dd .txtIcn.fllGry{display: inline-block;float: left;min-width: 47px;max-width: 80px;letter-spacing: -0.27px;}
 
       .chkIcnLst{display: inline-flex;}
          .chkIcnLst.iss li{display: none;float: left;width: 24px;height: 25px;font-size: 0;}

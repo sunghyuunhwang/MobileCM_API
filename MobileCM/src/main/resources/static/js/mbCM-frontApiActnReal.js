@@ -517,7 +517,8 @@ $('#assgnSub_lst li').remove();
 	                   var text = "지급금액 : ";
 	                   var text2 = " 원";
 	                   var com_rfg = response.com_rfg;
-
+					   var req_time = response.req_time;
+					   var req_loc = response.req_loc;
 	                   var arr_change_data = "";
 	                   arr_change_data = com_ssec+"/"+rem_dt+"/"+rem_seq+"/"+plm_no+"/"+orm_no
 
@@ -543,6 +544,8 @@ $('#assgnSub_lst li').remove();
     			        assgn_lst += "<span class='assgnRqagt'>"+vnd_nm+"</span>";
     			        assgn_lst += "<span class='assgnRqschdivyn'>"+schdiv_yn+"</font></span>";
     			        assgn_lst += "<span class='assgnRqcomrfg'>"+com_rfg+"</span>";
+    			        assgn_lst += "<span class='assgnReqTime'>"+req_time+"</span>";
+    			        assgn_lst += "<span class='assgnReqLoc'>"+req_loc+"</span>";
     			        assgn_lst += "<input type='hidden' value="+com_rfg+" name='comrfg'/>"
                        	assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
                        	assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
@@ -615,7 +618,8 @@ $('#assgnSub_lst li').remove();
 	                   var text = "지급금액 : ";
 	                   var text2 = " 원";
 	                   var com_rfg = response.com_rfg;
-
+					   var req_time = response.req_time;
+					   var req_loc = response.req_loc;
 	                   var arr_change_data = "";
 	                   arr_change_data = com_ssec+"/"+rem_dt+"/"+rem_seq+"/"+plm_no+"/"+orm_no
 
@@ -641,6 +645,8 @@ $('#assgnSub_lst li').remove();
     			        assgn_lst += "<span class='assgnRqagt'>"+vnd_nm+"</span>";
     			        assgn_lst += "<span class='assgnRqschdivyn'>"+schdiv_yn+"</font></span>";
     			        assgn_lst += "<span class='assgnRqcomrfg'>"+com_rfg+"</span>";
+    			        assgn_lst += "<span class='assgnReqTime'>"+req_time+"</span>";
+    			        assgn_lst += "<span class='assgnReqLoc'>"+req_loc+"</span>";    			        
     			        assgn_lst += "<input type='hidden' value="+com_rfg+" name='comrfg' />"
                        	assgn_lst += "<input type='hidden' value="+response.latitude+" class='latitudeNbr' />"
                        	assgn_lst += "<input type='hidden' value="+response.longitude+" class='longitudeNbr' />"
