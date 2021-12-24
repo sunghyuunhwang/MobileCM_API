@@ -20,6 +20,13 @@ import com.fursys.mobilecm.vo.erp.ERPSigongReport;
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	public DataResult selectHappyCallSendCheck(HashMap<String,Object> params);
+	public int insertHappyCallAnswer(HashMap<String,Object> params);
+	public int insertHappyCallDetail(HashMap<String,Object> params);
+	public int insertHappyCallMaster(HashMap<String,Object> params);
+	public int updateHappyCallCount(HashMap<String,Object> params);
+	
+	public DataResult selectHappyCallMessage(HashMap<String,Object> params);
 	public int erp_sigongDelivery(HashMap<String,Object> params);
 	public ERPAsReport erp_selectAsReport(HashMap<String,Object> params);
 	public ArrayList<ERPAsItemReport> erp_selectAsItemReport(HashMap<String,Object> params);

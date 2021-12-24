@@ -46,6 +46,54 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	
+	
+	@ApiOperation(value = "erp_happyCallKakao", notes = "해피콜전송")
+	@GetMapping("/erp_happyCallKakao")
+	public String erp_happyCallKakao (
+			@ApiParam(value = "PLM_NO", required=true, example = "I201403240001")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "RPT_NO", required=true, example = "I201403240001")
+			@RequestParam(name="rpt_no", required=true) String rpt_no,
+			@ApiParam(value = "RPT_SEQ", required=true, example = "IC0639")
+			@RequestParam(name="rpt_seq", required=true) String rpt_seq,
+			@ApiParam(value = "COM_SSEC", required=true, example = "C18C")
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@ApiParam(value = "COM_AGSEC", required=true, example = "C02I")
+			@RequestParam(name="com_agsec", required=true) String com_agsec,
+			@ApiParam(value = "COM_BRAND", required=true, example = "T60I01")
+			@RequestParam(name="com_brand", required=true) String com_brand,
+			@ApiParam(value = "CTM_NM", required=true, example = "홍길동")
+			@RequestParam(name="ctm_nm", required=true) String ctm_nm,
+			@ApiParam(value = "CTM_HP", required=true, example = "01000000000")
+			@RequestParam(name="ctm_hp", required=true) String ctm_hp,
+			@ApiParam(value = "STI_CD", required=true, example = "YA521")
+			@RequestParam(name="sti_cd", required=true) String sti_cd
+		) {
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("plm_no", plm_no);
+		params.put("rpt_no", rpt_no);
+		params.put("rpt_seq", rpt_seq);
+		params.put("com_ssec", com_ssec);
+		params.put("com_agsec", com_agsec);
+		params.put("com_brand", com_brand);
+		params.put("ctm_nm", ctm_nm);
+		//params.put("ctm_hp", ctm_hp);
+		params.put("ctm_hp", "01066890755");
+		params.put("sti_cd", sti_cd);
+        
+		System.out.println(String.format("rpt_no=[%s]", rpt_no));
+		System.out.println(String.format("rpt_seq=[%s]", rpt_seq));
+		System.out.println(String.format("ctm_nm=[%s]", ctm_nm));
+		
+		BaseResponse response = apiErpSigongAsService.erp_happyCallKakao(params);
+		        
+		System.out.println(String.format("response=[%s]", gson.toJson(response)));
+		
+		return gson.toJson(response);
+	}
+	
 	@ApiOperation(value = "erp_selectAsReport", notes = "서비스내역서")
 	@GetMapping("/erp_selectAsReport")
 	public String erp_selectAsReport (

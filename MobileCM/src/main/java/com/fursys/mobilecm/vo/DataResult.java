@@ -18,6 +18,9 @@ public class DataResult {
 	private String data5;
 	private String data6;
 	private String data7;
+	private String data8;
+	private String data9;
+	private String data10;
 	
 	private int value1;
 	private int value2;
