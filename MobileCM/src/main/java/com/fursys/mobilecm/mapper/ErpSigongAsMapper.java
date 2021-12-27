@@ -12,6 +12,7 @@ import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
+import com.fursys.mobilecm.vo.erp.ERPHappyCall;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
@@ -26,7 +27,7 @@ public interface ErpSigongAsMapper {
 	public int insertHappyCallMaster(HashMap<String,Object> params);
 	public int updateHappyCallCount(HashMap<String,Object> params);
 	
-	public DataResult selectHappyCallMessage(HashMap<String,Object> params);
+	public ERPHappyCall selectHappyCallMessage(HashMap<String,Object> params);
 	public int erp_sigongDelivery(HashMap<String,Object> params);
 	public ERPAsReport erp_selectAsReport(HashMap<String,Object> params);
 	public ArrayList<ERPAsItemReport> erp_selectAsItemReport(HashMap<String,Object> params);

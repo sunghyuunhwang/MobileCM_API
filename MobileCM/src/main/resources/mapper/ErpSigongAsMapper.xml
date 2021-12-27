@@ -7,15 +7,15 @@
 	 SELECT TOP 1
 	        A.COM_CMP AS DATA1
 	   FROM TA_HCSENDD A, TC_RESMST B
-      WHERE A.COM_CMP = #{companyCd}
+      WHERE A.PLM_NO = B.PLM_NO
+	    AND A.COM_SSEC = B.COM_SSEC
+	    AND A.COM_CMP = #{companyCd}
 	    AND A.COM_AGSEC = #{com_agsec}
 	    AND A.COM_SSEC = #{com_ssec}
-	    AND A.CLIENT_SSEC = #{client_ssec}
 	    AND A.SEND_SEQ = #{send_seq}
-	    AND A.CTM_CD = #{orm_purcst}
 	    AND A.PLM_NO = #{plm_no}
-	    AND A.PLM_NO = B.PLM_NO
-	    AND A.COM_SSEC = B.COM_SSEC
+	    AND A.RPT_NO = #{rpt_no}
+	    AND A.RPT_SEQ = #{rpt_seq}	    
 	    
 ]]>
 </select>
@@ -188,52 +188,22 @@
  ]]>
 </update> 
 
- 
- <select id="selectHappyCallMessage" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+ <select id="selectHappyCallMessage" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPHappyCall">
 <![CDATA[
   
-	SELECT RMK1 AS DATA1, RMK2 AS DATA2, RMK3 AS DATA3,
-       (SELECT Z.CCD_NM FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS DATA4,
-	   (SELECT Z.REF_1 FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS DATA5,
-	   ISNULL((SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}), '') AS DATA6,
-	   (SELECT ISNULL(MAX(M.SEND_SEQ), 0) FROM TC_RESMST R WITH (NOLOCK) INNER JOIN TA_HCSENDM M WITH (NOLOCK) ON M.COM_AGSEC = R.COM_AGSEC AND M.COM_SSEC = R.COM_SSEC WHERE R.PLM_NO = #{plm_no} AND M.COM_CMP = #{companyCd} AND M.DIST_CD = #{dist_cd} AND M.CLIENT_SSEC = (SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}) ) AS DATA7,
-	   ISNULL((SELECT TOO.ORM_PURCST FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = (SELECT TCP.ORM_NO FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no})), '') AS DATA8,
+	SELECT RMK1 AS BIZTALKMESSAGE, RMK2 AS MESSAGE, RMK3 AS ATTACHMENTURL,
+       (SELECT Z.CCD_NM FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS FROMNM,
+	   (SELECT Z.REF_1 FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS FROMNO,
+	   ISNULL((SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}), '') AS CLIENT_SSEC,
+	   (SELECT ISNULL(MAX(M.SEND_SEQ), 0) FROM TC_RESMST R WITH (NOLOCK) INNER JOIN TA_HCSENDM M WITH (NOLOCK) ON M.COM_AGSEC = R.COM_AGSEC AND M.COM_SSEC = R.COM_SSEC WHERE R.PLM_NO = #{plm_no} AND M.COM_CMP = #{companyCd} AND M.DIST_CD = #{dist_cd} AND M.CLIENT_SSEC = (SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}) ) AS SEND_SEQ,
+	   ISNULL((SELECT TOO.ORM_PURCST FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = (SELECT TCP.ORM_NO FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no})), '') AS ORM_PURCST,
 	   (CASE #{com_ssec} WHEN 'C18C' THEN (SELECT PLM_CDT FROM TC_PLANMST WITH (NOLOCK) WHERE PLM_NO = #{plm_no})
-	                                 ELSE (SELECT RPT_ENDDT FROM TA_RPTREQ WITH (NOLOCK) WHERE RPT_NO = #{rpt_no} AND RPT_SEQ = #{rpt_seq}) END) AS DATA9,
-	   RMK4 AS DATA10                        
+	                                 ELSE (SELECT RPT_ENDDT FROM TA_RPTREQ WITH (NOLOCK) WHERE RPT_NO = #{rpt_no} AND RPT_SEQ = #{rpt_seq}) END) AS SEND_DT,
+	   RMK4 AS ATTACHMENTNAME,
+	   TEMPLATE_CODE AS TEMPLATE_CODE
        FROM   TC_SMSM A  with (nolock)
        WHERE  1 = 1
        AND    COM_AGSEC  = #{com_agsec}
-       AND    COM_BRAND  = #{com_brand}
-       AND    SOT_CD  = #{sot_cd}
-       AND    B_CH_CD  = 'C63002'
-       AND    B_TAR_CD  = 'C64003'
-       AND B_GUBUN_CD IN (SELECT CCD_CD
-                          FROM   TT_COMCD with (nolock)
-                          WHERE  CDX_CD = 'C62'
-                             AND REF_1 = 'A'
-                             AND REF_2 = 'HAPPYCALL')
-	    
-]]>
-</select>
-
- <select id="selectHappyCallMessage_" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
-<![CDATA[
-
-	SELECT RMK1 AS DATA1, RMK2 AS DATA2, RMK3 AS DATA3,
-       (SELECT Z.CCD_NM FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS DATA4,
-	   (SELECT Z.REF_1 FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS DATA5,
-	   (SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}) AS DATA6,
-	   (SELECT ISNULL(MAX(M.SEND_SEQ), 0) FROM TC_RESMST R WITH (NOLOCK) INNER JOIN TA_HCSENDM M WITH (NOLOCK) ON M.COM_AGSEC = R.COM_AGSEC AND M.COM_SSEC = R.COM_SSEC WHERE R.PLM_NO = #{plm_no} AND M.COM_CMP = #{companyCd} AND M.DIST_CD = #{dist_cd} AND M.CLIENT_SSEC = (SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}) ) AS DATA7,
-	   (SELECT TOO.ORM_PURCST FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = (SELECT TCP.ORM_NO FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no})) AS DATA8,
-	   (CASE #{com_ssec} WHEN 'C18C' THEN (SELECT PLM_CDT FROM TC_PLANMST WITH (NOLOCK) WHERE PLM_NO = #{plm_no})
-	                                 ELSE (SELECT RPT_ENDDT FROM TA_RPTREQ WITH (NOLOCK) WHERE RPT_NO = #{rpt_no} AND RPT_SEQ = #{rpt_seq}) END) AS DATA9,
-	   (CASE #{com_ssec} WHEN 'C18C' THEN #{plm_no}
-	                                 ELSE (SELECT TOP 1 PLM_NO FROM TC_RESMST WITH (NOLOCK) WHERE ORM_NO = ISNULL(#{rpt_no}, '') + ISNULL(#{rpt_seq}, '')) END) AS DATA10                            
-       FROM   TC_SMSM A  with (nolock)
-       WHERE  1 = 1
-       AND    COM_AGSEC  = #{com_agsec}
-       AND    COM_BRAND  = #{com_brand}
        AND    SOT_CD  = #{sot_cd}
        AND    B_CH_CD  = 'C63002'
        AND    B_TAR_CD  = 'C64003'

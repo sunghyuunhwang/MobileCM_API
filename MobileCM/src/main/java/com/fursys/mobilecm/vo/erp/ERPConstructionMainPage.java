@@ -57,7 +57,9 @@ public class ERPConstructionMainPage {
 	private String stm_no;
 	private String stm_nm;
 	private String ord_amt;
-	private Integer pld_sum;
+	private Integer pld_sum;	
+	private String req_time;
+	private String req_location;
 	
 	
 	private ArrayList<ERPAsFileList> fileList_0;

@@ -28,6 +28,7 @@ import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
+import com.fursys.mobilecm.vo.erp.ERPHappyCall;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
@@ -57,25 +58,23 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		BaseResponse response = new BaseResponse();
 		DataResult dataResult = new DataResult();
+		ERPHappyCall happycall = new ERPHappyCall();
 		HashMap<String, Object> params;		
 		int res = 1;
 		
 		try {
 			String message = "", attachmentUrl = "", fromNm = "", fromNo = "", biztalkmessage = "", templateCode = "", senderkey = "";
-			String companyCd = "T01B", client_ssec = "", dist_cd = "000011", orm_purcst = "", send_dt = "", process_cd = "", attachmentName = "서비스만족도 조사 참여하기";
-			                                                        
-			String temp = "";
-			long send_seq = 0, ctm_url_key = 0;
+			String companyCd = "T01B", client_ssec = "", dist_cd = "000011", orm_purcst = "", send_dt = "", process_cd = "", attachmentName = "", template_code = "";
 			
+			String temp = "";
+			long send_seq = 0, ctm_url_key = 0;			
 			
 			String plm_no = (String) param.get("plm_no");
-			//String orm_purcst = (String) param.get("orm_purcst");
 			String rpt_no = (String) param.get("rpt_no");
 			String rpt_seq = (String) param.get("rpt_seq");
 			String com_ssec = (String) param.get("com_ssec");
 			String com_agsec = (String) param.get("com_agsec");
 			String com_brand = (String) param.get("com_brand");
-			//String send_dt = (String) param.get("send_dt");
 			String ctm_nm = (String) param.get("ctm_nm");
 			String ctm_hp = (String) param.get("ctm_hp");
 			String sti_cd = (String) param.get("sti_cd");
@@ -98,36 +97,35 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			params.put("rpt_no", rpt_no);
 			params.put("rpt_seq", rpt_seq);
 			
-			dataResult = erpsigongasMapper.selectHappyCallMessage(params);
-			if (dataResult == null) {
+			happycall = erpsigongasMapper.selectHappyCallMessage(params);
+			if (happycall == null) {
 				txManager.rollback(status);
 				response.setResultCode("5001");
 				response.setResultMessage("erp_happyCallKakao selectHappyCallMessage 오류 [" + res + "]");
 				return response;
 			}
 			
-			biztalkmessage = dataResult.getData1();
-			message = dataResult.getData2();
-			attachmentUrl = dataResult.getData3();
-			fromNm = dataResult.getData4();
-			fromNo = dataResult.getData5();
-			client_ssec = dataResult.getData6();
-			temp = dataResult.getData7();	//send_seq
-			send_seq = Long.valueOf(temp);
-			//long longCtmUrlKey   = ((BigDecimal)messageInfo.get("CTM_URL_KEY")).longValue();
-			orm_purcst = dataResult.getData8();
-			send_dt = dataResult.getData9();
-			
-			if (!"C18C".equals(com_ssec)) {
-				attachmentName = dataResult.getData10();
-			}
+			biztalkmessage = happycall.getBiztalkmessage();
+			message = happycall.getMessage();
+			attachmentUrl = happycall.getAttachmentUrl();
+			fromNm = happycall.getFromNm();
+			fromNo = happycall.getFromNo();
+			client_ssec = happycall.getClient_ssec();
+			send_seq = happycall.getSend_seq();
+			orm_purcst = happycall.getOrm_purcst();
+			send_dt = happycall.getSend_dt();
+			attachmentName = happycall.getAttachmentName();
+			template_code = happycall.getTemplate_code();			
 
-			System.out.println(String.format("attachmentName=[%s]", attachmentName));
+			System.out.println(String.format("happycall=[%s]", happycall.toString()));			
+			
 			System.out.println(String.format("orm_purcst=[%s]", orm_purcst));
 			System.out.println(String.format("ctm_nm=[%s]", ctm_nm));
 			System.out.println(String.format("send_dt=[%s]", send_dt));
 			System.out.println(String.format("send_seq=[%d]", send_seq));
-			 
+			System.out.println(String.format("attachmentName=[%s]", attachmentName));
+			System.out.println(String.format("template_code=[%s]", template_code));
+			
 			biztalkmessage = biztalkmessage.replace("{1}", ctm_nm);
 			try {
 				biztalkmessage = biztalkmessage.replace("{2}", send_dt.substring(0,4) + "년"+ send_dt.substring(4,6) + "월" + send_dt.substring(6,8) + "일");
@@ -135,29 +133,26 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 				biztalkmessage = biztalkmessage.replace("{2}", send_dt);
 			}
 			
-			System.out.println(String.format("biztalkmessage=[%s]", biztalkmessage));
-			
+			System.out.println(String.format("biztalkmessage=[%s]", biztalkmessage));				    	
+	    	
 	    	if("T60F01".equals(com_brand)) {	//퍼시스브랜드
 	    		senderkey = "8615d8c99db78a8ec996e0c0d659ed11313eb781";
-	    		if ("C18C".equals(com_ssec)) {
-	    			templateCode = "fursysConshappycall001";
-				} else {
-					templateCode = "fursysAShappycall001";
-				}
+	    		
 	    	} else if("T60I01".equals(com_brand)) {	//일룸브랜드
 	    		senderkey = "dbf8669a88dd7926fd653ff3ff9b23d331fbbb4c";
-	    		if ("C18C".equals(com_ssec)) {
-	    			templateCode = "iloomConshappycall003";
-				} else {
-					templateCode = "iloomAShappycall001";
-				}
-	    	} else if("T60P01".equals(com_brand)) {	//시디즈브랜드
+	    		
+	    	} else if("T60I02".equals(com_brand)) {	//데스커브랜드
+	    		senderkey = "9917d09567d2ebf1acc89662d7f9ff10db1488d7";
+	    		
+	    	} else if("T60I03".equals(com_brand)) {	//슬로우브랜드	    		
+	    		senderkey = "3ed320702f733d0b5a31e99a3ba931d9f2f9f960";
+	    		
+	    	} else if("T60P01".equals(com_brand)) {	//시디즈브랜드	    		
 	    		senderkey = "6b94c758a1f689223024765ae6e2b0aede351955";
-	    		if ("C18C".equals(com_ssec)) {
-	    			templateCode = "sidizConshappycall001";
-				} else {
-					templateCode = "sidizAShappycall001";
-				}
+	    		      		
+	    	} else if("T60P02".equals(com_brand)) {	//알로소브랜드	    		
+	    		senderkey = "a75beb8ed88e9fa60be384f82eeeafe2f3dccc9a";
+
 	    	} else {
 	    		txManager.rollback(status);
 				response.setResultCode("5001");
@@ -201,6 +196,14 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 
             System.out.println(String.format("send_seq=[%d]", send_seq));		
             
+            //데이타가 있을경우 해피콜전송하지 않음
+			dataResult = erpsigongasMapper.selectHappyCallSendCheck(params);
+			if (dataResult != null) {
+				txManager.rollback(status);
+				response.setResultCode("200");				
+				return response;
+			}
+		
 			params.put("orm_purcst", orm_purcst);
 			params.put("ctm_hp", ctm_hp);
 			params.put("process_cd", process_cd);
@@ -225,23 +228,12 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			attachmentUrl = "http://192.8.211.70:8080/customer/happycall.do?id=";
 					
 			attachmentUrl = attachmentUrl + v_rtnEncrypt;
-			
-			
+						
 			System.out.println(String.format("attachmentUrl=[%s]", attachmentUrl));		
-/*		
-			dataResult = erpsigongasMapper.selectHappyCallSendCheck(params);
-			if (dataResult != null) {
-				txManager.rollback(status);
-				response.setResultCode("5001");
-				response.setResultMessage("이미 해피콜을 전송하였습니다.");
-				return response;
-			}
-*/
-			
+								
 			JSONArray jArray = new JSONArray();
 			JSONObject sendList = new JSONObject();	    	 
 	    	JSONObject sObject = new JSONObject();
-
 			
 	    	sendList.put("authKey", "D62D413F25CD43B3BD06636F2B3F570ABFB5008BD727901E341F041448D22C3A6593D58D45C68E60171F7FB2B2C345459361A08D20298BAE6A3A1B74196A95C3");
 
@@ -271,7 +263,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			sendList.put("list" ,jArray); 
 			
 			System.out.println(String.format("RestCallObject=[%s]", sendList.toString()));	
-			
+						
 			BaseResponse kakao_res = MobileCMLib.RestCall("https://msg-api.fursys.com/v1/api/message/SendMsg", sendList);	
         	if (!"200".equals(kakao_res.getResultCode())) {
 				txManager.rollback(status);
@@ -305,7 +297,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			return response;
 		}
 
-		txManager.commit(status);		
+		txManager.commit(status);
 		response.setResultCode("200");		
 		return response;
 
