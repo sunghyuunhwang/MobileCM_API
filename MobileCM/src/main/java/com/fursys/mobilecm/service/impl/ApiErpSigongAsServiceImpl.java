@@ -64,9 +64,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 		
 		try {
 			String message = "", attachmentUrl = "", fromNm = "", fromNo = "", biztalkmessage = "", templateCode = "", senderkey = "";
-			String companyCd = "T01B", client_ssec = "", dist_cd = "000011", orm_purcst = "", send_dt = "", process_cd = "", attachmentName = "", template_code = "";
-			
-			String temp = "";
+			String companyCd = "T01B", client_ssec = "", dist_cd = "000011", orm_purcst = "", send_dt = "", process_cd = "", attachmentName = "";
 			long send_seq = 0, ctm_url_key = 0;			
 			
 			String plm_no = (String) param.get("plm_no");
@@ -115,17 +113,17 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			orm_purcst = happycall.getOrm_purcst();
 			send_dt = happycall.getSend_dt();
 			attachmentName = happycall.getAttachmentName();
-			template_code = happycall.getTemplate_code();			
+			templateCode = happycall.getTemplateCode();			
 
-			System.out.println(String.format("happycall=[%s]", happycall.toString()));			
-			
+			System.out.println(String.format("happycall=[%s]", happycall.toString()));
+/*			
 			System.out.println(String.format("orm_purcst=[%s]", orm_purcst));
 			System.out.println(String.format("ctm_nm=[%s]", ctm_nm));
 			System.out.println(String.format("send_dt=[%s]", send_dt));
 			System.out.println(String.format("send_seq=[%d]", send_seq));
 			System.out.println(String.format("attachmentName=[%s]", attachmentName));
-			System.out.println(String.format("template_code=[%s]", template_code));
-			
+			System.out.println(String.format("templateCode=[%s]", templateCode));
+*/			
 			biztalkmessage = biztalkmessage.replace("{1}", ctm_nm);
 			try {
 				biztalkmessage = biztalkmessage.replace("{2}", send_dt.substring(0,4) + "년"+ send_dt.substring(4,6) + "월" + send_dt.substring(6,8) + "일");
@@ -162,12 +160,9 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	    	           
             params.put("companyCd", companyCd);
             params.put("client_ssec", client_ssec);
-            params.put("send_seq", send_seq);
-            
-            params.put("quest_seq", 1);
-            
-            params.put("send_seq", send_seq);
-            params.put("send_title", "");	//일시공1207
+            params.put("send_seq", send_seq);            
+            //params.put("quest_seq", 1);            
+            //params.put("send_title", "");	//일시공1207
             params.put("resv_yn", "N");
             params.put("msg_gubun_cd", "C62008");
             params.put("biztalkmessage", biztalkmessage);
@@ -176,25 +171,13 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
             params.put("sti_cd", sti_cd);
             
             if (send_seq == 0) {
-            	/*
-            	res = erpsigongasMapper.insertHappyCallMaster(params);
-    			if (res < 1) {
-	    			txManager.rollback(status);
-					response.setResultCode("5001");
-					response.setResultMessage("erp_happyCallKakao insertHappyCallMaster 오류 [" + res + "]");
-					return response;
-    			}
-    			send_seq = (int) params.get("send_seq");
-    			*/
-            	
             	txManager.rollback(status);
 				response.setResultCode("5001");
 				response.setResultMessage("해피콜 전송 기준정보가 없습니다. 서비스관리팀에 문의하세요.");
 				return response;
-    			
             }
 
-            System.out.println(String.format("send_seq=[%d]", send_seq));		
+            //System.out.println(String.format("send_seq=[%d]", send_seq));		
             
             //데이타가 있을경우 해피콜전송하지 않음
 			dataResult = erpsigongasMapper.selectHappyCallSendCheck(params);
@@ -217,11 +200,11 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			}
 			ctm_url_key = (int) params.get("ctm_url_key");
 			
-			System.out.println(String.format("ctm_url_key=[%d]", ctm_url_key));		
+			//System.out.println(String.format("ctm_url_key=[%d]", ctm_url_key));		
 			
 			String v_rtnEncrypt = MobileCMLib.makeEncryptValue(String.format("%s", ctm_url_key));
 			
-			System.out.println(String.format("v_rtnEncrypt=[%s]", v_rtnEncrypt));		
+			//System.out.println(String.format("v_rtnEncrypt=[%s]", v_rtnEncrypt));		
 			
 			//개발사이트
 			attachmentUrl = "http://192.9.202.101:8080/customer/happycall.do?id=";

@@ -140,7 +140,7 @@ public class JobSchedulerCronTab {
 	
 			if (!"yes".equals(isRun)) return;
 	
-			job = environment.getProperty("scheduled.job1");
+			job = environment.getProperty("scheduled.job2");
 	
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 			Date now = new Date();

@@ -200,7 +200,7 @@
 	   (CASE #{com_ssec} WHEN 'C18C' THEN (SELECT PLM_CDT FROM TC_PLANMST WITH (NOLOCK) WHERE PLM_NO = #{plm_no})
 	                                 ELSE (SELECT RPT_ENDDT FROM TA_RPTREQ WITH (NOLOCK) WHERE RPT_NO = #{rpt_no} AND RPT_SEQ = #{rpt_seq}) END) AS SEND_DT,
 	   RMK4 AS ATTACHMENTNAME,
-	   TEMPLATE_CODE AS TEMPLATE_CODE
+	   TEMPLATE_CODE AS TEMPLATECODE
        FROM   TC_SMSM A  with (nolock)
        WHERE  1 = 1
        AND    COM_AGSEC  = #{com_agsec}

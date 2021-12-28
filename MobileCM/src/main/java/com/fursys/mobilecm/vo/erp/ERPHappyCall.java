@@ -21,7 +21,7 @@ public class ERPHappyCall {
 	private String orm_purcst = "";
 	private String send_dt = "";
 	private String attachmentName = "";
-	private String template_code = "";
+	private String templateCode = "";
 	
 }
 
