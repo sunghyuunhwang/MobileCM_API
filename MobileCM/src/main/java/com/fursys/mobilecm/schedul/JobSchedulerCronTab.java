@@ -128,7 +128,7 @@ public class JobSchedulerCronTab {
 	}
 	
 	//@Scheduled(cron = "0 59 23 * * *")	// 매일 23:59분	
-	@Scheduled(cron = "0 59 8 * * *")	// 매일 23:59분
+	@Scheduled(cron = "0 45 8 * * *")	// 매일 23:59분
 	public void cronJobSch2() {
 
 		BaseResponse response = new BaseResponse();
