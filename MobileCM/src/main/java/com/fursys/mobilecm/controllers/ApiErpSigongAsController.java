@@ -301,7 +301,9 @@ public class ApiErpSigongAsController {
 			@ApiParam(value = "STI_CD", required=true, example = "YA551")
 			@RequestParam(name="sti_cd", required=true) String sti_cd,
 			@ApiParam(value = "PHONE_ID", required=true, example = "ciOBoXqaQ1qPDcVL5CraXk:APA91bFaBEPkasZlm0L9e2d_C6QYYDj6CTXs6XHT3QlPCiMOee47SE-a_rb0VzQAc_OCsuR0rVzQKNJRZ3DYcUHsVVqs7pfor2OQuc0RcKiOsqvVJc8g7cp3AHDfWcaWKSo6Uv9FCy--")
-			@RequestParam(name="phone_id", required=true) String phone_id
+			@RequestParam(name="phone_id", required=true) String phone_id,
+			@ApiParam(value = "VERSION_CODE", required=false, example = "73")
+			@RequestParam(name="version_code", required=false) String version_code
 			) {
 		       
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -313,6 +315,7 @@ public class ApiErpSigongAsController {
 			params.put("sti_cd", sti_cd);
 			params.put("com_scd", com_scd);
 			params.put("phone_id", phone_id);
+			params.put("version_code", version_code);
 					
 			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
 			res = erpsigongasMapper.deleteUsedPhoneID(params);        	

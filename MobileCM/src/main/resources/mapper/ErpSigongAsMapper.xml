@@ -1885,12 +1885,13 @@
 <update id="updatePhoneID" parameterType="HashMap">
 <![CDATA[
 	UPDATE TC_STINF
-	   SET PHONE_ID = #{phone_id}
+	   SET PHONE_ID = #{phone_id},
+	       MOBILECM_VERSION = #{version_code}
 	 WHERE COM_SCD = #{com_scd}
 	   AND STI_CD = #{sti_cd}
 ]]>
 </update> 
-
+ 
 <select id="selectNotifyGetDate" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 	SELECT CONVERT(NVARCHAR(20), GETDATE(), 2) + ' ' + CONVERT(NVARCHAR(8), GETDATE(), 8) DATA1      

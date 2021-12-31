@@ -250,7 +250,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			sendList.put("list" ,jArray); 
 			
 			System.out.println(String.format("RestCallObject=[%s]", sendList.toString()));	
-						
+
 			BaseResponse kakao_res = MobileCMLib.RestCall("https://msg-api.fursys.com/v1/api/message/SendMsg", sendList);	
         	if (!"200".equals(kakao_res.getResultCode())) {
 				txManager.rollback(status);
