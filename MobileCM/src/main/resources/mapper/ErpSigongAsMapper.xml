@@ -6,20 +6,16 @@
 <![CDATA[
 	 SELECT TOP 1
 	        A.COM_CMP AS DATA1
-	   FROM TA_HCSENDD A, TC_RESMST B
-      WHERE A.PLM_NO = B.PLM_NO
-	    AND A.COM_SSEC = B.COM_SSEC
-	    AND A.COM_CMP = #{companyCd}
+	   FROM TA_HCSENDD A WITH (NOLOCK)
+      WHERE A.COM_CMP = #{companyCd}
 	    AND A.COM_AGSEC = #{com_agsec}
 	    AND A.COM_SSEC = #{com_ssec}
 	    AND A.SEND_SEQ = #{send_seq}
 	    AND A.PLM_NO = #{plm_no}
-	    AND A.RPT_NO = #{rpt_no}
-	    AND A.RPT_SEQ = #{rpt_seq}	    
 	    
 ]]>
 </select>
- 
+  
 <insert id="insertHappyCallAnswer" parameterType="HashMap">
 <![CDATA[
 	INSERT INTO TA_HC_ANSWERMST (
@@ -67,16 +63,16 @@
 	        GETDATE(),
 	        #{sti_cd},
 	        GETDATE()
-	   FROM TA_HCSENDD A, TC_RESMST B
+	   FROM TA_HCSENDD A WITH (NOLOCK), TC_RESMST B WITH (NOLOCK)
 	  WHERE A.COM_CMP = #{companyCd}
 	    AND A.COM_AGSEC = #{com_agsec}
 	    AND A.COM_SSEC = #{com_ssec}
 	    AND A.CLIENT_SSEC = #{client_ssec}
 	    AND A.SEND_SEQ = #{send_seq}
-	    AND A.CTM_CD = #{orm_purcst}
-	    AND A.PLM_NO = #{plm_no}
 	    AND A.PLM_NO = B.PLM_NO
 	    AND A.COM_SSEC = B.COM_SSEC
+	    AND B.REM_DT = #{rem_dt}
+	    AND B.REM_SEQ = #{rem_seq}
 
 ]]>
 </insert>
@@ -196,7 +192,7 @@
 	   (SELECT Z.REF_1 FROM TT_COMCD Z with (nolock) WHERE Z.CDX_CD = 'C02' AND Z.CCD_CD = #{com_agsec}) AS FROMNO,
 	   ISNULL((SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}), '') AS CLIENT_SSEC,
 	   (SELECT ISNULL(MAX(M.SEND_SEQ), 0) FROM TC_RESMST R WITH (NOLOCK) INNER JOIN TA_HCSENDM M WITH (NOLOCK) ON M.COM_AGSEC = R.COM_AGSEC AND M.COM_SSEC = R.COM_SSEC WHERE R.PLM_NO = #{plm_no} AND M.COM_CMP = #{companyCd} AND M.DIST_CD = #{dist_cd} AND M.CLIENT_SSEC = (SELECT CASE C.CTM_TYPE WHEN 'C' THEN 'A6002' ELSE 'A6001' END FROM TT_CUSTOM C WITH (NOLOCK) INNER JOIN TC_RESMST R WITH (NOLOCK) ON C.CTM_CD = R.ORM_PURCST WHERE R.PLM_NO = #{plm_no}) ) AS SEND_SEQ,
-	   ISNULL((SELECT TOO.ORM_PURCST FROM TO_ORDMAS TOO WITH (NOLOCK) WHERE TOO.ORM_NO = (SELECT TCP.ORM_NO FROM TC_PLANMST TCP WITH (NOLOCK) WHERE TCP.PLM_NO = #{plm_no})), '') AS ORM_PURCST,
+	   ISNULL((SELECT ORM_PURCST FROM TC_RESMST WITH (NOLOCK) WHERE REM_DT = #{rem_dt} AND REM_SEQ = #{rem_seq}), '') AS ORM_PURCST,
 	   (CASE #{com_ssec} WHEN 'C18C' THEN (SELECT PLM_CDT FROM TC_PLANMST WITH (NOLOCK) WHERE PLM_NO = #{plm_no})
 	                                 ELSE (SELECT RPT_ENDDT FROM TA_RPTREQ WITH (NOLOCK) WHERE RPT_NO = #{rpt_no} AND RPT_SEQ = #{rpt_seq}) END) AS SEND_DT,
 	   RMK4 AS ATTACHMENTNAME,
@@ -208,7 +204,7 @@
        AND    B_CH_CD  = 'C63002'
        AND    B_TAR_CD  = 'C64003'
        AND B_GUBUN_CD IN (SELECT CCD_CD
-                          FROM   TT_COMCD with (nolock)
+                          FROM   TT_COMCD WITH (NOLOCK)
                           WHERE  CDX_CD = 'C62'
                              AND REF_1 = 'A'
                              AND REF_2 = 'HAPPYCALL')

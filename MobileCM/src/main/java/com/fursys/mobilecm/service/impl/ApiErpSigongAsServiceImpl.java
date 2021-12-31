@@ -70,6 +70,8 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			String plm_no = (String) param.get("plm_no");
 			String rpt_no = (String) param.get("rpt_no");
 			String rpt_seq = (String) param.get("rpt_seq");
+			String rem_dt = (String) param.get("rem_dt");
+			String rem_seq = (String) param.get("rem_seq");
 			String com_ssec = (String) param.get("com_ssec");
 			String com_agsec = (String) param.get("com_agsec");
 			String com_brand = (String) param.get("com_brand");
@@ -94,6 +96,8 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			params.put("dist_cd", dist_cd);
 			params.put("rpt_no", rpt_no);
 			params.put("rpt_seq", rpt_seq);
+			params.put("rem_dt", rem_dt);
+			params.put("rem_seq", rem_seq);
 			
 			happycall = erpsigongasMapper.selectHappyCallMessage(params);
 			if (happycall == null) {

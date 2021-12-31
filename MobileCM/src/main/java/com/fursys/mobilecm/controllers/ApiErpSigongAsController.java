@@ -51,12 +51,16 @@ public class ApiErpSigongAsController {
 	@ApiOperation(value = "erp_happyCallKakao", notes = "해피콜전송")
 	@GetMapping("/erp_happyCallKakao")
 	public String erp_happyCallKakao (
-			@ApiParam(value = "PLM_NO", required=true, example = "I201403240001")
+			@ApiParam(value = "PLM_NO", required=true, example = "I202112131451")
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@ApiParam(value = "RPT_NO", required=true, example = "I201403240001")
+			@ApiParam(value = "RPT_NO", required=true, example = "I202112131451")
 			@RequestParam(name="rpt_no", required=true) String rpt_no,
-			@ApiParam(value = "RPT_SEQ", required=true, example = "IC0639")
+			@ApiParam(value = "RPT_SEQ", required=true, example = "IC1496")
 			@RequestParam(name="rpt_seq", required=true) String rpt_seq,
+			@ApiParam(value = "REM_DT", required=true, example = "20211213")
+			@RequestParam(name="rem_dt", required=true) String rem_dt,
+			@ApiParam(value = "REM_SEQ", required=true, example = "IC1496")
+			@RequestParam(name="rem_seq", required=true) String rem_seq,
 			@ApiParam(value = "COM_SSEC", required=true, example = "C18C")
 			@RequestParam(name="com_ssec", required=true) String com_ssec,
 			@ApiParam(value = "COM_AGSEC", required=true, example = "C02I")
@@ -75,6 +79,8 @@ public class ApiErpSigongAsController {
 		params.put("plm_no", plm_no);
 		params.put("rpt_no", rpt_no);
 		params.put("rpt_seq", rpt_seq);
+		params.put("rem_dt", rem_dt);
+		params.put("rem_seq", rem_seq);
 		params.put("com_ssec", com_ssec);
 		params.put("com_agsec", com_agsec);
 		params.put("com_brand", com_brand);
