@@ -233,7 +233,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			//System.out.println(String.format("v_rtnEncrypt=[%s]", v_rtnEncrypt));		
 			
 			//개발사이트
-			attachmentUrl = "http://192.9.202.101:8080/customer/happycall.do?id=";
+			//attachmentUrl = "http://192.9.202.101:8080/customer/happycall.do?id=";
 					
 			attachmentUrl = attachmentUrl + v_rtnEncrypt;
 						

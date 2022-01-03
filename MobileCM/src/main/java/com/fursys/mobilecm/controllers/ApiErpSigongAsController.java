@@ -85,8 +85,8 @@ public class ApiErpSigongAsController {
 		params.put("com_agsec", com_agsec);
 		params.put("com_brand", com_brand);
 		params.put("ctm_nm", ctm_nm);
-		//params.put("ctm_hp", ctm_hp);
-		params.put("ctm_hp", "010-6689-0755");
+		params.put("ctm_hp", ctm_hp);
+		//params.put("ctm_hp", "010-6689-0755");
 		params.put("sti_cd", sti_cd);
         
 		System.out.println(String.format("rpt_no=[%s]", rpt_no));
