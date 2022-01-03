@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
+ <select id="selectNotSendCtm" parameterType="java.lang.String" resultType="Integer">
+<![CDATA[
+ 	SELECT COUNT(*) AS CNT
+ 		FROM   TA_HC_NOTSENDCTM Z with (nolock)
+	    WHERE  Z.CTM_TEL = #{ctm_hp}
+	    AND Z.APPLY_YN = 'Y'	    
+]]>
+</select>
+
  <select id="selectHappyCallSendCheck" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 	 SELECT TOP 1

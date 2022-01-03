@@ -65,7 +65,8 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 		try {
 			String message = "", attachmentUrl = "", fromNm = "", fromNo = "", biztalkmessage = "", templateCode = "", senderkey = "";
 			String companyCd = "T01B", client_ssec = "", dist_cd = "000011", orm_purcst = "", send_dt = "", process_cd = "", attachmentName = "";
-			long send_seq = 0, ctm_url_key = 0;			
+			long send_seq = 0, ctm_url_key = 0;
+			int notSendCnt = 0;
 			
 			String plm_no = (String) param.get("plm_no");
 			String rpt_no = (String) param.get("rpt_no");
@@ -80,10 +81,22 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			String sti_cd = (String) param.get("sti_cd");
 			String sot_cd = "";
 			
+			// 수신거부 고객 체크
+			notSendCnt = erpsigongasMapper.selectNotSendCtm(ctm_hp);
+			if(notSendCnt > 0) {
+				txManager.rollback(status);
+				response.setResultCode("200");				
+				return response;				
+			}
+			
+			// AS건 일단 발송하지 않음.
 			if ("C18C".equals(com_ssec)) {
 				sot_cd = "C65001";
 			} else {
 				sot_cd = "C65002";
+				txManager.rollback(status);
+				response.setResultCode("200");				
+				return response;
 			}
 			
 			params = new HashMap<String, Object>();
@@ -145,15 +158,24 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	    		
 	    	} else if("T60I02".equals(com_brand)) {	//데스커브랜드
 	    		senderkey = "9917d09567d2ebf1acc89662d7f9ff10db1488d7";
+				txManager.rollback(status);
+				response.setResultCode("200");				
+				return response;
 	    		
 	    	} else if("T60I03".equals(com_brand)) {	//슬로우브랜드	    		
 	    		senderkey = "3ed320702f733d0b5a31e99a3ba931d9f2f9f960";
+				txManager.rollback(status);
+				response.setResultCode("200");				
+				return response;
 	    		
 	    	} else if("T60P01".equals(com_brand)) {	//시디즈브랜드	    		
 	    		senderkey = "6b94c758a1f689223024765ae6e2b0aede351955";
 	    		      		
 	    	} else if("T60P02".equals(com_brand)) {	//알로소브랜드	    		
 	    		senderkey = "a75beb8ed88e9fa60be384f82eeeafe2f3dccc9a";
+				txManager.rollback(status);
+				response.setResultCode("200");				
+				return response;
 
 	    	} else {
 	    		txManager.rollback(status);
@@ -212,7 +234,6 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 			
 			//개발사이트
 			attachmentUrl = "http://192.9.202.101:8080/customer/happycall.do?id=";
-			attachmentUrl = "http://192.8.211.70:8080/customer/happycall.do?id=";
 					
 			attachmentUrl = attachmentUrl + v_rtnEncrypt;
 						

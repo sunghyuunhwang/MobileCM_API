@@ -21,6 +21,7 @@ import com.fursys.mobilecm.vo.erp.ERPSigongReport;
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	public int selectNotSendCtm(String params);
 	public DataResult selectHappyCallSendCheck(HashMap<String,Object> params);
 	public int insertHappyCallAnswer(HashMap<String,Object> params);
 	public int insertHappyCallDetail(HashMap<String,Object> params);
