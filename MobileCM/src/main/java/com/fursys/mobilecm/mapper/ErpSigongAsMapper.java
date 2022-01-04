@@ -51,7 +51,9 @@ public interface ErpSigongAsMapper {
 	public int insertSigongWallFix(HashMap<String,Object> params);
 	public ArrayList<ERPPushMessage> selectPhoneID(HashMap<String,Object> params);
 	public int deleteUsedPhoneID(HashMap<String,Object> params);
-	public DataResult selectNotifyGetDate(HashMap<String, Object> param);	
+	public DataResult selectNotifyGetDate(HashMap<String, Object> param);
+	public DataResult selectMobileCmVersion(HashMap<String, Object> param);
+	public int updateMobileCmVersion(HashMap<String,Object> params);
 	public int updatePhoneID(HashMap<String,Object> params);
 	public int insertNotify(HashMap<String,Object> params);
 	public ArrayList<ERPAttachFileList> selectSigongAttachFileList(HashMap<String,Object> params);

@@ -308,6 +308,7 @@ public class ApiErpSigongAsController {
 		       
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		int res = 0;
+		DataResult dataResult = new DataResult();
 		BaseResponse response = new BaseResponse();
 		
 		try {
@@ -316,20 +317,37 @@ public class ApiErpSigongAsController {
 			params.put("com_scd", com_scd);
 			params.put("phone_id", phone_id);
 			params.put("version_code", version_code);
-					
-			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
-			res = erpsigongasMapper.deleteUsedPhoneID(params);        	
-			txManager.commit(status);
+							
+			String db_phone_id = "", db_version_code = "";
 			
-			status = txManager.getTransaction(new DefaultTransactionDefinition());
-        	res = erpsigongasMapper.updatePhoneID(params);
-        	if (res < 1){
-        		txManager.rollback(status);
-        		response.setResultCode("5001");
-        		response.setResultMessage("PhoneId 변경에 실패하였습니다.");
-        		return gson.toJson(response);
-        	}
-        				
+			dataResult = erpsigongasMapper.selectMobileCmVersion(params);
+    		if (dataResult != null) {
+    			db_phone_id = dataResult.getData1();
+    			db_version_code = dataResult.getData2();
+    		}
+    		
+    		if (!db_phone_id.equals(phone_id)) {
+    			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
+    			res = erpsigongasMapper.deleteUsedPhoneID(params);
+    			res = erpsigongasMapper.updatePhoneID(params);
+            	if (res < 1){
+            		txManager.rollback(status);
+            		response.setResultCode("5001");
+            		response.setResultMessage("PhoneId 변경에 실패하였습니다.");
+            		return gson.toJson(response);
+            	}
+    		}
+			
+    		if (!db_version_code.equals(version_code)) {
+    			res = erpsigongasMapper.updateMobileCmVersion(params);
+            	if (res < 1){
+            		txManager.rollback(status);
+            		response.setResultCode("5001");
+            		response.setResultMessage("MobileCmVersion 변경에 실패하였습니다.");
+            		return gson.toJson(response);
+            	}
+    		}
+			
 		} catch (Exception e) {
 			txManager.rollback(status);
 			System.out.println(e.toString());			

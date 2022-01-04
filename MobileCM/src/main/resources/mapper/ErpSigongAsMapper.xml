@@ -1891,11 +1891,28 @@
 ]]>
 </update> 
 
+<select id="selectMobileCmVersion" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+	SELECT ISNULL(PHONE_ID, '') AS DATA1, ISNULL(MOBILECM_VERSION, '') AS DATA2 
+	  FROM TC_STINF WITH (NOLOCK)
+	 WHERE COM_SCD = #{com_scd}
+	   AND STI_CD = #{sti_cd}	
+]]>
+</select>
+
 <update id="updatePhoneID" parameterType="HashMap">
 <![CDATA[
 	UPDATE TC_STINF
-	   SET PHONE_ID = #{phone_id},
-	       MOBILECM_VERSION = #{version_code}
+	   SET PHONE_ID = #{phone_id}
+	 WHERE COM_SCD = #{com_scd}
+	   AND STI_CD = #{sti_cd}
+]]>
+</update> 
+ 
+<update id="updateMobileCmVersion" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_STINF
+	   SET MOBILECM_VERSION = #{version_code}
 	 WHERE COM_SCD = #{com_scd}
 	   AND STI_CD = #{sti_cd}
 ]]>
