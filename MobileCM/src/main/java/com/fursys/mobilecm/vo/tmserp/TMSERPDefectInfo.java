@@ -43,6 +43,8 @@ public class TMSERPDefectInfo{
 	public String rtnsec; /*회수여부*/
 	@ApiModelProperty(value = "접수파일", example="Y")
 	public String file_yn; /*접수파일*/
+	@ApiModelProperty(value = "시공번호", example="Y")
+	public String plm_no; /*시공번호*/
 	@ApiModelProperty(value = "접수파일", example="C123456789")
 	public String file_id;
 }

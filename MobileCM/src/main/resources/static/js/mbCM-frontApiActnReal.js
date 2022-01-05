@@ -1517,6 +1517,7 @@ function getDfctInf() {//하자내역조회
 	                  getDfctInf += "<input type='hidden' name = 'rpt_no' value='"+response.rpt_no+"'/>";
 	                  getDfctInf += "<input type='hidden' name = 'rpt_seq' value='"+response.rpt_seq+"'/>";
 	                  getDfctInf += "<input type='hidden' name = 'file_id' value='"+response.file_id+"'/>";
+	                  getDfctInf += "<input type='hidden' name = 'plm_no' value='"+response.plm_no+"'/>";
 	                  getDfctInf += "</ul>";
 	               $('#getDfctInf').append(getDfctInf);
 	           });
