@@ -1612,6 +1612,7 @@
 	  FROM tw_wtrecpl tww with (nolock), tc_resmst tcr with (nolock)
 	 WHERE tww.orm_no = tcr.orm_no
 	   AND tcr.com_ssec = 'C18C'
+	   AND tww.wtp_finish in ('W510', 'W511', 'W515')
 	   AND tcr.rem_dt = CONVERT(CHAR(8), DATEADD(DAY, 1, convert(char(8), getdate(), 112)), 112)
 	 ORDER BY tcr.sti_cd
 
