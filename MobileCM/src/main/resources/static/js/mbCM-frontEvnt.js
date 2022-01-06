@@ -3,6 +3,41 @@
 //백엔드에 필요한 이벤트는 함수 혹은 함수안의 이벤트를 사용해 주시고
 //백엔드에 사용한 프론트엔드이벤트가 $(document).ready(function()에서 필요 없을경우 주석 처리해주세요.*주석 처리시설명필수표시
 
+function stiMmbrInfAllnmber(){//총수
+     var nmbr = $('.stiTmLstBx .ulLftlst');
+     var sump = 0;
+     var sumc = 0;
+        nmbr.each(function(){
+             var p = $(this).find('._total_qty');
+             var c = $(this).find('._car_qty');
+            sump += Number(p.text());
+            sumc += Number(c.text());
+        });
+       var allp = $('.allNmberBox').find('._total_qty');
+       var allc = $('.allNmberBox').find('._car_qty');
+       allp.text(sump);
+       allc.text(sumc);
+}
+function inInfoDlwh(){//dfLnUl
+     $('.inInfoDl').each(function() {
+          var w = $(this).find('.ttl');
+          var h = $(this).find('.inf');
+          if(w.height() < h.height()){
+              w.height(h.height());
+          }
+          if(h.text() == 'undefined'){
+             h.text('');
+          }
+     });
+}
+function dfLnUl(){//dfLnUl
+     $(document).on("click",".dfLnUl li",function(){
+          var dfLnUl = $(this);
+         $('.dfLnUl li').removeClass('on');
+         dfLnUl.addClass('on');
+     });
+
+}
 function defectinfStl() {//하자내역 상세 화면 변경
      $('._indefectInf .inFileBtn').each(function() {
           var inFile = $(this);
@@ -22,7 +57,7 @@ function defectinfStl() {//하자내역 상세 화면 변경
 		        $('#opinion').val('이의 제기내용이 없습니다.');
 		    }
 	 	  $(this).addClass('on');
-	});	
+	});
 }
 
 function migyeolinfStl() {//미경상세화면변경
@@ -341,15 +376,15 @@ function inNrrwWid() {//리스트 스타일 바꾸기
   });
 }
 function popCls() {//각 팝업 닫기 공통
-  $('.fssMblCmPop').each(function() {
-     var pop = $(this);
-     var cls = pop.find('.clsBtn');
-     var cntnst = pop.find('.popCntnts');
-     cls.click(function() {
-          pop.removeClass('opn');
-          cntnst.removeClass('on');
+     $(document).on("click",".clsBtn",function(){
+         var pop = $(this).parents('.fssMblCmPop');
+         var cntnst = pop.find('.popCntnts');
+              pop.removeClass('opn');
+              cntnst.removeClass('on');
+              if($('._stiMmbrDtil').length > 0){
+                   $('._stiMmbrDtil').removeClass('on');
+              }
      });
-  });
 }
 
 function chckLnth() {//체크갯수 세기
@@ -661,6 +696,95 @@ function allRset() {//모두 처음으로 돌리기(프론트엔드부분만)
      $('.chngTm').removeClass('don');
      $('.chngTm').text('미지정');
 }
+function slctChck() { //셀렉트박스
+       $(document).on("click",".slctVal",function(){//열고닫고
+           var slctVal = $(this);
+           var slctBox = slctVal.parents('.slctBox');
+           slctBox.toggleClass('on');
+       });
+       $(document).on("click",".slct",function(){//선택이벤트
+           var slctTxt = $(this).find('.slctTxt');
+           var slctVluChck = slctTxt.attr('data-value');
+           var slctLst = slctTxt.parents('.slctLst');
+           var slctBox = slctLst.parents('.slctBox');
+           var slct = slctLst.prev('.slctVal');
+           var slctVlu = slct.attr('data-value');
+           slct.text(slctTxt.text());
+           slct.attr('data-value',slctVluChck);
+           slctBox.removeClass('on');
+       });
+}
+function stiMmbrMdfPop() {//정보수정-원정보
+     $(document).on("click","._stiMmbrDtil",function(){
+         $('.slctBox').removeClass('on');
+          let mmbrinfBx = $(this);
+          let mmbr_stm_nm = mmbrinfBx.find('._stm_nm').text();
+          let mmbr_stm_no = mmbrinfBx.find('._stm_no').val();
+          let mmbr_sti_cd = mmbrinfBx.find('._sti_cd').val();
+          let mmbr_stm_hp = mmbrinfBx.find('._stm_hp').text();
+          let mmbr_com_pos = mmbrinfBx.find('._com_pos').text();
+          let mmbr_stm_zip = mmbrinfBx.find('._stm_zip').text();
+          let mmbr_car_no = mmbrinfBx.find('._car_no').text();
+          let mmbr_stm_jdt = mmbrinfBx.find('._stm_jdt').text();
+          let mmbr_stm_addr = mmbrinfBx.find('._stm_addr').text();
+          let mmbrpop = $(".stiMmbrMdfPop");
+          let stm_nm = mmbrpop.find('._stm_nm');
+          let stm_no = mmbrpop.find('._stm_no');
+          let sti_cd = mmbrpop.find('._sti_cd');
+          let stm_hp = mmbrpop.find('._stm_hp');
+          let com_pos = mmbrpop.find('._com_pos');
+          let stm_zip = mmbrpop.find('._stm_zip');
+          let car_no = mmbrpop.find('._car_no');
+          let stm_jdt = mmbrpop.find('._stm_jdt');
+          let astm_addr = mmbrpop.find('.address_stm_addr');
+          let stm_addr = mmbrpop.find('._stm_addr');
+          stm_nm.val(mmbr_stm_nm);
+          stm_no.val(mmbr_stm_no);
+          sti_cd.val(mmbr_sti_cd);
+          stm_hp.val(mmbr_stm_hp);
+          com_pos.text(mmbr_com_pos);
+          stm_zip.val(mmbr_stm_zip);
+          car_no.val(mmbr_car_no);
+          stm_jdt.val(mmbr_stm_jdt);
+          stm_addr.val(mmbr_stm_addr);
+          astm_addr.val(mmbr_stm_addr);
+          if($(".stiMmbrMdfPop ._stm_jdt").val().trim() == ''){
+               $(".stiMmbrMdfPop ._stm_jdt").removeAttr('readonly');
+               $(".stiMmbrMdfPop ._stm_jdt").val('');
+          }
+          if(com_pos.text().trim() == ''){
+               com_pos.text('직택 선택')
+          }
+          mmbrpop.removeClass('_insrt');
+          mmbrpop.addClass('opn _Mdf');
+     });
+
+}
+function stiMmbrInsrtPopopn() { //팀등록팝업오픈
+       $(document).on("click",".stiMmbrInsrtBtn",function(){
+            var mmbrpop = $(".stiMmbrMdfPop");
+           mmbrpop.removeClass('_Mdf');
+           mmbrpop.addClass('opn _insrt');
+           mmbrpop.find('._stm_nm').removeAttr('readonly');
+           mmbrpop.find('._stm_jdt').removeAttr('readonly');
+           mmbrpop.find('._stm_nm').val('');
+           mmbrpop.find('._stm_no').val('');
+           mmbrpop.find('._sti_cd').val('');
+           mmbrpop.find('._stm_hp').val('');
+           mmbrpop.find('._com_pos').text('직책 선택');
+           mmbrpop.find('._com_pos').attr('data-value','');
+           mmbrpop.find('._stm_zip').val('');
+           mmbrpop.find('._car_no').val('');
+           mmbrpop.find('._stm_jdt').val('');
+           mmbrpop.find('#address').val('');
+           mmbrpop.find('#detailAddress').val('');
+           mmbrpop.find('._stm_addr').val('');
+          var sti_cd =  $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._sti_cd').val();
+          var in_stm_no = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._stm_no').val();
+          mmbrpop.find('._sti_cd').val(sti_cd);
+          mmbrpop.find('._stm_no').val(parseInt(in_stm_no)+parseInt(1));
+       });
+}
 $(document).ready(function(){
       if($('.loginBx').length < 1){
            $(".datepicker").val($.datepicker.formatDate("m월    dd일", new Date()));
@@ -668,6 +792,7 @@ $(document).ready(function(){
             datepicker();//달력 한글화
             swipeActn();//터치액션
       }
+      slctChck();//셀렉트박스
       cmma(); // 세자리수 콤마찍기 - 읽기 전용
       innmbr(); // 인풋 넓이 조절을 위한 금액을 span에 보이기
       assgnLstCkck();// 할당리스트 클릭시
@@ -686,6 +811,8 @@ $(document).ready(function(){
       ulLftlst();//리스트표시
       cnstrctLstPop();//시공건 팝업
       topMenuPopBox();//팝업메뉴 팝업
+      dfLnUl();
+      stiMmbrInsrtPopopn(); //팀등록팝업오픈
 /*      vndBSsFilePop();//첨부파일*/
 /*      inFileBtnPop();//미결첨부파일*/
 });

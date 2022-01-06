@@ -18,9 +18,9 @@ hr {height:1px; border:0;margin:1em 0; padding:0;}
 
 
 .inptBx[type="password"]{letter-spacing: 2px;}
-input::placeholder,.inptBx::placeholder {color: #dbdbdb;opacity: 1; /* 파이어폭스에서 뿌옇게 나오는 현상을 방지하기 위한 css */}
-input::-webkit-input-placeholder,.inptBx::-webkit-input-placeholder {color: #dbdbdb;}
-input:-ms-input-placeholder,.inptBx:-ms-input-placeholder {color: #dbdbdb;}
+input::placeholder,.inptBx::placeholder {color: #aaa;opacity: 1; /* 파이어폭스에서 뿌옇게 나오는 현상을 방지하기 위한 css */}
+input::-webkit-input-placeholder,.inptBx::-webkit-input-placeholder {color: #aaa;}
+input:-ms-input-placeholder,.inptBx:-ms-input-placeholder {color: #aaa;}
 input:focus::-webkit-input-placeholder,textarea:focus::-webkit-input-placeholder,.inptBx:focus::-webkit-input-placeholder { color:transparent;}
 input:focus:-moz-placeholder,textarea:focus:-moz-placeholder,.inptBx:focus:-moz-placeholder {color:transparent;}
 input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:focus:-ms-input-placeholder {color:transparent;}
@@ -62,9 +62,15 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .w130px{width: 130px;}
 .w135px{width: 135px;}
 .w150px{width: 150px;}
+.w155px{width: 155px;}
+.w160px{width: 160px;}
+.w170px{width: 170px;}
+.w175px{width: 175px;}
+.w185px{width: 185px;}
 .w190px{width: 190px;}
 .w200px{width: 200px;}
 .w210px{width: 210px;}
+.w215px{width: 215px;}
 .w250px{width: 250px;}
 .w270px{width: 270px;}
 .w300px{width: 300px;}
@@ -73,7 +79,14 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .w500px{width: 500px;}
 .w540px{width: 540px;}
 
+.wCal140px{width: calc(100% - 140px);}
+.wCal200px{width: calc(100% - 200px);}
 .wCal300px{width: calc(100% - 300px);}
+.wCal340px{width: calc(100% - 340px);}
+.wCal350px{width: calc(100% - 350px);}
+.wCal360px{width: calc(100% - 360px);}
+.wCal385px{width: calc(100% - 385px);}
+.wCal390px{width: calc(100% - 390px);}
 .wCal550px{width: calc(100% - 550px);}
 .wCal500px{width: calc(100% - 500px);}
 .wCal680px{width: calc(100% - 680px);}
@@ -90,7 +103,9 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .h54px{height: 54px;}
 
 
+.mLft15px{margin-left: 15px;}
 .mLft20px{margin-left: 20px;}
+.mTop5px{margin-top: 5px;}
 .mTop10px{margin-top: 10px;}
 
 /*글씨색*/

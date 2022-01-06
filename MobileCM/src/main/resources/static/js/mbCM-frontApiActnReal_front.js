@@ -1,3 +1,261 @@
+function delstimmbrChckPop(){//시공팀원정보삭제확인
+     $(document).on("click",".delstimmbrChck",function(){
+         $('.delstimmbrChckPop').addClass('opn');
+         var stm_nm = $(".stiMmbrMdfPop._Mdf").find('._stm_nm').val();
+         $('.alert_stm_nm').text(stm_nm);
+    });
+}
+function delstimmbrinf(data){//시공팀원정보삭제
+    $('.delstimmbrChckPop').removeClass('opn');
+     let mmbrpop = $(".stiMmbrMdfPop._Mdf");
+     let stm_no = mmbrpop.find('._stm_no').val();
+     let com_scd = mmbrpop.find('._com_scd').val();
+     let sti_cd = mmbrpop.find('._sti_cd').val();
+
+     $.ajax({
+            url: "/v1/api/tmserp/tmserp_insertstimemberinfo",
+            type: "DELETE",
+            cache: false,
+            dataType: "json",
+            contentType: 'application/json',
+            data:{
+            stm_no:stm_no,
+            com_scd:com_scd,
+            sti_cd:sti_cd
+            },
+            success : function(data){
+                 alert("팀원 정보가 삭제되었습니다.");
+                 mmbrpop.removeClass('opn _insrt');
+                 window.location.reload();
+
+          }
+     });
+}
+function insrtstimmbrinf() {//시공팀원정보등록
+     var mmbrpop = $(".stiMmbrMdfPop._insrt");
+     var astm_addr = mmbrpop.find('.address_stm_addr').val();
+     var dstm_addr = mmbrpop.find('#detailAddress').val();
+     var stm_addr = mmbrpop.find('._stm_addr');
+     stm_addr.val(astm_addr+dstm_addr);
+     var stm_addrinf = mmbrpop.find('._stm_addr').val();
+     var stm_nm = mmbrpop.find('._stm_nm').val();
+     var stm_no = mmbrpop.find('._stm_no').val();
+     var com_scd = mmbrpop.find('._com_scd').val();
+     var sti_cd = mmbrpop.find('._sti_cd').val();
+     var stm_hp = mmbrpop.find('._stm_hp').val();
+     var com_pos = mmbrpop.find('._com_pos').val();
+     var stm_zip = mmbrpop.find('._stm_zip').val();
+     var car_no = mmbrpop.find('._car_no').val();
+     var stm_jdt = mmbrpop.find('._stm_jdt').val();
+
+     var stimember = {
+          stm_addr:stm_addrinf,
+     stm_nm:stm_nm,
+     stm_no:stm_no,
+     com_scd:com_scd,
+     sti_cd:sti_cd,
+     stm_hp:stm_hp,
+     com_pos:com_pos,
+     stm_zip:stm_zip,
+     car_no:car_no,
+     stm_jdt:stm_jdt
+     }
+     if(stm_nm.length < 1 || (stm_jdt.length < 1 || isNaN(stm_jdt))){
+          alert('팀원 이름/입사일은 필수입력 사항입니다. 입사일은 숫자 8자리로 입력해주세요. (예 : 20200909)');
+          if(stm_nm.length < 1){
+               mmbrpop.find('._stm_nm').addClass('wrng');
+          }
+          if(stm_jdt.length < 1 || isNaN(stm_jdt)){
+              mmbrpop.find('._stm_jdt').addClass('wrng');
+          }
+     }else{
+           mmbrpop.find('._stm_nm').removeClass('wrng');
+           mmbrpop.find('._stm_jdt').removeClass('wrng');
+          $.ajax({
+                 url: "/v1/api/tmserp/tmserp_insertstimemberinfo",
+                 type: "POST",
+                 cache: false,
+                 dataType: "json",
+                 contentType: 'application/json',
+                 data:{
+                      stimember
+                 },
+                 data : JSON.stringify(stimember),
+                 success : function(stimember){
+                      alert("팀원 정보가 등록되었습니다.");
+                      mmbrpop.removeClass('opn _insrt');
+                      window.location.reload();
+
+               }
+          });
+     }
+
+}
+
+function updtstimmbrinf() {//시공팀원정보수정
+     let mmbrpop = $(".stiMmbrMdfPop._Mdf");
+     let astm_addr = mmbrpop.find('.address_stm_addr').val();
+     let dstm_addr = mmbrpop.find('#detailAddress').val();
+     var stm_addr = mmbrpop.find('._stm_addr');
+     stm_addr.val(astm_addr+dstm_addr);
+     let stm_addrinf = mmbrpop.find('._stm_addr').val();
+     let stm_nm = mmbrpop.find('._stm_nm').val();
+     let stm_no = mmbrpop.find('._stm_no').val();
+     let com_scd = mmbrpop.find('._com_scd').val();
+     let sti_cd = mmbrpop.find('._sti_cd').val();
+     let stm_hp = mmbrpop.find('._stm_hp').val();
+     let com_pos = mmbrpop.find('._com_pos').val();
+     let stm_zip = mmbrpop.find('._stm_zip').val();
+     let car_no = mmbrpop.find('._car_no').val();
+     let stm_jdt = mmbrpop.find('._stm_jdt').val();
+
+     var stimember = {
+         stm_addr:stm_addrinf,
+         stm_nm:stm_nm,
+         stm_no:stm_no,
+         com_scd:com_scd,
+         sti_cd:sti_cd,
+         stm_hp:stm_hp,
+         com_pos:com_pos,
+         stm_zip:stm_zip,
+         car_no:car_no,
+         stm_jdt:stm_jdt
+     }
+
+     if(stm_nm.length < 1 || (stm_jdt.length < 1 || isNaN(stm_jdt))){
+          alert('팀원 이름/입사일은 필수입력 사항입니다. 입사일은 숫자 8자리로 입력해주세요. (예 : 20200909)');
+          if(stm_nm.length < 1){
+               mmbrpop.find('._stm_nm').addClass('wrng');
+          }
+          if(stm_jdt.length < 1 || isNaN(stm_jdt)){
+              mmbrpop.find('._stm_jdt').addClass('wrng');
+          }
+     }else{
+           mmbrpop.find('._stm_nm').removeClass('wrng');
+           mmbrpop.find('._stm_jdt').removeClass('wrng');
+       $.ajax({
+              url: "/v1/api/tmserp/tmserp_updatestimemberinfo",
+              type: "PUT",
+              cache: false,
+              dataType: "json",
+              contentType: 'application/json',
+              data:{
+                   stimember
+              },
+              data : JSON.stringify(stimember),
+              success : function(stimember){
+                   alert("팀원 정보가 수정되었습니다.");
+                   mmbrpop.removeClass('opn _Mdf');
+                   window.location.reload();
+
+            }
+       });
+     }
+
+}
+
+function getComcdList() {//시공팀직책리스트
+     $.ajax({
+       url: "/v1/api/tmserp/getComcdList",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+            cdx_cd:'C12'
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getCmcdLst = "<li class='slct'><span class='slctTxt _ccd_name' data-value='"+response.ccd_cd+"'>"+response.ccd_name+"</span></li>";
+                $('#getComcdList').append(getCmcdLst);
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getStiMemberDetailInfo(e) {//시공팀원정보상세조회
+     $('#getStiMemberDetailInfo > li').remove();
+     let sti_cd = $(e).find('._sti_cd').text();
+     let com_scd = $(e).find('._com_scd').val();
+     let tmName = $(e).find('._com_scd').parents('li').text();
+     let total_qty = $(e).find('._total_qty');
+     $.ajax({
+       url: "/v1/api/tmserp/getStiMemberDetailInfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+            sti_cd: sti_cd,
+            com_scd:com_scd
+       },
+       success: function(list){
+          if(total_qty.text() == '0'){
+              $('#getStiMemberDetailInfo').append("<li class='nonData'>팀원정보가 없습니다.</li>");
+          }else{
+            $.each(list, function(idx, response) {
+               var getStiMmbrDtl = "<li class='_stiMmbrDtil'>";
+                   getStiMmbrDtl += "<dl class='inInfoDl wCal390px'><dt class='ttl'>팀원성명</dt><dd class='inf bld _stm_nm'>"+response.stm_nm+"<input type='hidden' value='"+response.stm_no+"' class='_stm_no'/><input type='hidden' value='"+response.sti_cd+"' class='_sti_cd'/></dd></dl>";
+                   getStiMmbrDtl += "<dl class='inInfoDl w215px'><dt class='ttl'>전화번호</dt><dd class='inf bld _stm_hp'>"+response.stm_hp+"</dd></dl>";
+                   getStiMmbrDtl += "<dl class='inInfoDl w175px'><dt class='ttl'>직책</dt><dd class='inf _com_pos'>"+response.com_pos+"</dd></dl>";
+                   getStiMmbrDtl += "<dl class='inInfoDl wCal360px'><dt class='ttl'>우편번호</dt><dd class='inf _stm_zip'>"+response.stm_zip+"</dd></dl>";
+                   getStiMmbrDtl += "<dl class='inInfoDl w185px'><dt class='ttl'>차량번호</dt><dd class='inf _car_no'>"+response.car_no+"</dd></dl>";
+                   getStiMmbrDtl += "<dl class='inInfoDl w175px'><dt class='ttl'>입사일</dt><dd class='inf _stm_jdt'>"+response.stm_jdt+"</dd></dl>";
+                   getStiMmbrDtl += "<dl class='inInfoDl w100p br0'><dt class='ttl'>주소</dt><dd class='inf _stm_addr'>"+response.stm_addr+"</dd></dl>";
+                   getStiMmbrDtl += "</li>";
+                    $('#getStiMemberDetailInfo').append(getStiMmbrDtl);
+                inInfoDlwh();
+                console.log(response);
+            });
+          }
+          $('.stiMmbrInsrtBtn').addClass('on');
+          $('.stiMmbrInsrtBtn').text(tmName + '팀의 팀원등록');
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
+function getStiMemberInfo() {//시공팀원정보현황조회
+     $.ajax({
+       url: "/v1/api/tmserp/getStiMemberInfo",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var getStiMmbrInf = "<ul class='ulLftlst' onclick='getStiMemberDetailInfo(this);'>";
+                   getStiMmbrInf += "<li class='w130px'>"+response.sti_nm+"<input type='hidden' value='"+response.com_scd+"' class='_com_scd'/></li>";
+                   getStiMmbrInf += "<li class='w130px _sti_cd'>"+response.sti_cd+"</li>";
+                   getStiMmbrInf += "<li class='w80px tAlgnCntr _total_qty'>"+response.total_qty+"</li>";
+                   getStiMmbrInf += "<li class='w50px tAlgnCntr _car_qty'>"+response.car_qty+"</li>";
+                   getStiMmbrInf += "</ul>";
+                $('#getStiMemberInfo').append(getStiMmbrInf);
+                ulLftlst();
+                stiMmbrInfAllnmber();
+            console.log(response);
+            });
+
+       },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+
+
+}
 function saveOpinion() {//하자내역상새조회
      $(document).on("click",".saveOpnnBtn",function(){
            var rpt_no = $('.getDfctInfLst.on').find('_rpt_no').text();
@@ -45,6 +303,7 @@ function getDfctDetail() {//하자내역상새조회
                    getDfctDetail += "</ul>";
                 $('#getDfctDetail').append(getDfctDetail);
                 inFileBtnPop();
+                ulLftlst();
             console.log(response);
             });
 
@@ -148,6 +407,7 @@ function getMglSubInf() {//상세상세미결현황요약정보
                 $('#getMglSubInf').append(getMglSubInf);
                    cmma();//콤마
                    innmbr();//인풋값 스팬으로 넘기기
+                  ulLftlst();
             console.log(response);
             });
 
@@ -194,6 +454,7 @@ function getMigyeolInfo() {//상세미결현황요약정보
                 $('#getMigyeolInf').append(mglRprtInf);
                 migyeolinfStl() ;//미경상세화면변경
                 inFileBtnPop();
+                ulLftlst();
             console.log(response);
             });
 
@@ -259,6 +520,7 @@ function getMigyeolReportInfo() {//미결현황요약정보
                    getMglRprtInfLst += "</ul>";
                 $('#getMigyeolRprtInfLst').append(getMglRprtInfLst);
                migyeolPerBar();
+               ulLftlst();
             console.log(response);
             });
 

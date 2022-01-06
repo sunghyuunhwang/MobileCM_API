@@ -1,5 +1,6 @@
 @charset "utf-8";
-
+input[type='text']:read-only{border: 0;color: #777;}
+input:disabled{opacity: 0.5;}
 .btnBx{display: inline-flex;align-items: center;justify-content: center;width: 100%;}
 .btn{border-radius: 8px;}
 .icnBtn{display: inline-block;font-size: 0;line-height: 0;background-repeat: no-repeat;}
@@ -11,11 +12,15 @@ a.btn{display:inline-flex;align-items: center;justify-content: center;}
 .btn.h54px{font-size: 16px;font-weight: 500;}
 .txtBtn.icnChck_gry::before{display: inline-block;}
 
+.btnSzDf_w{width: auto;padding: 0 12px;}
 .btnSzDf{height: 49px;line-height: 49px;font-size: 15px;font-weight: 500;}
 .btnSzSmll{height: 30px;line-height: 30px;font-size: 15px;font-weight: 500;}
+.btnSzMdl{height: 38px;line-height: 38px;font-size: 15px;font-weight: 500;}
 .btnSzHrf{width: calc(50% - 6px);}
 .btnSzHrf.lft{margin: 0 6px 0 0;}
 .btnSzHrf.rght{margin: 0 0 0 6px;}
+.btnSzWclc3{width: calc(100%/3 - 10px);}
+.btnSzWclc3.lft{margin: 0 10px 0 0;}
 
 .lndBtn.smll{padding: 3px 13px;border-radius: 12px;}
 
@@ -43,3 +48,16 @@ a.btn{display:inline-flex;align-items: center;justify-content: center;}
 
 .dfTxtAra{display: block;width: 100%;height:100%;padding: 5px;border: #ccc 1px solid;box-sizing: border-box;}
   .dfTxtAra:focus{background-color: #fff;}
+
+.frmBox{display: inline-block;float: left;width: 100%;}
+
+.lnInpt{display: inline-block;float: left;padding: 3px 8px;border: #ddd 1px solid;font-size: 15px;line-height: 30px;border-radius: 8px;box-sizing: border-box;}
+.lnInpt.wrng{border:#d16767 1px solid;}
+
+.slctBox{position: relative;}
+.slctBox._inSlct .slctVal{position: relative;display: inline-block;float: left; width: 100%;height: 38px;padding:3px 38px 3px 8px;border: #ddd 1px solid;font-size: 15px;line-height: 30px;border-radius: 8px;box-sizing: border-box;}
+   .slctVal::after{content: '';position: absolute;top:0px;right:0px;width: 38px;height: 38px;background-image: url('/img/icnArrwHddwn_blck.svg');background-repeat: no-repeat;background-position: right 10px center;background-size: 15px;transition: 0.3s;}
+   .slctBox.on .slctVal::after{transform: rotate(180deg);}
+.slctBox .slctLst{position: absolute;display: none;top: 39px;left: 0px;width: 100%;max-height: 160px;border: #aaa 1px solid;font-size: 15px;border-radius:8px;background-color: #fff;box-shadow: 0 1px 3px rgb(0 0 0 / 30%);box-sizing: border-box;}
+   .slctBox.on .slctLst{display: inline-block;}
+   .slctLst .slct{display: inline-block;float: left;width: 100%;padding: 6px 12px;margin: 4px 0;font-size: 15px;line-height: 24px;box-sizing: border-box;}
