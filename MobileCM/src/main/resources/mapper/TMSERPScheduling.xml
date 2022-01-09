@@ -2792,6 +2792,7 @@
 		                    WHEN ast.ast_rtnyn = 'N' THEN 1
 		                  END), 0) > 0 then 'N' else 'Y' end  AS rtnsec,
 		       x.file_yn,
+		       plm_no,
 		       file_id
 		FROM   (SELECT b.com_agsec,
 		               b.com_brand,
@@ -2810,6 +2811,7 @@
 					   d.sti_cd as rpt_rst_acttm,
 					   c.sti_nm as rpt_rst_acttm_nm,
 		               d.plm_cdt,
+		               /*
 		               ( CASE
 		                   WHEN (SELECT Count(*)
 		                         FROM   ty_attchfile WITH (nolock)
@@ -2817,6 +2819,9 @@
 		                 THEN 'Y'
 		                   ELSE ''
 		                 END )                      AS file_yn,
+		               */
+		               'Y' as file_yn,
+					   d.plm_no,
 		               A.defect_typ,
 		               b.file_id
 		        FROM   ta_astitem a WITH (nolock),
@@ -2859,7 +2864,8 @@
 		                  x.plm_cdt,
 		                  x.file_id,
 						  x.rpt_rst_acttm_nm,
-						  x.file_yn
+						  x.file_yn,
+						  x.plm_no
 		         ORDER  BY rpt_enddt	
     </select>
 	<select id="selectDefectDetail" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail">

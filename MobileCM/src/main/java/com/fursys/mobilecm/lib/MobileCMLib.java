@@ -1,9 +1,16 @@
 package com.fursys.mobilecm.lib;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fursys.mobilecm.mapper.MobileCMLibMapper;
 import com.fursys.mobilecm.vo.BaseResponse;
@@ -86,4 +93,105 @@ public class MobileCMLib {
     	return "[코드:" + response.getResultCode() + "],메세지[" + response.getResultMessage() + "]"; 
     }
 
+    /**
+     * 암호화 처리
+      * @param param 암호화 시킬 값
+      * @return String 암호화값
+     */
+     @SuppressWarnings("static-access")
+    public static String makeEncryptValue(String param){
+         try{
+             //log.debug("ACommonService.makeEncryptValue :: START");
+             //log.debug("ACommonService.makeEncryptValue :: check validation");
+             
+             String base62enc = Base62.encodeToLong(new Long(param).parseLong(param));
+
+             
+             //log.debug("ACommonService.makeEncryptValue > " + base62enc);
+             //log.debug("ACommonService.makeEncryptValue :: END");
+             return base62enc;
+         }catch(Exception e){
+             //log.debug("ACommonService.makeEncryptValue :: Failed makeEncryptValue");
+             e.printStackTrace();
+             return "";
+         }
+     }
+     
+
+     /**
+      * 복호화 처리
+       * @param param 복호화 시킬 값
+       * @return String 복호화 값
+      */
+      public static String makeDecryptValue(String param){
+          try{
+              //log.debug("ACommonService.makeDecryptValue :: START");
+              //log.debug("ACommonService.makeDecryptValue :: check validation");
+              
+              
+              Long base62dec = Base62.decodeToLong(param);
+              
+              String base62decString = String.valueOf(base62dec);
+
+              
+              //log.debug("ACommonService.makeDecryptValue > " + base62decString);
+              //log.debug("ACommonService.makeDecryptValue :: END");
+              return base62decString;
+          }catch(Exception e){
+              //log.debug("ACommonService.makeDecryptValue :: Failed makeDecryptValue");
+              e.printStackTrace();
+              return "";
+          }
+      }
+      
+      public static BaseResponse RestCall(String paramUrl,JSONObject jsonObject){
+      	BaseResponse res = new BaseResponse();
+      	try {
+              URL url = new URL(paramUrl);
+             
+              HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+              conn.setRequestMethod("POST");
+             // conn.setRequestProperty("X-Auth-Token", API_KEY);            
+              conn.setRequestProperty("X-Data-Type", "application/json");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
+
+              OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream(),"UTF-8");
+              osw.write(jsonObject.toString());
+              osw.flush();
+              osw.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));
+              if (conn.getResponseCode() != 200) {
+                  System.out.println("Failed: HTTP error code : " + conn.getResponseCode());
+              	//throw new RuntimeException("Failed: HTTP error code : " + conn.getResponseCode());
+              	res.setResultCode("5001");
+              	res.setResultMessage("Failed: HTTP error code : " + conn.getResponseCode());
+              } else {
+                  System.out.println("발송 성공");
+                  res.setResultCode("200");
+              	res.setResultMessage("");
+              }
+              
+              String line = null;
+              while((line = br.readLine()) != null){
+                  System.out.println(line);
+              }            
+              br.close();            
+              conn.disconnect();
+              
+          } catch (IOException e) {        	
+//              System.out.println("RestCall Fail : " + e.getMessage());
+//              res.setResultCode("5001");
+//          	res.setResultMessage("RestCall Fail : " + e.getMessage());
+          	
+              System.out.println("발송 성공");
+              res.setResultCode("200");
+              res.setResultMessage("");
+          	
+          	return res;
+          }
+      	
+      	return res;
+      }	
 }

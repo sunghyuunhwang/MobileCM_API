@@ -46,6 +46,60 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	
+	
+	@ApiOperation(value = "erp_happyCallKakao", notes = "해피콜전송")
+	@GetMapping("/erp_happyCallKakao")
+	public String erp_happyCallKakao (
+			@ApiParam(value = "PLM_NO", required=true, example = "I202112131451")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "RPT_NO", required=true, example = "I202112131451")
+			@RequestParam(name="rpt_no", required=true) String rpt_no,
+			@ApiParam(value = "RPT_SEQ", required=true, example = "IC1496")
+			@RequestParam(name="rpt_seq", required=true) String rpt_seq,
+			@ApiParam(value = "REM_DT", required=true, example = "20211213")
+			@RequestParam(name="rem_dt", required=true) String rem_dt,
+			@ApiParam(value = "REM_SEQ", required=true, example = "IC1496")
+			@RequestParam(name="rem_seq", required=true) String rem_seq,
+			@ApiParam(value = "COM_SSEC", required=true, example = "C18C")
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@ApiParam(value = "COM_AGSEC", required=true, example = "C02I")
+			@RequestParam(name="com_agsec", required=true) String com_agsec,
+			@ApiParam(value = "COM_BRAND", required=true, example = "T60I01")
+			@RequestParam(name="com_brand", required=true) String com_brand,
+			@ApiParam(value = "CTM_NM", required=true, example = "홍길동")
+			@RequestParam(name="ctm_nm", required=true) String ctm_nm,
+			@ApiParam(value = "CTM_HP", required=true, example = "01000000000")
+			@RequestParam(name="ctm_hp", required=true) String ctm_hp,
+			@ApiParam(value = "STI_CD", required=true, example = "YA521")
+			@RequestParam(name="sti_cd", required=true) String sti_cd
+		) {
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("plm_no", plm_no);
+		params.put("rpt_no", rpt_no);
+		params.put("rpt_seq", rpt_seq);
+		params.put("rem_dt", rem_dt);
+		params.put("rem_seq", rem_seq);
+		params.put("com_ssec", com_ssec);
+		params.put("com_agsec", com_agsec);
+		params.put("com_brand", com_brand);
+		params.put("ctm_nm", ctm_nm);
+		params.put("ctm_hp", ctm_hp);
+		//params.put("ctm_hp", "010-6689-0755");
+		params.put("sti_cd", sti_cd);
+        
+		System.out.println(String.format("rpt_no=[%s]", rpt_no));
+		System.out.println(String.format("rpt_seq=[%s]", rpt_seq));
+		System.out.println(String.format("ctm_nm=[%s]", ctm_nm));
+		
+		BaseResponse response = apiErpSigongAsService.erp_happyCallKakao(params);
+		        
+		System.out.println(String.format("response=[%s]", gson.toJson(response)));
+		
+		return gson.toJson(response);
+	}
+	
 	@ApiOperation(value = "erp_selectAsReport", notes = "서비스내역서")
 	@GetMapping("/erp_selectAsReport")
 	public String erp_selectAsReport (
@@ -247,11 +301,14 @@ public class ApiErpSigongAsController {
 			@ApiParam(value = "STI_CD", required=true, example = "YA551")
 			@RequestParam(name="sti_cd", required=true) String sti_cd,
 			@ApiParam(value = "PHONE_ID", required=true, example = "ciOBoXqaQ1qPDcVL5CraXk:APA91bFaBEPkasZlm0L9e2d_C6QYYDj6CTXs6XHT3QlPCiMOee47SE-a_rb0VzQAc_OCsuR0rVzQKNJRZ3DYcUHsVVqs7pfor2OQuc0RcKiOsqvVJc8g7cp3AHDfWcaWKSo6Uv9FCy--")
-			@RequestParam(name="phone_id", required=true) String phone_id
+			@RequestParam(name="phone_id", required=true) String phone_id,
+			@ApiParam(value = "VERSION_CODE", required=false, example = "73")
+			@RequestParam(name="version_code", required=false) String version_code
 			) {
 		       
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		int res = 0;
+		DataResult dataResult = new DataResult();
 		BaseResponse response = new BaseResponse();
 		
 		try {
@@ -259,20 +316,38 @@ public class ApiErpSigongAsController {
 			params.put("sti_cd", sti_cd);
 			params.put("com_scd", com_scd);
 			params.put("phone_id", phone_id);
-					
-			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
-			res = erpsigongasMapper.deleteUsedPhoneID(params);        	
-			txManager.commit(status);
+			params.put("version_code", version_code);
+							
+			String db_phone_id = "", db_version_code = "";
 			
-			status = txManager.getTransaction(new DefaultTransactionDefinition());
-        	res = erpsigongasMapper.updatePhoneID(params);
-        	if (res < 1){
-        		txManager.rollback(status);
-        		response.setResultCode("5001");
-        		response.setResultMessage("PhoneId 변경에 실패하였습니다.");
-        		return gson.toJson(response);
-        	}
-        				
+			dataResult = erpsigongasMapper.selectMobileCmVersion(params);
+    		if (dataResult != null) {
+    			db_phone_id = dataResult.getData1();
+    			db_version_code = dataResult.getData2();
+    		}
+    		
+    		if (!db_phone_id.equals(phone_id)) {
+    			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
+    			res = erpsigongasMapper.deleteUsedPhoneID(params);
+    			res = erpsigongasMapper.updatePhoneID(params);
+            	if (res < 1){
+            		txManager.rollback(status);
+            		response.setResultCode("5001");
+            		response.setResultMessage("PhoneId 변경에 실패하였습니다.");
+            		return gson.toJson(response);
+            	}
+    		}
+			
+    		if (!db_version_code.equals(version_code)) {
+    			res = erpsigongasMapper.updateMobileCmVersion(params);
+            	if (res < 1){
+            		txManager.rollback(status);
+            		response.setResultCode("5001");
+            		response.setResultMessage("MobileCmVersion 변경에 실패하였습니다.");
+            		return gson.toJson(response);
+            	}
+    		}
+			
 		} catch (Exception e) {
 			txManager.rollback(status);
 			System.out.println(e.toString());			

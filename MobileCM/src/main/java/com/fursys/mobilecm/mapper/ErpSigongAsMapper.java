@@ -12,6 +12,7 @@ import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
+import com.fursys.mobilecm.vo.erp.ERPHappyCall;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
@@ -20,6 +21,14 @@ import com.fursys.mobilecm.vo.erp.ERPSigongReport;
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	public int selectNotSendCtm(String params);
+	public DataResult selectHappyCallSendCheck(HashMap<String,Object> params);
+	public int insertHappyCallAnswer(HashMap<String,Object> params);
+	public int insertHappyCallDetail(HashMap<String,Object> params);
+	public int insertHappyCallMaster(HashMap<String,Object> params);
+	public int updateHappyCallCount(HashMap<String,Object> params);
+	
+	public ERPHappyCall selectHappyCallMessage(HashMap<String,Object> params);
 	public int erp_sigongDelivery(HashMap<String,Object> params);
 	public ERPAsReport erp_selectAsReport(HashMap<String,Object> params);
 	public ArrayList<ERPAsItemReport> erp_selectAsItemReport(HashMap<String,Object> params);
@@ -42,7 +51,9 @@ public interface ErpSigongAsMapper {
 	public int insertSigongWallFix(HashMap<String,Object> params);
 	public ArrayList<ERPPushMessage> selectPhoneID(HashMap<String,Object> params);
 	public int deleteUsedPhoneID(HashMap<String,Object> params);
-	public DataResult selectNotifyGetDate(HashMap<String, Object> param);	
+	public DataResult selectNotifyGetDate(HashMap<String, Object> param);
+	public DataResult selectMobileCmVersion(HashMap<String, Object> param);
+	public int updateMobileCmVersion(HashMap<String,Object> params);
 	public int updatePhoneID(HashMap<String,Object> params);
 	public int insertNotify(HashMap<String,Object> params);
 	public ArrayList<ERPAttachFileList> selectSigongAttachFileList(HashMap<String,Object> params);
