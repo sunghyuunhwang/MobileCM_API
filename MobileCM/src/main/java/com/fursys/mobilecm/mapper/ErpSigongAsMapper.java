@@ -6,6 +6,9 @@ import java.util.HashMap;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.fursys.mobilecm.vo.DataResult;
+import com.fursys.mobilecm.vo.erp.ERPAddAct;
+import com.fursys.mobilecm.vo.erp.ERPAddActDetail;
+import com.fursys.mobilecm.vo.erp.ERPAddActList;
 import com.fursys.mobilecm.vo.erp.ERPAsItemReport;
 import com.fursys.mobilecm.vo.erp.ERPAsReport;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
@@ -17,10 +20,28 @@ import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
 import com.fursys.mobilecm.vo.erp.ERPSigongReport;
+import com.fursys.mobilecm.vo.erp.ERPTrinfList;
+import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	
+	public int deleteAddActDetail(HashMap<String,Object> params);
+	public int updateAddAct(HashMap<String,Object> params);
+	public int updateAddActDetail(HashMap<String,Object> params);
+	
+	public ERPAddAct selectAddAct(HashMap<String,Object> params);
+	public ArrayList<ERPAddActDetail> selectAddActDetail(HashMap<String,Object> params);
+	
+	public int insertAddAct(HashMap<String,Object> params);
+	public int insertAddActDetail(HashMap<String,Object> params);
+	public int insertAddActDetailMulti(HashMap<String,Object> params);
+	public DataResult selectAddActDetailSeq(HashMap<String,Object> params);
+	public DataResult selectAddActSeq(HashMap<String,Object> params);
+	public ArrayList<ERPTrinfList> selectActItemList(HashMap<String,Object> params);
+	public ArrayList<ERPTtComcd> selectTrsecList(HashMap<String,Object> params);
+	public ArrayList<ERPAddActList> selectAddActList(HashMap<String,Object> params);
 	public int selectNotSendCtm(String params);
 	public DataResult selectHappyCallSendCheck(HashMap<String,Object> params);
 	public int insertHappyCallAnswer(HashMap<String,Object> params);

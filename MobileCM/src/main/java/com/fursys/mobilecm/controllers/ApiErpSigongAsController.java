@@ -20,18 +20,33 @@ import com.fursys.mobilecm.mapper.CRS0010_M01Mapper;
 import com.fursys.mobilecm.mapper.ErpSigongAsMapper;
 import com.fursys.mobilecm.service.ApiErpService;
 import com.fursys.mobilecm.service.ApiErpSigongAsService;
+import com.fursys.mobilecm.utils.ComParamLogger;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
+import com.fursys.mobilecm.vo.erp.ERPAddAct;
+import com.fursys.mobilecm.vo.erp.ERPAddActDetail;
+import com.fursys.mobilecm.vo.erp.ERPAddActList;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
+import com.fursys.mobilecm.vo.erp.ERPBusinessTrip;
+import com.fursys.mobilecm.vo.erp.ERPBusinessTripDetail;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
+import com.fursys.mobilecm.vo.erp.ERPScheduleCount;
+import com.fursys.mobilecm.vo.erp.ERPTrinfList;
+import com.fursys.mobilecm.vo.erp.ERPTtComcd;
+import com.fursys.mobilecm.vo.mobile.response.AddActResponse;
 import com.fursys.mobilecm.vo.mobile.response.AsReportResponse;
+import com.fursys.mobilecm.vo.mobile.response.BusinessTripResponse;
 import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
 import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
 import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.Getter;
+import lombok.Setter;
 
 @RestController
 @RequestMapping("/v1/api/erp_sigongas")
@@ -46,7 +61,338 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	@ApiOperation(value = "erp_selectAddAct", notes = "추가정산 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "추가정산 조회 실패 !!") })
+	@GetMapping("/erp_selectAddAct")
+	@RequestMapping(value = "/erp_selectAddAct", method = RequestMethod.GET)
+	public String erp_selectAddAct(
+			@ApiParam(value = "PLM_NO", required=true, example = "P202112311700")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "COM_SSEC", required=true, example = "C18C")
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@ApiParam(value = "SEQ", required=true, example = "001")
+			@RequestParam(name="seq", required=true) String seq,
+			@ApiParam(value = "ATTCH_FILE_ID", required=true, example = "ADDACTP202112311700001")
+			@RequestParam(name="attch_file_id", required=true) String attch_file_id,
+			@ApiParam(value = "ATTCH_DIV_CD", required=true, example = "C")
+			@RequestParam(name="attch_div_cd", required=true) String attch_div_cd
+			) {
+
+		AddActResponse response = new AddActResponse();		
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("plm_no", plm_no);
+		params.put("com_ssec", com_ssec);
+		params.put("seq", seq);		
+		params.put("attch_file_id", attch_file_id);
+        params.put("attch_div_cd", attch_div_cd);
+
+		try {						 
+			ERPAddAct addAct = erpsigongasMapper.selectAddAct(params);
+			if (addAct == null) {
+				addAct = new ERPAddAct(); 
+			}			
+			ArrayList<ERPAddActDetail> list = erpsigongasMapper.selectAddActDetail(params);		
+			ArrayList<ERPAttachFileList> file_list = erpsigongasMapper.selectSigongAttachFileList(params);
+	       
+			response.setAddAct(addAct);
+			response.setList(list);
+			response.setFile_list(file_list);
+			
+			System.out.println(gson.toJson(response));
+			
+		} catch (Exception e) {
+			System.out.println(e.toString());
+		}
+		
+		return gson.toJson(response);
+	}
 	
+	@ApiOperation(value = "erp_saveAddAct", notes = "추가정산저장")
+	@GetMapping("/erp_saveAddAct")
+	public String erp_saveAddAct (
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@RequestParam(name="seq", required=true) String seq,
+			@RequestParam(name="com_agsec", required=true) String com_agsec,
+			@RequestParam(name="com_brand", required=true) String com_brand,
+			@RequestParam(name="trs_sec", required=true) String trs_sec,
+			@RequestParam(name="remark", required=true) String remark,			
+			@RequestParam(name="user_id", required=true) String user_id,
+
+			@RequestParam(name="dseq_arr", required=true) String dseq_arr,
+			@RequestParam(name="tri_icd_arr", required=true) String tri_icd_arr,
+			@RequestParam(name="qty_arr", required=true) String qty_arr,
+			@RequestParam(name="req_amt_arr", required=true) String req_amt_arr,
+			@RequestParam(name="req_sum_amt_arr", required=true) String req_sum_amt_arr,
+			@RequestParam(name="tri_type_arr", required=true) String tri_type_arr,
+			@RequestParam(name="tri_famt_arr", required=true) String tri_famt_arr,
+			@RequestParam(name="tri_drate_arr", required=true) String tri_drate_arr,
+			@RequestParam(name="rate_subject_arr", required=true) String rate_subject_arr,
+			@RequestParam(name="std_amt_arr", required=true) String std_amt_arr
+			
+		) {
+        
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		String res_msg = "";
+		DataResult dataResult = new DataResult();
+		
+		try {
+			
+	        //dataResult = erpsigongasMapper.selectLgsStat(params);
+
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+			params.put("plm_no", plm_no);
+			params.put("com_ssec", com_ssec);
+			params.put("seq", seq);
+			params.put("com_agsec", com_agsec);
+			params.put("com_brand", com_brand);
+			params.put("trs_sec", trs_sec);
+			params.put("remark", remark);
+			params.put("user_id", user_id);
+/*			
+			params.put("tri_icd_arr", tri_icd_arr);
+			params.put("qty_arr", qty_arr);
+			params.put("req_amt_arr", req_amt_arr);
+			params.put("req_sum_amt_arr", req_sum_amt_arr);
+			params.put("tri_type_arr", tri_type_arr);
+			params.put("tri_famt_arr", tri_famt_arr);
+			params.put("tri_drate_arr", tri_drate_arr);
+			params.put("rate_subject_arr", rate_subject_arr);
+			params.put("std_amt_arr", std_amt_arr);
+*/       
+			if ("".equals(seq)) {	//신규등록
+				dataResult = erpsigongasMapper.selectAddActSeq(params);
+				if (dataResult == null) {
+					txManager.rollback(status);
+	        		response.setResultCode("5001");
+	        		response.setResultMessage("추가정산 채번에 실패하였습니다.");
+	        		return gson.toJson(response);
+	        	}
+				
+				seq = dataResult.getData1();
+				System.out.println(String.format("seq=[%s]", seq));
+				
+				params.put("seq", seq);
+				
+				res = erpsigongasMapper.insertAddAct(params);       	
+				if (res < 1) {    				
+					res_msg =  "insertAddAct 오류 [" + res + "]";
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage(res_msg);
+					return gson.toJson(response);
+				}
+
+				
+				String dseq = "";
+				String tri_icd[] = tri_icd_arr.split(",");
+				String qty[] = qty_arr.split(",");
+				String req_amt[] = req_amt_arr.split(",");
+				String req_sum_amt[] = req_sum_amt_arr.split(",");
+				String tri_type[] = tri_type_arr.split(",");
+				String tri_famt[] = tri_famt_arr.split(",");
+				String tri_drate[] = tri_drate_arr.split(",");
+				String rate_subject[] = rate_subject_arr.split(",");
+				String std_amt[] = std_amt_arr.split(",");
+				
+				for (int i = 0; i<tri_icd.length; i++) {
+					params.put("tri_icd", tri_icd[i]);
+					params.put("qty", qty[i]);
+					params.put("req_amt", req_amt[i]);
+					params.put("req_sum_amt", req_sum_amt[i]);
+					params.put("tri_type", tri_type[i]);
+					params.put("tri_famt", tri_famt[i]);
+					params.put("tri_drate", tri_drate[i]);
+					params.put("rate_subject", rate_subject[i]);
+					params.put("std_amt", std_amt[i]);
+					
+					System.out.println(String.format("req_amt=[%s]", req_amt[i]));
+					
+					dataResult = erpsigongasMapper.selectAddActDetailSeq(params);
+					if (dataResult == null) {
+						txManager.rollback(status);
+		        		response.setResultCode("5001");
+		        		response.setResultMessage("추가정산상세 채번에 실패하였습니다.");
+		        		return gson.toJson(response);
+		        	}
+					dseq = dataResult.getData1();
+					System.out.println(String.format("dseq=[%s]", dseq));
+					params.put("dseq", dseq);
+					
+					res = erpsigongasMapper.insertAddActDetail(params);       	
+					if (res < 1) {    				
+						res_msg =  "insertAddActDetail 오류 [" + res + "]";
+						txManager.rollback(status);
+						response.setResultCode("5001");
+						response.setResultMessage(res_msg);
+						return gson.toJson(response);
+					}
+				}
+				
+				
+			       
+			} else {
+
+				
+				res = erpsigongasMapper.updateAddAct(params);       	
+				if (res < 1) {    				
+					res_msg =  "updateAddAct 오류 [" + res + "]";
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage(res_msg);
+					return gson.toJson(response);
+				}
+
+				
+				String dseq[] = dseq_arr.split(",");
+				String tri_icd[] = tri_icd_arr.split(",");
+				String qty[] = qty_arr.split(",");
+				String req_amt[] = req_amt_arr.split(",");
+				String req_sum_amt[] = req_sum_amt_arr.split(",");
+				String tri_type[] = tri_type_arr.split(",");
+				String tri_famt[] = tri_famt_arr.split(",");
+				String tri_drate[] = tri_drate_arr.split(",");
+				String rate_subject[] = rate_subject_arr.split(",");
+				String std_amt[] = std_amt_arr.split(",");
+
+				for (int i = 0; i<tri_icd.length; i++) {
+					params.put("dseq", dseq[i]);
+					params.put("tri_icd", tri_icd[i]);
+					params.put("qty", qty[i]);
+					params.put("req_amt", req_amt[i]);
+					params.put("req_sum_amt", req_sum_amt[i]);
+					params.put("tri_type", tri_type[i]);
+					params.put("tri_famt", tri_famt[i]);
+					params.put("tri_drate", tri_drate[i]);
+					params.put("rate_subject", rate_subject[i]);
+					params.put("std_amt", std_amt[i]);
+					
+					if ("*".equals(dseq[i])) {
+						dataResult = erpsigongasMapper.selectAddActDetailSeq(params);
+						if (dataResult == null) {
+							txManager.rollback(status);
+			        		response.setResultCode("5001");
+			        		response.setResultMessage("추가정산상세 채번에 실패하였습니다.");
+			        		return gson.toJson(response);
+			        	}
+						dseq[i] = dataResult.getData1();
+						System.out.println(String.format("dseq=[%s]", dseq[i]));
+						params.put("dseq", dseq[i]);
+						
+						res = erpsigongasMapper.insertAddActDetail(params);
+						res_msg =  "insertAddActDetail 오류 [" + res + "]";
+						
+					} else {
+						
+						if ("".equals(qty[i])) {
+							res = erpsigongasMapper.deleteAddActDetail(params); 
+							res_msg =  "deleteAddActDetail 오류 [" + res + "]";
+						} else {
+							res = erpsigongasMapper.updateAddActDetail(params); 
+							res_msg =  "updateAddActDetail 오류 [" + res + "]";
+						}
+						
+						
+					}
+					      	
+					if (res < 1) {    				
+						txManager.rollback(status);
+						response.setResultCode("5001");
+						response.setResultMessage(res_msg);
+						return gson.toJson(response);
+					}
+				}
+				
+				
+			}
+			
+			response.setResultCount(seq);
+			
+			System.out.println(String.format("seq=[%s]", seq));
+
+			
+		}	
+		catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}				
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);        
+
+	}
+	
+	@ApiOperation(value = "erp_selectActItemList", notes = "추가정산품목조회")
+	@GetMapping("/erp_selectActItemList")
+	public String erp_selectActItemList (
+			@ApiParam(value = "ORM_NO", required=true, example = "I20211225104501")
+			@RequestParam(name="orm_no", required=true) String orm_no,
+			@ApiParam(value = "COM_AGSEC", required=true, example = "C02I")
+			@RequestParam(name="com_agsec", required=true) String com_agsec,
+			@ApiParam(value = "COM_BRAND", required=true, example = "T60I01")
+			@RequestParam(name="com_brand", required=true) String com_brand,
+			@ApiParam(value = "TRS_SEC", required=true, example = "000054")
+			@RequestParam(name="trs_sec", required=true) String trs_sec,
+			@ApiParam(value = "TRI_INM", required=false, example = "")
+			@RequestParam(name="tri_inm", required=false) String tri_inm
+		) {
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("orm_no", orm_no);
+		params.put("com_agsec", com_agsec);
+		params.put("com_brand", com_brand);
+		params.put("trs_sec", trs_sec);
+		if (tri_inm == null) tri_inm = "";
+		params.put("tri_inm", tri_inm);
+        
+		ArrayList<ERPTrinfList> allItems = apiErpSigongAsService.erp_selectActItemList(params);
+        
+		return gson.toJson(allItems);
+
+	}
+	
+	@ApiOperation(value = "erp_selectTrsecList", notes = "정산분류조회")
+	@GetMapping("/erp_selectTrsecList")  
+	public String erp_selectTrsecList(
+			@ApiParam(value = "COM_AGSEC", required=true, example = "C02P")
+			@RequestParam(name="com_agsec", required=true) String com_agsec,
+			@ApiParam(value = "COM_BRAND", required=true, example = "T60P02")
+			@RequestParam(name="com_brand", required=true) String com_brand
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("com_agsec", com_agsec);
+        params.put("com_brand", com_brand);
+		ArrayList<ERPTtComcd> allItems = erpsigongasMapper.selectTrsecList(params);
+		
+		return gson.toJson(allItems);
+	}
+	
+	@ApiOperation(value = "erp_addActList", notes = "추가정산조회")
+	@GetMapping("/erp_addActList")
+	public String erp_addActList (
+			@ApiParam(value = "PLM_NO", required=true, example = "P202112311700")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "COM_SSEC", required=true, example = "C18C")
+			@RequestParam(name="com_ssec", required=true) String com_ssec
+		) {
+        
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("plm_no", plm_no);
+		params.put("com_ssec", com_ssec);
+        
+		ArrayList<ERPAddActList> allItems = apiErpSigongAsService.erp_addActList(params);
+        
+		return gson.toJson(allItems);
+
+	}
 	
 	@ApiOperation(value = "erp_happyCallKakao", notes = "해피콜전송")
 	@GetMapping("/erp_happyCallKakao")
@@ -88,14 +434,10 @@ public class ApiErpSigongAsController {
 		params.put("ctm_hp", ctm_hp);
 		//params.put("ctm_hp", "010-6689-0755");
 		params.put("sti_cd", sti_cd);
-        
-		System.out.println(String.format("rpt_no=[%s]", rpt_no));
-		System.out.println(String.format("rpt_seq=[%s]", rpt_seq));
-		System.out.println(String.format("ctm_nm=[%s]", ctm_nm));
 		
 		BaseResponse response = apiErpSigongAsService.erp_happyCallKakao(params);
 		        
-		System.out.println(String.format("response=[%s]", gson.toJson(response)));
+		//System.out.println(String.format("response=[%s]", gson.toJson(response)));
 		
 		return gson.toJson(response);
 	}

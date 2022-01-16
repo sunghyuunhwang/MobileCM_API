@@ -948,9 +948,11 @@
 	ORDER BY COM_TONSEC
 ]]>
 </select> 
-
+ 
 <select id="selectSigongItemResultPage" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPConstructionItemResultPage">         
 <![CDATA[ 
+    SELECT *
+      FROM (
 	SELECT 
 			'정상시공' AS GUBUN_NM 								
 		   ,ISNULL(A.SET_CD, '') AS SET_CD										
@@ -1029,6 +1031,8 @@
 	   AND A.PLM_NO = #{plm_no}
        AND A.COM_PLDSEC IN ('C094','C09A')
 	   AND 'C' = #{gubun}
+	   ) A
+	 ORDER BY A.ITM_CD
 ]]>
 </select>
 

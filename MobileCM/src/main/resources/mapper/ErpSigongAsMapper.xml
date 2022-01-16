@@ -2,6 +2,343 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
+<update id="deleteAddActDetail" parameterType="HashMap">
+<![CDATA[
+	DELETE FROM TC_ADDACTREQ_DTL
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ = #{seq}
+	   AND DSEQ = #{dseq}
+	
+]]>
+</update> 
+
+<update id="updateAddAct" parameterType="HashMap">
+<![CDATA[
+
+	UPDATE TC_ADDACTREQ SET 
+	 REMARK =  #{remark}
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ = #{seq}
+
+ ]]>
+</update> 
+
+<update id="updateAddActDetail" parameterType="HashMap">
+<![CDATA[
+
+	UPDATE TC_ADDACTREQ_DTL SET 
+	 TRI_ICD =  #{tri_icd}
+	,QTY = #{qty}
+	,REQ_AMT = #{req_amt}
+	,REQ_SUM_AMT = #{req_sum_amt}
+	,TRI_TYPE = #{tri_type}
+	,TRI_FAMT = #{tri_famt}
+	,TRI_DRATE = #{tri_drate}
+	,RATE_SUBJECT = #{rate_subject}
+	,STD_AMT = #{std_amt}
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ = #{seq}
+	   AND DSEQ = #{dseq}
+
+ ]]>
+</update> 
+
+<select id="selectAddActDetail" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAddActDetail">
+<![CDATA[
+
+	SELECT A.PLM_NO
+			,A.COM_SSEC
+			,A.SEQ
+			,A.DSEQ
+			,A.TRI_ICD
+			,C.TRI_INM
+			,A.QTY
+			,A.REQ_AMT
+			,A.REQ_SUM_AMT
+			,A.TRI_TYPE
+			,A.TRI_FAMT
+			,A.TRI_DRATE
+			,A.RATE_SUBJECT
+			,A.STD_AMT
+	  FROM TC_ADDACTREQ_DTL A WITH (NOLOCK), TC_ADDACTREQ B, TC_TRINF C WITH(NOLOCK)
+	 WHERE A.PLM_NO = B.PLM_NO
+	   AND A.COM_SSEC = B.COM_SSEC
+	   AND A.SEQ = B.SEQ
+	   AND B.COM_AGSEC = C.COM_AGSEC
+	   AND B.COM_BRAND = C.COM_BRAND
+	   AND B.TRS_SEC = C.TRS_SEC
+	   AND A.TRI_ICD = C.TRI_ICD
+	   AND A.PLM_NO = #{plm_no}
+	   AND A.COM_SSEC = #{com_ssec}
+	   AND A.SEQ = #{seq}
+	 ORDER BY A.DSEQ
+
+]]> 
+</select>
+ 
+<select id="selectAddAct" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAddAct">
+<![CDATA[
+
+	SELECT A.PLM_NO
+			,A.COM_SSEC
+			,A.SEQ
+			,A.COM_AGSEC
+			,A.COM_BRAND
+			,A.TRS_SEC
+			,B.TRS_SNM
+			,A.ADDACT_REQDT
+			,A.ADDACT_STAT
+			,A.REMARK
+	  FROM TC_ADDACTREQ A WITH (NOLOCK), TC_TRSEC B WITH(NOLOCK)
+	 WHERE A.COM_AGSEC = B.COM_AGSEC
+	   AND A.COM_BRAND = B.COM_BRAND
+	   AND A.TRS_SEC = B.TRS_SEC
+	   AND A.PLM_NO = #{plm_no}
+	   AND A.COM_SSEC = #{com_ssec}
+	   AND A.SEQ = #{seq}
+ 
+]]> 
+</select>
+
+<insert id="insertAddAct" parameterType="HashMap">
+<![CDATA[
+	INSERT TC_ADDACTREQ (
+	 PLM_NO
+	,COM_SSEC
+	,SEQ
+	,COM_AGSEC
+	,COM_BRAND
+	,TRS_SEC
+	,ADDACT_REQDT
+	,ADDACT_STAT
+	,REMARK
+	,FST_USR_CD
+	,FST_SYS_DT
+	,USR_CD
+	,SYS_DT
+	) VALUES (
+	 #{plm_no}
+	,#{com_ssec}
+	,#{seq}
+	,#{com_agsec} -- 등록한 정산분류정보
+	,#{com_brand} -- 등록한 정산분류정보
+	,#{trs_sec}  -- 등록한 정산분류정보
+	,CONVERT(VARCHAR(8), GETDATE(), 112) -- 요청일자
+	,'C83001' -- 요청
+	,#{remark} -- 비고
+	,#{user_id}
+	,GETDATE()
+	,#{user_id}
+	,GETDATE())
+
+]]>
+</insert>
+
+<insert id="insertAddActDetailMulti" parameterType="HashMap">
+<![CDATA[
+	INSERT TC_ADDACTREQ_DTL (
+	 PLM_NO
+	,COM_SSEC
+	,SEQ
+	,DSEQ
+	,TRI_ICD
+	,QTY
+	,REQ_AMT
+	,REQ_SUM_AMT
+	,TRI_TYPE
+	,TRI_FAMT
+	,TRI_DRATE
+	,RATE_SUBJECT
+	,STD_AMT
+	,FST_USR_CD
+	,FST_SYS_DT
+	,USR_CD
+	,SYS_DT )
+    SELECT  #{plm_no}
+	       ,#{com_ssec}
+	       ,#{seq}
+	       ,(SELECT REPLICATE('0',3 - LEN(ISNULL(MAX(DSEQ),0) + 1)) + CAST((ISNULL(MAX(DSEQ),0) + 1) AS VARCHAR)
+	           FROM TC_ADDACTREQ_DTL WITH (NOLOCK)
+	       	  WHERE PLM_NO = #{plm_no}
+	       	    AND COM_SSEC = #{com_ssec}
+	       	    AND SEQ = #{seq})
+	       ,A.DATA AS TRI_ICD
+	       ,B.DATA AS QTY
+	       ,C.DATA AS REQ_AMT
+	       ,D.DATA AS REQ_SUM_AMT
+	       ,E.DATA AS TRI_TYPE
+	       ,F.DATA AS TRI_FAMT
+	       ,G.DATA AS TRI_DRATE
+	       ,H.DATA AS RATE_SUBJECT
+	       ,I.DATA AS STD_AMT
+	       ,#{user_id}
+	       ,GETDATE()
+	       ,#{user_id}
+	       ,GETDATE()
+	  FROM dbo.fnSplit(#{tri_icd_arr}) A, dbo.fnSplit(#{qty_arr}) B, dbo.fnSplit(#{req_amt_arr}) C, dbo.fnSplit(#{req_sum_amt_arr}) D, dbo.fnSplit(#{tri_type_arr}) E,
+	       dbo.fnSplit(#{tri_famt_arr}) F, dbo.fnSplit(#{tri_drate_arr}) G, dbo.fnSplit(#{rate_subject_arr}) H, dbo.fnSplit(#{std_amt_arr}) I
+	 WHERE A.SEQNO = B.SEQNO
+	   AND A.SEQNO = C.SEQNO
+	   AND A.SEQNO = D.SEQNO
+	   AND A.SEQNO = E.SEQNO
+	   AND A.SEQNO = F.SEQNO
+	   AND A.SEQNO = G.SEQNO
+	   AND A.SEQNO = H.SEQNO
+	   AND A.SEQNO = I.SEQNO
+]]>
+</insert>
+ 
+<insert id="insertAddActDetail" parameterType="HashMap">
+<![CDATA[
+	INSERT TC_ADDACTREQ_DTL (
+	 PLM_NO
+	,COM_SSEC
+	,SEQ
+	,DSEQ
+	,TRI_ICD
+	,QTY
+	,REQ_AMT
+	,REQ_SUM_AMT
+	,TRI_TYPE
+	,TRI_FAMT
+	,TRI_DRATE
+	,RATE_SUBJECT
+	,STD_AMT
+	,FST_USR_CD
+	,FST_SYS_DT
+	,USR_CD
+	,SYS_DT
+	) VALUES (
+	 #{plm_no}
+	,#{com_ssec}
+	,#{seq}
+	,#{dseq}
+	,#{tri_icd} -- 정산품목 코드
+	,#{qty} -- 요청수량
+	,#{req_amt} -- 요청단가
+	,#{req_sum_amt} -- 품목 * 단가
+	,#{tri_type} -- 품목의 정산유형
+	,#{tri_famt} -- 품목의 정산단가 (정산유형이 '정액'일 경우)
+	,#{tri_drate} -- 품목의 지급요율 (정산유형이 '요율'일 경우)
+	,#{rate_subject} -- 품목의 요율산정대상 (정산유형이 '요율'일 경우)
+	,#{std_amt} -- 정산기준금액(소바자가일경우 TO_ORDDET SUM(IOP_SALCST_REC), 공장도가일 경우(IOP_MNFCST)) (정산유형이 '요율'일 경우)
+	,#{user_id}
+	,GETDATE()
+	,#{user_id}
+	,GETDATE())
+
+]]> 
+</insert>
+
+<select id="selectAddActDetailSeq" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+	SELECT REPLICATE('0',3 - LEN(ISNULL(MAX(DSEQ),0) + 1)) + CAST((ISNULL(MAX(DSEQ),0) + 1) AS VARCHAR) AS DATA1
+	  FROM TC_ADDACTREQ_DTL WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ = #{seq}
+
+]]> 
+</select>
+
+<select id="selectAddActSeq" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+	SELECT REPLICATE('0',3 - LEN(ISNULL(MAX(SEQ),0) + 1)) + CAST((ISNULL(MAX(SEQ),0) + 1) AS VARCHAR) AS DATA1
+	  FROM TC_ADDACTREQ WITH (NOLOCK)
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC =  #{com_ssec}
+
+]]>
+</select>
+
+<select id="selectActItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTrinfList">
+<![CDATA[
+	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, RATE_SUBJECT, TRI_DRATE,
+	       CASE TRI_TYPE WHEN  'C84001' THEN 
+	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) WHEN -1 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) * TRI_DRATE END
+	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) WHEN -1 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) * TRI_DRATE END
+	                          ELSE '0'END )-- 
+	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
+	                          ELSE 0
+	                          END AS TRI_AMT,
+	       CASE TRI_TYPE WHEN  'C84001' THEN 
+	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) WHEN -1 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) END
+	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) WHEN -1 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) END
+	                          ELSE '0'END )-- 
+	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
+	                          ELSE 0
+	                          END AS STD_AMT	                          
+	  FROM TC_TRINF WITH(NOLOCK)
+	 WHERE COM_AGSEC = #{com_agsec}
+	   AND COM_BRAND = #{com_brand}
+	   AND TRS_SEC = #{trs_sec}
+	   AND TRI_INM LIKE #{tri_inm}
+	   AND USE_YN = 'Y'
+	 ORDER BY TRI_INM
+	 
+	 		
+]]>
+</select>  
+    
+<select id="selectActItemList_" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTrinfList">
+<![CDATA[
+ 
+	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, RATE_SUBJECT, TRI_DRATE,  
+	       CASE TRI_TYPE WHEN  'C84001' THEN (CASE RATE_SUBJECT WHEN 'C85001' THEN TRI_DRATE * (SELECT SUM(ISNULL(IOP_SALCST,0)) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) 
+		                                                        WHEN 'C85002' THEN TRI_DRATE * (SELECT SUM(ISNULL(IOP_MNFCST,0)) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) ELSE '0' END)
+	                     WHEN  'C84002' THEN TRI_FAMT ELSE 0 END AS TRI_AMT
+	  FROM TC_TRINF WITH(NOLOCK)
+	 WHERE COM_AGSEC = #{com_agsec}
+	   AND COM_BRAND = #{com_brand}
+	   AND TRS_SEC = #{trs_sec}
+	   AND TRI_INM LIKE #{tri_inm}
+	   AND USE_YN = 'Y'
+	 ORDER BY TRI_INM
+   
+]]>
+</select> 
+
+<select id="selectTrsecList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTtComcd">
+<![CDATA[
+
+	SELECT A.TRS_SNM AS CCD_CD, A.TRS_SEC AS CCD_NM 
+	  FROM TC_TRSEC A WITH(NOLOCK) INNER JOIN TT_COMCD C ON A.GUBUN = C.CCD_CD
+	 WHERE A.COM_AGSEC = #{com_agsec}
+	   AND A.COM_BRAND = #{com_brand}
+	   AND A.USE_YN = 'Y'
+	   AND C.REF_1 = 'Y'
+	 ORDER BY A.TRS_SNM
+  
+]]>
+</select>
+
+<select id="selectAddActList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPAddActList">
+<![CDATA[
+  
+	SELECT R.SEQ,
+	       T.TRS_SEC,
+	       T.TRS_SNM,
+	       SUM(D.REQ_SUM_AMT) AS AMT,
+	       ADDACT_STAT
+	  FROM TC_ADDACTREQ R WITH (NOLOCK) INNER JOIN TC_ADDACTREQ_DTL D WITH (NOLOCK) ON R.PLM_NO = D.PLM_NO AND R.COM_SSEC = D.COM_SSEC AND R.SEQ = D.SEQ
+	                                    INNER JOIN TC_TRSEC T WITH (NOLOCK) ON R.COM_AGSEC = T.COM_AGSEC AND R.COM_BRAND = T.COM_BRAND AND R.TRS_SEC = T.TRS_SEC
+	 WHERE R.PLM_NO = #{plm_no} 
+	   AND R.COM_SSEC = #{com_ssec} 
+	 GROUP BY R.SEQ, T.TRS_SEC, T.TRS_SNM, ADDACT_STAT
+	 ORDER BY R.SEQ DESC 
+ 
+]]>
+</select>
+  
  <select id="selectNotSendCtm" parameterType="java.lang.String" resultType="Integer">
 <![CDATA[
  	SELECT COUNT(*) AS CNT
@@ -10,7 +347,7 @@
 	    AND Z.APPLY_YN = 'Y'	    
 ]]>
 </select>
-
+  
  <select id="selectHappyCallSendCheck" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 	 SELECT TOP 1

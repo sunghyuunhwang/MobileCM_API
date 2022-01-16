@@ -22,6 +22,7 @@ import com.fursys.mobilecm.service.ApiErpSigongAsService;
 import com.fursys.mobilecm.utils.FcmMessage;
 import com.fursys.mobilecm.vo.BaseResponse;
 import com.fursys.mobilecm.vo.DataResult;
+import com.fursys.mobilecm.vo.erp.ERPAddActList;
 import com.fursys.mobilecm.vo.erp.ERPAsItemReport;
 import com.fursys.mobilecm.vo.erp.ERPAsReport;
 import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
@@ -33,6 +34,7 @@ import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
 import com.fursys.mobilecm.vo.erp.ERPSigongReport;
+import com.fursys.mobilecm.vo.erp.ERPTrinfList;
 import com.fursys.mobilecm.vo.mobile.response.AsReportResponse;
 import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
 import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
@@ -52,6 +54,55 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
 
+	@Override		
+	public ArrayList<ERPTrinfList> erp_selectActItemList(HashMap<String, Object> param) {
+		ArrayList<ERPTrinfList> allitems;
+		HashMap<String, Object> params;
+		
+		try {
+			String orm_no = (String) param.get("orm_no");
+			String com_agsec = (String) param.get("com_agsec");
+			String com_brand = (String) param.get("com_brand");
+			String trs_sec = (String) param.get("trs_sec");
+			String tri_inm = "%" + (String) param.get("tri_inm") + "%";
+			
+			params = new HashMap<String, Object>();
+			params.put("orm_no", orm_no);
+			params.put("com_agsec", com_agsec);
+			params.put("com_brand", com_brand);
+			params.put("trs_sec", trs_sec);
+			params.put("tri_inm", tri_inm);
+			
+			allitems = erpsigongasMapper.selectActItemList(params);		
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return allitems;
+	}
+	
+	@Override		
+	public ArrayList<ERPAddActList> erp_addActList(HashMap<String, Object> param) {
+		ArrayList<ERPAddActList> allitems;
+		HashMap<String, Object> params;
+		
+		try {
+			String plm_no = (String) param.get("plm_no");
+			String com_ssec = (String) param.get("com_ssec");
+			
+			params = new HashMap<String, Object>();
+			params.put("plm_no", plm_no);
+			params.put("com_ssec", com_ssec);
+			
+			allitems = erpsigongasMapper.selectAddActList(params);		
+	        
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			return null;
+		}		
+		return allitems;
+	}
 	
 	@Override
 	public BaseResponse erp_happyCallKakao(HashMap<String, Object> param) {
