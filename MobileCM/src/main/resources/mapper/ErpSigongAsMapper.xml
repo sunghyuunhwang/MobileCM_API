@@ -2,6 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
+<update id="deleteAddAct" parameterType="HashMap">
+<![CDATA[
+	DELETE FROM TC_ADDACTREQ
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ = #{seq}
+	
+]]>
+</update> 
+
+<update id="deleteAddActDetailAll" parameterType="HashMap">
+<![CDATA[
+	DELETE FROM TC_ADDACTREQ_DTL
+	 WHERE PLM_NO = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ = #{seq}
+	
+]]>
+</update> 
+
 <update id="deleteAddActDetail" parameterType="HashMap">
 <![CDATA[
 	DELETE FROM TC_ADDACTREQ_DTL

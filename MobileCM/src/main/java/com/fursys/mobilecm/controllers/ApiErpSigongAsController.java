@@ -61,6 +61,62 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	@ApiOperation(value = "erp_deleteAddAct", notes = "추가정산삭제")
+	@GetMapping("/erp_deleteAddAct")
+	public String erp_deleteAddAct (
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@RequestParam(name="seq", required=true) String seq
+			
+		) {
+        
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		String res_msg = "";
+		
+		try {
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+			params.put("plm_no", plm_no);
+			params.put("com_ssec", com_ssec);
+			params.put("seq", seq);
+
+			res = erpsigongasMapper.deleteAddActDetailAll(params);       	
+			if (res < 1) {    				
+				res_msg =  "deleteAddActDetailAll 오류 [" + res + "]";
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage(res_msg);
+				return gson.toJson(response);
+			}
+			
+			res = erpsigongasMapper.deleteAddAct(params);       	
+			if (res < 1) {    				
+				res_msg =  "deleteAddAct 오류 [" + res + "]";
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage(res_msg);
+				return gson.toJson(response);
+			}
+
+		}
+		
+		catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}				
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);        
+
+	}
+	
 	@ApiOperation(value = "erp_selectAddAct", notes = "추가정산 조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "추가정산 조회 실패 !!") })
 	@GetMapping("/erp_selectAddAct")
