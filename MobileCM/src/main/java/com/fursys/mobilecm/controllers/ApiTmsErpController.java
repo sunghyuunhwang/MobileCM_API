@@ -1680,7 +1680,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getStiMemberInfo")
 	@RequestMapping(value="/getStiMemberInfo",method=RequestMethod.GET)
 	public String getStiMemberInfo(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user
 			//@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
 			//@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd
 			) throws Exception {
@@ -1689,13 +1689,15 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPStimemberInfo> stiMember = null;
 		
 		try {
-			//if (user != null) {
-				params.put("k_sti_cd", "YA521");
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("k_sti_cd", etc.getSti_cd());				
+				//params.put("k_sti_cd", "YA521");
 				stiMember = tmserpScheduling.selectStimemberInfo(params);
 				return gson.toJson(stiMember);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
@@ -1706,7 +1708,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getStiMemberDetailInfo")
 	@RequestMapping(value="/getStiMemberDetailInfo",method=RequestMethod.GET)
 	public String getStiMemberDetailInfo(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "sti_cd", required = true, example = "YA521")
 			@RequestParam(name = "sti_cd", required = true) String sti_cd,
 			@ApiParam(value = "com_scd", required = true, example = "C16YA")
@@ -1717,14 +1719,14 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPStimemberDetailInfo> stiDetailMember = null;
 		
 		try {
-			//if (user != null) {
+			if (user != null) {
 				params.put("sti_cd", sti_cd);
 				params.put("com_scd", com_scd);
 				stiDetailMember = tmserpScheduling.selectStimemberDetailInfo(params);
 				return gson.toJson(stiDetailMember);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
@@ -1749,7 +1751,7 @@ public class ApiTmsErpController {
 			params.put("stm_no", stimember.stm_no);
 			params.put("stm_nm", stimember.stm_nm);		
 			params.put("stm_hp", stimember.stm_hp);		
-			params.put("stm_mdt", stimember.stm_mdt);		
+			params.put("car_no", stimember.car_no);		
 			params.put("stm_zdt", stimember.stm_jdt);		
 			params.put("com_pos", stimember.com_pos);		
 			params.put("stm_addr", stimember.stm_addr);		
@@ -1792,12 +1794,14 @@ public class ApiTmsErpController {
 		try {
 			params.put("sti_cd", stimember.sti_cd);
 			params.put("com_scd", stimember.com_scd);
-			params.put("stm_nm", stimember.stm_nm);		
+			params.put("stm_nm", stimember.stm_nm);	
+			params.put("stm_no", stimember.stm_no);	
 			params.put("stm_hp", stimember.stm_hp);		
-			params.put("stm_mdt", stimember.stm_mdt);		
+			params.put("car_no", stimember.car_no);		
 			params.put("stm_jdt", stimember.stm_jdt);		
 			params.put("com_pos", stimember.com_pos);		
-			params.put("stm_addr", stimember.stm_addr);		
+			params.put("stm_addr", stimember.stm_addr);
+			params.put("stm_zip", stimember.stm_zip);	
 			
 	    	res = tmserpScheduling.insertStimemberInfo(params);
 	    	

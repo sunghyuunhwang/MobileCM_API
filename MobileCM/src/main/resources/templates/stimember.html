@@ -17,6 +17,9 @@
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
     <script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
+<!--     <script src="/js/mbCM-frontApiActnReal_front.js"></script>프론트엔드 이벤 -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script><!--우편번호-->
+
 </head>
 
 <body>
@@ -24,158 +27,246 @@
           <div class="subPgTopBx">
                <button class="icnBtn icnTopMenuOpn">메뉴</button>
                <aside class="fssMblCmPop topMenuPopBox">
-                    <menu class="topMenuPopLst">
-                         <li>
-                            <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
-                         </li>
-                         <li>
-                            <a class="lstLnk" href="/v1/areamaster/migyeolReport">미결 현황 관리</a>
-                         </li>
-                         <li>
-                            <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
-                         </li>
-<!--                          <li>
-                            <a class="lstLnk">하자 내역 조회</a>
-                         </li> -->
-                    </menu>
+	               <menu class="topMenuPopLst">
+	                    <li>
+	                        <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
+	                    </li>
+	                     <li>
+	                        <a class="lstLnk" href="/v1/areamaster/migyeolReport">미결 현황 관리</a>
+	                    </li>
+	                    <li>
+	                        <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
+	                    </li>
+				        <li>
+				           <a class="lstLnk" href="/v1/areamaster/defectInfo">하자내역 조회</a>
+				        </li>
+				        <li>
+				           <a class="lstLnk" href="/v1/areamaster/stimember">시공팀원관리</a>
+				        </li>			                         
+	               </menu>
                     <button class="clsBtn bgBlck"><!--배경닫기--></button>
                </aside>
           </div>
-           <h1 class="insubPgTopBx ttl">대리점 반품 의뢰</h1>
-           <article class="srchBox">
-                <div class="dateBx">
-                     시공확정일자
-                     <input type="text" name="" id="nmldate1" class="nmldatepicker inptBx hThin" value="" readonly/>
-                     ~
-                     <input type="text" name="" id="nmldate2" class="nmldatepicker inptBx hThin" value="" readonly/>
-                </div>
-                <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="getVndBanpum()">조회</button>
+           <h1 class="insubPgTopBx ttl">
+                시공팀원 관리
+                <button class="btn btnSzSmll btnBlck btnSzDf_w fltRght stiMmbrInsrtBtn">
+                     팀원 등록
+                </button>
+           </h1>
+           <article class="stiTmLstBx" id="getStiMemberInfo">
+                <ul class="ulLftlst _index">
+                     <li class="w130px">시공팀</li>
+                     <li class="w130px">시공팀코드</li>
+                     <li class="w80px tAlgnCntr">총원</li>
+                     <li class="w60px tAlgnCntr">차량</li>
+                </ul>
+                <!--<ul class="ulLftlst" onclick="getStiMemberDetailInfo()">
+                     <li class='w130px'>IJ01정득수</li>
+                     <li class='w130px'>YA521</li>
+                     <li class='w80px tAlgnCntr _total_qty'>00</li>
+                     <li class='w50px tAlgnCntr _car_qty'>00</li>
+                </ul>-->
+                <article class="allNmberBox">
+                     <dl class='infoDl'>
+                          <dt class='ttl'>총원</dt>
+                          <dd class='inf'><span class="nmbr _total_qty"></span>명</dd>
+                     </dl>
+                     <dl class='infoDl'>
+                          <dt class='ttl'>총 차량대수</dt>
+                          <dd class='inf'><span class="nmbr _car_qty"></span>대</dd>
+                     </dl>
+                </article>
            </article>
-           <article class="inSrchFtBx">
-                     <h2 class="popSmllTtl">대리점 반품 정보</h2>
-                     <div class="scrll _inTtl" id="getVndBanpumLst">
-                          <ul class="ulLftlst _index">
-                               <li class="w110px">시공확정일</li>
-                               <li class="w150px tAlgnCntr">시공팀</li>
-                               <li class="w100px">브랜드</li>
-                               <li class="w150px">대리점명</li>
-                               <li class="w200px">수주건명</li>
-                               <li class="w150px">수주번호</li>
-                               <li class="w100px">세트코드</li>
-                               <li class="w100px">세트색상</li>
-                               <li class="w130px">단품코드</li>
-                               <li class="w100px">단품색상</li>
-                               <li class="w100px tAlgnCntr">수주수량</li>
-                               <li class="w100px tAlgnCntr">반품의뢰수량</li>
-                               <li class="w130px tAlgnRght">처리현황</li>
-                               <li class="w200px">반품등록일시</li>
-                               <li class="w100px tAlgnCntr">모바일상태</li>
-                               <li class="w130px tAlgnRght">세부내역</li>
+           <article class="stiMmbrLstBx">
+                <ul class="dfLnUl" id="getStiMemberDetailInfo">
+                     <li class="nonData">
+                          <ul class="infLst">
+                               <li>왼쪽 시공팀을 선택하면 오른쪽 상단 팀원등록 버튼이 생성됩니다.</li>
+                               <li>선택한 시공팀으로 팀원은 자동 등록됩니다.</li>
+                               <li>팀원 등록시 팀원명와 입사일은 필수 사항입니다.</li>
+                               <li>팀원 등록시 연락가능한 전화번호, 실제 주소를 입력해주세요.</li>
+                               <li>소속팀 팀원리스트를 누르면 팀원수정 및 삭제가 가능한 팝업이 생성됩니다.</li>
                           </ul>
-                          <!--나중에 주석처리할 부분
-                          <ul class='ulLftlst'>
-                               <li class="w110px">2021-10-14</li>
-                               <li class="w150px tAlgnCntr">IA신민혁팀</li>
-                               <li class="w100px">데스커</li>
-                               <li class="w150px">가산OPC</li>
-                               <li class="w200px">경북공고</li>
-                               <li class="w150px">I20211021000101</li>
-                               <li class="w100px">CCR132A</li>
-                               <li class="w100px">LLBK</li>
-                               <li class="w130px">CCA9000M</li>
-                               <li class="w100px">BK</li>
-                               <li class="w100px tAlgnCntr">
-                                    <span class="numTxt"></span>
-                                    <input type='text' name='' value='2' class='innmbr nmCmma w100p'>
-                               </li>
-                               <li class="w100px tAlgnCntr">
-                                    <span class="numTxt"></span>
-                                    <input type='text' name='' value='1' class='innmbr nmCmma w100p'>
-                               </li>
-                               <li class="w130px tAlgnRght">의뢰</li>
-                               <li class="w200px">2021-10-20 09:56:22</li>
-                               <li class="w100px tAlgnCntr">
-                                    <button class="vndBSsBtn">미결</button>
-                               </li>
-                               <li class="w130px tAlgnRght">상차후 반품</li>
-                          </ul>
-                          <ul class='ulLftlst'>
-                               <li class="w110px">2021-10-14</li>
-                               <li class="w150px tAlgnCntr">IA신민혁팀</li>
-                               <li class="w100px">데스커</li>
-                               <li class="w150px">가산OPC</li>
-                               <li class="w200px">경북공고</li>
-                               <li class="w150px">I20211021000101</li>
-                               <li class="w100px">CCR132A</li>
-                               <li class="w100px">LLBK</li>
-                               <li class="w130px">CCA9000M</li>
-                               <li class="w100px">BK</li>
-                               <li class="w100px tAlgnCntr">
-                                    <span class="numTxt"></span>
-                                    <input type='text' name='' value='2' class='innmbr nmCmma w100p'>
-                               </li>
-                               <li class="w100px tAlgnCntr">
-                                    <span class="numTxt"></span>
-                                    <input type='text' name='' value='1' class='innmbr nmCmma w100p'>
-                               </li>
-                               <li class="w130px tAlgnRght">의뢰</li>
-                               <li class="w200px">2021-10-20 09:56:22</li>
-                               <li class="w100px tAlgnCntr">
-                                    <button class="vndBSsBtn">미결</button>
-                               </li>
-                               <li class="w130px tAlgnRght">상차후 반품</li>
-                          </ul>나중에 주석처리할 부분-->
-                     </div>
+                     </li>
+                     <!--<li>
+                          <dl class='inInfoDl wCal390px'>
+                               <dt class='ttl'>팀원성명</dt>
+                               <dd class='inf bld'>IJ01정득수</dd>
+                          </dl>
+                          <dl class='inInfoDl w215px'>
+                               <dt class='ttl'>전화번호</dt>
+                               <dd class='inf bld'>010-1111-1111</dd>
+                          </dl>
+                          <dl class='inInfoDl w175px'>
+                               <dt class='ttl'>직책</dt>
+                               <dd class='inf'>총괄팀장</dd>
+                          </dl>
+                          <dl class='inInfoDl wCal360px'>
+                               <dt class='ttl'>우편번호</dt>
+                               <dd class='inf'>102030</dd>
+                          </dl>
+                          <dl class='inInfoDl w185px'>
+                               <dt class='ttl'>차량번호</dt>
+                               <dd class='inf'>164라 7028</dd>
+                          </dl>
+                          <dl class='inInfoDl w175px'>
+                               <dt class='ttl'>입사일</dt>
+                               <dd class='inf'>2012-04-13</dd>
+                          </dl>
+                          <dl class='inInfoDl w100p br0'>
+                               <dt class='ttl'>주소</dt>
+                               <dd class='inf'>서울 도봉구 해등로 195 쌍문 삼익세라믹 APT</dd>
+                          </dl>
+                     </li>-->
+                </ul>
            </article>
      </section>
-<!--      <aside class="fssMblCmPop _cnter vndBSsFilePop">
+     <aside class="fssMblCmPop _cnter stiMmbrMdfPop">
            <article class="popCntnts smll">
                 <h2 class="ttl">
-                     파일리스트
+                     팀원정보 <span class="mmbrMdf">수정</span><span class="mmbrInsrt">등록</span>
                 </h2>
-                <menu class="fileLst" id="getAttachFileList">
-                     <li>
-                          <a href="" class="bfafNn icnDown">202145155412325841227522.JPG</a>
-                     </li>
-                </menu>
+                <article class="stiMmbrFrm frmBox">
+                    <form>
+                         <dl class="frmDL">
+                              <dt class="ttl _must">팀원성명</dt>
+                              <dd class="inf">
+                                   <input type="text" value="" class="lnInpt w100p _stm_nm" readonly/>
+                                   <input type='hidden' value='' class='_stm_no'/>
+                                   <input type='hidden' value='' class='_sti_cd'/>
+                                   <input type='hidden' value='' class='_com_scd'/>
+                              </dd>
+                         </dl>
+                         <dl class="frmDL">
+                              <dt class="ttl">직책</dt>
+                              <dd class="inf slctBox _inSlct _getComcdList">
+                                   <span class="slctVal _com_pos" data-value="">직책선택</span>
+                                   <menu class="slctLst" id="getComcdList">
+                                        <!--<li class="slct">
+                                             <span  class="slctTxt _ccd_name" data-value="">테스트</span>
+                                        </li>-->
+                                   </menu>
+                              </dd>
+                         </dl>
+                         <dl class="frmDL">
+                              <dt class="ttl">전화번호</dt>
+                              <dd class="inf "><input type="text" value="" class="lnInpt w100p _stm_hp" placeholder="연락가능한 전화번호를 입력해주세요."/></dd>
+                         </dl>
+                         <dl class="frmDL">
+                              <dt class="ttl">차량번호</dt>
+                              <dd class="inf "><input type="text" value="" class="lnInpt w100p _car_no" placeholder="차량번호를 입력해주세요."/></dd>
+                         </dl>
+                         <dl class="frmDL">
+                              <dt class="ttl _must">입사일</dt>
+                              <dd class="inf ">
+                                   <input type="text" value="" placeholder="8자리로 입력해 주세요 (예:20210910)" maxlength="8" class="lnInpt w100p _stm_jdt" readonly/>
+                              </dd>
+                         </dl>
+                         <dl class="frmDL">
+                              <dt class="ttl">주소</dt>
+                              <dd class="inf ">
+                                   <input type="text" id="postcode" class="lnInpt wCal140px _stm_zip" placeholder="우편번호"/>
+                                   <input type="button" onclick="execDaumPostcode()" class="btn btnSzMdl btnBlck w125px mLft15px" value="우편번호 찾기"/>
+                                   <input type="text" id="address" class="lnInpt w100p mTop5px address_stm_addr" placeholder="우편번호 찾기를 눌러 주소 입력"/>
+                                   <input type="hidden" id="detailAddress" class="lnInpt w100p mTop5px" placeholder="상세주소"/>
+                                   <input type="hidden" class="pstAddrss _stm_addr" placeholder="주소"/>
+                                   <div id="layer" class="execDaumPostBox">
+                                      <span class="icnCls_blck" onclick="closeDaumPostcode()"></span>
+                                   </div>
+                              </dd>
+                         </dl>
+                    </form>
+                </article>
                 <div class="btnBx">
-                     <button class="clsBtn btn btnSzHrf lft btnGry h54px">닫기</button>
+                     <button class="btn btnSzWclc3 lft btnBlck h54px mmbrMdf" onclick="updtstimmbrinf()">정보수정</button>
+                     <button class="btn btnSzWclc3 lft btnBlckLn h54px mmbrMdf delstimmbrChck">팀원삭제</button>
+                     <button class="clsBtn btn btnSzWclc3 btnGry h54px mmbrMdf">닫기</button>
+                     <button class="clsBtn btn btnSzHrf lft btnGry h54px mmbrInsrt">취소</button>
+                     <button class="btn btnSzHrf rght btnBlck h54px mmbrInsrt" onclick="insrtstimmbrinf()">정보등록</button>
+                </div>
+                <div class="inalrtPop delstimmbrChckPop">
+                     <span class="infTxt"><span class="alert_stm_nm"></span>님 팀원정보를 정말 삭제하시겠습니까?</span>
+                     <button class="btn w100p btnBlck h54px delChck" onclick="delstimmbrinf()">정보삭제</button>
                 </div>
            </article>
           <button class="clsBtn bgBlck">배경닫기</button>
-     </aside> -->
+     </aside>
+
      <div th:replace="fileList_popup :: fileList_popup">
           <!--시공건 팝업 :: html로 팝업 파일 나눠주셔서 타임리프로 넣어놓긴했는데 여기에 그냥 팝업이 있는게 편하시면 전달주세요~-->
      </div>
-     <aside class="fssMblCmPop bgBlck alrtPop">
-             <article class="popCntnts alrtBx loding" id="lodingPop">
-		          <h2 class="ttl _f19px _24px _fwNml">
-		               <strong>데이터</strong>를 불러오고 있습니다.
-		          </h2>
-		          <span class="ldingTxt">평균 1분이내로 소요됩니다.</span>
-              </article>
-              <article class="popCntnts alrtBx" id="vndBSs_popFail"><!-- 시공건팝업 -->
-                   <h2 class="ttl _f19px _32px">
-                        조회조건을 확인해주세요.
-                   </h2>
-                   <h4 class="ttlInf">
-                        *검색가능일자는 최대 3달입니다.
-                   </h4>
-                   <div class="btnBx">
-                        <button class="clsBtn btn btnSzHrf lft btnGry h54px">닫기</button>
-                   </div>
-              </article>
-     </aside>
-     <script type="text/javascript">
-     $( ".nmldatepicker" ).click(function() {
-          $('.ui-datepicker').addClass('nml');
-     });
-/*           function showDays() {
-              var start = $('.vndBanpumStatus #nmldate1').datepicker('getDate');
-              var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
-          }
-          $('.vndBanpumStatus #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
-     	 $('.vndBanpumStatus #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
- */     </script>
+     <script>
+           $(function(){
+              getStiMemberInfo();
+              getComcdList();//시공팀직책리스트
+              stiMmbrMdfPop();//정보수정-원정보
+              delstimmbrChckPop();//시공팀원정보삭제확인
+           });
+    // 우편번호 찾기 화면을 넣을 element
+    var element_layer = document.getElementById('layer');
+
+    function closeDaumPostcode() {
+        // iframe을 넣은 element를 안보이게 한다.
+        element_layer.style.display = 'none';
+    }
+
+    function execDaumPostcode() {
+         var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
+
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("address").value = extraAddr;
+
+                } else {
+                    document.getElementById("address").value = '';
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('postcode').value = data.zonecode;
+                document.getElementById("address").value = addr+extraAddr;
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById("detailAddress").focus();
+
+                // iframe을 넣은 element를 안보이게 한다.
+                // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
+                element_layer.style.display = 'none';
+            },
+            width : '100%',
+            height : '100%',
+            maxSuggestItems : 5
+        }).embed(element_layer);
+
+        element_layer.style.display = 'block';
+    }
+</script>
 </body>
 </html>

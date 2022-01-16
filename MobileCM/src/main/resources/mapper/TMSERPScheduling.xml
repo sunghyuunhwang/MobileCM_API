@@ -2897,7 +2897,7 @@
 		 ,( SELECT COUNT(*)
 			  FROM TC_STMEMBER TCSM WITH (NOLOCK) 
 			 WHERE TCSM.STI_CD = TCS.STI_CD
-			  AND ( TCSM.STM_MDT IS NOT NULL OR TCSM.STM_MDT <> '' ) ) AS CAR_QTY
+			   AND ( ISNULL(TCSM.STM_MDT,'') > '' ) ) AS CAR_QTY
     FROM    TC_STINF TCS WITH (NOLOCK)
     WHERE   TCS.k_STI_CD = #{k_sti_cd}
 	]]>    
@@ -2908,12 +2908,13 @@
     SELECT TCS.STI_CD AS STI_CD
           , TCS.STM_NO AS STM_NO
           , TCS.STM_NM AS STM_NM
+          , TCS.COM_POS AS COM_POS_CD
           , ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = TCS.COM_POS ) AS COM_POS
           , ISNULL(TCS.STM_ADDR, '') AS STM_ADDR
           , ISNULL(TCS.STM_HP, '') AS STM_HP
 		  , ISNULL(TCS.STM_ZIP, '') AS STM_ZIP
           , ISNULL(TCS.STM_JDT, '') AS STM_JDT
-          , ISNULL(TCS.STM_MDT, '') AS STM_MDT
+          , ISNULL(TCS.STM_MDT, '') AS CAR_NO
     FROM    TC_STMEMBER TCS WITH (NOLOCK)
     WHERE   TCS.COM_SCD = #{com_scd}
     AND     TCS.STI_CD = #{sti_cd}
@@ -2927,7 +2928,7 @@
 	   SET STM_NM = #{stm_nm}
 	     , STM_HP = #{stm_hp}
 	     , STM_ADDR = #{stm_addr}
-	     , STM_MDT = #{stm_mdt}
+	     , STM_MDT = #{car_no}
 		 , STM_JDT = #{stm_zdt}
 		 , COM_POS = #{com_pos}
 		 , SYS_DT = GETDATE()
@@ -2947,6 +2948,7 @@
                 , STM_NO
                 , STM_NM
                 , COM_POS
+                , STM_ZIP
                 , STM_ADDR
                 , STM_HP
                 , STM_MDT
@@ -2959,13 +2961,13 @@
                 )
         VALUES (  #{com_scd}
                 , #{sti_cd}
-			    , FORMAT(CONVERT(INT, ( SELECT stm_no FROM TC_STMEMBER A WITH (NOLOCK)
-										 WHERE A.STI_CD = #{sti_cd} ) ) + 1, '00')
+				, #{stm_no}
                 , #{stm_nm}
                 , #{com_pos}
+                , #{stm_zip}
                 , #{stm_addr}
                 , #{stm_hp}
-                , #{stm_mdt}
+                , #{car_no}
                 , #{stm_jdt}
                 , 'Y'
                 , #{sti_cd}
