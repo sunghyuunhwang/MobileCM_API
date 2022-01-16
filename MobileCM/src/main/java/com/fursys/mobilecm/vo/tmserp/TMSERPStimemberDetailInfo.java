@@ -22,7 +22,9 @@ public class TMSERPStimemberDetailInfo{
 	@ApiModelProperty(value = "팀원이름", example="황성현팀")
 	public String stm_nm; /*팀원이름*/
 	@ApiModelProperty(value = "직책", example="C112")
-	public String com_pos; /*직책*/
+	public String com_pos_cd; /*직책*/
+	@ApiModelProperty(value = "직책명", example="C112")
+	public String com_pos; /*직책명*/	
 	@ApiModelProperty(value = "주소", example="서울서울서울")
 	public String stm_addr; /*주소*/
 	@ApiModelProperty(value = "HP", example="010-0000-0000")
@@ -32,7 +34,7 @@ public class TMSERPStimemberDetailInfo{
 	@ApiModelProperty(value = "우편번호", example="05353")
 	public String stm_zip; /*우편번호*/
 	@ApiModelProperty(value = "차량번호", example="123가4567")
-	public String stm_mdt; /*차량번호*/
+	public String car_no; /*차량번호*/
 }
 
 

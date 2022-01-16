@@ -717,12 +717,14 @@ function slctChck() { //셀렉트박스
 function stiMmbrMdfPop() {//정보수정-원정보
      $(document).on("click","._stiMmbrDtil",function(){
          $('.slctBox').removeClass('on');
-          let mmbrinfBx = $(this);
+          var mmbrinfBx = $(this);
           let mmbr_stm_nm = mmbrinfBx.find('._stm_nm').text();
           let mmbr_stm_no = mmbrinfBx.find('._stm_no').val();
           let mmbr_sti_cd = mmbrinfBx.find('._sti_cd').val();
+          let mmbr_com_scd = mmbrinfBx.find('._com_scd').val();
           let mmbr_stm_hp = mmbrinfBx.find('._stm_hp').text();
           let mmbr_com_pos = mmbrinfBx.find('._com_pos').text();
+          let com_pos_cd = mmbrinfBx.find('._com_pos_cd').val();
           let mmbr_stm_zip = mmbrinfBx.find('._stm_zip').text();
           let mmbr_car_no = mmbrinfBx.find('._car_no').text();
           let mmbr_stm_jdt = mmbrinfBx.find('._stm_jdt').text();
@@ -731,6 +733,7 @@ function stiMmbrMdfPop() {//정보수정-원정보
           let stm_nm = mmbrpop.find('._stm_nm');
           let stm_no = mmbrpop.find('._stm_no');
           let sti_cd = mmbrpop.find('._sti_cd');
+          let com_scd = mmbrpop.find('._com_scd');
           let stm_hp = mmbrpop.find('._stm_hp');
           let com_pos = mmbrpop.find('._com_pos');
           let stm_zip = mmbrpop.find('._stm_zip');
@@ -741,17 +744,21 @@ function stiMmbrMdfPop() {//정보수정-원정보
           stm_nm.val(mmbr_stm_nm);
           stm_no.val(mmbr_stm_no);
           sti_cd.val(mmbr_sti_cd);
+          com_scd.val(mmbr_com_scd);
           stm_hp.val(mmbr_stm_hp);
           com_pos.text(mmbr_com_pos);
+          com_pos.attr("data-value", com_pos_cd);
+          //com_pos.data("value",com_pos_cd);        
+          //alert("ddddc : " + $(".stiMmbrMdfPop").find("._com_pos").data("value"));  
           stm_zip.val(mmbr_stm_zip);
           car_no.val(mmbr_car_no);
           stm_jdt.val(mmbr_stm_jdt);
           stm_addr.val(mmbr_stm_addr);
           astm_addr.val(mmbr_stm_addr);
-          if($(".stiMmbrMdfPop ._stm_jdt").val().trim() == ''){
+/*          if($(".stiMmbrMdfPop ._stm_jdt").val().trim() == ''){
                $(".stiMmbrMdfPop ._stm_jdt").removeAttr('readonly');
                $(".stiMmbrMdfPop ._stm_jdt").val('');
-          }
+          }*/
           if(com_pos.text().trim() == ''){
                com_pos.text('직택 선택')
           }
@@ -781,7 +788,9 @@ function stiMmbrInsrtPopopn() { //팀등록팝업오픈
            mmbrpop.find('._stm_addr').val('');
           var sti_cd =  $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._sti_cd').val();
           var in_stm_no = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._stm_no').val();
+          var com_scd = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._com_scd').val();
           mmbrpop.find('._sti_cd').val(sti_cd);
+          mmbrpop.find('._com_scd').val(com_scd);
           mmbrpop.find('._stm_no').val(parseInt(in_stm_no)+parseInt(1));
        });
 }

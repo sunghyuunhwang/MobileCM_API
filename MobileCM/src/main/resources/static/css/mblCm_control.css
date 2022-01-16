@@ -58,6 +58,6 @@ a.btn{display:inline-flex;align-items: center;justify-content: center;}
 .slctBox._inSlct .slctVal{position: relative;display: inline-block;float: left; width: 100%;height: 38px;padding:3px 38px 3px 8px;border: #ddd 1px solid;font-size: 15px;line-height: 30px;border-radius: 8px;box-sizing: border-box;}
    .slctVal::after{content: '';position: absolute;top:0px;right:0px;width: 38px;height: 38px;background-image: url('/img/icnArrwHddwn_blck.svg');background-repeat: no-repeat;background-position: right 10px center;background-size: 15px;transition: 0.3s;}
    .slctBox.on .slctVal::after{transform: rotate(180deg);}
-.slctBox .slctLst{position: absolute;display: none;top: 39px;left: 0px;width: 100%;max-height: 160px;border: #aaa 1px solid;font-size: 15px;border-radius:8px;background-color: #fff;box-shadow: 0 1px 3px rgb(0 0 0 / 30%);box-sizing: border-box;}
+.slctBox .slctLst{position: absolute;display: none;top: 39px;left: 0px;width: 100%;max-height: 300px;border: #aaa 1px solid;font-size: 15px;border-radius:8px;background-color: #fff;box-shadow: 0 1px 3px rgb(0 0 0 / 30%);box-sizing: border-box;}
    .slctBox.on .slctLst{display: inline-block;}
    .slctLst .slct{display: inline-block;float: left;width: 100%;padding: 6px 12px;margin: 4px 0;font-size: 15px;line-height: 24px;box-sizing: border-box;}

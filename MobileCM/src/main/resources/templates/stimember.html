@@ -17,7 +17,7 @@
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
     <script src="/js/mbCM-frontApiActnReal.js"></script><!-- 프론트엔드 이벤 -->
-    <script src="/js/mbCM-frontApiActnReal_front.js"></script><!-- 프론트엔드 이벤 -->
+<!--     <script src="/js/mbCM-frontApiActnReal_front.js"></script>프론트엔드 이벤 -->
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script><!--우편번호-->
 
 </head>
@@ -27,20 +27,23 @@
           <div class="subPgTopBx">
                <button class="icnBtn icnTopMenuOpn">메뉴</button>
                <aside class="fssMblCmPop topMenuPopBox">
-                    <menu class="topMenuPopLst">
-                         <li>
-                            <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
-                         </li>
-                         <!-- <li>
-                            <a class="lstLnk" href="/v1/areamaster/migyeolReport">미결 현황 관리</a>
-                         </li>
-                         <li>
-                            <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
-                         </li>
-                         <li>
-                            <a class="lstLnk">하자 내역 조회</a>
-                         </li> -->
-                    </menu>
+	               <menu class="topMenuPopLst">
+	                    <li>
+	                        <a class="lstLnk" href="/v1/areamaster/scheduling">시공 스케줄링</a>
+	                    </li>
+	                     <li>
+	                        <a class="lstLnk" href="/v1/areamaster/migyeolReport">미결 현황 관리</a>
+	                    </li>
+	                    <li>
+	                        <a class="lstLnk" href="/v1/areamaster/vndBanpumStatus">대리점 반품 의뢰</a>
+	                    </li>
+				        <li>
+				           <a class="lstLnk" href="/v1/areamaster/defectInfo">하자내역 조회</a>
+				        </li>
+				        <li>
+				           <a class="lstLnk" href="/v1/areamaster/stimember">시공팀원관리</a>
+				        </li>			                         
+	               </menu>
                     <button class="clsBtn bgBlck"><!--배경닫기--></button>
                </aside>
           </div>
@@ -55,7 +58,7 @@
                      <li class="w130px">시공팀</li>
                      <li class="w130px">시공팀코드</li>
                      <li class="w80px tAlgnCntr">총원</li>
-                     <li class="w50px tAlgnCntr">차량</li>
+                     <li class="w60px tAlgnCntr">차량</li>
                 </ul>
                 <!--<ul class="ulLftlst" onclick="getStiMemberDetailInfo()">
                      <li class='w130px'>IJ01정득수</li>
@@ -131,7 +134,7 @@
                                    <input type="text" value="" class="lnInpt w100p _stm_nm" readonly/>
                                    <input type='hidden' value='' class='_stm_no'/>
                                    <input type='hidden' value='' class='_sti_cd'/>
-                                   <input type='hidden' value='C16YA' class='_com_scd'/>
+                                   <input type='hidden' value='' class='_com_scd'/>
                               </dd>
                          </dl>
                          <dl class="frmDL">
@@ -165,7 +168,7 @@
                                    <input type="text" id="postcode" class="lnInpt wCal140px _stm_zip" placeholder="우편번호"/>
                                    <input type="button" onclick="execDaumPostcode()" class="btn btnSzMdl btnBlck w125px mLft15px" value="우편번호 찾기"/>
                                    <input type="text" id="address" class="lnInpt w100p mTop5px address_stm_addr" placeholder="우편번호 찾기를 눌러 주소 입력"/>
-                                   <input type="text" id="detailAddress" class="lnInpt w100p mTop5px" placeholder="상세주소"/>
+                                   <input type="hidden" id="detailAddress" class="lnInpt w100p mTop5px" placeholder="상세주소"/>
                                    <input type="hidden" class="pstAddrss _stm_addr" placeholder="주소"/>
                                    <div id="layer" class="execDaumPostBox">
                                       <span class="icnCls_blck" onclick="closeDaumPostcode()"></span>

@@ -162,4 +162,9 @@ public class WebController {
 		return "defectInfo";
     	
     }
+    @GetMapping("/stimember")
+    public String stimember(@AuthenticationPrincipal User user) {
+		return "stimember";
+    	
+    }
 }
