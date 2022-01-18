@@ -18,6 +18,7 @@ public class ERPAddActList {
 	private String trs_snm;
 	private String amt;
 	private String addact_stat;
+	private String addact_stat_nm;
 }
 
 

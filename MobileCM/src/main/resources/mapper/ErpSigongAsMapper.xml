@@ -374,17 +374,19 @@
 	       T.TRS_SEC,
 	       T.TRS_SNM,
 	       SUM(D.REQ_SUM_AMT) AS AMT,
-	       ADDACT_STAT
+	       ADDACT_STAT,
+		   X.CCD_NM ADDACT_STAT_NM
 	  FROM TC_ADDACTREQ R WITH (NOLOCK) INNER JOIN TC_ADDACTREQ_DTL D WITH (NOLOCK) ON R.PLM_NO = D.PLM_NO AND R.COM_SSEC = D.COM_SSEC AND R.SEQ = D.SEQ
 	                                    INNER JOIN TC_TRSEC T WITH (NOLOCK) ON R.COM_AGSEC = T.COM_AGSEC AND R.COM_BRAND = T.COM_BRAND AND R.TRS_SEC = T.TRS_SEC
+	                                    INNER JOIN TT_COMCD X WITH(NOLOCK) ON R.ADDACT_STAT = X.CCD_CD
 	 WHERE R.PLM_NO = #{plm_no} 
 	   AND R.COM_SSEC = #{com_ssec} 
-	 GROUP BY R.SEQ, T.TRS_SEC, T.TRS_SNM, ADDACT_STAT
+	 GROUP BY R.SEQ, T.TRS_SEC, T.TRS_SNM, ADDACT_STAT, X.CCD_NM
 	 ORDER BY R.SEQ DESC 
  
 ]]>
 </select>
-  
+   
  <select id="selectNotSendCtm" parameterType="java.lang.String" resultType="Integer">
 <![CDATA[
  	SELECT COUNT(*) AS CNT

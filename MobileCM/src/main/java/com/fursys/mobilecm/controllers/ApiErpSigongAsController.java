@@ -131,19 +131,7 @@ public class ApiErpSigongAsController {
             		return gson.toJson(response);
         		}
         	}
-			
-			
-
-/*
-			res = erpsigongasMapper.deleteAddActDetailAll(params);       	
-			if (res < 1) {    				
-				res_msg =  "deleteAddActDetailAll 오류 [" + res + "]";
-				txManager.rollback(status);
-				response.setResultCode("5001");
-				response.setResultMessage(res_msg);
-				return gson.toJson(response);
-			}
-*/			
+						
 			res = erpsigongasMapper.deleteAddAct(params);       	
 			if (res < 1) {    				
 				res_msg =  "deleteAddAct 오류 [" + res + "]";
@@ -258,21 +246,6 @@ public class ApiErpSigongAsController {
 			params.put("trs_sec", trs_sec);
 			params.put("remark", remark);
 			params.put("user_id", user_id);
-
-			dataResult = erpsigongasMapper.erp_selectConsumerAmt(params);
-			if (dataResult == null) {
-				txManager.rollback(status);
-        		response.setResultCode("5001");
-        		response.setResultMessage("추가정산 조건검증에 실패하였습니다.");
-        		return gson.toJson(response);
-        	} else {
-        		if (dataResult.getValue1() == -9999 || dataResult.getValue2() == -9999) {        		
-	        		txManager.rollback(status);
-	        		response.setResultCode("5001");
-	        		response.setResultMessage("추가정산 요청이 불가합니다.");
-	        		return gson.toJson(response);
-        		}
-        	}			
 			
 			if ("".equals(seq)) {	//신규등록
 				dataResult = erpsigongasMapper.selectAddActSeq(params);
@@ -342,12 +315,7 @@ public class ApiErpSigongAsController {
 						return gson.toJson(response);
 					}
 				}
-				
-				
-			       
 			} else {
-
-				
 				res = erpsigongasMapper.updateAddAct(params);       	
 				if (res < 1) {    				
 					res_msg =  "updateAddAct 오류 [" + res + "]";
@@ -357,7 +325,6 @@ public class ApiErpSigongAsController {
 					return gson.toJson(response);
 				}
 
-				
 				String dseq[] = dseq_arr.split(",");
 				String tri_icd[] = tri_icd_arr.split(",");
 				String qty[] = qty_arr.split(",");
@@ -397,7 +364,6 @@ public class ApiErpSigongAsController {
 						res_msg =  "insertAddActDetail 오류 [" + res + "]";
 						
 					} else {
-						
 						if ("".equals(qty[i])) {
 							res = erpsigongasMapper.deleteAddActDetail(params); 
 							res_msg =  "deleteAddActDetail 오류 [" + res + "]";
@@ -405,8 +371,6 @@ public class ApiErpSigongAsController {
 							res = erpsigongasMapper.updateAddActDetail(params); 
 							res_msg =  "updateAddActDetail 오류 [" + res + "]";
 						}
-						
-						
 					}
 					      	
 					if (res < 1) {    				
@@ -417,14 +381,12 @@ public class ApiErpSigongAsController {
 					}
 				}
 				
-				
 			}
 			
 			response.setResultCount(seq);
 			
-			System.out.println(String.format("seq=[%s]", seq));
+			//System.out.println(String.format("seq=[%s]", seq));
 
-			
 		}	
 		catch (Exception e) {
 			txManager.rollback(status);
@@ -436,7 +398,7 @@ public class ApiErpSigongAsController {
 		
 		txManager.commit(status);
 		response.setResultCode("200");
-		System.out.println(response.toString());	
+		//System.out.println(response.toString());	
 		return gson.toJson(response);        
 
 	}
