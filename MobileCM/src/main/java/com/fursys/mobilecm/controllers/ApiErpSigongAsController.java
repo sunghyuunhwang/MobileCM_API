@@ -61,18 +61,52 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@ApiOperation(value = "erp_deleteAddAct", notes = "추가정산삭제")
+	@ApiOperation(value = "erp_selectConsumerAmt", notes = "소비자/공장도가 조회")
+	@GetMapping("/erp_selectConsumerAmt")  
+	public String erp_selectConsumerAmt (
+			@ApiParam(value = "PLM_NO", required=true, example = "I202201170027")			
+			@RequestParam(name="plm_no", required=true) String plm_no
+		) { 	
+        
+		DataResult dataResult = new DataResult();		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("plm_no", plm_no);
+        
+        dataResult = erpsigongasMapper.erp_selectConsumerAmt(params);
+        
+        if (dataResult == null) {
+        	
+        } else {
+        	if (dataResult.getValue1() == -9999) {
+        		dataResult.setData1("");	
+        	} else {
+        		dataResult.setData1(String.format("%d", dataResult.getValue1()));
+        	}
+        	if (dataResult.getValue2() == -9999) {
+        		dataResult.setData2("");	
+        	} else {
+        		dataResult.setData2(String.format("%d", dataResult.getValue2()));
+        	}        	
+        }
+        
+		return gson.toJson(dataResult);
+	}
+	
+	
+	@ApiOperation(value = "erp_deleteAddAct", notes = "추가정산요청취소")
 	@GetMapping("/erp_deleteAddAct")
 	public String erp_deleteAddAct (
 			@RequestParam(name="plm_no", required=true) String plm_no,
 			@RequestParam(name="com_ssec", required=true) String com_ssec,
-			@RequestParam(name="seq", required=true) String seq
+			@RequestParam(name="seq", required=true) String seq,			
+			@RequestParam(name="user_id", required=true) String user_id
 			
 		) {
         
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		int res = 0;
 		BaseResponse response = new BaseResponse();
+		DataResult dataResult = new DataResult();
 		String res_msg = "";
 		
 		try {
@@ -81,7 +115,26 @@ public class ApiErpSigongAsController {
 			params.put("plm_no", plm_no);
 			params.put("com_ssec", com_ssec);
 			params.put("seq", seq);
+			params.put("user_id", user_id);
+			
+			dataResult = erpsigongasMapper.selectAddActStat(params);
+			if (dataResult == null) {
+				txManager.rollback(status);
+        		response.setResultCode("5001");
+        		response.setResultMessage("추가정산 상태체크 실패하였습니다.");
+        		return gson.toJson(response);
+        	} else {
+        		if (!"C83001".equals(dataResult.getData1())) {
+        			txManager.rollback(status);
+            		response.setResultCode("5001");
+            		response.setResultMessage("요청중인 건만 취소처리 할 수 있습니다.");
+            		return gson.toJson(response);
+        		}
+        	}
+			
+			
 
+/*
 			res = erpsigongasMapper.deleteAddActDetailAll(params);       	
 			if (res < 1) {    				
 				res_msg =  "deleteAddActDetailAll 오류 [" + res + "]";
@@ -90,7 +143,7 @@ public class ApiErpSigongAsController {
 				response.setResultMessage(res_msg);
 				return gson.toJson(response);
 			}
-			
+*/			
 			res = erpsigongasMapper.deleteAddAct(params);       	
 			if (res < 1) {    				
 				res_msg =  "deleteAddAct 오류 [" + res + "]";
@@ -191,13 +244,10 @@ public class ApiErpSigongAsController {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		int res = 0;
 		BaseResponse response = new BaseResponse();
-		String res_msg = "";
 		DataResult dataResult = new DataResult();
+		String res_msg = "";		
 		
 		try {
-			
-	        //dataResult = erpsigongasMapper.selectLgsStat(params);
-
 			
 			HashMap<String,Object> params = new HashMap<String, Object>();
 			params.put("plm_no", plm_no);
@@ -208,17 +258,22 @@ public class ApiErpSigongAsController {
 			params.put("trs_sec", trs_sec);
 			params.put("remark", remark);
 			params.put("user_id", user_id);
-/*			
-			params.put("tri_icd_arr", tri_icd_arr);
-			params.put("qty_arr", qty_arr);
-			params.put("req_amt_arr", req_amt_arr);
-			params.put("req_sum_amt_arr", req_sum_amt_arr);
-			params.put("tri_type_arr", tri_type_arr);
-			params.put("tri_famt_arr", tri_famt_arr);
-			params.put("tri_drate_arr", tri_drate_arr);
-			params.put("rate_subject_arr", rate_subject_arr);
-			params.put("std_amt_arr", std_amt_arr);
-*/       
+
+			dataResult = erpsigongasMapper.erp_selectConsumerAmt(params);
+			if (dataResult == null) {
+				txManager.rollback(status);
+        		response.setResultCode("5001");
+        		response.setResultMessage("추가정산 조건검증에 실패하였습니다.");
+        		return gson.toJson(response);
+        	} else {
+        		if (dataResult.getValue1() == -9999 || dataResult.getValue2() == -9999) {        		
+	        		txManager.rollback(status);
+	        		response.setResultCode("5001");
+	        		response.setResultMessage("추가정산 요청이 불가합니다.");
+	        		return gson.toJson(response);
+        		}
+        	}			
+			
 			if ("".equals(seq)) {	//신규등록
 				dataResult = erpsigongasMapper.selectAddActSeq(params);
 				if (dataResult == null) {

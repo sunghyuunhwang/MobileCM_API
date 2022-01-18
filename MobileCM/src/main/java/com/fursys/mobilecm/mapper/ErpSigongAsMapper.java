@@ -26,6 +26,10 @@ import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 @Mapper
 public interface ErpSigongAsMapper {
 	
+	
+	
+	public DataResult selectAddActStat(HashMap<String,Object> params);
+	public DataResult erp_selectConsumerAmt(HashMap<String,Object> params);
 	public int deleteAddAct(HashMap<String,Object> params);
 	public int deleteAddActDetailAll(HashMap<String,Object> params);
 	public int deleteAddActDetail(HashMap<String,Object> params);

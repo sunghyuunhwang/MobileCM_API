@@ -2,15 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
+
+<select id="selectAddActStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+	SELECT A.ADDACT_STAT AS DATA1
+	  FROM TC_ADDACTREQ A WITH (NOLOCK)
+	 WHERE A.PLM_NO = #{plm_no}
+	   AND A.COM_SSEC = #{com_ssec}
+	   AND A.SEQ = #{seq}
+ 
+]]> 
+</select>
+
+<select id="erp_selectConsumerAmt" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+	SELECT ISNULL(SUM(IOP_MNFCST), -9999) AS VALUE1, ISNULL(SUM(IOP_SALCST_REC), -9999) AS VALUE2
+	  FROM TO_ORDDET D WITH(NOLOCK) INNER JOIN TC_PLANMST P WITH(NOLOCK) ON D.ORM_NO = P.ORM_NO
+	 WHERE PLM_NO = #{plm_no}
+
+]]> 
+</select>
+ 
 <update id="deleteAddAct" parameterType="HashMap">
 <![CDATA[
-	DELETE FROM TC_ADDACTREQ
+	UPDATE TC_ADDACTREQ
+	   SET ADDACT_STAT = 'C83004',
+	       USR_CD = #{user_id},
+	       SYS_DT = GETDATE()
 	 WHERE PLM_NO = #{plm_no}
 	   AND COM_SSEC = #{com_ssec}
 	   AND SEQ = #{seq}
 	
 ]]>
-</update> 
+</update>
 
 <update id="deleteAddActDetailAll" parameterType="HashMap">
 <![CDATA[
@@ -81,7 +107,7 @@
 			,A.TRI_TYPE
 			,A.TRI_FAMT
 			,A.TRI_DRATE
-			,A.RATE_SUBJECT
+			,ISNULL(A.RATE_SUBJECT, '') RATE_SUBJECT
 			,A.STD_AMT
 	  FROM TC_ADDACTREQ_DTL A WITH (NOLOCK), TC_ADDACTREQ B, TC_TRINF C WITH(NOLOCK)
 	 WHERE A.PLM_NO = B.PLM_NO
@@ -275,24 +301,24 @@
 
 ]]>
 </select>
-
+ 
 <select id="selectActItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTrinfList">
 <![CDATA[
-	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, RATE_SUBJECT, TRI_DRATE,
+	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, ISNULL(RATE_SUBJECT, '') RATE_SUBJECT, TRI_DRATE,
 	       CASE TRI_TYPE WHEN  'C84001' THEN 
-	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) WHEN -1 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) * TRI_DRATE END
-	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) WHEN -1 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no}) * TRI_DRATE END
+	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
+	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
 	                          ELSE '0'END )-- 
 	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
 	                          ELSE 0
 	                          END AS TRI_AMT,
 	       CASE TRI_TYPE WHEN  'C84001' THEN 
-	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) WHEN -1 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) END
-	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) WHEN -1 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -9999) FROM TO_ORDDET WHERE ORM_NO = #{orm_no} ) END
+	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) END
+	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) END
 	                          ELSE '0'END )-- 
 	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
 	                          ELSE 0
