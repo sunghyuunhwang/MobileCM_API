@@ -257,8 +257,7 @@ public class ApiErpSigongAsController {
 	        	}
 				
 				seq = dataResult.getData1();
-				System.out.println(String.format("seq=[%s]", seq));
-				
+				//System.out.println(String.format("seq=[%s]", seq));
 				params.put("seq", seq);
 				
 				res = erpsigongasMapper.insertAddAct(params);       	
@@ -270,7 +269,6 @@ public class ApiErpSigongAsController {
 					return gson.toJson(response);
 				}
 
-				
 				String dseq = "";
 				String tri_icd[] = tri_icd_arr.split(",");
 				String qty[] = qty_arr.split(",");
@@ -293,7 +291,12 @@ public class ApiErpSigongAsController {
 					params.put("rate_subject", rate_subject[i]);
 					params.put("std_amt", std_amt[i]);
 					
-					System.out.println(String.format("req_amt=[%s]", req_amt[i]));
+					//System.out.println(String.format("req_amt=[%s]", req_amt[i]));
+					
+					if ("*".equals(rate_subject[i])) {
+						rate_subject[i] = "";
+						params.put("rate_subject", rate_subject[i]);
+					}
 					
 					dataResult = erpsigongasMapper.selectAddActDetailSeq(params);
 					if (dataResult == null) {
@@ -303,7 +306,7 @@ public class ApiErpSigongAsController {
 		        		return gson.toJson(response);
 		        	}
 					dseq = dataResult.getData1();
-					System.out.println(String.format("dseq=[%s]", dseq));
+					//System.out.println(String.format("dseq=[%s]", dseq));
 					params.put("dseq", dseq);
 					
 					res = erpsigongasMapper.insertAddActDetail(params);       	
@@ -357,7 +360,7 @@ public class ApiErpSigongAsController {
 			        		return gson.toJson(response);
 			        	}
 						dseq[i] = dataResult.getData1();
-						System.out.println(String.format("dseq=[%s]", dseq[i]));
+						//System.out.println(String.format("dseq=[%s]", dseq[i]));
 						params.put("dseq", dseq[i]);
 						
 						res = erpsigongasMapper.insertAddActDetail(params);
@@ -372,7 +375,12 @@ public class ApiErpSigongAsController {
 							res_msg =  "updateAddActDetail 오류 [" + res + "]";
 						}
 					}
-					      	
+					
+					if ("*".equals(rate_subject[i])) {
+						rate_subject[i] = "";
+						params.put("rate_subject", rate_subject[i]);
+					}
+					
 					if (res < 1) {    				
 						txManager.rollback(status);
 						response.setResultCode("5001");

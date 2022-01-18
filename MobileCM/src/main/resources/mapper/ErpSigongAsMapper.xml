@@ -380,7 +380,8 @@
 	                                    INNER JOIN TC_TRSEC T WITH (NOLOCK) ON R.COM_AGSEC = T.COM_AGSEC AND R.COM_BRAND = T.COM_BRAND AND R.TRS_SEC = T.TRS_SEC
 	                                    INNER JOIN TT_COMCD X WITH(NOLOCK) ON R.ADDACT_STAT = X.CCD_CD
 	 WHERE R.PLM_NO = #{plm_no} 
-	   AND R.COM_SSEC = #{com_ssec} 
+	   AND R.COM_SSEC = #{com_ssec}
+	   AND R.ADDACT_STAT NOT IN ('C83004')
 	 GROUP BY R.SEQ, T.TRS_SEC, T.TRS_SNM, ADDACT_STAT, X.CCD_NM
 	 ORDER BY R.SEQ DESC 
  
