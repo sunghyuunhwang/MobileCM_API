@@ -33,6 +33,10 @@ public class TMSERPDefectDetail{
 	public String ast_rtnyn; /*회수여부*/
 	@ApiModelProperty(value = "이의제기", example="이의제기내용입니다.")
 	public String opinion; /*이의제기*/
+	@ApiModelProperty(value = "이의제기파일", example="이의제기파일")
+	public String diff_file_id; /*이의제기파일*/
+	@ApiModelProperty(value = "이의제기파일개수", example="이의제기파일개수")
+	public String diff_file_cnt; /*이의제기파일개수*/
 }
 
 

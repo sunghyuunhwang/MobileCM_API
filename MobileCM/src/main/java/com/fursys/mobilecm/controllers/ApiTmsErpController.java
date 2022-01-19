@@ -3,15 +3,21 @@ package com.fursys.mobilecm.controllers;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +43,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fursys.mobilecm.config.TMapInfo;
 import com.fursys.mobilecm.mapper.ErpCommMapper;
@@ -1209,7 +1218,243 @@ public class ApiTmsErpController {
 			throw new Exception();
 		}
 	}
+	
+	@ApiOperation(value="/fileDelete", notes="tms첨부파일 삭제")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@PostMapping("/fileDelete")
+	@RequestMapping(value="/fileDelete",method=RequestMethod.POST)
+	public void fileDelete(
+			@AuthenticationPrincipal User user,
+			@ApiParam(value = "attch_file_snum", required = true, example = "1")
+			@RequestParam(name = "attch_file_snum", required = true) String attch_file_snum,
+			@ApiParam(value = "attch_file_id", required = true, example = "SC20220119251504")
+			@RequestParam(name = "attch_file_id", required = true) String attch_file_id
+			) throws Exception {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		HashMap<String, Object> paramMap = new HashMap<String, Object>();
+		int res = 0;
+		try {
+			if(user == null) {
+				throw new Exception();
+			}
+			
+			paramMap.put("attch_file_id", attch_file_id);
+			paramMap.put("attch_file_snum", attch_file_snum);			
+			res = tmserpScheduling.deleteFile(paramMap);			
+			if (res < 0) {
+    			txManager.rollback(status);
+        		return;					
+			}
+			
+		} catch(Exception e) {
+			txManager.rollback(status);
+    		return;				
+		}
+		txManager.commit(status);
+		return;	
+	}	
+	
+	@ApiOperation(value="/fileUpload", notes="tms첨부파일 업로드")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
+	@PostMapping("/fileUpload")
+	@RequestMapping(value="/fileUpload",method=RequestMethod.POST)
+	public void fileUpload(MultipartHttpServletRequest multiRequest,  
+			@AuthenticationPrincipal User user,
+			@RequestParam(value="attch_file_id", required=false) String attch_file_id
+			) throws Exception {
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		HashMap<String, Object> paramMap = new HashMap<String, Object>();
+		//String attch_file_id = "";
+		String attch_div_cd = "SCHEDUELING";
+		String userId="";
+		int res = 0;
+		
+		try {
+			
+			if(user == null) {
+				throw new Exception();
+			}
+			userId = user.getUsername();
+			
+			// 1. file id 채번
+			if(attch_file_id.equals("") || attch_file_id == null) {
+				paramMap.put("attch_div_cd", attch_div_cd);	
+				attch_file_id = tmserpScheduling.getAttchFileId(paramMap);
+				System.out.println("attch_file_id :" + attch_file_id);	
+			}
+			
+			if("".equals(attch_file_id)) {
+    			txManager.rollback(status);
+        		return;				
+			}
+			
+			// 2. file 저장
+			final Map<String, MultipartFile> files = multiRequest.getFileMap();					
+			if (files.size() > 0) {
+				System.out.println("file_size : " + files.size());
+				List list = new ArrayList();
+				String uploadBasePath =  environment.getProperty("file.upload.directory");
+				File saveFolder = new File(uploadBasePath);
+				// upload root folder create
+				if (!saveFolder.exists() || saveFolder.isFile()) {
+					saveFolder.mkdirs();
+				}			
+				Iterator<Entry<String, MultipartFile>> itr = files.entrySet().iterator();
+				MultipartFile file;
+				while (itr.hasNext()) {
+					Entry<String, MultipartFile> entry = itr.next();
+					System.out.println("client file upload object = [" + entry.getKey() + "]");
+					
+					file = entry.getValue();
+					System.out.println("original file name = [" + file.getOriginalFilename() + "]");
+					
+					String atchFilePath = makeNewFileName(file.getOriginalFilename(), attch_div_cd);
+					String atchFilePathOnly = "";
+					System.out.println("new file full path = [" + atchFilePath + "]");
+					String vtAtchFileNm = "";				
+					if (atchFilePath != null && !"".equals(atchFilePath)) {
+			
+						if (atchFilePath.indexOf("/") > -1) {
+							vtAtchFileNm = atchFilePath.substring(atchFilePath.lastIndexOf("/") + 1, atchFilePath.length());						
+							atchFilePathOnly = atchFilePath.substring(0, atchFilePath.lastIndexOf("/"));
+						} else {
+							vtAtchFileNm = atchFilePath.substring(atchFilePath.lastIndexOf("\\") + 1, atchFilePath.length());						
+							atchFilePathOnly = atchFilePath.substring(0, atchFilePath.lastIndexOf("\\"));
+						}					
+						System.out.println("vtAtchFileNm=" + vtAtchFileNm);
+						System.out.println("atchFileId=" + attch_file_id);
+						System.out.println("atchFilePathOnly=" + atchFilePathOnly);
+					}
+					
+					if (!"".equals(file.getOriginalFilename())) {
+						try {
+							file.transferTo(new File(uploadBasePath +  atchFilePath));
+						} catch (IllegalStateException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+				
+						HashMap<String, Object> map = new HashMap<String, Object>();
+						
+						map.put("attch_div_cd", attch_div_cd);
+						map.put("attch_file_id", attch_file_id);
+						map.put("attch_file_path", atchFilePathOnly);
+						map.put("attch_file_size", file.getSize());
+						map.put("real_attch_file_name", file.getOriginalFilename());
+						map.put("virtual_attch_file_name", vtAtchFileNm);
+						map.put("sti_cd", userId);
+						
+						list.add(map);
+											
+					}
+			
+				}
+				
+				for (int i = 0; i < list.size(); i++) {
+					HashMap inMap = new HashMap<String, Object>();					
+					inMap = (HashMap) list.get(i);
+					res = tmserpScheduling.insertFile(inMap);
+		        	if (res < 1){
+		        		txManager.rollback(status);
+		        		return;
+		        	}					
+				}
+				
+			} else {
+				System.out.println("multi part data size zero!!!!!");
+    			txManager.rollback(status);
+        		return;		
+			}	     
+		} catch (Exception e) {
+			txManager.rollback(status);
+			return;			
+		}
+		txManager.commit(status);
+		return;
+	}
+	
+	private String getShortDateString() {
+		java.text.SimpleDateFormat formatter =
+            new java.text.SimpleDateFormat ("yyyyMMdd", java.util.Locale.KOREA);
+		return formatter.format(new java.util.Date());
+	}
+	
+	private String makeNewFolderName(final String fileName, final String strAttchDivCd) throws Exception{
+		try{
+		String filePath = "";
 
+		if ("".equals(strAttchDivCd)) {
+			return "";
+		}
+		filePath = "/ERP"+filePath + "/" +strAttchDivCd+"/"+ getShortDateString();
+		
+		String basePath = environment.getProperty("file.upload.directory");
+		File checkFolder = new File(basePath + "/" + filePath);
+		if (!checkFolder.exists() || checkFolder.isFile()) {
+			checkFolder.mkdirs();
+		}
+
+		return filePath;
+		
+		}catch(Exception e){
+			throw new Exception();
+        }			
+	}
+	
+	private String makeNewFileName(final String originFileName, final String strAttchDivCd) throws Exception{
+		try{
+			String fileExt;
+			//final NumberFormat numberformat = new DecimalFormat("000000");
+			final NumberFormat numberformat = new DecimalFormat("000");
+			
+	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS"); //SSS가 밀리세컨드 표시
+	        Calendar calendar = Calendar.getInstance();
+	
+	        
+	        //vfilename = dateFormat.format(calendar.getTime())+String.format("%03d",kk)+filename.substring(filename.lastIndexOf(".")); 
+			
+			//String today = DateUtil.getCurrentDateTime(""); // yyyyMMddHHmmss
+			String today =  dateFormat.format(calendar.getTime());
+	
+			if (originFileName.indexOf(".") > -1) {
+				fileExt = originFileName.substring(originFileName.lastIndexOf(".") + 1);
+			} else {
+				fileExt = "";
+			}
+	
+			String filePath = makeNewFolderName(originFileName, strAttchDivCd);
+			if ("".equals(filePath)) {
+				System.out.println("file path unrecognized");
+				return "";
+			}
+	
+			int serial = 1;
+			String tempFileName;
+			String basePath = environment.getProperty("file.upload.directory");
+			//CDN경로
+			if("CDN".equals(strAttchDivCd)){
+				basePath = environment.getProperty("cdn.upload.path");
+			}
+			while (true) {
+				//tempFileName = today + "-" + numberformat.format(serial) + ("".equals(fileExt) ? "" : ("." + fileExt));
+				tempFileName = today + numberformat.format(serial) + ("".equals(fileExt) ? "" : ("." + fileExt));
+				File checkFile = new File(basePath + "/" + filePath + "/" + tempFileName);
+				if (checkFile.exists()) {
+					serial++;
+				} else {
+					break;
+				}
+			}
+			return filePath + "/" + tempFileName;
+		}catch(Exception e){
+			throw new Exception();
+		}
+	}	
+	
 	@ApiOperation(value="/fileDownload", notes="tms첨부파일 다운로드")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
 	@PostMapping("/fileDownload")
@@ -1297,7 +1542,7 @@ public class ApiTmsErpController {
 		} finally {
 		}
 	}
-		
+	
 	private String getBrowser(HttpServletRequest request) {
 	        String header = request.getHeader("User-Agent");
 	        if (header.indexOf("MSIE") > -1) {
@@ -1612,14 +1857,14 @@ public class ApiTmsErpController {
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
-		ArrayList<TMSERPDefectDetail> defectDetail = null;
+		ArrayList<TMSERPDefectDetail> defectDetailList = null;
 		
 		try {
 			if (user != null) {
 				params.put("rpt_no", rpt_no);
 				params.put("rpt_seq", rpt_seq);
-				defectDetail = tmserpScheduling.selectDefectDetail(params);
-				return gson.toJson(defectDetail);				
+				defectDetailList = tmserpScheduling.selectDefectDetail(params);
+				return gson.toJson(defectDetailList);				
 			} else {
 				throw new Exception();
 			}			
@@ -1783,7 +2028,8 @@ public class ApiTmsErpController {
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀원정보 등록 실패 !!") })
 	@PostMapping("/tmserp_insertstimemberinfo")
 	@RequestMapping(value = "/tmserp_insertstimemberinfo", method = RequestMethod.POST)
-	public String tmserp_insertstimemberinfo(@RequestBody @ApiParam(value = "stimember", required = true) TMSERPStimemberDetailInfo stimember
+	public String tmserp_insertstimemberinfo(
+			@RequestBody @ApiParam(value = "stimember", required = true) TMSERPStimemberDetailInfo stimember
 			) {
 		
 		BaseResponse response = new BaseResponse();

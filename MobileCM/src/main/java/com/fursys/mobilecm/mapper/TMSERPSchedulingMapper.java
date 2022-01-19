@@ -104,4 +104,7 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPSticurrentDuedateInfo> selectComcdList(HashMap<String,Object> params);
 	public int updateOpinion(HashMap<String,Object> params);
 	public ArrayList<TMSERPSticurrentDuedateInfo1> selectStiDueInfo1(HashMap<String,Object> params);
+	public int insertFile(HashMap<String, Object> params);
+	public String getAttchFileId(HashMap<String, Object> params);
+	public int deleteFile(HashMap<String, Object> params);
 }

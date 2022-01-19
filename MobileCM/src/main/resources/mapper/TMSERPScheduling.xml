@@ -2,13 +2,52 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.fursys.mobilecm.mapper.TMSERPSchedulingMapper">
+    <delete id="deleteFile" parameterType="HashMap">
+    DELETE FROM TY_ATTCHFILE
+    WHERE ATTCH_FILE_ID = #{attch_file_id}
+    AND ATTCH_FILE_SNUM = #{attch_file_snum}
+    </delete>
 
+    <insert id="insertFile" parameterType="HashMap">
+    INSERT INTO TY_ATTCHFILE
+    (
+          ATTCH_DIV_CD
+        , ATTCH_FILE_ID
+        , ATTCH_FILE_SNUM
+        , REAL_ATTCH_FILE_NAME
+        , VIRTUAL_ATTCH_FILE_NAME
+        , ATTCH_FILE_PATH
+        , ATTCH_FILE_SIZE
+        , FST_USR
+        , FST_SYS_DT
+        , USR_CD
+        , SYS_DT
+    )VALUES (
+          #{attch_div_cd}
+        , #{attch_file_id}
+        , (SELECT ISNULL(MAX(ATTCH_FILE_SNUM),0)+1 AS ATTCH_FILE_SNUM FROM TY_ATTCHFILE WHERE ATTCH_FILE_ID = #{attch_file_id})
+        , #{real_attch_file_name}
+        , #{virtual_attch_file_name}
+        , #{attch_file_path}
+        , #{attch_file_size}
+        , #{sti_cd}
+        , GETDATE()
+        , #{sti_cd}
+        , GETDATE()        
+    )    
+    </insert>
+    <select id="getAttchFileId" parameterType="HashMap" resultType="java.lang.String">
+        <![CDATA[
+           DECLARE @p_RTN VARCHAR (16)
+           EXECUTE dbo.SP_GET_FILEKEY #{attch_div_cd}, @p_RTN = @p_RTN OUTPUT
+           SELECT @p_RTN AS DATA1
+        ]]>
+    </select>  
     <select id="getKstiCdYn" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">     
 	<![CDATA[       
         SELECT COUNT(*) AS VALUE1
           FROM TC_STINF WITH (NOLOCK)
          WHERE K_STI_CD = #{login_id}
-        
 	]]>
     </select>
 	
@@ -2880,7 +2919,9 @@
 		       END AS FILE_YN,
 		       final_file_id,
 		       ast_rtnyn,
-		       isnull(diff_opinion,'') as opinion
+		       isnull(diff_opinion,'') as opinion,
+		       diff_file_id,
+		       (select count(*) from ty_attchfile with (nolock) where attch_file_id = diff_file_id) as diff_file_cnt
 		FROM   ta_astitem WITH (nolock)
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 
@@ -2900,6 +2941,7 @@
 			   AND ( ISNULL(TCSM.STM_MDT,'') > '' ) ) AS CAR_QTY
     FROM    TC_STINF TCS WITH (NOLOCK)
     WHERE   TCS.k_STI_CD = #{k_sti_cd}
+    AND 	TCS.STI_RANK = 'Y'
 	]]>    
 	</select>	
 	
