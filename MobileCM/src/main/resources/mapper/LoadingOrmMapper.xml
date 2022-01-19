@@ -26,7 +26,13 @@
 	   AND TD.COM_PLDSEC IN ('C092', 'C090') ), 0) AS ITM_SUM,
 	   ISNULL( ( CASE WHEN ( SELECT COUNT(*) FROM TW_WTRECPL WT WITH(NOLOCK) WHERE WT.ORM_NO = A.ORM_NO ) >0 THEN 'Y' ELSE '' END), '') AS RETURN_YN,
 	   A.PLM_FTM,
-	   ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.PLM_FTM ) AS PLM_FTMNM			
+	   ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.PLM_FTM ) AS PLM_FTMNM,
+	   ( CASE ( SELECT TCR.LOADING_YN FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18C' ) WHEN 'Y' THEN 상차완료' ELSE '상차전' END ) AS LOADING_YN,
+	   ( CASE WHEN ( SELECT COUNT(*) 
+	                   FROM TC_LOADINGISSUE TCL WITH (NOLOCK) 
+	                  WHERE TCL.REM_DT = ( SELECT TCR.REM_DT FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18C' ) 
+	                    AND TCL.REM_SEQ = ( SELECT TCR.REM_SEQ FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18C' ) 
+	                    AND TCL.COM_SSEC = 'C18C' ) > 1 THEN '상차이슈발생' ELSE '' END ) AS LOADINGISSUE_YN	             		
 	FROM TC_PLANMST A WITH (NOLOCK)
 	WHERE A.COM_SCD = #{com_scd}	
 	AND A.STI_CD = #{sti_cd}	
@@ -57,7 +63,13 @@
 	 ), 0) AS ITM_SUM,
 	 '' AS RETURN_YN,
 	 A.PLM_FTM,
-	 ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.PLM_FTM ) AS PLM_FTMNM	
+	 ( SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = A.PLM_FTM ) AS PLM_FTMNM,
+	 ( CASE ( SELECT TCR.LOADING_YN FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) WHEN 'Y' THEN 상차완료' ELSE '상차전' END ) AS LOADING_YN,
+	 ( CASE WHEN ( SELECT COUNT(*) 
+	                 FROM TC_LOADINGISSUE TCL WITH (NOLOCK) 
+	                WHERE TCL.REM_DT = ( SELECT TCR.REM_DT FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) 
+	                  AND TCL.REM_SEQ = ( SELECT TCR.REM_SEQ FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) 
+	                  AND TCL.COM_SSEC = 'C18C' ) > 1 THEN '상차이슈발생' ELSE '' END ) AS LOADINGISSUE_YN	             			 	
 	FROM TA_PLANMST A WITH (NOLOCK), TA_RPTREQ B WITH (NOLOCK)
 	WHERE A.COM_SCD = #{com_scd}
 	AND A.STI_CD = #{sti_cd}	
@@ -125,5 +137,92 @@
 	GROUP BY B.BMT_ITEM , B.COL_CD
 ]]>
 </select>
+
+<update id="updateLoadingInfo" parameterType="HashMap">
+<![CDATA[
+
+	UPDATE TC_RESMST SET LOADING_YN = 'Y', SYS_DT = GETDATE()
+	 WHERE REM_DT = #{rem_dt}
+	   AND REM_SEQ = #{rem_seq}
+
+]]>
+</update> 
+
+<select id="selectTcresmstInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+	SELECT ISNULL(REM_DT, '') AS DATA1, 
+		   ISNULL(REM_SEQ, '') AS DATA2,
+		   ISNULL(ORM_NO, '') AS DATA3,
+		   ISNULL(STI_CD, '') AS DATA4
+	FROM TC_RESMST WITH(NOLOCK)	   	   
+	 WHERE plm_no = #{plm_no}
+	   AND COM_SSEC = #{com_ssec}
+]]>
+</select>
+
+<select id="selectTcloadingoissueMaxSeqNo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">        
+<![CDATA[
+		  SELECT
+			ISNULL(MAX(SEQ_NO), 0) + 1
+		   FROM TC_LOADINGISSUE TCL WITH (NOLOCK)
+		  WHERE TCL.REM_DT = #{rem_dt}
+		    AND TCL.REM_SEQ = #{rem_seq}
+		    AND TCL.COM_SSEC = #{com_ssec} 
+]]>
+</select>
+
+<insert id="insertLoadingIssueInfo" parameterType="HashMap">
+<![CDATA[
+	
+	INSERT INTO TC_LOADINGISSUE
+	(
+		REM_DT, 
+		REM_SEQ, 
+		COM_SSEC, 
+		SEQ_NO, 
+		ORM_NO, 
+		PLM_NO, 
+		ITM_CD, 
+		COL_CD, 
+		LOADINGISSUE_STD, 
+		LOADINGISSUE_REMARK, 
+		LOADINGISSUE_PROCSTD, 
+		LOADINGISSUE_PROCREMARK, 
+		FST_USR_CD, 
+		FST_SYS_DT, 
+		USR_CD, 
+		SYS_DT
+	)
+	VALUES
+	(
+		#{rem_dt},
+		#{rem_seq},
+		#{com_ssec},
+		(SELECT
+			ISNULL(MAX(SEQ_NO), 0) + 1
+		   FROM TC_LOADINGISSUE TCL WITH (NOLOCK)
+		  WHERE TCL.REM_DT = #{rem_dt}
+		    AND TCL.REM_SEQ = #{rem_seq}
+		    AND TCL.COM_SSEC = #{com_ssec} ),
+		#{orm_no},
+		#{plm_no},
+		#{itm_cd},
+		#{col_cd},
+		#{loadingissue_std},
+		#{loadingissue_remark},
+		#{loadingissue_procstd},
+		#{loadingissue_procremark},
+		#{sti_cd},
+		GETDATE(),
+		#{sti_cd},
+		GETDATE()
+	)
+	
+
+]]>
+</insert> 
+
+
+
 
 </mapper>

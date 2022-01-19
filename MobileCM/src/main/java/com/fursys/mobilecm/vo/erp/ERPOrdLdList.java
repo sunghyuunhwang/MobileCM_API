@@ -20,4 +20,6 @@ public class ERPOrdLdList {
 	private int itm_sum;
 	private String return_yn;
 	private String plm_ftmnm;
+	private String loading_yn;
+	private String loadingissue_yn;
 }

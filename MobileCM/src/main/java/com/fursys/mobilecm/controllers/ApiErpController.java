@@ -6422,4 +6422,131 @@ public class ApiErpController {
 		return gson.toJson(response);        
         
 	}	
+	
+
+	@ApiOperation(value = "erp_updateLoadingInfo", notes = "상차완료처리")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "상차완료처리 Update 실패") })	
+	@GetMapping("/erp_updateLoadingInfo")  
+	@RequestMapping(value = "/erp_updateLoadingInfo", method = RequestMethod.GET)
+	public String erp_updateLoadingInfo (
+
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="com_ssec", required=true) String com_ssec
+		) { 
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		AsResultResponse response = new AsResultResponse();
+		DataResult dataResult = new DataResult();
+		
+		try {
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+	        params.put("plm_no", plm_no);
+	        params.put("com_ssec", com_ssec);
+	        
+	        dataResult = lOADINGORMMapper.selectTcresmstInfo(params);
+	        
+	        String rem_dt = dataResult.getData1();
+	        String rem_seq = dataResult.getData2();
+	 	        
+	        params.put("rem_dt", rem_dt);
+	        params.put("rem_seq", rem_seq);
+	        
+	        res = lOADINGORMMapper.updateLoadingInfo(params);
+	        
+
+			if (res < 1) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("상차처리 오류 [" + res + "]");
+				return gson.toJson(response);
+			}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+		
+	}		
+	
+	@ApiOperation(value = "erp_updateLoadingIssueInfo", notes = "상차이슈등록")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "상차이슈등록 Update 실패") })	
+	@GetMapping("/erp_updateLoadingIssueInfo")  
+	@RequestMapping(value = "/erp_updateLoadingIssueInfo", method = RequestMethod.GET)
+	public String erp_updateLoadingIssueInfo (
+			@RequestParam(name="loadingissue_std", required=true) String loadingissue_std,
+			@RequestParam(name="loadingissue_remark", required=true) String loadingissue_remark,
+			@RequestParam(name="itm_cd", required=true) String itm_cd,
+			@RequestParam(name="col_cd", required=true) String col_cd,
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="com_ssec", required=true) String com_ssec
+		) { 
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		AsResultResponse response = new AsResultResponse();
+		DataResult dataResult = new DataResult();
+		
+		try {
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+	        params.put("plm_no", plm_no);
+	        params.put("com_ssec", com_ssec);
+	        
+	        dataResult = lOADINGORMMapper.selectTcresmstInfo(params);
+	        
+	        String rem_dt = dataResult.getData1();
+	        String rem_seq = dataResult.getData2();
+	 	    String orm_no = dataResult.getData3();
+	 	    String sti_cd = dataResult.getData4();
+	 	    
+	        params.put("rem_dt", rem_dt);
+	        params.put("rem_seq", rem_seq);
+	        params.put("orm_no", orm_no);
+	        params.put("loadingissue_std", loadingissue_std);
+	        params.put("loadingissue_remark", loadingissue_remark);
+	        params.put("itm_cd", itm_cd);
+	        params.put("col_cd", col_cd);
+	        params.put("sti_cd", sti_cd);
+	        
+	        res = lOADINGORMMapper.insertLoadingIssueInfo(params);
+	        
+
+			if (res < 1) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("상차이슈처리 오류 [" + res + "]");
+				return gson.toJson(response);
+			}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+		
+	}	
+	
+	
+	
+	
+	
+	
+	
 }
