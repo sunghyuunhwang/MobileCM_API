@@ -30,6 +30,8 @@ import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTrip;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTripDetail;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
+import com.fursys.mobilecm.vo.erp.ERPMobileContent;
+import com.fursys.mobilecm.vo.erp.ERPMobileContentList;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPScheduleCount;
 import com.fursys.mobilecm.vo.erp.ERPTrinfList;
@@ -37,6 +39,7 @@ import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 import com.fursys.mobilecm.vo.mobile.response.AddActResponse;
 import com.fursys.mobilecm.vo.mobile.response.AsReportResponse;
 import com.fursys.mobilecm.vo.mobile.response.BusinessTripResponse;
+import com.fursys.mobilecm.vo.mobile.response.MobileContentResponse;
 import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
 import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
 import com.google.gson.Gson;
@@ -61,6 +64,189 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+
+	@ApiOperation(value = "erp_saveMobileContent", notes = "게시판 저장")
+	@GetMapping("/erp_saveMobileContent")
+	public String erp_saveMobileContent (
+			@ApiParam(value = "REQ_NO", required=true, example = "0")			
+			@RequestParam(name="req_no", required=true) int req_no,
+			@ApiParam(value = "REQ_DT", required=true, example = "20220121")			
+			@RequestParam(name="req_dt", required=true) String req_dt,
+			@ApiParam(value = "REQ_STD", required=true, example = "C86001")			
+			@RequestParam(name="req_std", required=true) String req_std,
+			@ApiParam(value = "REQ_PROC", required=true, example = "C87001")			
+			@RequestParam(name="req_proc", required=true) String req_proc,
+			@ApiParam(value = "REQ_TITLE", required=true, example = "요청사항 제목입니다.")			
+			@RequestParam(name="req_title", required=true) String req_title,
+			@ApiParam(value = "REQ_CONTENT", required=true, example = "요청사항 내용입니다.")			
+			@RequestParam(name="req_content", required=true) String req_content,
+			@ApiParam(value = "ANS_CONTENT", required=true, example = "답변사항 내용입니다.")			
+			@RequestParam(name="ans_content", required=true) String ans_content,
+			@ApiParam(value = "ANS_DT", required=true, example = "20220121")			
+			@RequestParam(name="ans_dt", required=true) String ans_dt,
+			@ApiParam(value = "USER_ID", required=true, example = "YA521")
+			@RequestParam(name="user_id", required=true) String user_id			
+		) {
+        
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		DataResult dataResult = new DataResult();
+		int new_req_no = 0;
+		String res_msg = "";		
+		
+		try {
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+			params.put("req_no", req_no);
+			params.put("req_dt", req_dt);
+			params.put("req_std", req_std);
+			params.put("req_proc", req_proc);
+			params.put("req_title", req_title);
+			params.put("req_content", req_content);
+			params.put("ans_content", ans_content);
+			params.put("req_dt", req_dt);
+			params.put("ans_dt", ans_dt);
+			params.put("user_id", user_id);
+			
+			if (req_no == 0) {	//신규등록				
+				res = erpsigongasMapper.insertMobileContent(params);       	
+				if (res < 1) {    				
+					res_msg =  "insertMobileContent 오류 [" + res + "]";
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage(res_msg);
+					return gson.toJson(response);
+				}
+				new_req_no = (int) params.get("req_no");
+
+			} else {
+				dataResult = erpsigongasMapper.selectMobileContentReqProc(params);
+				if (dataResult == null) {
+					txManager.rollback(status);
+	        		response.setResultCode("5001");
+	        		response.setResultMessage("게시판 진행상태체크 실패하였습니다.");
+	        		return gson.toJson(response);
+	        	} else {
+	        		if (!"C87001".equals(dataResult.getData1())) {
+	        			txManager.rollback(status);
+	            		response.setResultCode("5001");
+	            		response.setResultMessage("요청중인 건만 수정 할 수 있습니다.");
+	            		return gson.toJson(response);
+	        		}
+	        	}
+				
+				res = erpsigongasMapper.updateMobileContent(params);       	
+				if (res < 1) {    				
+					res_msg =  "updateMobileContent 오류 [" + res + "]";
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage(res_msg);
+					return gson.toJson(response);					
+				}
+				new_req_no = req_no;				
+				
+			}
+			
+			response.setResultCount(String.format("%d", new_req_no));
+			
+			System.out.println(String.format("req_no=[%s]", new_req_no));
+
+		}	
+		catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}				
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		//System.out.println(response.toString());	
+		return gson.toJson(response);        
+
+	}
+	
+	@ApiOperation(value = "erp_selectMobileContent", notes = "게시판상세 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "게시판상세 조회 실패 !!") })
+	@GetMapping("/erp_selectMobileContent")
+	@RequestMapping(value = "/erp_selectMobileContent", method = RequestMethod.GET)
+	public String erp_selectMobileContent(
+			@ApiParam(value = "REQ_NO", required=true, example = "18")			
+			@RequestParam(name="req_no", required=true) int req_no,
+			@ApiParam(value = "ATTCH_FILE_ID", required=true, example = "MOBILECONTENT1")
+			@RequestParam(name="attch_file_id", required=true) String attch_file_id,
+			@ApiParam(value = "ATTCH_DIV_CD", required=true, example = "C")
+			@RequestParam(name="attch_div_cd", required=true) String attch_div_cd
+			) {
+
+		MobileContentResponse response = new MobileContentResponse();		
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("req_no", req_no);
+		params.put("attch_file_id", attch_file_id);
+        params.put("attch_div_cd", attch_div_cd);
+
+		try {						 
+			ERPMobileContent mobileContent = erpsigongasMapper.selectMobileContent(params);
+			if (mobileContent == null) {
+				mobileContent = new ERPMobileContent(); 
+			}			
+			ArrayList<ERPAttachFileList> file_list = erpsigongasMapper.selectSigongAttachFileList(params);
+	       
+			response.setMobileContent(mobileContent);
+			response.setFile_list(file_list);
+			
+			System.out.println(gson.toJson(response));
+			
+		} catch (Exception e) {
+			System.out.println(e.toString());
+		}
+		
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "erp_selectMobileContentList", notes = "게시판조회")
+	@GetMapping("/erp_selectMobileContentList")  
+	public String erp_selectMobileContentList(
+			@ApiParam(value = "FR_DATE", required=true, example = "20220119")
+			@RequestParam(name="fr_date", required=true) String fr_date,
+			@ApiParam(value = "TO_DATE", required=true, example = "20220119")
+			@RequestParam(name="to_date", required=true) String to_date,
+			@ApiParam(value = "REQ_STD", required=true, example = "%")
+			@RequestParam(name="req_std", required=true) String req_std,
+			@ApiParam(value = "ATTCH_FILE_ID", required=true, example = "MOBILECONTENT")
+			@RequestParam(name="attch_file_id", required=true) String attch_file_id,
+			@ApiParam(value = "ATTCH_DIV_CD", required=true, example = "C")
+			@RequestParam(name="attch_div_cd", required=true) String attch_div_cd
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("fr_date", String.format("%s 00:00", fr_date));
+		params.put("to_date", String.format("%s 23:59", to_date));
+		if (req_std == null) req_std = "%";
+        params.put("req_std", req_std);
+        params.put("attch_file_id", attch_file_id);
+        params.put("attch_div_cd", attch_div_cd);
+
+        ArrayList<ERPMobileContentList> allItems = erpsigongasMapper.selectMobileContentList(params);
+		
+		return gson.toJson(allItems);
+	}
+	
+	@ApiOperation(value = "erp_selectReqStdList", notes = "게시판분류조회")
+	@GetMapping("/erp_selectReqStdList")  
+	public String erp_selectReqStdList(
+			@ApiParam(value = "USER_ID", required=true, example = "YA521")
+			@RequestParam(name="user_id", required=true) String user_id
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("user_id", user_id);
+
+        ArrayList<ERPTtComcd> allItems = erpsigongasMapper.selectReqStdList(params);
+		
+		return gson.toJson(allItems);
+	}
+		
 	@ApiOperation(value = "erp_selectConsumerAmt", notes = "소비자/공장도가 조회")
 	@GetMapping("/erp_selectConsumerAmt")  
 	public String erp_selectConsumerAmt (
@@ -158,8 +344,8 @@ public class ApiErpSigongAsController {
 
 	}
 	
-	@ApiOperation(value = "erp_selectAddAct", notes = "추가정산 조회")
-	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "추가정산 조회 실패 !!") })
+	@ApiOperation(value = "erp_selectAddAct", notes = "추가정산상세 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "추가정산상세 조회 실패 !!") })
 	@GetMapping("/erp_selectAddAct")
 	@RequestMapping(value = "/erp_selectAddAct", method = RequestMethod.GET)
 	public String erp_selectAddAct(

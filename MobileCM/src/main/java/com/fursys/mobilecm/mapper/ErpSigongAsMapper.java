@@ -16,6 +16,8 @@ import com.fursys.mobilecm.vo.erp.ERPConstructionItemPage;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
 import com.fursys.mobilecm.vo.erp.ERPHappyCall;
+import com.fursys.mobilecm.vo.erp.ERPMobileContent;
+import com.fursys.mobilecm.vo.erp.ERPMobileContentList;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPPushMessage;
 import com.fursys.mobilecm.vo.erp.ERPSigongItemReport;
@@ -27,7 +29,12 @@ import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 public interface ErpSigongAsMapper {
 	
 	
-	
+	public DataResult selectMobileContentReqProc(HashMap<String,Object> params);
+	public int updateMobileContent(HashMap<String,Object> params);
+	public int insertMobileContent(HashMap<String,Object> params);
+	public ERPMobileContent selectMobileContent(HashMap<String,Object> params);
+	public ArrayList<ERPMobileContentList> selectMobileContentList(HashMap<String,Object> params);
+	public ArrayList<ERPTtComcd> selectReqStdList(HashMap<String,Object> params);
 	public DataResult selectAddActStat(HashMap<String,Object> params);
 	public DataResult erp_selectConsumerAmt(HashMap<String,Object> params);
 	public int deleteAddAct(HashMap<String,Object> params);

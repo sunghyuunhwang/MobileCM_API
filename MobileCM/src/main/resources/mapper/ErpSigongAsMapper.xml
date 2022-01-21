@@ -3,6 +3,109 @@
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
 
+<select id="selectMobileContentReqProc" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+	SELECT ISNULL(A.REQ_PROC, '') AS DATA1
+	  FROM TC_MOBILECONTENT A WITH (NOLOCK)
+	 WHERE REQ_NO = #{req_no}
+ 
+]]> 
+</select>
+ 
+<update id="updateMobileContent" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_MOBILECONTENT
+	   SET REQ_STD = #{req_std},
+	       REQ_TITLE = #{req_title},
+	       REQ_CONTENT = #{req_content},
+	       USR_CD = #{user_id},
+	       SYS_DT = GETDATE()
+	 WHERE REQ_NO = #{req_no} 
+
+]]>
+</update>
+
+<insert id="insertMobileContent" parameterType="HashMap">
+<selectKey keyProperty="req_no" resultType="Integer" order="AFTER"> 
+	SELECT IDENT_CURRENT('TC_MOBILECONTENT')
+</selectKey>
+<![CDATA[
+	INSERT INTO TC_MOBILECONTENT (
+	       REQ_DT,
+	       REQ_USR_CD,
+	       REQ_STD,
+	       REQ_PROC,
+	       REQ_TITLE,
+	       REQ_CONTENT,
+	       ANS_CONTENT,
+	       ANS_DT,
+	       ANS_USR_CD,
+	       FST_USR_CD,
+	       FST_SYS_DT,
+	       USR_CD,
+	       SYS_DT)
+	 VALUES (
+	       GETDATE(),
+	       #{user_id},
+	       #{req_std},
+	       #{req_proc},
+	       #{req_title},
+	       #{req_content},
+	       NULL,
+	       NULL,
+	       NULL,
+	       #{user_id},
+	       GETDATE(),
+	       #{user_id},
+	       GETDATE())
+
+]]> 
+</insert>
+ 
+<select id="selectMobileContent" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPMobileContent">
+<![CDATA[
+
+	 SELECT A.REQ_NO, CONVERT(VARCHAR(16), A.REQ_DT, 120) REQ_DT, A.REQ_USR_CD, A.REQ_STD, B.CCD_NM REQ_STD_NM, A.REQ_PROC, C.CCD_NM REQ_PROC_NM, A.REQ_TITLE, A.REQ_CONTENT,
+	        ISNULL(A.ANS_CONTENT, '') ANS_CONTENT, ISNULL(CONVERT(VARCHAR(16), A.ANS_DT, 120), '') ANS_DT, ISNULL(A.ANS_USR_CD, '') ANS_USR_CD,
+	        A.FST_USR_CD, CONVERT(VARCHAR(16), A.FST_SYS_DT, 120) FST_SYS_DT, A.USR_CD, CONVERT(VARCHAR(16), A.SYS_DT, 120) SYS_DT
+	   FROM TC_MOBILECONTENT A WITH(NOLOCK), TT_COMCD B WITH(NOLOCK), TT_COMCD C WITH(NOLOCK)
+	  WHERE A.REQ_STD = B.CCD_CD
+	    AND A.REQ_PROC = C.CCD_CD
+	    AND A.REQ_NO = #{req_no}
+  
+]]> 
+</select>
+    
+<select id="selectMobileContentList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPMobileContentList">
+<![CDATA[
+
+	 SELECT A.REQ_NO, CONVERT(VARCHAR(16), A.REQ_DT, 120) REQ_DT, A.REQ_USR_CD, A.REQ_STD, B.CCD_NM REQ_STD_NM, A.REQ_PROC, C.CCD_NM REQ_PROC_NM, A.REQ_TITLE, A.REQ_CONTENT,
+	        ISNULL(A.ANS_CONTENT, '') ANS_CONTENT, ISNULL(CONVERT(VARCHAR(16), A.ANS_DT, 120), '') ANS_DT, ISNULL(A.ANS_USR_CD, '') ANS_USR_CD,
+	        A.FST_USR_CD, CONVERT(VARCHAR(16), A.FST_SYS_DT, 120) FST_SYS_DT, A.USR_CD, CONVERT(VARCHAR(16), A.SYS_DT, 120) SYS_DT,
+	        (SELECT COUNT(ATTCH_FILE_ID) FROM TY_ATTCHFILE WITH(NOLOCK) WHERE ATTCH_FILE_ID = #{attch_file_id} + CONVERT(VARCHAR(10), A.REQ_NO) AND ATTCH_DIV_CD = #{attch_div_cd}) AS FILE_CNT
+	   FROM TC_MOBILECONTENT A WITH(NOLOCK), TT_COMCD B WITH(NOLOCK), TT_COMCD C WITH(NOLOCK)
+	  WHERE A.REQ_STD = B.CCD_CD
+	    AND A.REQ_PROC = C.CCD_CD
+	    AND A.REQ_DT >= CONVERT(DATETIME, #{fr_date}) 
+	    AND A.REQ_DT <= CONVERT(DATETIME, #{to_date})
+		AND A.REQ_STD LIKE #{req_std}
+	  ORDER BY A.REQ_NO DESC
+  
+]]> 
+</select>
+     
+<select id="selectReqStdList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTtComcd">
+<![CDATA[
+
+	SELECT A.CCD_CD, A.CCD_NM 
+	  FROM TT_COMCD A WITH(NOLOCK)
+	 WHERE A.CDX_CD = 'C86'
+	 ORDER BY A.SORT_SEQ
+  
+]]>
+</select>
+
 <select id="selectAddActStat" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 
@@ -357,7 +460,7 @@
 <![CDATA[
 
 	SELECT A.TRS_SNM AS CCD_CD, A.TRS_SEC AS CCD_NM 
-	  FROM TC_TRSEC A WITH(NOLOCK) INNER JOIN TT_COMCD C ON A.GUBUN = C.CCD_CD
+	  FROM TC_TRSEC A WITH(NOLOCK) INNER JOIN TT_COMCD C WITH(NOLOCK) ON A.GUBUN = C.CCD_CD
 	 WHERE A.COM_AGSEC = #{com_agsec}
 	   AND A.COM_BRAND = #{com_brand}
 	   AND A.USE_YN = 'Y'
@@ -2014,8 +2117,8 @@
 	 ORDER BY SEND_DT DESC
 
 ]]>
-</select>
-
+</select> 
+  
 <insert id="insertSigonWorkTimeOverAcc" parameterType="HashMap">
 <![CDATA[
 	INSERT INTO TC_ACTLIST (
