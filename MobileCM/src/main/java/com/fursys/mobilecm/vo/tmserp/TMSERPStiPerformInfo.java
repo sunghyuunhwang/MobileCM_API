@@ -9,7 +9,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class TMSERPSticurrentDuedateInfo1{
+public class TMSERPStiPerformInfo{
 	public String rem_dt;
 	public String com_scd;
 	public String sti_cd;
@@ -24,6 +24,8 @@ public class TMSERPSticurrentDuedateInfo1{
 	public Integer constcst_sum;
 	public Integer sigonghaja_cnt;
 	public Integer sigonghaja_average;
+	public Integer claim_cnt;
+	public Integer service_cnt;
 	
 /**	
 	public String sti_cd;

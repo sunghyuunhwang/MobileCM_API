@@ -14,8 +14,8 @@ public class TMSERPSticurrentDuedateInfo{
 	public String sti_nm; /*대리점명*/
 	public Integer sti_qtycapa; /*건수카파*/
 	public Integer sti_amtcapa; /*금액카파*/
-	public Integer sti_currentamt; /*당일시공금액*/
-	public Integer sti_currentqty; /*당일 시공건수*/
+	public Integer sum_currentamt; /*당일시공금액*/
+	public Integer sum_currentqty; /*당일 시공건수*/
 	public Integer current_dueday; /*현재납기*/	
 	public Integer max_dueday; /*max납기*/	
 	public Integer total_daycnt; /*당일 시공건수*/	

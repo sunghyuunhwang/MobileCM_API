@@ -79,8 +79,8 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPResmst;
 import com.fursys.mobilecm.vo.tmserp.TMSERPScheduleCount;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsItemList;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSigongAsList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPStiPerformInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo;
-import com.fursys.mobilecm.vo.tmserp.TMSERPSticurrentDuedateInfo1;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberDetailInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPTeamMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPVehicleList;
@@ -1222,9 +1222,9 @@ public class ApiTmsErpController {
 	@ApiOperation(value="/fileDelete", notes="tms첨부파일 삭제")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
 	@PostMapping("/fileDelete")
-	@RequestMapping(value="/fileDelete",method=RequestMethod.POST)
+	@RequestMapping(value="/fileDelete",method=RequestMethod.DELETE)
 	public void fileDelete(
-			@AuthenticationPrincipal User user,
+			//@AuthenticationPrincipal User user,
 			@ApiParam(value = "attch_file_snum", required = true, example = "1")
 			@RequestParam(name = "attch_file_snum", required = true) String attch_file_snum,
 			@ApiParam(value = "attch_file_id", required = true, example = "SC20220119251504")
@@ -1234,9 +1234,9 @@ public class ApiTmsErpController {
 		HashMap<String, Object> paramMap = new HashMap<String, Object>();
 		int res = 0;
 		try {
-			if(user == null) {
-				throw new Exception();
-			}
+			//if(user == null) {
+			//	throw new Exception();
+			//}
 			
 			paramMap.put("attch_file_id", attch_file_id);
 			paramMap.put("attch_file_snum", attch_file_snum);			
@@ -1254,33 +1254,63 @@ public class ApiTmsErpController {
 		return;	
 	}	
 	
-	@ApiOperation(value="/fileUpload", notes="tms첨부파일 업로드")
+	@ApiOperation(value="/diffFileUpload", notes="tms이의제기파일 업로드")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@PostMapping("/fileUpload")
-	@RequestMapping(value="/fileUpload",method=RequestMethod.POST)
+	@PostMapping("/diffFileUpload")
+	@RequestMapping(value="/diffFileUpload",method=RequestMethod.POST)
 	public void fileUpload(MultipartHttpServletRequest multiRequest,  
-			@AuthenticationPrincipal User user,
-			@RequestParam(value="attch_file_id", required=false) String attch_file_id
+			//@AuthenticationPrincipal User user,
+			@RequestParam(value="diff_file_id", required=false) String diff_file_id,
+			@RequestParam(value="rpt_no", required=true) String rpt_no,
+			@RequestParam(value="rpt_seq", required=true) String rpt_seq,
+			@RequestParam(value="bmt_item", required=true) String bmt_item,
+			@RequestParam(value="col_cd", required=true) String col_cd			
 			) throws Exception {
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
-		HashMap<String, Object> paramMap = new HashMap<String, Object>();
-		//String attch_file_id = "";
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		int res = 0;
+		String user_id = "";
+		
+		try {
+			//if(user == null) {
+			//	throw new Exception();
+			//}
+			//user_id = user.getUsername();
+			user_id ="YA601";
+			fileUpload(multiRequest, diff_file_id, user_id);
+			params.put("user_id", user_id);
+			params.put("diff_file_id", diff_file_id);
+			params.put("rpt_no", rpt_no);
+			params.put("rpt_seq", rpt_seq);
+			params.put("bmt_item", bmt_item);
+			params.put("col_cd", col_cd);
+			res = tmserpScheduling.updateDiffFileId(params);
+			if(res < 0) {
+				txManager.rollback(status);
+				return;				
+			}
+		} catch (Exception e) {
+			txManager.rollback(status);
+			return;			
+		}
+		txManager.commit(status);
+		return;
+	}
+	
+	private void fileUpload(MultipartHttpServletRequest multiRequest, String attch_file_id, String user_id) {
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		HashMap<String, Object> params = new HashMap<String, Object>();
 		String attch_div_cd = "SCHEDUELING";
-		String userId="";
 		int res = 0;
 		
 		try {
 			
-			if(user == null) {
-				throw new Exception();
-			}
-			userId = user.getUsername();
-			
 			// 1. file id 채번
 			if(attch_file_id.equals("") || attch_file_id == null) {
-				paramMap.put("attch_div_cd", attch_div_cd);	
-				attch_file_id = tmserpScheduling.getAttchFileId(paramMap);
+				params.put("attch_div_cd", attch_div_cd);	
+				attch_file_id = tmserpScheduling.getAttchFileId(params);
 				System.out.println("attch_file_id :" + attch_file_id);	
 			}
 			
@@ -1346,7 +1376,7 @@ public class ApiTmsErpController {
 						map.put("attch_file_size", file.getSize());
 						map.put("real_attch_file_name", file.getOriginalFilename());
 						map.put("virtual_attch_file_name", vtAtchFileNm);
-						map.put("sti_cd", userId);
+						map.put("sti_cd", user_id);
 						
 						list.add(map);
 											
@@ -1374,7 +1404,7 @@ public class ApiTmsErpController {
 			return;			
 		}
 		txManager.commit(status);
-		return;
+		return;		
 	}
 	
 	private String getShortDateString() {
@@ -1926,8 +1956,6 @@ public class ApiTmsErpController {
 	@RequestMapping(value="/getStiMemberInfo",method=RequestMethod.GET)
 	public String getStiMemberInfo(
 			@AuthenticationPrincipal User user
-			//@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
-			//@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
@@ -1936,8 +1964,7 @@ public class ApiTmsErpController {
 		try {
 			if (user != null) {
 				UserEtc etc = getUserEtc(user);
-				params.put("k_sti_cd", etc.getSti_cd());				
-				//params.put("k_sti_cd", "YA521");
+				params.put("k_sti_cd", etc.getK_sti_cd());				
 				stiMember = tmserpScheduling.selectStimemberInfo(params);
 				return gson.toJson(stiMember);				
 			} else {
@@ -2119,16 +2146,15 @@ public class ApiTmsErpController {
 	}		
 	
 	
-	@ApiOperation(value="/getStiDuedayInformation2", notes="시공납기현황 조회")
+	@ApiOperation(value="/getStiDuedayInformation", notes="시공납기현황 조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공납기현황 조회 실패") })
-	@GetMapping("/getStiDuedayInformation2")
-	@RequestMapping(value="/getStiDuedayInformation2",method=RequestMethod.GET)
-	public String getStiDuedayInformation2(
-			@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
-			@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd,
-			@ApiParam(value = "fdt", required = true, example = "20211216")
+	@GetMapping("/getStiDuedayInformation")
+	@RequestMapping(value="/getStiDuedayInformation",method=RequestMethod.GET)
+	public String getStiDuedayInformation(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "fdt", required = true, example = "20220101")
 			@RequestParam(name = "fdt", required = true) String fdt,
-			@ApiParam(value = "tdt", required = true, example = "20211217")
+			@ApiParam(value = "tdt", required = true, example = "20220120")
 			@RequestParam(name = "tdt", required = true) String tdt			
 			) throws Exception {
 		
@@ -2137,7 +2163,9 @@ public class ApiTmsErpController {
 		
 		try {
 			//if (user != null) {
-				params.put("k_sti_cd", k_sti_cd);
+				//UserEtc etc = getUserEtc(user);
+				//params.put("k_sti_cd", etc.getK_sti_cd());
+				params.put("k_sti_cd", "YA601");
 				params.put("fdt", fdt);
 				params.put("tdt", tdt);
 				stiDueInfo = tmserpScheduling.selectStiDueInfo(params);
@@ -2155,6 +2183,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getComcdList")
 	@RequestMapping(value="/getComcdList",method=RequestMethod.GET)
 	public String getComcdList(
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "cdx_cd", required = true, example = "C11")
 			@RequestParam(name = "cdx_cd", required = true) String cdx_cd		
 			) throws Exception {
@@ -2163,44 +2192,44 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPSticurrentDuedateInfo> comCdList = null;
 		
 		try {
-			//if (user != null) {
+			if (user != null) {
 				params.put("cdx_cd", cdx_cd);
 				comCdList = tmserpScheduling.selectComcdList(params);
 				return gson.toJson(comCdList);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
 	}	
 	
 	
-	@ApiOperation(value="/getStiDuedayInformation1", notes="시공실적현황 조회")
+	@ApiOperation(value="/getStiPerformInformation", notes="시공실적현황 조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공실적현황 조회 실패") })
-	@GetMapping("/getStiDuedayInformation1")
-	@RequestMapping(value="/getStiDuedayInformation1",method=RequestMethod.GET)
-	public String getStiDuedayInformation1(
-			@ApiParam(value = "k_sti_cd", required = true, example = "YA521")
-			@RequestParam(name = "k_sti_cd", required = true) String k_sti_cd,
-			@ApiParam(value = "fdt", required = true, example = "20211216")
+	@GetMapping("/getStiPerformInformation")
+	@RequestMapping(value="/getStiPerformInformation",method=RequestMethod.GET)
+	public String getStiPerformInformation(
+			//@AuthenticationPrincipal User user,
+			@ApiParam(value = "fdt", required = true, example = "20220101")
 			@RequestParam(name = "fdt", required = true) String fdt,
-			@ApiParam(value = "tdt", required = true, example = "20211217")
-			@RequestParam(name = "tdt", required = true) String tdt,
-			@ApiParam(value = "com_scd", required = true, example = "C16YA")
-			@RequestParam(name = "com_scd", required = true) String com_scd			
+			@ApiParam(value = "tdt", required = true, example = "20220120")
+			@RequestParam(name = "tdt", required = true) String tdt		
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
-		ArrayList<TMSERPSticurrentDuedateInfo1> stiDueInfo1 = null;
+		ArrayList<TMSERPStiPerformInfo> stiDueInfo1 = null;
 		
 		try {
 			//if (user != null) {
-				params.put("k_sti_cd", k_sti_cd);
+			//	UserEtc etc = getUserEtc(user);	
+				//params.put("k_sti_cd", etc.getK_sti_cd());
+				//params.put("com_scd", etc.getCom_scd());
+				params.put("k_sti_cd", "YA601");
+				params.put("com_scd", "C16YA");
 				params.put("fdt", fdt);
 				params.put("tdt", tdt);
-				params.put("com_scd", com_scd);
-				stiDueInfo1 = tmserpScheduling.selectStiDueInfo1(params);
+				stiDueInfo1 = tmserpScheduling.selectStiPerformInfo(params);
 				return gson.toJson(stiDueInfo1);				
 			//} else {
 			//	throw new Exception();
