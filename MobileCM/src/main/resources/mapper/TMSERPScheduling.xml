@@ -2892,7 +2892,7 @@
 		               AND c.k_sti_cd = #{ksti_cd}
 		               AND d.plm_no = b.plm_no
 		       <if test="ctm_nm != null and ctm_nm != ''">
-			   		   AND b.ctm_nm LIKE #{ctm_nm} + '%'
+			   		   AND b.ctm_nm LIKE '%' + #{ctm_nm} + '%'
 			   </if>) X
 				 inner join ta_astitem ast
 				 on ast.rpt_no = x.rpt_no
