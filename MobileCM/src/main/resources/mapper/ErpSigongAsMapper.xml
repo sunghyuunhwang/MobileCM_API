@@ -19,7 +19,6 @@
 	   SET REQ_STD = #{req_std},
 	       REQ_TITLE = #{req_title},
 	       REQ_CONTENT = #{req_content},
-	       USR_CD = #{user_id},
 	       SYS_DT = GETDATE()
 	 WHERE REQ_NO = #{req_no} 
 
@@ -43,8 +42,9 @@
 	       ANS_USR_CD,
 	       FST_USR_CD,
 	       FST_SYS_DT,
-	       USR_CD,
-	       SYS_DT)
+	       USR_CD,	       
+	       SYS_DT,
+	       COM_SCD)
 	 VALUES (
 	       GETDATE(),
 	       #{user_id},
@@ -57,8 +57,9 @@
 	       NULL,
 	       #{user_id},
 	       GETDATE(),
-	       #{user_id},
-	       GETDATE())
+	       #{user_id},	       
+	       GETDATE(),
+	       #{com_scd})
 
 ]]> 
 </insert>

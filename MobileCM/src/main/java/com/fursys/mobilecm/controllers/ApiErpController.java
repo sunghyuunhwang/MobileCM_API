@@ -6424,14 +6424,15 @@ public class ApiErpController {
 	}	
 	
 
-	@ApiOperation(value = "erp_updateLoadingInfo", notes = "상차완료처리")
-	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "상차완료처리 Update 실패") })	
+	@ApiOperation(value = "erp_updateLoadingInfo", notes = "상차완료/취소처리")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "상차완료/취소처리 Update 실패") })	
 	@GetMapping("/erp_updateLoadingInfo")  
 	@RequestMapping(value = "/erp_updateLoadingInfo", method = RequestMethod.GET)
 	public String erp_updateLoadingInfo (
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@RequestParam(name="com_ssec", required=true) String com_ssec
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@RequestParam(name="loading_yn", required=true) String loading_yn
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -6452,10 +6453,9 @@ public class ApiErpController {
 	 	        
 	        params.put("rem_dt", rem_dt);
 	        params.put("rem_seq", rem_seq);
-	        
-	        res = lOADINGORMMapper.updateLoadingInfo(params);
-	        
-
+	        params.put("loading_yn", loading_yn);
+	        	        
+	        res = lOADINGORMMapper.updateLoadingInfo(params);	        
 			if (res < 1) {
 				txManager.rollback(status);
 				response.setResultCode("5001");

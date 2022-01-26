@@ -141,7 +141,7 @@
 <update id="updateLoadingInfo" parameterType="HashMap">
 <![CDATA[
 
-	UPDATE TC_RESMST SET LOADING_YN = 'Y', SYS_DT = GETDATE()
+	UPDATE TC_RESMST SET LOADING_YN = #{loading_yn}, SYS_DT = GETDATE()
 	 WHERE REM_DT = #{rem_dt}
 	   AND REM_SEQ = #{rem_seq}
 

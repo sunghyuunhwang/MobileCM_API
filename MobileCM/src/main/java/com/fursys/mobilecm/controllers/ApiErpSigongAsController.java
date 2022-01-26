@@ -85,7 +85,9 @@ public class ApiErpSigongAsController {
 			@ApiParam(value = "ANS_DT", required=true, example = "20220121")			
 			@RequestParam(name="ans_dt", required=true) String ans_dt,
 			@ApiParam(value = "USER_ID", required=true, example = "YA521")
-			@RequestParam(name="user_id", required=true) String user_id			
+			@RequestParam(name="user_id", required=true) String user_id,
+			@ApiParam(value = "COM_SCD", required=true, example = "C16YA")
+			@RequestParam(name="com_scd", required=true) String com_scd
 		) {
         
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -108,6 +110,7 @@ public class ApiErpSigongAsController {
 			params.put("req_dt", req_dt);
 			params.put("ans_dt", ans_dt);
 			params.put("user_id", user_id);
+			params.put("com_scd", com_scd);
 			
 			if (req_no == 0) {	//신규등록				
 				res = erpsigongasMapper.insertMobileContent(params);       	
