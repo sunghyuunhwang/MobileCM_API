@@ -6483,50 +6483,85 @@ public class ApiErpController {
 	@GetMapping("/erp_updateLoadingIssueInfo")  
 	@RequestMapping(value = "/erp_updateLoadingIssueInfo", method = RequestMethod.GET)
 	public String erp_updateLoadingIssueInfo (
+			@RequestParam(name="rem_dt", required=true) String rem_dt,
+			@RequestParam(name="rem_seq", required=true) String rem_seq,
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@RequestParam(name="seq_no", required=true) int seq_no,			
 			@RequestParam(name="loadingissue_std", required=true) String loadingissue_std,
 			@RequestParam(name="loadingissue_remark", required=true) String loadingissue_remark,
 			@RequestParam(name="itm_cd", required=true) String itm_cd,
 			@RequestParam(name="col_cd", required=true) String col_cd,
 			@RequestParam(name="plm_no", required=true) String plm_no,
-			@RequestParam(name="com_ssec", required=true) String com_ssec
+			@RequestParam(name="sti_cd", required=true) String sti_cd
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		int res = 0;
 		AsResultResponse response = new AsResultResponse();
 		DataResult dataResult = new DataResult();
+		int new_seq_no = 0;
 		
 		try {
 			
 			HashMap<String,Object> params = new HashMap<String, Object>();
 	        params.put("plm_no", plm_no);
 	        params.put("com_ssec", com_ssec);
-	        
-	        dataResult = lOADINGORMMapper.selectTcresmstInfo(params);
-	        
-	        String rem_dt = dataResult.getData1();
-	        String rem_seq = dataResult.getData2();
-	 	    String orm_no = dataResult.getData3();
-	 	    String sti_cd = dataResult.getData4();
-	 	    
-	        params.put("rem_dt", rem_dt);
-	        params.put("rem_seq", rem_seq);
-	        params.put("orm_no", orm_no);
-	        params.put("loadingissue_std", loadingissue_std);
-	        params.put("loadingissue_remark", loadingissue_remark);
-	        params.put("itm_cd", itm_cd);
-	        params.put("col_cd", col_cd);
-	        params.put("sti_cd", sti_cd);
-	        
-	        res = lOADINGORMMapper.insertLoadingIssueInfo(params);
-	        
 
-			if (res < 1) {
-				txManager.rollback(status);
-				response.setResultCode("5001");
-				response.setResultMessage("상차이슈처리 오류 [" + res + "]");
-				return gson.toJson(response);
-			}
+	        if (seq_no > 0) {
+	        	params.put("rem_dt", rem_dt);
+		        params.put("rem_seq", rem_seq);
+		        params.put("com_ssec", com_ssec);
+		        params.put("seq_no", seq_no);		        
+	        	params.put("loadingissue_std", loadingissue_std);
+		        params.put("loadingissue_remark", loadingissue_remark);
+		        params.put("sti_cd", sti_cd);
+		        
+		        res = lOADINGORMMapper.updateLoadingIssueInfo(params);	        
+				if (res < 1) {
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage("상차이슈수정 오류 [" + res + "]");
+					return gson.toJson(response);
+				}
+				
+		        new_seq_no = seq_no;
+		        
+			} else {
+		        dataResult = lOADINGORMMapper.selectTcresmstInfo(params);
+		        
+		        rem_dt = dataResult.getData1();
+		        rem_seq = dataResult.getData2();
+		 	    String orm_no = dataResult.getData3();
+		 	    sti_cd = dataResult.getData4();
+		 	    
+		        params.put("rem_dt", rem_dt);
+		        params.put("rem_seq", rem_seq);
+		        params.put("orm_no", orm_no);
+		        params.put("loadingissue_std", loadingissue_std);
+		        params.put("loadingissue_remark", loadingissue_remark);
+		        params.put("itm_cd", itm_cd);
+		        params.put("col_cd", col_cd);
+		        params.put("sti_cd", sti_cd);
+		        
+		        res = lOADINGORMMapper.insertLoadingIssueInfo(params);	        
+				if (res < 1) {
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage("상차이슈등록 오류 [" + res + "]");
+					return gson.toJson(response);
+				}
+				
+				new_seq_no = (int) params.get("seq_no");				
+			}	        
+						
+			response.setData1(String.format("%s", rem_dt));
+			response.setData2(String.format("%s", rem_seq));
+			response.setData3(String.format("%d", new_seq_no));
+			response.setData4(String.format("loadingissue%s%s%s%d", rem_dt, rem_seq, com_ssec, new_seq_no));
+			
+			System.out.println(String.format("seq_no=[%s]", response.getData3()));
+			System.out.println(String.format("attatch_file_id=[%s]", response.getData4()));
+
 			
 		} catch (Exception e) {
 			txManager.rollback(status);

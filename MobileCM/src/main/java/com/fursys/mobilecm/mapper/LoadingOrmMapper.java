@@ -17,4 +17,5 @@ public interface LoadingOrmMapper {
 	public int updateLoadingInfo(HashMap<String,Object> params);
 	public DataResult selectTcresmstInfo(HashMap<String,Object> params);
 	public int insertLoadingIssueInfo(HashMap<String,Object> params);
+	public int updateLoadingIssueInfo(HashMap<String,Object> params);
 }

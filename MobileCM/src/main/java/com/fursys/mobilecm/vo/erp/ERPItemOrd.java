@@ -19,5 +19,14 @@ public class ERPItemOrd {
     private Integer return_qty;
     private String item_col;
     private String delay_yn;
-    private String inpbit;
+    private String inpbit;    
+    private String rem_dt;
+    private String rem_seq;
+    private String com_ssec;
+    private int seq_no; 
+    private String loadingissue_std;
+    private String loadingissue_std_nm;
+    private String loadingissue_procstd;
+  
+    
 }

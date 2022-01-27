@@ -14,4 +14,10 @@ public class BaseResponse {
 	private String resultCount;
 	private String resultMessage;
 	private String mappingKey;
+	
+	private String data1;
+	private String data2;
+	private String data3;
+	private String data4;
+	private String data5;
 }

@@ -170,8 +170,12 @@
 		    AND TCL.COM_SSEC = #{com_ssec} 
 ]]>
 </select>
-
+ 
 <insert id="insertLoadingIssueInfo" parameterType="HashMap">
+<selectKey keyProperty="seq_no" resultType="Integer" order="AFTER"> 
+	SELECT MAX(SEQ_NO) FROM TC_LOADINGISSUE WHERE REM_DT = #{rem_dt} AND REM_SEQ = #{rem_seq} AND COM_SSEC = #{com_ssec}
+</selectKey>
+  
 <![CDATA[
 	
 	INSERT INTO TC_LOADINGISSUE
@@ -222,7 +226,22 @@
 ]]>
 </insert> 
 
+<update id="updateLoadingIssueInfo" parameterType="HashMap">
+<![CDATA[
 
+	UPDATE TC_LOADINGISSUE
+	   SET LOADINGISSUE_STD = #{loadingissue_std},
+	       LOADINGISSUE_REMARK = #{loadingissue_remark},
+	       SYS_DT = GETDATE(),
+	       USR_CD = #{sti_cd}
+	 WHERE REM_DT = #{rem_dt}
+	   AND REM_SEQ = #{rem_seq}
+	   AND COM_SSEC = #{com_ssec}
+	   AND SEQ_NO = #{seq_no}
 
+]]>
+</update> 
+
+ 
 
 </mapper>

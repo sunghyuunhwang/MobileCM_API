@@ -30,15 +30,19 @@ import com.fursys.mobilecm.vo.erp.ERPAttachFileList;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTrip;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTripDetail;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
+import com.fursys.mobilecm.vo.erp.ERPLoadingIssue;
 import com.fursys.mobilecm.vo.erp.ERPMobileContent;
 import com.fursys.mobilecm.vo.erp.ERPMobileContentList;
+import com.fursys.mobilecm.vo.erp.ERPOrderItemLoadingIssueList;
 import com.fursys.mobilecm.vo.erp.ERPPendencyList;
 import com.fursys.mobilecm.vo.erp.ERPScheduleCount;
 import com.fursys.mobilecm.vo.erp.ERPTrinfList;
 import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 import com.fursys.mobilecm.vo.mobile.response.AddActResponse;
 import com.fursys.mobilecm.vo.mobile.response.AsReportResponse;
+import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.BusinessTripResponse;
+import com.fursys.mobilecm.vo.mobile.response.LoadingIssueResponse;
 import com.fursys.mobilecm.vo.mobile.response.MobileContentResponse;
 import com.fursys.mobilecm.vo.mobile.response.PendencyDetailListResponse;
 import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
@@ -64,6 +68,149 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	
+	
+	@ApiOperation(value = "erp_selectOrderItemLoadingIssueList", notes = "상차이슈 리스트")
+	@GetMapping("/erp_selectOrderItemLoadingIssueList")  
+	public String erp_selectOrderItemLoadingIssueList(
+			@ApiParam(value = "PLM_NO", required=true, example = "I202201240794")
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@ApiParam(value = "COM_SSEC", required=true, example = "C18C")
+			@RequestParam(name="com_ssec", required=true) String com_ssec
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("plm_no", plm_no);
+        params.put("com_ssec", com_ssec);
+
+        ArrayList<ERPOrderItemLoadingIssueList> allItems = erpsigongasMapper.selectOrderItemLoadingIssueList(params);
+        
+		return gson.toJson(allItems);
+	}
+	
+	@ApiOperation(value = "erp_deleteLoadingIssueInfo", notes = "상차이슈삭제")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "상차이슈삭제 실패") })	
+	@GetMapping("/erp_deleteLoadingIssueInfo")  
+	@RequestMapping(value = "/erp_deleteLoadingIssueInfo", method = RequestMethod.GET)
+	public String erp_deleteLoadingIssueInfo (
+			@RequestParam(name="rem_dt", required=true) String rem_dt,
+			@RequestParam(name="rem_seq", required=true) String rem_seq,
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@RequestParam(name="seq_no", required=true) int seq_no,
+			@RequestParam(name="sti_cd", required=true) String sti_cd
+		) { 
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		AsResultResponse response = new AsResultResponse();
+		
+		try {
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+        	params.put("attch_file_id", String.format("loadingissue%s%s%s%d", rem_dt, rem_seq, com_ssec, seq_no));
+	        params.put("attch_div_cd", "C");
+		    
+	        res = erpsigongasMapper.deleteAttachFileAll(params);			
+			if (res < 0) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("상차이슈 첨부파일삭제 오류 [" + res + "]");
+				System.out.println("res=" + res);				
+				return gson.toJson(response);
+			}
+			
+			params.put("rem_dt", rem_dt);
+	        params.put("rem_seq", rem_seq);
+	        params.put("com_ssec", com_ssec);
+	        params.put("seq_no", seq_no);
+	        
+	        res = erpsigongasMapper.deleteLoadingIssueInfo(params);	        
+			if (res < 1) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("상차이슈삭제 오류 [" + res + "]");
+				return gson.toJson(response);
+			}
+				
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+		
+	}	
+	 
+	@ApiOperation(value = "erp_selectLoadingIssue", notes = "상차이슈 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "상차이슈 조회 실패 !!") })
+	@GetMapping("/erp_selectLoadingIssue")
+	@RequestMapping(value = "/erp_selectLoadingIssue", method = RequestMethod.GET)
+	public String erp_selectLoadingIssue(
+			@ApiParam(value = "REM_DT", required=true, example = "20220126")			
+			@RequestParam(name="rem_dt", required=true) String rem_dt,
+			@ApiParam(value = "REM_SEQ", required=true, example = "1")			
+			@RequestParam(name="rem_seq", required=true) String rem_seq,
+			@ApiParam(value = "COM_SSEC", required=true, example = "C18A")			
+			@RequestParam(name="com_ssec", required=true) String com_ssec,
+			@ApiParam(value = "SEQ_NO", required=true, example = "1")			
+			@RequestParam(name="seq_no", required=true) int seq_no,			
+			@ApiParam(value = "ATTCH_FILE_ID", required=true, example = "loadingissue202201261C18A1")
+			@RequestParam(name="attch_file_id", required=true) String attch_file_id,
+			@ApiParam(value = "ATTCH_DIV_CD", required=true, example = "C")
+			@RequestParam(name="attch_div_cd", required=true) String attch_div_cd
+			) {
+ 
+		LoadingIssueResponse response = new LoadingIssueResponse();		
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("rem_dt", rem_dt);
+		params.put("rem_seq", rem_seq);
+		params.put("com_ssec", com_ssec);
+		params.put("seq_no", seq_no);
+		 
+		params.put("attch_file_id", attch_file_id);
+        params.put("attch_div_cd", attch_div_cd);
+
+		try {						 
+			ERPLoadingIssue loadingIssue = erpsigongasMapper.selectLoadingIssue(params);
+			if (loadingIssue == null) {
+				loadingIssue = new ERPLoadingIssue(); 
+			}			
+			ArrayList<ERPAttachFileList> file_list = erpsigongasMapper.selectSigongAttachFileList(params);
+	       
+			response.setLoadingIssue(loadingIssue);
+			response.setFile_list(file_list);
+			
+			System.out.println(gson.toJson(response));
+			
+		} catch (Exception e) {
+			System.out.println(e.toString());
+		}
+		
+		return gson.toJson(response);
+	}
+	
+	@ApiOperation(value = "erp_selectLoadingIssueStdList", notes = "게시판분류조회")
+	@GetMapping("/erp_selectLoadingIssueStdList")  
+	public String erp_selectLoadingIssueStdList(
+			@ApiParam(value = "CDX_CD", required=true, example = "C88")
+			@RequestParam(name="cdx_cd", required=true) String cdx_cd,
+			@ApiParam(value = "USER_ID", required=true, example = "YA521")
+			@RequestParam(name="user_id", required=true) String user_id
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("cdx_cd", cdx_cd);
+        params.put("user_id", user_id);
+
+        ArrayList<ERPTtComcd> allItems = erpsigongasMapper.selectLoadingIssueStdList(params);
+        
+		return gson.toJson(allItems);
+	}
 
 	@ApiOperation(value = "erp_saveMobileContent", notes = "게시판 저장")
 	@GetMapping("/erp_saveMobileContent")
@@ -151,7 +298,7 @@ public class ApiErpSigongAsController {
 				
 			}
 			
-			response.setResultCount(String.format("%d", new_req_no));
+			response.setResultCount(String.format("%d", new_req_no));			
 			
 			System.out.println(String.format("req_no=[%s]", new_req_no));
 
@@ -246,7 +393,7 @@ public class ApiErpSigongAsController {
         params.put("user_id", user_id);
 
         ArrayList<ERPTtComcd> allItems = erpsigongasMapper.selectReqStdList(params);
-		
+
 		return gson.toJson(allItems);
 	}
 		
@@ -507,7 +654,22 @@ public class ApiErpSigongAsController {
 						return gson.toJson(response);
 					}
 				}
-			} else {
+			} else {				
+				dataResult = erpsigongasMapper.selectAddActStat(params);
+				if (dataResult == null) {
+					txManager.rollback(status);
+	        		response.setResultCode("5001");
+	        		response.setResultMessage("추가정산 상태체크 실패하였습니다.");
+	        		return gson.toJson(response);
+	        	} else {
+	        		if (!"C83001".equals(dataResult.getData1())) {
+	        			txManager.rollback(status);
+	            		response.setResultCode("5001");
+	            		response.setResultMessage("요청중인 건만 취소처리 할 수 있습니다.");
+	            		return gson.toJson(response);
+	        		}
+	        	}
+				
 				res = erpsigongasMapper.updateAddAct(params);       	
 				if (res < 1) {    				
 					res_msg =  "updateAddAct 오류 [" + res + "]";
@@ -1184,6 +1346,46 @@ public class ApiErpSigongAsController {
         ArrayList<ERPAttachFileList> allItems = apiErpSigongAsService.erp_AttachFileList(params);
         
 		return gson.toJson(allItems);
+	}
+	
+	@ApiOperation(value = "erp_AttachFileDeleteAll", notes = "첨부파일 삭제")
+	@GetMapping("/erp_AttachFileDeleteAll")
+	@RequestMapping(value = "/erp_AttachFileDeleteAll", method = RequestMethod.GET)
+	public String erp_AttachFileDeleteAll(
+			@RequestParam(name = "attch_file_id", required = false) String attch_file_id,	
+			@RequestParam(name = "attch_div_cd", required = false) String attch_div_cd
+			) {
+		       
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		BaseResponse response = new BaseResponse();
+		
+		try {
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("attch_file_id", attch_file_id);
+			params.put("attch_div_cd", attch_div_cd);
+			
+			res = erpsigongasMapper.deleteAttachFileAll(params);			
+			if (res < 1) {
+				txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("deleteAttachFile 오류 [" + res + "]");
+				System.out.println("res=" + res);				
+				return gson.toJson(response);
+			}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
 	}
 	
 	@ApiOperation(value = "erp_AttachFileDelete", notes = "첨부파일 삭제")
