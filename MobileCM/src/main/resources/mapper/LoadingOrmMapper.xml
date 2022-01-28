@@ -32,7 +32,7 @@
 	                   FROM TC_LOADINGISSUE TCL WITH (NOLOCK) 
 	                  WHERE TCL.REM_DT = ( SELECT TCR.REM_DT FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18C' ) 
 	                    AND TCL.REM_SEQ = ( SELECT TCR.REM_SEQ FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18C' ) 
-	                    AND TCL.COM_SSEC = 'C18C' ) > 1 THEN '상차이슈발생' ELSE '' END ) AS LOADINGISSUE_YN	             		
+	                    AND TCL.COM_SSEC = 'C18C' ) > 0 THEN '상차이슈발생' ELSE '' END ) AS LOADINGISSUE_YN	             		
 	FROM TC_PLANMST A WITH (NOLOCK)
 	WHERE A.COM_SCD = #{com_scd}	
 	AND A.STI_CD = #{sti_cd}	
@@ -69,7 +69,7 @@
 	                 FROM TC_LOADINGISSUE TCL WITH (NOLOCK) 
 	                WHERE TCL.REM_DT = ( SELECT TCR.REM_DT FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) 
 	                  AND TCL.REM_SEQ = ( SELECT TCR.REM_SEQ FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) 
-	                  AND TCL.COM_SSEC = 'C18C' ) > 1 THEN '상차이슈발생' ELSE '' END ) AS LOADINGISSUE_YN	             			 	
+	                  AND TCL.COM_SSEC = 'C18C' ) > 0 THEN '상차이슈발생' ELSE '' END ) AS LOADINGISSUE_YN	             			 	
 	FROM TA_PLANMST A WITH (NOLOCK), TA_RPTREQ B WITH (NOLOCK)
 	WHERE A.COM_SCD = #{com_scd}
 	AND A.STI_CD = #{sti_cd}	
