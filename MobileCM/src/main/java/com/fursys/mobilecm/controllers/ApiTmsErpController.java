@@ -1072,10 +1072,6 @@ public class ApiTmsErpController {
 			@RequestParam(name = "from_dt", required = true) String from_dt,
 			@ApiParam(value = "to_dt", required = true, example = "20211013")
 			@RequestParam(name = "to_dt", required = true) String to_dt,
-			//@ApiParam(value = "com_scd", required = true, example = "C16YA")
-			//@RequestParam(name = "com_scd", required = true) String com_scd,
-			//@ApiParam(value = "ksti_cd", required = true, example = "YA601")
-			//@RequestParam(name = "ksti_cd", required = true) String ksti_cd,
 			@ApiParam(value = "orm_nm", required = false, example = "김")
 			@RequestParam(name = "orm_nm", required = false) String orm_nm,
 			@ApiParam(value = "itm_cd", required = false, example = "")
@@ -1089,8 +1085,6 @@ public class ApiTmsErpController {
 				UserEtc etc = getUserEtc(user);
 				params.put("com_scd", etc.getCom_scd());
 				params.put("ksti_cd", etc.getSti_cd());
-				//params.put("com_scd", "C16YA");
-				//params.put("ksti_cd", "YA601");
 				params.put("from_dt", from_dt.replace("-", ""));
 				params.put("to_dt", to_dt.replace("-", ""));
 				params.put("orm_nm", orm_nm);
@@ -1099,13 +1093,16 @@ public class ApiTmsErpController {
 				resList = tmserpScheduling.selectResmstList(params);
 				return gson.toJson(resList);	
 			} else {
-				//return gson.toJson(resList);
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			//return gson.toJson(resList);
-			throw new Exception();
-		} 
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
+		}
 	}
 	
 	@ApiOperation(value="/getResdtlList", notes="tms시공건상세검색")
@@ -1140,13 +1137,16 @@ public class ApiTmsErpController {
 					throw new Exception();
 				}
 				return gson.toJson(resDtlList);				
-			} else {
-				//return gson.toJson(resList);
-				throw new Exception();
+			}else {
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			//return gson.toJson(resDtlList);
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1175,10 +1175,15 @@ public class ApiTmsErpController {
 				vndBanpumList = tmserpScheduling.selectVndBanpumList(params);
 				return gson.toJson(vndBanpumList);				
 			} else {
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1212,10 +1217,15 @@ public class ApiTmsErpController {
 				fileList = tmserpScheduling.selectFileList(params);
 				return gson.toJson(fileList);				
 			} else {
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1506,7 +1516,7 @@ public class ApiTmsErpController {
 		try {
 			
 			if(user == null) {
-				throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}
 			
 	        if ("".equals(file_id)) {
@@ -1568,8 +1578,11 @@ public class ApiTmsErpController {
 				throw new Exception();
 			}
 		} catch(Exception e) {
-			throw new Exception();
-		} finally {
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1669,8 +1682,6 @@ public class ApiTmsErpController {
 				UserEtc etc = getUserEtc(user);
 				params.put("com_scd", etc.getCom_scd());
 				params.put("ksti_cd", etc.getSti_cd());
-			    //params.put("com_scd", "C16YA");
-			    //params.put("ksti_cd", "YA601");
 				params.put("from_dt", from_dt.replace("-", ""));
 				params.put("to_dt", to_dt.replace("-", ""));
 				
@@ -1696,21 +1707,14 @@ public class ApiTmsErpController {
 					all_com_unpsec_r += com_unpsec_r;
 										
 					if(tot_cnt > 0) {
-						
-						//migyeol_per = (double)migyeol_cnt/(double)tot_cnt*100;
 						migyeol_per = calcPercentage(migyeol_cnt, tot_cnt);
-						//comp_per = (double)comp_cnt/(double)tot_cnt*100;
 						comp_per = 100 - migyeol_per;
 					}
 					
 					if(migyeol_cnt > 0) {
-						//com_unpsec_a_per = Math.round((double)com_unpsec_a/(double)migyeol_cnt*100);
-						//com_unpsec_e_per = Math.round((double)com_unpsec_e/(double)migyeol_cnt*100);
-						//com_unpsec_c_per = Math.round((double)com_unpsec_c/(double)migyeol_cnt*100);
 						com_unpsec_a_per = calcPercentage(com_unpsec_a, migyeol_cnt);
 						com_unpsec_e_per = calcPercentage(com_unpsec_e, migyeol_cnt);
 						com_unpsec_c_per = calcPercentage(com_unpsec_c, migyeol_cnt);
-						//com_unpsec_r_per = (double)com_unpsec_r/(double)migyeol_cnt*100;
 						com_unpsec_r_per = 100 - com_unpsec_a_per - com_unpsec_e_per - com_unpsec_c_per;
 					}
 					
@@ -1725,17 +1729,11 @@ public class ApiTmsErpController {
 					
 				}
 				if(all_tot_cnt > 0) {
-					//all_migyeol_per = (double)all_migyeol_cnt/(double)all_tot_cnt*100;
 					all_migyeol_per = calcPercentage(all_migyeol_cnt, all_tot_cnt);
-					//all_comp_per = (double)all_comp_cnt/(double)all_tot_cnt*100;	
 					all_comp_per = 100 - all_migyeol_per;
 				}
 
 				if(all_migyeol_cnt > 0) {
-					//all_com_unpsec_a_per = (double)all_com_unpsec_a/(double)all_migyeol_cnt*100;
-					//all_com_unpsec_e_per = (double)all_com_unpsec_e/(double)all_migyeol_cnt*100;
-					//all_com_unpsec_c_per = (double)all_com_unpsec_c/(double)all_migyeol_cnt*100;
-					//all_com_unpsec_r_per = (double)all_com_unpsec_r/(double)all_migyeol_cnt*100;
 					all_com_unpsec_a_per = calcPercentage(all_com_unpsec_a, all_migyeol_cnt);
 					all_com_unpsec_e_per = calcPercentage(all_com_unpsec_e, all_migyeol_cnt);
 					all_com_unpsec_c_per = calcPercentage(all_com_unpsec_c, all_migyeol_cnt);
@@ -1760,15 +1758,17 @@ public class ApiTmsErpController {
 				result.put("info", teamMigyeolRepoList);
 				
 				return gson.toJson(result);	
-			} else {
-				//return gson.toJson(result);
-				throw new Exception();
+			}  else {
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			//return gson.toJson(result);
-			e.printStackTrace();
-			throw new Exception();
-		} 
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
+		}
 	} 
 	
 	private int calcPercentage(int a, int b) {
@@ -1798,16 +1798,20 @@ public class ApiTmsErpController {
 				UserEtc etc = getUserEtc(user);
 				params.put("com_scd", etc.getCom_scd());
 				params.put("sti_cd", sti_cd);
-			    //params.put("com_scd", "C16YA");
 				params.put("from_dt", from_dt.replace("-", ""));
 				params.put("to_dt", to_dt.replace("-", ""));				
 				migyeolInfoList = tmserpScheduling.selectMigyeolInfo(params);
 				return gson.toJson(migyeolInfoList);				
-			} else {
-				throw new Exception();
+			}  else {
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1829,11 +1833,16 @@ public class ApiTmsErpController {
 				params.put("plm_no", plm_no);
 				migyeolInfoList = tmserpScheduling.selectMigyeolDetailInfo(params);
 				return gson.toJson(migyeolInfoList);				
-			} else {
-				throw new Exception();
+			}  else {
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1867,10 +1876,15 @@ public class ApiTmsErpController {
 				defectInfoList = tmserpScheduling.selectDefectInfoList(params);
 				return gson.toJson(defectInfoList);				
 			} else {
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1896,10 +1910,15 @@ public class ApiTmsErpController {
 				defectDetailList = tmserpScheduling.selectDefectDetail(params);
 				return gson.toJson(defectDetailList);				
 			} else {
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1968,10 +1987,15 @@ public class ApiTmsErpController {
 				stiMember = tmserpScheduling.selectStimemberInfo(params);
 				return gson.toJson(stiMember);				
 			} else {
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -1997,10 +2021,15 @@ public class ApiTmsErpController {
 				stiDetailMember = tmserpScheduling.selectStimemberDetailInfo(params);
 				return gson.toJson(stiDetailMember);				
 			} else {
-				throw new Exception();
+				//throw new Exception();
+				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
-			throw new Exception();
+			if(e instanceof UsernameNotFoundException) {
+				throw new UsernameNotFoundException("login fail");
+			} else {
+				throw new Exception();	
+			}
 		}
 	}
 	
@@ -2143,7 +2172,7 @@ public class ApiTmsErpController {
 		response.setResultCode("200");
 		System.out.println(response.toString());	
 		return gson.toJson(response);
-	}		
+	}			
 	
 	
 	@ApiOperation(value="/getStiDuedayInformation", notes="시공납기현황 조회")

@@ -58,8 +58,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and() 
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
-                .logoutSuccessUrl("/user/logout/result")
-                .invalidateHttpSession(true);
+                .logoutSuccessUrl("/user/login")
+                .deleteCookies("JSESSIONID", "remember-me")
+                .invalidateHttpSession(true)
+             .and()
+             	.rememberMe()
+             	.alwaysRemember(true)
+             	.userDetailsService(userDetailsService);
         if(!csrfEnabled) {
         	http.csrf().disable();
         }

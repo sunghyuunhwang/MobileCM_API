@@ -817,6 +817,8 @@ function assgninfLstdt(_this,rem_dt,com_scd,sti_cd,sti_nm,orm_qty,orm_amt, const
 	var com_ssec2 = $(_this).find('.assgnSbInfBx .txt').attr("data-com-ssec");
 	$('#assgnInfLstPop').removeClass('smll');//품목리스트 숨기기
     $('#assgnInfLstPop .infLstdtBx ul').remove();
+    $('.alrtPop').addClass('opn');
+	$('#lodingPop').addClass('on');
 	$.ajax({
 	    url: "/v1/api/tmserp/erp_SelectSigongItemList",
 	    type: "GET",
@@ -850,9 +852,10 @@ function assgninfLstdt(_this,rem_dt,com_scd,sti_cd,sti_nm,orm_qty,orm_amt, const
 			 console.log(response);
  	          });
 	    },
-         //complete:function{
-
-         //},
+	    complete:function(){
+	                $('.alrtPop').removeClass('opn');
+	                $('#lodingPop').removeClass('on');
+	    },
 	    error: function (request, status, error){
               console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
               alert('데이터를 불러올수 없습니다.');
@@ -1589,9 +1592,9 @@ function delstimmbrinf(data){//시공팀원정보삭제
             success : function(data){
                  alert("팀원 정보가 삭제되었습니다.");
                  mmbrpop.removeClass('opn _insrt');
-                 //window.location.reload();
-                 var clikUl = $('#getStiMemberInfo .on');
-                 getStiMemberDetailInfo(clikUl);                 
+                 window.location.reload();
+                 //var clikUl = $('#getStiMemberInfo .on');
+                 //getStiMemberDetailInfo(clikUl);                 
           }
      });
 }
@@ -1648,9 +1651,9 @@ function insrtstimmbrinf() {//시공팀원정보등록
                  success : function(stimember){
                       alert("팀원 정보가 등록되었습니다.");
                       mmbrpop.removeClass('opn _insrt');
-                      //window.location.reload();
-	                  var clikUl = $('#getStiMemberInfo .on');
-	                  getStiMemberDetailInfo(clikUl);
+                      window.location.reload();
+	                  //var clikUl = $('#getStiMemberInfo .on');
+	                  //getStiMemberDetailInfo(clikUl);
                }
           });
      }
@@ -1710,9 +1713,9 @@ function updtstimmbrinf() {//시공팀원정보수정
               success : function(stimember){
                    alert("팀원 정보가 수정되었습니다.");
                    mmbrpop.removeClass('opn _Mdf');
-                  // window.location.reload();
-                  var clikUl = $('#getStiMemberInfo .on');
-                  getStiMemberDetailInfo(clikUl);
+                   window.location.reload();
+                  //var clikUl = $('#getStiMemberInfo .on');
+                  //getStiMemberDetailInfo(clikUl);
 
             }
        });

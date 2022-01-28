@@ -786,9 +786,13 @@ function stiMmbrInsrtPopopn() { //팀등록팝업오픈
            mmbrpop.find('#address').val('');
            mmbrpop.find('#detailAddress').val('');
            mmbrpop.find('._stm_addr').val('');
-          var sti_cd =  $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._sti_cd').val();
+          //var sti_cd =  $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._sti_cd').val();
+          //var in_stm_no = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._stm_no').val();
+          //var com_scd = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._com_scd').val();
+          var sti_cd = $('#getStiMemberInfo .on').find('._sti_cd').text();
+          var com_scd = $('#getStiMemberInfo .on').find('._com_scd').val();
           var in_stm_no = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._stm_no').val();
-          var com_scd = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._com_scd').val();
+          if(isNaN(in_stm_no)) in_stm_no = "0";
           mmbrpop.find('._sti_cd').val(sti_cd);
           mmbrpop.find('._com_scd').val(com_scd);
           mmbrpop.find('._stm_no').val(parseInt(in_stm_no)+parseInt(1));
