@@ -20,5 +20,9 @@ public class ERPOrderItemLoadingIssueList {
     private String rem_dt;
     private String rem_seq;
     private String com_ssec;
-    private int seq_no; 
+    private int seq_no;
+    private String itm_cd;
+    private String col_cd;
+    private String itm_nm;
+    
 }
