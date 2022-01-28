@@ -776,6 +776,7 @@
        FROM   TC_SMSM A  with (nolock)
        WHERE  1 = 1
        AND    COM_AGSEC  = #{com_agsec}
+       AND	  COM_BRAND  = #{com_brand}
        AND    SOT_CD  = #{sot_cd}
        AND    B_CH_CD  = 'C63002'
        AND    B_TAR_CD  = 'C64003'
