@@ -209,9 +209,9 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	    		
 	    	} else if("T60I02".equals(com_brand)) {	//데스커브랜드
 	    		senderkey = "9917d09567d2ebf1acc89662d7f9ff10db1488d7";
-				txManager.rollback(status);
-				response.setResultCode("200");				
-				return response;
+				//txManager.rollback(status);
+				//response.setResultCode("200");				
+				//return response;
 	    		
 	    	} else if("T60I03".equals(com_brand)) {	//슬로우브랜드	    		
 	    		senderkey = "3ed320702f733d0b5a31e99a3ba931d9f2f9f960";
