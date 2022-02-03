@@ -106,6 +106,7 @@ import com.fursys.mobilecm.vo.erp.ERPConstructionItemResultPage;
 import com.fursys.mobilecm.vo.erp.ERPConstructionMainPage;
 import com.fursys.mobilecm.vo.erp.ERPCooperationList;
 import com.fursys.mobilecm.vo.erp.ERPItemOrd;
+import com.fursys.mobilecm.vo.erp.ERPItemOrdSummary;
 import com.fursys.mobilecm.vo.erp.ERPMigeulAverage;
 import com.fursys.mobilecm.vo.erp.ERPMigeulDetailList;
 import com.fursys.mobilecm.vo.erp.ERPOrdLdList;
@@ -6578,7 +6579,27 @@ public class ApiErpController {
 		
 	}	
 	
-	
+	@ApiOperation(value = "itemLoadingOrderList", notes = "품목별 상차 시 건 용약정보 조회")
+	@GetMapping("/itemLoadingOrderList")  
+	public String itemLoadingOrderList(
+			@RequestParam(name="time", required=false) Long time,
+			@RequestParam(name="com_scd", required=true) String com_scd,
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			@RequestParam(name="itmcd_col", required=true) String itmcd_col
+		) { 
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); 
+        Date date = new Date(time);
+		
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("date", format.format(date));
+        params.put("com_scd",com_scd);
+        params.put("sti_cd",sti_cd);
+        params.put("itmcd_col",itmcd_col);
+        
+		ArrayList<ERPItemOrdSummary> allItems = lOADINGORMMapper.getLoadingitemOrmSummaryList(params);
+		 
+		return gson.toJson(allItems);
+	}	
 	
 	
 	

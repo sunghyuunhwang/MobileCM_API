@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.erp.ERPItemOrd;
+import com.fursys.mobilecm.vo.erp.ERPItemOrdSummary;
 	
 @Mapper
 public interface LoadingOrmMapper {
@@ -18,4 +19,5 @@ public interface LoadingOrmMapper {
 	public DataResult selectTcresmstInfo(HashMap<String,Object> params);
 	public int insertLoadingIssueInfo(HashMap<String,Object> params);
 	public int updateLoadingIssueInfo(HashMap<String,Object> params);
+	public ArrayList<ERPItemOrdSummary> getLoadingitemOrmSummaryList(HashMap<String,Object> params);
 }
