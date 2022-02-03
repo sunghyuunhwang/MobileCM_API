@@ -793,9 +793,11 @@ function stiMmbrInsrtPopopn() { //팀등록팝업오픈
           var com_scd = $('#getStiMemberInfo .on').find('._com_scd').val();
           var in_stm_no = $('#getStiMemberDetailInfo > ._stiMmbrDtil').last().find('._stm_no').val();
           if(isNaN(in_stm_no)) in_stm_no = "0";
+          var new_stm_no = parseInt(in_stm_no)+parseInt(1);
+          if (new_stm_no < 10) new_stm_no = '0' + new_stm_no;
           mmbrpop.find('._sti_cd').val(sti_cd);
           mmbrpop.find('._com_scd').val(com_scd);
-          mmbrpop.find('._stm_no').val(parseInt(in_stm_no)+parseInt(1));
+          mmbrpop.find('._stm_no').val(new_stm_no);
        });
 }
 $(document).ready(function(){
