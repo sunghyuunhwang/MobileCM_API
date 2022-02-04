@@ -5456,11 +5456,13 @@ public class ApiErpController {
 			@RequestParam(name="fdt", required=true) String fdt,
 			@RequestParam(name="tdt", required=true) String tdt,
 			@RequestParam(name="com_scd", required=true) String com_scd,
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
 			@RequestParam(name="orm_nm", required=true) String orm_nm
 		) { 
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
         params.put("com_scd",com_scd);
+        params.put("sti_cd",sti_cd);
         params.put("fdt",fdt);
         params.put("tdt",tdt);
         params.put("orm_nm", "%" + orm_nm + "%");
