@@ -651,6 +651,23 @@ public class ApiErpController {
 		return gson.toJson(allItems);				
 	}
 		
+	@ApiOperation(value = "erp_selectTeamKManagerList", notes = "권역장 리스트 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀 리스트 조회 실패 !!") })
+	@GetMapping("/erp_selectTeamKManagerList")
+	@RequestMapping(value = "/erp_selectTeamKManagerList", method = RequestMethod.GET)
+	public String erp_selectTeamKManagerList(
+			@ApiParam(value="서비스센터코드", required = true, example = "C16YA")
+			@RequestParam(name="com_scd", required = true) String as_com_scd
+			) {
+
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("com_scd", as_com_scd);
+		
+		ArrayList<ERPTeamList> allItems = erpcommMapper.erp_selectTeamKManagerList(params);
+
+		return gson.toJson(allItems);				
+	}
+	
 	@ApiOperation(value = "erp_selectTeamListAll", notes = "시공팀 리스트 조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공팀 리스트 조회 실패 !!") })
 	@GetMapping("/erp_selectTeamListAll")
@@ -673,7 +690,6 @@ public class ApiErpController {
 		
 		return gson.toJson(allItems);				
 	}
-	
 	
 	@ApiOperation(value = "erp_selectCenterList", notes = "서비스센터 리스트 조회")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "서비스센터 리스트 조회 실패 !!") })

@@ -34,6 +34,7 @@ public class ERPScheduleList {
 	private String trans_yn = "" ; // TRANS_YN
 	private String com_rmfg = "" ; // COM_RMFG
 	private String com_rmfg_sub = "" ; // COM_RMFG
+	private String com_rmfg_sub2 = "" ; // COM_RMFG
 	private String rem_tmfyn = "" ; //REM_TMFYN
 	private String latitude = "" ; 
 	private String longitude = "" ;

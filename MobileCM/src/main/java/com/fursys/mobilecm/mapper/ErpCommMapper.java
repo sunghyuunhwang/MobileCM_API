@@ -15,6 +15,7 @@ import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 @Mapper
 public interface ErpCommMapper {
 		
+	public ArrayList<ERPTeamList> erp_selectTeamKManagerList(HashMap<String,Object> params);
 	public ArrayList<ERPSearchTeamList> erp_searchTeamList(HashMap<String,Object> params);
 	public ArrayList<ERPTeamList> erp_selectTeamList(HashMap<String,Object> params);
 	public ArrayList<ERPTeamList> erp_selectTeamListAll(HashMap<String,Object> params);

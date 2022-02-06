@@ -51,6 +51,21 @@
 ]]>
 </select>
 
+  <select id="erp_selectTeamKManagerList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTeamList">
+<![CDATA[
+	SELECT DISTINCT TCS.K_STI_CD AS K_STI_CD,
+	(SELECT B.STI_NM
+	   FROM TC_STINF B WITH (NOLOCK)
+	  WHERE B.STI_CD = TCS.K_STI_CD
+	    AND B.COM_SCD = TCS.COM_SCD ) AS STI_NM
+	FROM TC_STINF TCS WITH (NOLOCK)
+	WHERE TCS.COM_SCD = #{com_scd}
+	  AND TCS.STI_RANK = 'Y'
+	ORDER BY TCS.K_STI_CD
+
+]]>
+</select>
+ 
  <select id="erp_selectCenterList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPCenterList">
 <![CDATA[
 	SELECT
