@@ -1281,8 +1281,11 @@
 	)
 ]]>
 </insert>
-
+ 
 <update id="updateStiReqTime" parameterType="HashMap">
+<selectKey keyProperty="ccd_nm" resultType="String" order="AFTER"> 
+	SELECT TOP 1 CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CDX_CD = 'C70' AND CCD_NAME = #{req_time}
+</selectKey>
 <![CDATA[
 	UPDATE TC_RESMST
 	   SET REM_FTM = ( SELECT TTC.CCD_CD FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CDX_CD = 'C70' AND CCD_NAME = #{req_time} ),
@@ -1307,7 +1310,7 @@
 	    AND A.REM_SEQ = B.REM_SEQ
 ]]>
 </update> 
-
+ 
 <update id="updateStiReqTimeSend" parameterType="HashMap">
 <![CDATA[
 	UPDATE TC_RESMST

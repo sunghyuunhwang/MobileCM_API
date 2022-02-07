@@ -4433,7 +4433,7 @@ public class ApiErpController {
 		int res = 0;
 		AsResultResponse response = new AsResultResponse();
 		DataResult dataResult = new DataResult();
-		
+		String ccd_nm = "";
 		try {
 			
 			HashMap<String, Object> params = new HashMap<String, Object>();
@@ -4451,6 +4451,10 @@ public class ApiErpController {
 				return gson.toJson(response);
 			}	
 			
+			ccd_nm = (String) params.get("ccd_nm");
+			
+			//System.out.println("ccd_nm : " + ccd_nm);
+			
 			res = sCheduleMainListMapper.updateStiReqTimeSort(params);
 			
 			if (res < 1) {
@@ -4460,7 +4464,7 @@ public class ApiErpController {
 				return gson.toJson(response);
 			}	
 			
-			
+			response.setData1(ccd_nm);
 			
 		} catch (Exception e) {
 			txManager.rollback(status);
