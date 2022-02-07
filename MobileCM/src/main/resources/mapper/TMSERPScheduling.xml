@@ -2612,12 +2612,14 @@
 		                     ELSE 0
 		                   END)                                             COM_UNPSEC_E
 		               ,
-		               Sum(CASE
+		               /*Sum(CASE
 		                   WHEN Isnull(com_unpsec, '') = 'C23C' OR( com_rdsec = 'C13N'
 		                         AND ( pld_rmk = '시공' )) THEN 1
 		                     ELSE 0
 		                   END)                                             COM_UNPSEC_C
-		               ,
+		               */
+					   CASE ISNULL(A.INCONSISTENT_YN, '') WHEN 'Y' THEN 1 ELSE 0 END AS COM_UNPSEC_C
+					   ,
 		               Sum(CASE
 		                   WHEN Isnull(com_unpsec, '') = 'C23R' OR( com_rdsec = 'C13N'
 		                         AND ( Isnull(com_unpsec, '') = ''
@@ -2641,7 +2643,8 @@
 		        GROUP  BY A.plm_no,
 		                  D.sti_nm,
 		                  A.plm_cdt,
-		                  A.sti_cd
+		                  A.sti_cd,
+		                  A.INCONSISTENT_YN
 		       )AS A
 		GROUP  BY 
 		          sti_cd,
@@ -2672,11 +2675,11 @@
 		           ELSE ''
 		         END ) AS unpsec_r_yn,
 		       ( CASE
-		           WHEN Sum(c) > 0 THEN 'Y'
+		           WHEN Sum(e) > 0 THEN 'Y'
 		           ELSE ''
 		         END ) AS unpsec_e_yn,
 		       ( CASE
-		           WHEN Sum(e) > 0 THEN 'Y'
+		           WHEN Sum(c) > 0 THEN 'Y'
 		           ELSE ''
 		         END ) AS unpsec_c_yn,
 		       file_yn,
@@ -2715,12 +2718,15 @@
 		                              AND Isnull(pld_rcdt, '') = ''
 		                              AND Isnull(pld_rasdt, '') = '' ) THEN 1
 		                   ELSE 0
-		                 END )                       AS C,
+		                 END )                       AS E,
+		               /*
 		               ( CASE
 		                   WHEN Isnull(com_unpsec, '') = 'C23C'
 		                         OR ( pld_rmk = '시공' ) THEN 1
 		                   ELSE 0
-		                 END )                       AS E,
+		                 END )                       AS C,
+		               */
+					   ( CASE ISNULL(A.INCONSISTENT_YN, '') WHEN 'Y' THEN 1 ELSE 0 END) AS C,
 		               ( CASE
 		                   WHEN (SELECT Count(*)
 		                         FROM   ty_attchfile atc WITH (nolock)
