@@ -2902,4 +2902,138 @@ INSERT INTO TC_PLANDTL
 ]]>
 </update> 
 
+
+<insert id="insertNewTcResmst_org" parameterType="HashMap">
+<![CDATA[
+      INSERT INTO TC_RESMST
+           (REM_DT		  /* 서비스예약일 */	
+           ,REM_SEQ       /* 예약순번 */
+           ,PLM_NO        /* 시공번호 */
+           ,ORM_NO        /* 수주번호 */
+           ,PRJ_CD        /* 프로젝트번호 */
+           ,REM_PTM       /* 요청시간 */
+           ,REM_FTM       /* 확정시간 */
+           ,REM_TMFYN     /* 시간업수건수 */
+           ,REM_NTM       /* 예상소요시간 */
+           ,PLM_ETM       /* 종료시간 */
+           ,PLM_FIXEDT    /* 확정종료일 */
+           ,COM_AGSEC     /* 회사 */
+           ,COM_SSEC      /* 서비스구분 */
+           ,STI_CD        /* 시공팀코드 */
+           ,COM_CTSEC     /* 시공팀구분 */
+           ,SAC_CD        /* 서비스지역코드 */
+           ,ORM_AMT       /* 수주금액 */
+           ,ORM_PURCST    /* 구매고객코드 */
+           ,ORM_NM        /* 수주건명 */
+           ,REM_CLAMT     /* 시공난이도금액 */
+           ,COM_SCD       /* 서비스센터코드 */
+           ,STM_NO        /* 서비스팀원번호 */
+           ,AGT_CD        /* 대리점코드 */
+           ,COM_RFG       /* 예약상태 */
+           ,REM_ASNO      /* AS접수순번 */
+           ,REM_RMK       /* 비고 */
+           ,ZIP_CD        /* 우편번호 */
+           ,USR_CD        /* 최종변경자 */
+           ,SYS_DT        /* 최종변경일시 */
+           ,REM_EXTYN     /* 추가요청건유무 */
+           ,REM_CASYN     /* AS건시공예약유무 */
+           ,REM_CSEC      /* 생성구분 */
+           ,REM_VTM       /* 계획시간 */
+           ,TREQ_TIME     /* 운송요청시간 */
+           ,STI_REQTM     /* 시공팀변경요청시간 */
+           ,SCHDIV_YN     /* 서비스예약정보 */
+           ,SIGN_DT       /* 전자서명등록일시 */
+           ,REM_PTM_2     /* 요청시간2 */
+           ,REM_FTM_2     /* 확정시간2 */
+           ,TOWN_CD       /* 법정동코드 */
+           ,COM_BRAND     /* 브랜드 */
+           ,FST_USR       /* 최초등록자 */
+           ,FST_SYS_DT    /* 최초등록일시 */
+           )
+    VALUES (#{req_resigong_dt}
+           ,RTRIM(#{new_rem_seq})
+           ,#{new_plm_no}
+           ,#{org_orm_no}
+           ,''
+           ,ISNULL(#{req_rem_ftm}, 'C4133')
+           ,ISNULL(#{req_rem_ftm}, 'C4133')
+           ,'N'
+           ,'0'
+           ,NULL
+           ,NULL
+           ,#{org_com_agsec}
+           ,'C18C'
+           ,#{org_sti_cd}
+           ,'C06L'
+           ,NULL
+           ,(SELECT TCR.ORM_AMT
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,(SELECT TCR.ORM_PURCST
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,(SELECT TCR.ORM_NM
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,(SELECT TCR.REM_CLAMT
+               FROM TC_RESMST TCR WITH (NOLOCK)
+              WHERE TCR.REM_DT = #{org_rem_dt}
+                AND TCR.PLM_NO = #{plm_no}
+                AND TCR.COM_SSEC = 'C18C' )
+           ,#{org_com_scd}
+           ,'01'
+           ,#{org_agt_cd}
+           ,'C141'
+           ,NULL
+           ,LEFT((SELECT TCS.STI_NM 
+               FROM TC_STINF TCS WITH (NOLOCK) 
+              WHERE TCS.STI_CD = #{org_sti_cd} 
+                AND TCS.COM_SCD = #{org_com_scd} ) + ' 팀, 원시공일 : '+ #{org_rem_dt} + ' ' + ISNULL((SELECT TCP.MOB_REMARK 
+                      																			   FROM TC_PLANMST TCP WITH (NOLOCK) 
+                    																			  WHERE TCP.PLM_NO = #{plm_no} ), ''), 50)
+           ,#{org_orm_gpost}
+           ,#{sti_cd}
+           ,GETDATE()
+           ,'Y'
+           ,'N'
+           ,'R'
+           ,NULL
+           ,NULL
+           ,NULL
+           ,'N'
+           ,NULL
+           ,'C4133'
+           ,'C4133'
+           ,#{org_town_cd}
+           ,#{org_com_brand}
+           ,#{org_sti_cd}
+           ,GETDATE()    
+           )
+		
+]]>
+</insert> 
+
+
+<select id="selectOriginalStiTeamGet" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
+<![CDATA[
+
+    SELECT TOP 1 TS.STI_CD AS DATA1              /* 시공팀코드 */ 
+	  FROM TC_TOWND TD
+	 INNER JOIN TC_STINF TS
+	    ON TD.STI_CD = TS.STI_CD
+	 WHERE TD.COM_AGSEC = #{org_com_agsec}
+	   AND TD.COM_BRAND = #{org_com_brand}
+	   AND TD.TOWN_CD   = #{org_town_cd}
+	   AND TS.COM_SCD   = #{org_com_scd}
+	   AND TS.STI_RANK = 'Y' 
+	
+]]>
+</select>
+
 </mapper>

@@ -6623,6 +6623,267 @@ public class ApiErpController {
 		return gson.toJson(allItems);
 	}	
 	
+	@ApiOperation(value = "erp_sigongmiguelRecreateAutoProc_asignteam", notes = "시공미결재일정 자동 접수 처리(지역할당팀)")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "시공미결재일정 자동 접수 처리(지역할당팀) 실패") })	
+	@GetMapping("/erp_sigongmiguelRecreateAutoProc_asignteam")  
+	@RequestMapping(value = "/erp_sigongmiguelRecreateAutoProc_asignteam", method = RequestMethod.GET)
+	public String erp_sigongmiguelRecreateAutoProc_asignteam (
+
+			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="req_resigong_dt", required=true) String req_resigong_dt,
+			@RequestParam(name="com_undsec", required=true) String com_undsec,
+			@RequestParam(name="req_rem_ftm", required=true) String req_rem_ftm
+		) { 
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		AsResultResponse response = new AsResultResponse();
+		DataResult dataResult = new DataResult();
+		ERPPraNewRptNo item = null;
+		try {
+			
+			HashMap<String,Object> params = new HashMap<String, Object>();
+	        params.put("plm_no", plm_no);
+
+	        //재일정 요청을 위한 기본 정보 가져오기 1
+	        dataResult = sCheduleMainListMapper.selectSigongReqBasicInfomation(params);	
+
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("selectSigongReqBasicInfomation 오류");
+	        	return gson.toJson(response);
+	        }	
+	        
+	        String org_com_agsec = "";
+	        String org_com_brand = "";
+	        String org_com_scd = "";
+	        String org_sti_cd = "";
+	        String org_orm_no = "";
+	        String org_plm_cdt = "";
+	        
+	        org_com_agsec = dataResult.getData1();
+	        org_com_brand = dataResult.getData2();
+	        org_com_scd = dataResult.getData3();
+	        org_sti_cd = dataResult.getData4(); 
+	        org_orm_no = dataResult.getData5();
+	        org_plm_cdt = dataResult.getData6();
+	        
+	        //재일정 요청을 위한 기본 정보 가져오기 2
+	        dataResult = sCheduleMainListMapper.selectSigongReqBasicInfomation2(params);	
+
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("selectSigongReqBasicInfomation2 오류");
+	        	return gson.toJson(response);
+	        }		        
+	        
+	        String org_agt_cd = "";
+	        String org_orm_gpost = "";
+	        String org_town_cd = "";
+	        String org_orm_gaddr = "";
+	        String org_rem_dt = "";
+	    
+	        org_agt_cd = dataResult.getData1();
+	        org_orm_gpost = dataResult.getData2();
+	        org_town_cd = dataResult.getData3();
+	        org_orm_gaddr = dataResult.getData4(); 	        
+	        org_rem_dt = dataResult.getData5();
+	        
+	        
+	        
+	        params.put("org_com_agsec", org_com_agsec);
+	        params.put("org_com_brand", org_com_brand);
+	        params.put("org_com_scd", org_com_scd);
+	        params.put("org_sti_cd", org_sti_cd);
+	        params.put("org_orm_no", org_orm_no);
+	        params.put("org_agt_cd", org_agt_cd);
+	        params.put("org_orm_gpost", org_orm_gpost);
+	        params.put("org_town_cd", org_town_cd);
+	        params.put("org_orm_gaddr", org_orm_gaddr);
+	        params.put("org_rem_dt", org_rem_dt);
+	        params.put("req_resigong_dt", req_resigong_dt);
+	        params.put("req_rem_ftm", req_rem_ftm);
+	        
+	        //원 지역 할당 시공팀 정보 가져오기
+	        dataResult = sCheduleMainListMapper.selectOriginalStiTeamGet(params);
+	        
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("selectOriginalStiTeamGet 오류");
+	        	return gson.toJson(response);
+	        }	    		
+	        
+	        String asign_sti_team = "";
+	        asign_sti_team = dataResult.getData1();	   
+	        
+	        org_sti_cd = asign_sti_team;
+	        
+	        //신규 시공번호 채번
+			dataResult = sCheduleMainListMapper.executePraFaAseqrem(params);
+			
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("executePraFaAseqrem 오류");
+	        	return gson.toJson(response);
+	        }	    		
+	        
+	        String new_plm_no = "";
+	        new_plm_no = dataResult.getData1();	        
+	        
+	        //신규 tc_planmst insert
+	        params.put("new_plm_no", new_plm_no);
+        	res = sCheduleMainListMapper.insertSigongMigeulReRequest(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertSigongMigeulReRequest 오류");
+	        	return gson.toJson(response);
+			}	 	        
+	        
+	        //신규 tc_plandtl insert
+	        params.put("new_plm_no", new_plm_no);
+        	res = sCheduleMainListMapper.insertSigongMigeulDetailReRequest(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertSigongMigeulDetailReRequest 오류");
+	        	return gson.toJson(response);
+			}		        
+	        
+			//재시공 품목 정보 update
+			res = sCheduleMainListMapper.updateSigonReConfirmInform(params);
+			 
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateSigonReConfirmInform 오류");
+	        	return gson.toJson(response);
+			}
+			
+			//신규 tc_resmst의 rem_seq 채번
+			dataResult = sCheduleMainListMapper.selectRemSeqNowNo(params);
+			
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("selectRemSeqNowNo 오류");
+	        	return gson.toJson(response);
+	        }	    			
+			
+			int now_rem_seq = dataResult.getValue1();
+			
+			params.put("now_rem_seq", now_rem_seq);
+			res = sCheduleMainListMapper.updateTcSeqnoInfReCreate(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateTcSeqnoInfReCreate 오류");
+	        	return gson.toJson(response);
+			}		
+			
+			String new_rem_seq = "";
+			
+			if(org_com_agsec.equals("C02I")) {
+				new_rem_seq = "IC" +  String.format( "%1$04d" , now_rem_seq ) ;		
+			}else if (org_com_agsec.equals("C02F")) {
+				new_rem_seq = "FC" +  String.format( "%1$04d" , now_rem_seq ) ;
+			}else if (org_com_agsec.equals("C02P")) {
+				new_rem_seq = "PC" +  String.format( "%1$04d" , now_rem_seq ) ;
+			}
+			
+			params.put("new_rem_seq", new_rem_seq);
+			params.put("plm_cdt2", org_plm_cdt);
+	        //신규 tc_resmst insert
+        	res = sCheduleMainListMapper.insertNewTcResmst_org(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertNewTcResmst 오류");
+	        	return gson.toJson(response);
+			}				
+			
+			
+        	res = sCheduleMainListMapper.insertNewTcResdtl(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("insertNewTcResdtl 오류");
+	        	return gson.toJson(response);
+			}			
+			
+			
+			res = sCheduleMainListMapper.modifyOrmPsts_U(params);
+        	
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("modifyOrmPsts_U 오류");
+	        	return gson.toJson(response);
+			}	
+
+			String com_agsec = "";
+			if ("C02F".equals(org_com_agsec)) {
+				com_agsec = "T01F";
+			} else if ("C02I".equals(org_com_agsec)) {
+				com_agsec = "T01I";
+			} else if ("C02P".equals(org_com_agsec)) {
+				com_agsec = "T01P";
+			} else {
+				com_agsec = org_com_agsec;
+			}
+			
+			params = new HashMap<String, Object>();
+			params.put("plm_no", plm_no);
+			params.put("com_agsec", com_agsec);
+			params.put("com_scd", org_com_scd);
+			params.put("plm_cdt", org_plm_cdt);
+			params.put("req_resigong_dt",req_resigong_dt);
+			params.put("com_undsec", com_undsec);
+			
+			dataResult = sCheduleMainListMapper.selectFinalResult(params);
+	        if (dataResult == null) {
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("재일정, 반품 기준일자 조회 오류");
+	        	return gson.toJson(response);
+	        }
+	
+			String final_result = dataResult.getData1();
+			
+			params.put("final_result", final_result);			
+			//재시공 update
+			res = sCheduleMainListMapper.updateFinalResult(params);
+			if (res < 1) {    				
+	        	txManager.rollback(status);
+	        	response.setResultCode("5001");
+	        	response.setResultMessage("updateFinalResult 오류");
+	        	return gson.toJson(response);
+			}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());			
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);
+		
+	}	
+
 	
 	
 	

@@ -121,4 +121,7 @@ public interface ScheduleMainListMapper {
 	public int insertNewTcResmst(HashMap<String,Object> params);
 	public int insertNewTcResdtl(HashMap<String,Object> params);
 	public int modifyOrmPsts_U(HashMap<String,Object> params);
+	
+	public DataResult selectOriginalStiTeamGet(HashMap<String,Object> params);
+	public int insertNewTcResmst_org(HashMap<String,Object> params);	
 }
