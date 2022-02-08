@@ -2794,8 +2794,8 @@ INSERT INTO TC_PLANDTL
            ,#{new_plm_no}
            ,#{org_orm_no}
            ,''
-           ,'C4133'
-           ,'C4133'
+           ,ISNULL((SELECT TTC.CCD_CD FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CDX_CD = 'C70' AND CCD_NAME = #{req_rem_ftm}), 'C4133')
+           ,ISNULL((SELECT TTC.CCD_CD FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CDX_CD = 'C70' AND CCD_NAME = #{req_rem_ftm}), 'C4133')
            ,'N'
            ,'0'
            ,NULL

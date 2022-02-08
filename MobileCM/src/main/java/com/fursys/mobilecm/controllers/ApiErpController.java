@@ -6059,7 +6059,8 @@ public class ApiErpController {
 
 			@RequestParam(name="plm_no", required=true) String plm_no,
 			@RequestParam(name="req_resigong_dt", required=true) String req_resigong_dt,
-			@RequestParam(name="com_undsec", required=true) String com_undsec
+			@RequestParam(name="com_undsec", required=true) String com_undsec,
+			@RequestParam(name="req_rem_ftm", required=true) String req_rem_ftm
 		) { 
 		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
@@ -6210,6 +6211,8 @@ public class ApiErpController {
 			
 			params.put("new_rem_seq", new_rem_seq);
 			params.put("plm_cdt2", org_plm_cdt);
+			params.put("req_rem_ftm", req_rem_ftm);
+			
 	        //신규 tc_resmst insert
         	res = sCheduleMainListMapper.insertNewTcResmst(params);
         	
