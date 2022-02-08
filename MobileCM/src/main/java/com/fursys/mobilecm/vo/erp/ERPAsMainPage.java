@@ -61,6 +61,8 @@ public class ERPAsMainPage {
 	private String vnd_addr;
 	private String plm_ptmnm;
 	private String rem_ftmnm;
+	private String rem_ftmname;
+	private String rem_ftm;
 	private String req_time;
 	private String req_location;
 	
