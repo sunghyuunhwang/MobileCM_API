@@ -12,7 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class ERPAddAct {
-	
+
 	private String plm_no = "";
     private String com_ssec = "";
     private String seq = "";
@@ -20,6 +20,9 @@ public class ERPAddAct {
     private String com_brand = "";
     private String trs_sec = "";
     private String trs_snm = "";
+    private String addact_reqdt = "";
+    private String addact_stat = "";
+    private String reject_reason = "";
     
     private String orm_no = "";
     private String remark = "";
