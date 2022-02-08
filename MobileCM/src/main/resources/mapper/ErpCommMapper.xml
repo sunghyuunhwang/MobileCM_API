@@ -4,6 +4,29 @@
 
  <select id="erp_searchTeamList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSearchTeamList">
 <![CDATA[
+SELECT
+		TCS.STI_CD AS STI_CD,
+		TCS.STI_NM AS STI_NM,
+		TCS.COM_CTSEC AS COM_CTSEC,
+		TCS.COM_SCD AS COM_SCD,
+		(SELECT B.STM_HP
+         FROM TC_STMEMBER B WITH (NOLOCK) 
+        WHERE B.COM_SCD = TCS.COM_SCD
+          AND B.STI_CD = TCS.STI_CD
+          AND ( B.STM_NO = "01" OR B.STM_NO = "1" ) ) AS STM_HP
+	  FROM TC_STINF TCS WITH (NOLOCK)
+	WHERE TCS.COM_SCD = #{com_scd}
+	   AND TCS.K_STI_CD = #{k_sti_cd}
+	   AND TCS.STI_NM LIKE #{sti_nm}
+	   AND TCS.STI_RANK = 'Y'
+	   AND TCS.REAL_YN = 'Y'
+	   AND TCS.K_STI_CD NOT LIKE 'CJ%'
+	   AND TCS.COM_STSEC IN ('C20C', 'C20B')
+]]>
+</select>
+
+ <select id="erp_searchTeamList_backup" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPSearchTeamList">
+<![CDATA[
 	SELECT
 		TCS.STI_CD AS STI_CD,
 		TCS.STI_NM AS STI_NM,
