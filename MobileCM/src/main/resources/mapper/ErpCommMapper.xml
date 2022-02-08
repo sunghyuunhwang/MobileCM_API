@@ -13,7 +13,7 @@ SELECT
          FROM TC_STMEMBER B WITH (NOLOCK) 
         WHERE B.COM_SCD = TCS.COM_SCD
           AND B.STI_CD = TCS.STI_CD
-          AND ( B.STM_NO = "01" OR B.STM_NO = "1" ) ) AS STM_HP
+          AND ( B.STM_NO = '01' OR B.STM_NO = '1' ) ) AS STM_HP
 	  FROM TC_STINF TCS WITH (NOLOCK)
 	WHERE TCS.COM_SCD = #{com_scd}
 	   AND TCS.K_STI_CD = #{k_sti_cd}
