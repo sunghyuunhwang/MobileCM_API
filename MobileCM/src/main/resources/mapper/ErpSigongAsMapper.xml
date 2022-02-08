@@ -216,7 +216,7 @@
 <select id="erp_selectConsumerAmt" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.DataResult">
 <![CDATA[
 
-	SELECT ISNULL(SUM(IOP_MNFCST), -9999) AS VALUE1, ISNULL(SUM(IOP_SALCST_REC), -9999) AS VALUE2
+	SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -9999) AS VALUE1, ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -9999) AS VALUE2
 	  FROM TO_ORDDET D WITH(NOLOCK) INNER JOIN TC_PLANMST P WITH(NOLOCK) ON D.ORM_NO = P.ORM_NO
 	 WHERE PLM_NO = #{plm_no}
 
@@ -468,7 +468,7 @@
 	,#{tri_famt} -- 품목의 정산단가 (정산유형이 '정액'일 경우)
 	,#{tri_drate} -- 품목의 지급요율 (정산유형이 '요율'일 경우)
 	,#{rate_subject} -- 품목의 요율산정대상 (정산유형이 '요율'일 경우)
-	,CASE #{tri_type} WHEN 'C84002' THEN NULL ELSE #{std_amt} END -- 정산기준금액(소바자가일경우 TO_ORDDET SUM(IOP_SALCST_REC), 공장도가일 경우(IOP_MNFCST)) (정산유형이 '요율'일 경우)
+	,CASE #{tri_type} WHEN 'C84002' THEN NULL ELSE #{std_amt} END -- 정산기준금액(소바자가일경우 TO_ORDDET SUM(IOP_SALCST_REC*ORD_QTY), 공장도가일 경우(IOP_MNFCST)) (정산유형이 '요율'일 경우)
 	,#{user_id}
 	,GETDATE()
 	,#{user_id}
@@ -504,19 +504,19 @@
 <![CDATA[
 	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, ISNULL(RATE_SUBJECT, '') RATE_SUBJECT, TRI_DRATE,
 	       CASE TRI_TYPE WHEN  'C84001' THEN 
-	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
-	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
+	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
+	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
 	                          ELSE '0'END )-- 
 	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
 	                          ELSE 0
 	                          END AS TRI_AMT,
 	       CASE TRI_TYPE WHEN  'C84001' THEN 
-	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) WHEN -8888 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) END
-	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) WHEN -8888 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) END
+	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) END
+	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) WHEN -8888 THEN -9999
+	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no} ) END
 	                          ELSE '0'END )-- 
 	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
 	                          ELSE 0
