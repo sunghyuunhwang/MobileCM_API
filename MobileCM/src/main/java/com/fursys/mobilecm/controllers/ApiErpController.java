@@ -6696,7 +6696,7 @@ public class ApiErpController {
 	        params.put("org_com_agsec", org_com_agsec);
 	        params.put("org_com_brand", org_com_brand);
 	        params.put("org_com_scd", org_com_scd);
-	        params.put("org_sti_cd", org_sti_cd);
+	        
 	        params.put("org_orm_no", org_orm_no);
 	        params.put("org_agt_cd", org_agt_cd);
 	        params.put("org_orm_gpost", org_orm_gpost);
@@ -6720,6 +6720,7 @@ public class ApiErpController {
 	        asign_sti_team = dataResult.getData1();	   
 	        
 	        org_sti_cd = asign_sti_team;
+	        params.put("org_sti_cd", org_sti_cd);
 	        
 	        //신규 시공번호 채번
 			dataResult = sCheduleMainListMapper.executePraFaAseqrem(params);
