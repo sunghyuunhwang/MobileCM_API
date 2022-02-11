@@ -116,9 +116,9 @@
 
 .popPage.opn{display: flex;align-items: center;justify-content: center;}
 .srchBox{display: inline-block;width: 100%;padding: 0 0 10px 0;margin: 0 0 10px 0; border-bottom: #ddd 1px solid;}
-.srchBox .dateBx {display: inline-block;float: left;}
+.srchBox .dateBx {display: inline-block;float: left;font-size: 16px;font-weight:500;color: #555;}
+     .srchBox .dateBx .inptBx:first-child{margin-left: 5px;}
 .srchBox .dateBx .datepicker{}
-
 /*시공건팝*/
 .cnstrctLstBx{position: relative;width: calc(100% - 20px);height: calc(100% - 20px);padding:20px;border-radius: 16px;background: #fff;box-shadow: 0 -2px 6px 0 rgb(0 0 0 / 16%);box-sizing: border-box;}
 .cnstrctLstBx.popCntnts .ttl{padding: 0px 95px 15px 0px;font-size: 18px;}

@@ -1,5 +1,6 @@
 @charset "utf-8";
 input[type='text']:read-only{border: 0;color: #777;}
+.nmldatepicker:read-only{border: solid 1px #babcbe !important;}
 input:disabled{opacity: 0.5;}
 .btnBx{display: inline-flex;align-items: center;justify-content: center;width: 100%;}
 .btn{border-radius: 8px;}
@@ -39,7 +40,7 @@ a.btn{display:inline-flex;align-items: center;justify-content: center;}
 
   .chck.rghtTxt + label,.allChck.rghtTxt + label{padding: 0 0 0 24px;}
 
-.inptTtl{display: inline-block;padding: 14px 0;line-height: 22px;}
+.inptTtl{display: inline-block;padding: 14px 0;line-height: 22px;font-size: 16px;font-weight:500;color: #555;}
 .inptTtl.hThin{padding: 3px 0;}
 .inptBx{width: 100%;padding: 14px 18px;font-size: 15px;line-height: 22px;border-radius: 8px;border: solid 1px #babcbe;box-sizing: border-box;}
 .inptBx.hThin{padding: 3px 10px;}

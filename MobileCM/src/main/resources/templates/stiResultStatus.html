@@ -16,7 +16,8 @@
 <!--     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> -->
     <script src="/js/jquery.touchSwipe.min.js"></script>
     <script src="/js/mbCM-frontEvnt.js"></script><!-- 프론트엔드 이벤 -->
-    <script src="/js/mbCM-frontApiActnReal.js"></script><!--프론트엔드 이벤 -->
+    <!--<script src="/js/mbCM-frontApiActnReal.js"></script>프론트엔드 이벤 -->
+    <script src="/js/mbCM-frontApiActnReal_front.js"></script><!-- 프론트엔드 이벤 -->
 </head>
 
 <body>
@@ -37,119 +38,117 @@
                          <li>
                             <a class="lstLnk" href="/v1/areamaster/defectInfo">하자 내역 조회</a>
                          </li>
-				        <li>
-				           <a class="lstLnk" href="/v1/areamaster/stimember">시공팀원관리</a>
-				        </li>	
+				     <li>
+				        <a class="lstLnk" href="/v1/areamaster/stimember">시공팀원관리</a>
+				     </li>
+                         <li>
+				        <a class="lstLnk" href="/v1/areamaster/stiResultStatus">시공실적관리</a>
+				     </li>
                     </menu>
                     <button class="clsBtn bgBlck"><!--배경닫기--></button>
                </aside>
           </div>
-           <h1 class="insubPgTopBx ttl">하자내역 조회</h1>
+           <h1 class="insubPgTopBx ttl">시공팀 실적현황</h1>
            <article class="srchBox">
                 <div class="dateBx">
-                     최종조치일자
+                     시공예약일
                      <input type="text" name="" id="nmldate1" class="nmldatepicker inptBx hThin" value="" readonly/>
                      ~
                      <input type="text" name="" id="nmldate2" class="nmldatepicker inptBx hThin" value="" readonly/>
                 </div>
-                <label for="cstmrNm" class="inptTtl hThin mLft20px">고객명</label>
-                <input type="text" name="ctm_nm" id="cstmrNm" class="inptBx hThin w190px" />
-                <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="getDfctInf();">조회</button>
+                <button class="btn btnSzSmll btnBlck w60px mLft20px" onclick="stiResultStatus();">조회</button>
            </article>
-           <div class="dfBx_x wCal500px _inSbPgBx _lftPd">
-                <div class="inSrchFtBx">
-                     <article class="hHrfBx _top">
-                          <h2 class="popSmllTtl">AS 판정결과</h2>
-                          <div class="scrll _inTtl" id="getDfctInf">
-                               <ul class="ulLftlst _index">
-                                    <li class="w110px">최종조치일</li>
-                                    <li class="w150px">접수번호</li>
-                                    <li class="w80px tAlgnCntr">순번</li>
-                                    <li class="w100px">대리점명</li>
-                                    <li class="w300px tAlgnLft">고객명</li>
-                                    <li class="w150px">서비스팀<input type='hidden' value='' /></li>
-                                    <li class="w110px">원시공일</li>
-                                    <li class="w150px">의뢰시공팀</li>
-                                    <li class="w100px">접수자</li>
-                                    <li class="w80px  tAlgnCntr">회수여부</li>
-                                    <li class="w80px  tAlgnCntr">접수파일</li>
-                               </ul>
-                               <!--나중에 주석처리할 부분
-                               <ul class='ulLftlst'>
-                                    <li class='w110px'>2021-10-14</li>
-                                    <li class='w150px'><a class='lnkLn' onclick=''>I20210001001</a></li>
-                                    <li class='w80px tAlgnCntr'>01</li>
-                                    <li class='w300px'>수원광교점</li>
-                                    <li class="w100px tAlgnLft">박선주</li>
-                                    <li class='w150px'>IA신민혁팀</li>
-                                    <li class='w110px'>2021-10-05</li>
-                                    <li class='w150px'>임지훈팀</li>
-                                    <li class='w100px'>박효영</li>
-                                    <li class='w80px  tAlgnCntr'>N</li>
-                                    <li class='w80px  tAlgnCntr'><button class="inFileBtn">Y</button></li>
-                                    <li class='dsplyNon _rpt_astdesc'>"+response.rpt_astdesc+"</li>
-                                    <li class='dsplyNon _rpt_desc'>"+response.rpt_desc+"</li>
-                                    <li class='dsplyNon _opinion'>"+response.opinion+"</li>
-                               </ul>-->
-                               <!--나중에 주석처리할 부분-->
-                          </div>
-                     </article>
-                     <article class="hHrfBx _bttm">
-                          <h2 class="popSmllTtl">AS 상세정보</h2>
-                          <div class="scrll _inTtl" id="getDfctDetail">
-                               <ul class="ulLftlst _index">
-                                    <li class="w150px">단품코드</li>
-                                    <li class="w200px">부품코드</li>
-                                    <li class="w200px tAlgnCntr">색상</li>
-                                    <li class="w100px tAlgnCntr">조치수량</li>
-                                    <li class="w100px tAlgnCntr">회수여부</li>
-                                    <li class="wCal550px">파일</li>
-                               </ul>
-                               <!--나중에 주석처리할 부분
-                               <ul class='ulLftlst'>
-                                    <li class='w150px'>단품코드</li>
-                                    <li class='w200px'>부품코드</li>
-                                    <li class='wCal680px tAlgnCntr'>색상</li>
-                                    <li class='w100px tAlgnCntr'>조치수량</li>
-                                    <li class='w80px  tAlgnCntr'>회수여부</li>
-                                    <li class='w80px  tAlgnCntr'><button class='inFileBtn'>Y</button></li>
-                               </ul>-->
-                               <!--나중에 주석처리할 부분-->
-                          </div>
+           <div class="dfBx_x w50p _inSbPgBx _lftPd">
+                <h2 class="popSmllTtl">[1] 시공팀별 실적 현황</h2>
+                <div class="scrll _inTtl stRsltStts">
+                     <ul class='ulLftlst _index'>
+                          <li class='w150px'>시공팀명</li>
+                          <li class='w120px'>시공금액</li>
+                          <li class='w120px'>지급시공비</li>
+                          <li class='w85px tAlgnCntr'>고객만족도</li>
+                          <li class='w110px'>시공하자</li>
+                          <li class='w110px tAlgnRght'>내부부적합</li>
+                          <li class='w95px tAlgnCntr'>서비스메뉴얼</li>
+                          <li class='w90px tAlgnRght'>고객클레임</li>
+                     </ul>
+                     <div class="dfBx scrll" id="stiResultStatus_1">
+
+                     </div>
+                     <article class="allNmberBox">
+                          <ul class='ulLftlst'>
+                               <li class='w150px'>권역총합</li>
+                               <li class='w120px'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 시공팀면--></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w120px'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 지급시공비--></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w85px tAlgnCntr '><!--고객만족도--></li>
+                               <li class='w110px'>
+                                    <span><!--시공하자--></span>%(<span><!--시공하자--></span>건)
+                               </li>
+                               <li class='w110px tAlgnRght'>
+                                    <span><!--내부부적합--></span>%(<span><!--내부부적합--></span>건)
+                               </li>
+                               <li class='w95px tAlgnCntr'><!--서비스메뉴얼--></li>
+                               <li class='w90px tAlgnRght'><!-- 고객클레임--></li>
+                          </ul>
                      </article>
                 </div>
            </div>
-           <div class="dfBx_x w500px _inSbPgBx _rghtPd">
-                <article class="hHrfBx _hPr30 _top nonAslt">
-                     <dl class="dfDl _scllDd">
-                          <dt class="bldTtl">
-                               조치결과 특이사항
-                          </dt>
-                          <dd id="rpt_astdesc">
-                          </dd>
-                     </dl>
-                </article>
-                <article class="hHrfBx _hPr30 nonAslt">
-                     <dl class="dfDl _scllDd">
-                          <dt class="bldTtl">
-                               서비스 요구내역
-                          </dt>
-                          <dd id="rpt_desc">
+           <div class="dfBx_x w50p _inSbPgBx _rghtPd">
+                <h2 class="popSmllTtl">[2] 시공팀 납기현황</h2>
+                <div class="scrll _inTtl stRsltStts">
+                     <ul class='ulLftlst _index _inDCr'>
+                          <li class='w150px'>지역명</li>
+                          <li class='w80px tAlgnCntr'>CAPA(건)</li>
+                          <li class='w120px'>CAPA(금액)</li>
+                          <li class='w80px tAlgnCntr _inDCrBdr'>현재납기</li>
+                          <li class='w110px'>누적금액</li>
+                          <li class='w110px'>일평균금액</li>
+                          <li class='w95px tAlgnCntr'>누적건수</li>
+                          <li class='w85px tAlgnCntr'>일평균건수</li>
+                          <li class='w85px tAlgnCntr'>최대납기</li>
+                          <li class='w85px tAlgnRght'>평균납기</li>
+                     </ul>
+                     <div class="dfBx scrll" id="stiResultStatus_2">
 
-                          </dd>
-                     </dl>
-                </article>
-                <article class="hHrfBx _hPr30 _bttm nonAslt">
-                     <dl class="dfDl _scllDd">
-                          <dt class="bldTtl">
-                               이의제기 내용
-                          </dt>
-                          <dd class="saveOpnnBox">
-                               <textarea class="dfTxtAra" id="opinion"></textarea>
-                               <button class="btn btnSzSmll btnBlck w60px fltRght mTop10px saveOpnnBtn">저장</button>
-                          </dd>
-                     </dl>
-                </article>
+                     </div>
+                     <article class="allNmberBox">
+                          <ul class='ulLftlst'>
+                               <li class='w150px _inDCr'>권역총합</li>
+                               <li class='w80px tAlgnCntr _inDCr'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 CAPA(건) --></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w120px _inDCr'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 CAPA(금액) --></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w80px tAlgnCntr _inDCr'><!--15--></li>
+                               <li class='w110px'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 현재납기--></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w110px'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 누적금액 --></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w95px tAlgnCntr'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌 일평균금액 --></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w85px tAlgnCntr'>
+                                    <span class='numTxt'><!--아래 인풋value값에 값넣으면 자동콤마 찍어서 표시됌   누적건수--></span>
+                                    <input type='hidden' name='' value='' class='innmbr nmCmma'>
+                               </li>
+                               <li class='w85px tAlgnCntr'><!--최대납기--></li>
+                               <li class='w85px tAlgnRght'><!--평균납기--></li>
+                          </ul>
+                     </article>
+                </div>
            </div>
      </section>
      <div th:replace="fileList_popup :: fileList_popup">
@@ -176,15 +175,10 @@
      </aside>
      <script type="text/javascript">
 	 saveOpinion();
+         ulLftlst();
      $( ".nmldatepicker" ).click(function() {
           $('.ui-datepicker').addClass('nml');
      });
-/*           function showDays() {
-              var start = $('.vndBanpumStatus #nmldate1').datepicker('getDate');
-              var end   = $('.vndBanpumStatus #nmldate2').datepicker('getDate');
-          }
-          $('.vndBanpumStatus #nmldate1').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
-     	 $('.vndBanpumStatus #nmldate2').datepicker({ dateFormat: 'yy-mm-dd', onSelect: showDays });
- */     </script>
+       </script>
 </body>
 </html>
