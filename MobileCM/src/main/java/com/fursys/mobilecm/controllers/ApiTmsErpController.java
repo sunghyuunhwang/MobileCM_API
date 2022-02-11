@@ -66,6 +66,7 @@ import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.UserInfoResponse;
 import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
 import com.fursys.mobilecm.vo.tmserp.TMSERPAllMigyeolRepo;
+import com.fursys.mobilecm.vo.tmserp.TMSERPComcd;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPStimemberInfo;
@@ -2196,7 +2197,7 @@ public class ApiTmsErpController {
 				params.put("k_sti_cd", etc.getK_sti_cd());
 				params.put("fdt", fdt);
 				params.put("tdt", tdt);
-				stiDueInfo = tmserpScheduling.selectStiDueInfo(params);
+				stiDueInfo = tmserpScheduling.selectStiDueInfo(params);				
 				return gson.toJson(stiDueInfo);				
 			} else {
 				throw new Exception();
@@ -2217,7 +2218,7 @@ public class ApiTmsErpController {
 			) throws Exception {
 		
 		HashMap<String,Object> params = new HashMap<String, Object>();
-		ArrayList<TMSERPSticurrentDuedateInfo> comCdList = null;
+		ArrayList<TMSERPComcd> comCdList = null;
 		
 		try {
 			if (user != null) {

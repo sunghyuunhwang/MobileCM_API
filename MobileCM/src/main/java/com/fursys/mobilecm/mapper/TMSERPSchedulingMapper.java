@@ -20,6 +20,7 @@ import com.fursys.mobilecm.vo.tmserp.TMSERPVndBanpum;
 import com.fursys.mobilecm.vo.DataResult;
 import com.fursys.mobilecm.vo.tms.TmsViaPoints;
 import com.fursys.mobilecm.vo.tmserp.TMSERPCenterList;
+import com.fursys.mobilecm.vo.tmserp.TMSERPComcd;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectInfo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPFile;
@@ -101,7 +102,7 @@ public interface TMSERPSchedulingMapper {
 	public int insertStimemberInfo(HashMap<String,Object> params);
 	public int deleteStimemberInfo(HashMap<String,Object> params);
 	public ArrayList<TMSERPSticurrentDuedateInfo> selectStiDueInfo(HashMap<String,Object> params);
-	public ArrayList<TMSERPSticurrentDuedateInfo> selectComcdList(HashMap<String,Object> params);
+	public ArrayList<TMSERPComcd> selectComcdList(HashMap<String,Object> params);
 	public int updateOpinion(HashMap<String,Object> params);
 	public ArrayList<TMSERPStiPerformInfo> selectStiPerformInfo(HashMap<String,Object> params);
 	public int insertFile(HashMap<String, Object> params);

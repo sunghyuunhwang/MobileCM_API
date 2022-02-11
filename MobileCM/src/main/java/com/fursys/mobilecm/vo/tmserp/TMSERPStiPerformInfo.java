@@ -16,7 +16,7 @@ public class TMSERPStiPerformInfo{
 	public String sti_nm;
 	public Integer total_happycall_cnt;
 	public Integer total_happycall_score;
-	public Integer happycall_average;
+	public double happycall_average;
 	public Integer total_sigong_cnt;
 	public Integer inconsistent_cnt;
 	public Integer inconsistent_average;
