@@ -1881,7 +1881,7 @@ function stiResultStatus() {//시공팀별실적현황가져오기
     success: function(list){
           $.each(list, function(idx, response) {
              var stiRStts_2 = "<ul class='ulLftlst _inDpthClr _grn _data'>";
-                 stiRStts_2 += "<li class='w100px _inDCr _cdata' data-stinm='"+response.sti_nm+"'>"+response.sti_nm+"<input type='hidden' value='"+response.sti_cd+"' class='_sti_cd'/></li>";
+                 stiRStts_2 += "<li class='w150px _inDCr _cdata' data-stinm='"+response.sti_nm+"'>"+response.sti_nm+"<input type='hidden' value='"+response.sti_cd+"' class='_sti_cd'/></li>";
                  stiRStts_2 += "<li class='w80px tAlgnCntr _inDCr'>"+response.sti_qtycapa+"</li>";
                  stiRStts_2 += "<li class='w120px _inDCr'><span class='numTxt'></span><input type='text' name='' value='"+response.sti_amtcapa+"' class='innmbr nmCmma _orm_amt'></li>";
                  stiRStts_2 += "<li class='w80px tAlgnCntr _inDCr'>"+response.current_dueday+"</li>";
