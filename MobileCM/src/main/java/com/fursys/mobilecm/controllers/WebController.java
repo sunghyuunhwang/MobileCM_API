@@ -167,4 +167,9 @@ public class WebController {
 		return "stimember";
     	
     }
+    @GetMapping("/stiResultStatus")
+    public String stiResultStatus(@AuthenticationPrincipal User user) {
+		return "stiResultStatus";
+    	
+    }
 }

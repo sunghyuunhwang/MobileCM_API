@@ -2151,7 +2151,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getStiDuedayInformation")
 	@RequestMapping(value="/getStiDuedayInformation",method=RequestMethod.GET)
 	public String getStiDuedayInformation(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "fdt", required = true, example = "20220101")
 			@RequestParam(name = "fdt", required = true) String fdt,
 			@ApiParam(value = "tdt", required = true, example = "20220120")
@@ -2162,17 +2162,16 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPSticurrentDuedateInfo> stiDueInfo = null;
 		
 		try {
-			//if (user != null) {
-				//UserEtc etc = getUserEtc(user);
-				//params.put("k_sti_cd", etc.getK_sti_cd());
-				params.put("k_sti_cd", "YA601");
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);
+				params.put("k_sti_cd", etc.getK_sti_cd());
 				params.put("fdt", fdt);
 				params.put("tdt", tdt);
 				stiDueInfo = tmserpScheduling.selectStiDueInfo(params);
 				return gson.toJson(stiDueInfo);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
@@ -2210,7 +2209,7 @@ public class ApiTmsErpController {
 	@GetMapping("/getStiPerformInformation")
 	@RequestMapping(value="/getStiPerformInformation",method=RequestMethod.GET)
 	public String getStiPerformInformation(
-			//@AuthenticationPrincipal User user,
+			@AuthenticationPrincipal User user,
 			@ApiParam(value = "fdt", required = true, example = "20220101")
 			@RequestParam(name = "fdt", required = true) String fdt,
 			@ApiParam(value = "tdt", required = true, example = "20220120")
@@ -2221,19 +2220,17 @@ public class ApiTmsErpController {
 		ArrayList<TMSERPStiPerformInfo> stiDueInfo1 = null;
 		
 		try {
-			//if (user != null) {
-			//	UserEtc etc = getUserEtc(user);	
-				//params.put("k_sti_cd", etc.getK_sti_cd());
-				//params.put("com_scd", etc.getCom_scd());
-				params.put("k_sti_cd", "YA601");
-				params.put("com_scd", "C16YA");
+			if (user != null) {
+				UserEtc etc = getUserEtc(user);	
+				params.put("k_sti_cd", etc.getK_sti_cd());
+				params.put("com_scd", etc.getCom_scd());
 				params.put("fdt", fdt);
 				params.put("tdt", tdt);
 				stiDueInfo1 = tmserpScheduling.selectStiPerformInfo(params);
 				return gson.toJson(stiDueInfo1);				
-			//} else {
-			//	throw new Exception();
-			//}			
+			} else {
+				throw new Exception();
+			}			
 		} catch(Exception e) {
 			throw new Exception();
 		}
