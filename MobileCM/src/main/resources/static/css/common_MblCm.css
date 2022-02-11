@@ -29,6 +29,8 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
    .dfBx_x._inSbPgBx{height: calc(100% - 112px);box-sizing: border-box;}
       .dfBx_x._inSbPgBx._lftPd{padding: 0px 0px 0px 20px;}
       .dfBx_x._inSbPgBx._rghtPd{padding: 0px 20px;}
+         .dfBx_x._inSbPgBx.w50p._lftPd{padding: 0px 10px 0px 20px;}
+         .dfBx_x._inSbPgBx.w50p._rghtPd{padding: 0px 20px 0px 10px;}
       .dfBx_x._inSbPgBx > .inSrchFtBx{height: 100%;padding: 0;}
       ._inSbPgBx._rghtPd > .hHrfBx.nonAslt{padding: 10px;background-color: #f5f5f5;}
          ._inSbPgBx._rghtPd > .hHrfBx._top.nonAslt{margin: 0;border-radius: 8px 8px 0 0;}
@@ -49,12 +51,15 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .fltLft{float: left;}
 /*넓이*/
 .w100p{width: 100%;}
+.w50p{width: 50%;}
 
 .w45px{width: 45px;}
 .w60px{width: 60px;}
 .w78px{width: 78px;}
 .w80px{width: 80px;}
+.w85px{width: 85px;}
 .w90px{width: 90px;}
+.w95px{width: 95px;}
 .w100px{width: 100px;}
 .w110px{width: 110px;}
 .w120px{width: 120px;}

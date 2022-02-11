@@ -1824,6 +1824,90 @@ function getStiMemberInfo() {//시공팀원정보현황조회
 
 
 }
+
+function stiResultStatus() {//시공팀별실적현황가져오기
+	let fdt = $('#nmldate1').val();
+	let tdt = $('#nmldate2').val();
+	$('#stiResultStatus_1').find('.ulLftlst._data').remove();
+	$('#stiResultStatus_2').find('.ulLftlst._data').remove();
+	$('.alrtPop').addClass('opn');
+	$('#lodingPop').addClass('on');
+    $.ajax({
+       url: "/v1/api/tmserp/getStiPerformInformation",
+       type: "GET",
+       cache: false,
+       dataType: "json",
+       data: {
+          fdt:fdt,
+          tdt:tdt
+       },
+       success: function(list){
+            $.each(list, function(idx, response) {
+               var stiRStts_1 = "<ul class='ulLftlst _data'>";
+                   stiRStts_1 += "<li class='w150px _cdata' data-stinm='"+response.sti_nm+"'>"+response.sti_nm+"<input type='hidden' value='"+response.sti_cd+"' class='_sti_cd'/></li>";
+                   stiRStts_1 += "<li class='w120px'><span class='numTxt'></span><input type='text' name='' value='"+response.orm_amt+"' class='innmbr nmCmma _orm_amt'></li>";
+                   stiRStts_1 += "<li class='w120px'><span class='numTxt'></span><input type='text' name='' value='"+response.constcst_sum+"' class='innmbr nmCmma _constcst_sum'></li>";
+                   stiRStts_1 += "<li class='w85px tAlgnCntr _happycall_average'>"+response.happycall_average+"</li>";
+                   stiRStts_1 += "<li class='w110px tAlgnCntr'>"+response.sigonghaja_average+"%("+response.sigonghaja_cnt+"건)</li>";
+                   stiRStts_1 += "<li class='w110px tAlgnCntr'>"+response.inconsistent_average+"%("+response.total_sigong_cnt+"건)</li>";
+                   stiRStts_1 += "<li class='w95px tAlgnCntr'>"+response.service_cnt+"</li>";
+                   stiRStts_1 += "<li class='w90px tAlgnCntr'>"+response.claim_cnt+"</li>";
+                   stiRStts_1 += "</ul>";
+                $('#stiResultStatus_1').append(stiRStts_1);
+            });
+              ulLftlst();
+               cmma();//콤마
+               innmbr();//인풋값 스팬으로 넘기기
+
+       },
+       complete:function(){
+			$('.alrtPop').removeClass('opn');
+	        $('#lodingPop').removeClass('on');
+	    },
+       error: function (request, status, error){
+            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            alert('데이터를 불러올수 없습니다.');
+       }
+   });
+   $.ajax({
+    url: "/v1/api/tmserp/getStiDuedayInformation",
+    type: "GET",
+    cache: false,
+    dataType: "json",
+    data: {
+        fdt:fdt,
+        tdt:tdt
+    },
+    success: function(list){
+          $.each(list, function(idx, response) {
+             var stiRStts_2 = "<ul class='ulLftlst _inDpthClr _grn _data'>";
+                 stiRStts_2 += "<li class='w150px _inDCr _cdata' data-stinm='"+response.sti_nm+"'>"+response.sti_nm+"<input type='hidden' value='"+response.sti_cd+"' class='_sti_cd'/></li>";
+                 stiRStts_2 += "<li class='w80px tAlgnCntr _inDCr'>"+response.sti_qtycapa+"</li>";
+                 stiRStts_2 += "<li class='w120px _inDCr'><span class='numTxt'></span><input type='text' name='' value='"+response.sti_amtcapa+"' class='innmbr nmCmma _orm_amt'></li>";
+                 stiRStts_2 += "<li class='w80px tAlgnCntr _inDCr'>"+response.current_dueday+"</li>";
+                 stiRStts_2 += "<li class='w110px'><span class='numTxt'></span><input type='text' name='' value='"+response.sti_currentamt+"' class='innmbr nmCmma _orm_amt'></li>";
+                 stiRStts_2 += "<li class='w110px'><span class='numTxt'></span><input type='text' name='' value='"+response.avg_amt+"' class='innmbr nmCmma _orm_amt'></li>";
+                 stiRStts_2 += "<li class='w95px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+response.sum_currentqty+"' class='innmbr nmCmma _orm_amt'></li>";
+                 stiRStts_2 += "<li class='w85px tAlgnCntr'><span class='numTxt'></span><input type='text' name='' value='"+response.avg_cnt+"' class='innmbr nmCmma _orm_amt'></li>";
+                 stiRStts_2 += "<li class='w85px tAlgnCntr'>"+response.max_dueday+"</li>";
+                 stiRStts_2 += "<li class='w85px tAlgnRght'>"+response.avg_dueday+"</li>";
+                 stiRStts_2 += "</ul>";
+              $('#stiResultStatus_2').append(stiRStts_2);
+          });
+             ulLftlst();
+             valundefined();
+             cmma();//콤마
+             innmbr();//인풋값 스팬으로 넘기기
+
+    },
+    error: function (request, status, error){
+          console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+          alert('데이터를 불러올수 없습니다.');
+    }
+   });
+}
+
+      
 /*$(document).ready(function(){
      if($('.loginBx').length < 1){
           assgnCll();//총건수 불러오기

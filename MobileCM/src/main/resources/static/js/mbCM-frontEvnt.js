@@ -30,6 +30,15 @@ function inInfoDlwh(){//dfLnUl
           }
      });
 }
+function valundefined(){//dfLnUl
+     $('input').each(function() {
+          var un = $(this).val();
+          if(un == 'undefined'){
+             $(this).val('-');
+          }
+
+     });
+}
 function dfLnUl(){//dfLnUl
      $(document).on("click",".dfLnUl li",function(){
           var dfLnUl = $(this);
@@ -748,8 +757,8 @@ function stiMmbrMdfPop() {//정보수정-원정보
           stm_hp.val(mmbr_stm_hp);
           com_pos.text(mmbr_com_pos);
           com_pos.attr("data-value", com_pos_cd);
-          //com_pos.data("value",com_pos_cd);        
-          //alert("ddddc : " + $(".stiMmbrMdfPop").find("._com_pos").data("value"));  
+          //com_pos.data("value",com_pos_cd);
+          //alert("ddddc : " + $(".stiMmbrMdfPop").find("._com_pos").data("value"));
           stm_zip.val(mmbr_stm_zip);
           car_no.val(mmbr_car_no);
           stm_jdt.val(mmbr_stm_jdt);
