@@ -58,6 +58,7 @@ public interface ScheduleMainListMapper {
 	public ArrayList<ERPReReserveInfo> selectSigongReReserveInfo(HashMap<String,Object> params);
 	public ArrayList<ERPReReserveInfo> selectAsReReserveInfo(HashMap<String,Object> params);
 	public ERPGubbunInfo selectGubbunYnInfo(HashMap<String,Object> params);
+	public ArrayList<ERPConstructionItemResultPage> selectSigongItemNormalResultPage(HashMap<String,Object> params);
 	public ArrayList<ERPConstructionItemResultPage> selectSigongItemResultPage(HashMap<String,Object> params); 
 	public int sigongBanpumAgtRequestInsert(HashMap<String,Object> params);
 	public DataResult getNowTime();

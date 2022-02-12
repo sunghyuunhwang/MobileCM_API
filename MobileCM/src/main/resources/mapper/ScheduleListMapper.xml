@@ -1068,7 +1068,94 @@
 	ORDER BY COM_TONSEC
 ]]>
 </select> 
- 
+  
+<select id="selectSigongItemNormalResultPage" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPConstructionItemResultPage">         
+<![CDATA[ 
+    SELECT *
+      FROM (
+	SELECT 
+			'정상시공' AS GUBUN_NM 								
+		   ,ISNULL(A.SET_CD, '') AS SET_CD										
+		   ,ISNULL(A.COL_SCD, '') AS COL_SCD											
+		   ,A.ITM_CD AS ITM_CD										
+		   ,(SELECT ISNULL(AA.ITM_NM, '') FROM TT_ITMMST AA WITH (NOLOCK) WHERE 1=1 AND A.ITM_CD = AA.ITM_CD AND A.COL_CD = AA.COL_CD) AS ITM_NM	/* 단품명 */
+		   ,A.COL_CD AS COL_CD
+		   ,A.PLD_EQTY	AS PLD_EQTY
+		   ,ISNULL(A.COM_RDSEC, '')	AS COM_RDSEC
+		   ,A.PLM_NO AS PLM_NO		
+		   ,ISNULL(A.COM_PLDSEC, '') AS COM_PLDSEC								
+		   ,A.ORD_SSEQ AS ORD_SSEQ
+		   ,A.ORD_ISEQ	AS ORD_ISEQ								
+		   ,ISNULL(C.ORM_GGUBUN, '') AS ORM_GGUBUN		,						
+		   '' AS TRS_SEC_2
+	  FROM TC_PLANDTL A WITH (NOLOCK)
+	  JOIN TC_PLANMST B WITH (NOLOCK) ON 1=1
+     				   AND A.PLM_NO = B.PLM_NO
+      JOIN TO_ORDMAS C WITH (NOLOCK) ON 1=1
+      				  AND B.ORM_NO = C.ORM_NO
+	 WHERE 1=1
+   	   AND A.PLM_NO = #{plm_no}
+   	   AND A.COM_PLDSEC IN ('C090')
+   	   AND 'A' = #{gubun}
+		
+	UNION ALL
+
+	SELECT 
+			'매장경유/반품회수' AS GUBUN_NM 					
+		   ,ISNULL(A.SET_CD, '') AS SET_CD										
+		   ,ISNULL(A.COL_SCD, '') AS COL_SCD											
+		   ,A.ITM_CD AS ITM_CD										
+		   ,(SELECT ISNULL(AA.ITM_NM, '') FROM TT_ITMMST AA WITH (NOLOCK) WHERE 1=1 AND A.ITM_CD = AA.ITM_CD AND A.COL_CD = AA.COL_CD) AS ITM_NM	/* 단품명 */
+		   ,A.COL_CD AS COL_CD
+		   ,A.PLD_EQTY	AS PLD_EQTY
+		   ,ISNULL(A.COM_RDSEC, '')	AS COM_RDSEC
+		   ,A.PLM_NO AS PLM_NO		
+		   ,ISNULL(A.COM_PLDSEC, '') AS COM_PLDSEC								
+		   ,A.ORD_SSEQ AS ORD_SSEQ
+		   ,A.ORD_ISEQ	AS ORD_ISEQ								
+		   ,ISNULL(C.ORM_GGUBUN, '') AS ORM_GGUBUN		,						
+		   '' AS TRS_SEC_2
+	  FROM TC_PLANDTL A WITH (NOLOCK)
+	  JOIN TC_PLANMST B WITH (NOLOCK) ON 1=1
+     				   AND A.PLM_NO = B.PLM_NO
+      JOIN TO_ORDMAS C WITH (NOLOCK) ON 1=1
+      				  AND B.ORM_NO = C.ORM_NO
+	 WHERE 1=1
+ 	   AND A.PLM_NO = #{plm_no}
+	   AND A.COM_PLDSEC IN ('C092','C096','C095')
+	   AND 'B' = #{gubun}
+	   
+	UNION ALL
+
+	SELECT 
+			'분해설치/폐기장' AS GUBUN_NM 					
+		   ,ISNULL(A.SET_CD, '') AS SET_CD										
+		   ,ISNULL(A.COL_SCD, '') AS COL_SCD											
+		   ,A.ITM_CD AS ITM_CD										
+		   ,(SELECT CC.TRS_SNM FROM TC_TRSEC CC WITH (NOLOCK) WHERE 1=1 AND A.trs_sec_2 = CC.TRS_SEC) + '/' + (SELECT TRI_INM FROM TC_TRINF AA WITH (NOLOCK) WHERE 1=1 AND AA.TRS_SEC = A.trs_sec_2 AND AA.TRI_ICD = A.ITM_CD) AS ITM_NM	/* 단품명 */
+		   ,A.COL_CD AS COL_CD
+		   ,A.PLD_EQTY	AS PLD_EQTY
+		   ,ISNULL(A.COM_RDSEC, '')	AS COM_RDSEC
+		   ,A.PLM_NO AS PLM_NO		
+		   ,ISNULL(A.COM_PLDSEC, '') AS COM_PLDSEC								
+		   ,A.ORD_SSEQ AS ORD_SSEQ
+		   ,A.ORD_ISEQ	AS ORD_ISEQ								
+		   ,ISNULL(C.ORM_GGUBUN, '') AS ORM_GGUBUN		,						
+		   '' AS TRS_SEC_2
+	  FROM TC_PLANDTL A WITH (NOLOCK)
+	  JOIN TC_PLANMST B WITH (NOLOCK) ON 1=1
+     				   AND A.PLM_NO = B.PLM_NO
+      JOIN TO_ORDMAS C WITH (NOLOCK) ON 1=1
+      				  AND B.ORM_NO = C.ORM_NO
+	 WHERE 1=1
+	   AND A.PLM_NO = #{plm_no}
+       AND A.COM_PLDSEC IN ('C094','C09A')
+	   AND 'C' = #{gubun}
+	   ) A
+	 ORDER BY A.SET_CD, A.COL_SCD, A.ITM_CD
+]]>
+</select>
+
 <select id="selectSigongItemResultPage" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPConstructionItemResultPage">         
 <![CDATA[ 
     SELECT *
@@ -1155,7 +1242,6 @@
 	 ORDER BY A.ITM_CD
 ]]>
 </select>
-
     
 <insert id="sigongBanpumAgtRequestInsert" parameterType="HashMap">
 <![CDATA[ 

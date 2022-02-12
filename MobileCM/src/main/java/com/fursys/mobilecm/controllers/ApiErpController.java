@@ -4352,8 +4352,13 @@ public class ApiErpController {
         params.put("plm_no",plm_no);
         params.put("gubun",gubun);
         
-        ArrayList<ERPConstructionItemResultPage> allItems = sCheduleMainListMapper.selectSigongItemResultPage(params);
-		
+        ArrayList<ERPConstructionItemResultPage> allItems;
+        if ("A".equals(gubun)) {
+        	allItems = sCheduleMainListMapper.selectSigongItemNormalResultPage(params);
+        } else {
+        	allItems = sCheduleMainListMapper.selectSigongItemResultPage(params);	
+        }
+        		
 		return gson.toJson(allItems);
 	}    
 
