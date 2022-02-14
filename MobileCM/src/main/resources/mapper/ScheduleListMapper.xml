@@ -2918,7 +2918,7 @@ INSERT INTO TC_PLANDTL
            ,NULL
            ,LEFT((SELECT TCS.STI_NM 
                FROM TC_STINF TCS WITH (NOLOCK) 
-              WHERE TCS.STI_CD = #{org_sti_cd} 
+              WHERE TCS.STI_CD = #{org_sti_cd_get} 
                 AND TCS.COM_SCD = #{org_com_scd} ) + ' 팀, 원시공일 : '+ #{org_rem_dt} + ' ' + ISNULL((SELECT TCP.MOB_REMARK 
                       																			   FROM TC_PLANMST TCP WITH (NOLOCK) 
                     																			  WHERE TCP.PLM_NO = #{plm_no} ), ''), 50)
