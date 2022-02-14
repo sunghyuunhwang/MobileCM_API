@@ -6094,11 +6094,13 @@ public class ApiErpController {
 	        String org_sti_cd = "";
 	        String org_orm_no = "";
 	        String org_plm_cdt = "";
+	        String org_sti_cd_get = "";
 	        
 	        org_com_agsec = dataResult.getData1();
 	        org_com_brand = dataResult.getData2();
 	        org_com_scd = dataResult.getData3();
 	        org_sti_cd = dataResult.getData4(); 
+	        org_sti_cd_get = dataResult.getData4(); 
 	        org_orm_no = dataResult.getData5();
 	        org_plm_cdt = dataResult.getData6();
 	        
@@ -6217,6 +6219,7 @@ public class ApiErpController {
 			params.put("new_rem_seq", new_rem_seq);
 			params.put("plm_cdt2", org_plm_cdt);
 			params.put("req_rem_ftm", req_rem_ftm);
+			params.put("org_sti_cd_get", org_sti_cd_get);
 			
 	        //신규 tc_resmst insert
         	res = sCheduleMainListMapper.insertNewTcResmst(params);
