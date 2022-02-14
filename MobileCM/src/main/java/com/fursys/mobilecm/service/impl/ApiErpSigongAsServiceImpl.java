@@ -209,24 +209,15 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	    		
 	    	} else if("T60I02".equals(com_brand)) {	//데스커브랜드
 	    		senderkey = "9917d09567d2ebf1acc89662d7f9ff10db1488d7";
-				//txManager.rollback(status);
-				//response.setResultCode("200");				
-				//return response;
 	    		
 	    	} else if("T60I03".equals(com_brand)) {	//슬로우브랜드	    		
 	    		senderkey = "3ed320702f733d0b5a31e99a3ba931d9f2f9f960";
-				txManager.rollback(status);
-				response.setResultCode("200");				
-				return response;
 	    		
 	    	} else if("T60P01".equals(com_brand)) {	//시디즈브랜드	    		
 	    		senderkey = "6b94c758a1f689223024765ae6e2b0aede351955";
 	    		      		
 	    	} else if("T60P02".equals(com_brand)) {	//알로소브랜드	    		
 	    		senderkey = "a75beb8ed88e9fa60be384f82eeeafe2f3dccc9a";
-				txManager.rollback(status);
-				response.setResultCode("200");				
-				return response;
 
 	    	} else {
 	    		txManager.rollback(status);
