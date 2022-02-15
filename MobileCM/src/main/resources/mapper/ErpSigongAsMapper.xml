@@ -500,7 +500,7 @@
 
 ]]>
 </select> 
- 
+    
 <select id="selectActItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTrinfList">
 <![CDATA[
 	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, ISNULL(RATE_SUBJECT, '') RATE_SUBJECT, TRI_DRATE,
