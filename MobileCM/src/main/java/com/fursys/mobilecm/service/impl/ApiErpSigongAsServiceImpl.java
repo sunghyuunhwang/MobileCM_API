@@ -104,7 +104,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
     				send_text.append(DELIMETER + as_action_data);
     				send_text.append(DELIMETER + send_dt);
     				
-    	    		System.out.println("send_text ="  + send_text.toString());
+    	    		//System.out.println("send_text ="  + send_text.toString());
     	    		
     	    		allItems.get(i).setCommand(as_command);
     	    		allItems.get(i).setMessage(send_text.toString());

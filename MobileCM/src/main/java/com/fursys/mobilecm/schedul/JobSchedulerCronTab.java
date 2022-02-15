@@ -224,8 +224,8 @@ public class JobSchedulerCronTab {
 		return;					
 	}
 	
-	//@Scheduled(cron = "0 59 4 * * *")	// 매일 04:59분	
-	@Scheduled(cron = "0 45 12 * * *")	// 매일 04:59분
+	//@Scheduled(cron = "0 59 2 * * *")	// 매일 02:59분	
+	@Scheduled(cron = "0 45 10 * * *")	// 매일 02:59분
 	public void cronJobSch3() {
 
 		BaseResponse response = new BaseResponse();
@@ -259,8 +259,8 @@ public class JobSchedulerCronTab {
 					params = new HashMap<String, Object>();
 			        params.put("send_from_system", "MOBILECM");
 			        params.put("send_to_system", "MOBILECM");
-			        //params.put("com_scd", "ALL");	// ALL 이면 전체
-			        params.put("com_scd", "YA601");	// ALL 이면 전체
+			        params.put("com_scd", "ALL");	// ALL 이면 전체
+			        //params.put("com_scd", "YA601");	// ALL 이면 전체
 			        params.put("action", "SYSTEM_LOG_OUT");
 			        params.put("action_data", "");
 			        params.put("user_id", "SYSTEM");
