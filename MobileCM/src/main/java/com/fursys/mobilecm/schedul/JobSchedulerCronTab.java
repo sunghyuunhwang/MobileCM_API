@@ -224,6 +224,111 @@ public class JobSchedulerCronTab {
 		return;					
 	}
 	
+	//@Scheduled(cron = "0 59 4 * * *")	// 매일 04:59분	
+	@Scheduled(cron = "0 45 12 * * *")	// 매일 04:59분
+	public void cronJobSch3() {
+
+		BaseResponse response = new BaseResponse();
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		String job = "", seq_no = "", count = "";
+
+		try {
+			String isRun = environment.getProperty("scheduled.run");
+	
+			if (!"yes".equals(isRun)) return;
+	
+			job = environment.getProperty("scheduled.job3");
+	
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			Date now = new Date();
+			String strDate = sdf.format(now);			
+			
+			if ("erp_systemLogOutAll".equals(job)) {
+				try {
+					
+					System.out.println(String.format("Scheduled %s is run on %s", job, strDate));
+					
+					params = new HashMap<String, Object>();									
+					params.put("schedule_server", "MOBILECM");
+					params.put("schedule_id", job);
+					params.put("schedule_name", "전체로그아웃");
+					
+					response = apiErpSigongAsService.erp_startScheduleResult(params);					
+					seq_no = response.getResultCount();
+					
+					params = new HashMap<String, Object>();
+			        params.put("send_from_system", "MOBILECM");
+			        params.put("send_to_system", "MOBILECM");
+			        //params.put("com_scd", "ALL");	// ALL 이면 전체
+			        params.put("com_scd", "YA601");	// ALL 이면 전체
+			        params.put("action", "SYSTEM_LOG_OUT");
+			        params.put("action_data", "");
+			        params.put("user_id", "SYSTEM");
+					
+			        response = apiErpSigongAsService.erp_Fcm_SendCommand(params);			
+					if (!"200".equals(response.getResultCode())) {
+						params = new HashMap<String, Object>();									
+						params.put("schedule_server", "MOBILECM");
+						params.put("schedule_id", job);
+						params.put("schedule_name", "전체로그아웃");
+						params.put("result", "실패");
+						params.put("remark", String.format("resultcode=%s, resultMessage=%s", response.getResultCode(), response.getResultMessage()));					
+									
+						response = apiErpSigongAsService.erp_startScheduleResult(params);
+						
+		        		return ;
+		        	}
+					
+					count = response.getResultCount();
+					params = new HashMap<String, Object>();
+					params.put("seq_no", seq_no);
+					params.put("result", "성공");
+					params.put("remark", String.format("Send[%s]", count));					
+					response = apiErpSigongAsService.erp_finishScheduleResult(params);
+					
+				} catch (Exception e) {
+					System.out.println(e.toString());			
+					response.setResultCode("5001");
+					response.setResultMessage(e.toString());
+					
+					if ("".equals(seq_no)) {
+						params = new HashMap<String, Object>();									
+						params.put("schedule_server", "MOBILECM");
+						params.put("schedule_id", job);
+						params.put("schedule_name", "전체로그아웃");
+						params.put("result", "실패");
+						params.put("remark", e.toString());
+						response = apiErpSigongAsService.erp_startScheduleResult(params);
+					} else {
+						params = new HashMap<String, Object>();
+						params.put("seq_no", seq_no);
+						params.put("result", "실패");
+						params.put("remark", e.toString());
+						response = apiErpSigongAsService.erp_finishScheduleResult(params);
+					}
+					
+					return;
+				}			
+				response.setResultCode("200");			
+			}
+
+		} catch(Exception e) {
+			System.out.println(e.toString());
+			
+			params = new HashMap<String, Object>();									
+			params.put("schedule_server", "MOBILECM");
+			params.put("schedule_id", job);
+			params.put("schedule_name", "전체로그아웃");
+			params.put("result", "실패");
+			params.put("remark", e.toString());					
+						
+			response = apiErpSigongAsService.erp_startScheduleResult(params);
+			
+		}
+				
+		return;					
+	}
+	
 	//@Scheduled(cron = "*/10 * * * * *")	
 	public void cronJobSch99() {
 				

@@ -499,16 +499,16 @@
 	   AND COM_SSEC =  #{com_ssec}
 
 ]]>
-</select>
- 
+</select> 
+
 <select id="selectActItemList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTrinfList">
 <![CDATA[
 	SELECT TRS_SEC, TRI_ICD, TRI_INM, TRI_TYPE, ISNULL(RATE_SUBJECT, '') RATE_SUBJECT, TRI_DRATE,
 	       CASE TRI_TYPE WHEN  'C84001' THEN 
 	       (CASE RATE_SUBJECT WHEN 'C85001' THEN CASE (SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
+	                                             ELSE ROUND((SELECT ISNULL(SUM(IOP_SALCST_REC*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100, -1, 1) END
 	                          WHEN 'C85002' THEN CASE (SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) WHEN -8888 THEN -9999
-	                                             ELSE (SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100 END
+	                                             ELSE ROUND((SELECT ISNULL(SUM(IOP_MNFCST*ORD_QTY), -8888) FROM TO_ORDDET WITH(NOLOCK) WHERE ORM_NO = #{orm_no}) * TRI_DRATE/100, -1, 1) END
 	                          ELSE '0'END )-- 
 	                          WHEN 'C84002' THEN TRI_FAMT -- 금액
 	                          ELSE 0
@@ -533,7 +533,7 @@
 	 		
 ]]>
 </select>  
-    
+     
 <select id="selectActItemList_" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPTrinfList">
 <![CDATA[
  
@@ -2459,6 +2459,15 @@
 ]]>
 </insert> 
 
+
+<select id="selectPhoneIDAll" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPushMessage">
+<![CDATA[
+	SELECT STI_CD AS sti_cd, PHONE_ID AS token
+	FROM TC_STINF TCS WITH (NOLOCK)
+	WHERE TCS.PHONE_ID IS NOT NULL
+	  AND TCS.STI_RANK = 'Y'  				
+]]>
+</select>
 
 <select id="selectPhoneID" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPPushMessage">
 <![CDATA[

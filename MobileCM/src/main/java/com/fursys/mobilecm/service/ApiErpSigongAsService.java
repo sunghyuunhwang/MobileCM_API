@@ -16,7 +16,7 @@ import com.fursys.mobilecm.vo.mobile.response.SigongReportResponse;
 
 public interface ApiErpSigongAsService {
 
-	
+	public BaseResponse erp_Fcm_SendCommand(HashMap<String, Object> param);	
 	public ArrayList<ERPTrinfList> erp_selectActItemList(HashMap<String, Object> param);
 	public ArrayList<ERPAddActList> erp_addActList(HashMap<String, Object> param);
 	public BaseResponse erp_happyCallKakao(HashMap<String, Object> param);	

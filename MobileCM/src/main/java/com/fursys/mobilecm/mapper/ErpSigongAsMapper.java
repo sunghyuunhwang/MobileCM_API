@@ -88,6 +88,7 @@ public interface ErpSigongAsMapper {
 	public DataResult selectSigongWorkTimeCheck(HashMap<String,Object> params);
 	public int insertSigongWallFixAcc(HashMap<String,Object> params);
 	public int insertSigongWallFix(HashMap<String,Object> params);
+	public ArrayList<ERPPushMessage> selectPhoneIDAll(HashMap<String,Object> params);
 	public ArrayList<ERPPushMessage> selectPhoneID(HashMap<String,Object> params);
 	public int deleteUsedPhoneID(HashMap<String,Object> params);
 	public DataResult selectNotifyGetDate(HashMap<String, Object> param);

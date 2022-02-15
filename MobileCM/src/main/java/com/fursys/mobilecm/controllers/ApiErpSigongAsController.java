@@ -69,6 +69,38 @@ public class ApiErpSigongAsController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	
+	@ApiOperation(value = "erp_FcmSendCommand", notes = "FCM Command")
+	@GetMapping("/erp_FcmSendCommand")
+	@RequestMapping(value="/erp_FcmSendCommand",method=RequestMethod.POST)
+	public String erp_FcmSendCommand (
+			@ApiParam(value = "SEND_FROM_SYSTEM", required=true, example = "MOBILECM")
+			@RequestParam(name="send_from_system", required=true) String as_send_from_system,
+			@ApiParam(value = "SEND_TO_SYSTEM", required=true, example = "MOBILECM")
+			@RequestParam(name="send_to_system", required=true) String as_send_to_system,
+			@ApiParam(value = "COM_SCD", required=true, example = "YA601")
+			@RequestParam(name="com_scd", required=true) String as_com_scd,
+			@ApiParam(value = "ACTION", required=true, example = "SYSTEM_LOG_OUT")
+			@RequestParam(name="action", required=true) String as_action,
+			@ApiParam(value = "DATA", required=false, example = "")
+			@RequestParam(name="data", required=false) String as_action_data,
+			@ApiParam(value = "USER_ID", required=true, example = "SYSTEM")
+			@RequestParam(name="user_id", required=true) String as_user_id
+		) { 	
+        
+		BaseResponse response = new BaseResponse();
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("send_from_system", as_send_from_system);
+        params.put("send_to_system", as_send_to_system);
+        params.put("com_scd", as_com_scd);	// ALL 이면 전체
+        params.put("action", as_action);
+        params.put("action_data", as_action_data);
+        params.put("user_id", as_user_id);
+    
+		response = apiErpSigongAsService.erp_Fcm_SendCommand(params);
+
+		return gson.toJson(response);
+		
+	}
 	
 	@ApiOperation(value = "erp_selectOrderItemLoadingIssueList", notes = "상차이슈 리스트")
 	@GetMapping("/erp_selectOrderItemLoadingIssueList")  

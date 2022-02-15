@@ -54,6 +54,86 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
 	@Autowired private PlatformTransactionManager txManager;
 	Gson gson = new Gson();
 
+	@Override
+	public BaseResponse erp_Fcm_SendCommand(HashMap<String, Object> param) {
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		BaseResponse response = new BaseResponse();
+		DataResult dataResult = new DataResult();
+		HashMap<String, Object> params;
+		ArrayList<ERPPushMessage> allItems;
+		int res = 1;
+		int send = 0;
+		
+		try {
+			
+			String DELIMETER = "";
+
+			String as_command = "MobileCM.COMMAND";
+			String as_send_from_system = (String) param.get("send_from_system");
+			String as_send_to_system = (String) param.get("send_to_system");
+			String as_com_scd = (String) param.get("com_scd");
+			String as_action = (String) param.get("action");
+			String as_action_data = (String) param.get("action_data");
+			String as_user_id = (String) param.get("user_id");
+			String send_dt = "";
+			StringBuffer send_text = new StringBuffer();
+			int noti_seqno = 0;
+
+			params = new HashMap<String, Object>();
+			params.put("com_scd", as_com_scd);
+	        
+			dataResult = erpsigongasMapper.selectNotifyGetDate(params);
+			if (dataResult != null) {
+				send_dt = dataResult.getData1();
+			}
+			
+			if ("ALL".equals(as_com_scd)) {
+				//allItems = erpsigongasMapper.selectPhoneIDAll(params);
+				allItems = erpsigongasMapper.selectPhoneID(params);				
+			} else {
+				allItems = erpsigongasMapper.selectPhoneID(params);
+			}
+			
+			if (allItems != null) {
+    			for(int i=0; i<allItems.size(); i++) {
+    				send++;
+    				send_text = new StringBuffer();
+    				send_text.append(as_user_id);
+    				send_text.append(DELIMETER + allItems.get(i).getSti_cd());
+    				send_text.append(DELIMETER + as_action);
+    				send_text.append(DELIMETER + as_action_data);
+    				send_text.append(DELIMETER + send_dt);
+    				
+    	    		System.out.println("send_text ="  + send_text.toString());
+    	    		
+    	    		allItems.get(i).setCommand(as_command);
+    	    		allItems.get(i).setMessage(send_text.toString());
+    	    		
+    				FcmMessage.Send(allItems.get(i));
+    	    		
+    			}
+    		} else {
+    			txManager.rollback(status);
+				response.setResultCode("5001");
+				response.setResultMessage("전송 대상자가 없습니다.");
+				return response;
+    		}
+			
+		} catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return response;
+		}
+
+		response.setResultCount(String.format("%d", send));
+		txManager.commit(status);		
+		response.setResultCode("200");		
+		return response;
+
+	}	
+	
 	@Override		
 	public ArrayList<ERPTrinfList> erp_selectActItemList(HashMap<String, Object> param) {
 		ArrayList<ERPTrinfList> allitems;
@@ -744,7 +824,7 @@ public class ApiErpSigongAsServiceImpl implements ApiErpSigongAsService {
     				send_text.append(DELIMETER + as_message);
     				send_text.append(DELIMETER + send_dt);
     				
-    	    		System.out.println("send_text ="  + send_text.toString());
+    	    		//System.out.println("send_text ="  + send_text.toString());
     	    		
     	    		allItems.get(i).setCommand(as_command);
     	    		allItems.get(i).setMessage(send_text.toString());
