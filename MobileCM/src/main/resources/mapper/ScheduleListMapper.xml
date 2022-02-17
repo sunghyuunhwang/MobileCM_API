@@ -1404,7 +1404,7 @@
 <update id="updateStiReqTimeSend" parameterType="HashMap">
 <![CDATA[
 	UPDATE TC_RESMST
-	SET ARRIVALTM_SENDYN = 'Y'
+	SET ARRIVALTM_SENDYN = 'Y', ARRIVALTM_SEND_DATE = GETDATE()
 		FROM TC_RESMST A, (
 							SELECT a.data REM_DT,
 								   b.data REM_SEQ 
