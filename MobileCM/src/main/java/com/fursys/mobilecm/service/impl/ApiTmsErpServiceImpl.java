@@ -464,7 +464,7 @@ public class ApiTmsErpServiceImpl  implements ApiTmsErpService {
 			params.put("k_sti_cd", as_k_sti_cd);
 			params.put("rem_dt", as_rem_dt);
 			ArrayList<TMSERPOrderList> arErpOrderList = tmserpScheduling.selectOrderListGeocoding(params);
-			System.out.println("ERP 배송지수:" + arErpOrderList.size());
+			//System.out.println("ERP 배송지수:" + arErpOrderList.size());
 						
 			StringBuffer rem_dt_arr = new StringBuffer();
 			StringBuffer rem_seq_arr = new StringBuffer();
@@ -477,33 +477,37 @@ public class ApiTmsErpServiceImpl  implements ApiTmsErpService {
             	            	
             	if (!"200".equals(geocoding.getResultCode())) {
             		if ("Bad Request".equals(geocoding.getResultMessage())) {
-            			System.out.println("신주소로 다시 요청:" + arErpOrderList.get(i).getAddress());
+            			//System.out.println("신주소로 다시 요청:" + arErpOrderList.get(i).getAddress());
             			geocoding = gson.fromJson(mApiTmsController.fullTextGeocoding(as_appKey, TMapInfo.addressFlag_OLD, arErpOrderList.get(i).getAddress()), TmsGeocodingCoordinateInfoResponse.class);
             			if (!"200".equals(geocoding.getResultCode())) {
-            				txManager.rollback(status);
-            				System.out.println(geocoding.getResultMessage());        			
-    	        			response.setResultCode("5001");
-    	        			response.setResultMessage(geocoding.getResultMessage());
-    	        			return response;
+            				//txManager.rollback(status);
+            				//System.out.println(geocoding.getResultMessage());        			
+    	        			//response.setResultCode("5001");
+    	        			//response.setResultMessage(geocoding.getResultMessage());
+    	        			//return response;
+    	        			arErpOrderList.get(i).setLongitude("-");	
+    	        			arErpOrderList.get(i).setLatitude("-");
             			} else {
             				if (geocoding.getCoordinateInfo().getTotalCount() > 0) {        			
         	        			arErpOrderList.get(i).setLongitude(geocoding.getCoordinateInfo().getCoordinate().get(0).getLon());	
         	        			arErpOrderList.get(i).setLatitude(geocoding.getCoordinateInfo().getCoordinate().get(0).getLat());
-        	        			System.out.println("Order new lon=" + arErpOrderList.get(i).getLongitude() +", lat=" + arErpOrderList.get(i).getLatitude());
+        	        			//System.out.println("Order new lon=" + arErpOrderList.get(i).getLongitude() +", lat=" + arErpOrderList.get(i).getLatitude());
         	        		}
             			}
             		} else {
-            			txManager.rollback(status);
-	        			System.out.println(geocoding.getResultMessage());        			
-	        			response.setResultCode("5001");
-	        			response.setResultMessage(geocoding.getResultMessage());
-	        			return response;
+            			//txManager.rollback(status);
+	        			//System.out.println(geocoding.getResultMessage());        			
+	        			//response.setResultCode("5001");
+	        			//response.setResultMessage(geocoding.getResultMessage());
+	        			//return response;
+	        			arErpOrderList.get(i).setLongitude("-");	
+	        			arErpOrderList.get(i).setLatitude("-");
             		}
             	} else {            	
 	        		if (geocoding.getCoordinateInfo().getTotalCount() > 0) {        			
 	        			arErpOrderList.get(i).setLongitude(geocoding.getCoordinateInfo().getCoordinate().get(0).getNewLon());	
 	        			arErpOrderList.get(i).setLatitude(geocoding.getCoordinateInfo().getCoordinate().get(0).getNewLat());
-	        			System.out.println("Order lon=" + arErpOrderList.get(i).getLongitude() +", lat=" + arErpOrderList.get(i).getLatitude());
+	        			//System.out.println("Order lon=" + arErpOrderList.get(i).getLongitude() +", lat=" + arErpOrderList.get(i).getLatitude());
 	        		}
             	}
             	
@@ -522,11 +526,10 @@ public class ApiTmsErpServiceImpl  implements ApiTmsErpService {
 			            
             response.setResultCount(""+res);
             response.setResultMessage(res + "개의 배송지 위치가 등록되었습니다.");
-            System.out.println("ERP 배송지 Geocoding수:" + res);
+            //System.out.println("ERP 배송지 Geocoding수:" + res);
             
 		} catch (Exception e) {
 			txManager.rollback(status);
-			System.out.println(e.toString());
 			response.setResultCode("5001");
 			response.setResultMessage(e.toString());
 			return response;

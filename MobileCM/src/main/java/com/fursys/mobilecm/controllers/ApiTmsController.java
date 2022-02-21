@@ -219,13 +219,20 @@ public class ApiTmsController {
 		
 		try {
 			
-			System.out.println("fullAddr=" + fullAddr);
+			//System.out.println("fullAddr=" + fullAddr);
 			String baseUrl = "https://apis.openapi.sk.com/tmap/geo/fullAddrGeo?addressFlag=%s&coordType=WGS84GEO&version=1&format=json&fullAddr=%s&appKey=%s";
 			//baseUrl = String.format(baseUrl, "F01", URLEncoder.encode(fullAddr, "UTF-8"), TMapInfo.appKey); //구주소(지번)
 			//baseUrl = String.format(baseUrl, "F02",  URLEncoder.encode(fullAddr, "UTF-8"), TMapInfo.appKey); //신주소(도로명)
+			
+			//주소가 비어있을 경우 에러 처리
+			if(fullAddr == null || fullAddr.equals("")) { 
+				mTmsGeocodingCoordinateInfoResponse.setResultCode("5001"); 
+				return gson.toJson(mTmsGeocodingCoordinateInfoResponse); 
+			}
+			 
 			baseUrl = String.format(baseUrl, addressFlag,  URLEncoder.encode(fullAddr, "UTF-8"), appKey);
 			
-			System.out.println(baseUrl);
+			//System.out.println(baseUrl);
 			RestService.get(baseUrl, new RestServiceCallBack() {
 				@Override
 				public void onResult(String result) {
@@ -244,7 +251,7 @@ public class ApiTmsController {
 				}
 			});
 			
-			System.out.println(mTmsGeocodingCoordinateInfoResponse.toString());
+			//System.out.println(mTmsGeocodingCoordinateInfoResponse.toString());
 			
 			if (mTmsGeocodingCoordinateInfoResponse == null || !"200".equals(mTmsGeocodingCoordinateInfoResponse.getResultCode())) {
 				mTmsGeocodingCoordinateInfoResponse.setResultCode("5001");
@@ -256,7 +263,6 @@ public class ApiTmsController {
 			mTmsGeocodingCoordinateInfoResponse.setResultMessage(e.toString());
 			return gson.toJson(e.toString());
 		}
-		
 		return gson.toJson(mTmsGeocodingCoordinateInfoResponse);
 	}
 
