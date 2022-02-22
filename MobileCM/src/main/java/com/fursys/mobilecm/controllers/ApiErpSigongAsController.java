@@ -103,7 +103,7 @@ public class ApiErpSigongAsController {
         
         params.put("manual_std", manual_std);
         
-        search_tag_arr = "재일정,재일정관리";
+        //search_tag_arr = "재일정,재일정관리";
         
         params.put("search_tag_arr", search_tag_arr);
         params.put("user_id", user_id);
