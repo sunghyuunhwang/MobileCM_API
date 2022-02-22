@@ -6035,6 +6035,17 @@ public class ApiErpController {
 	        	return gson.toJson(response);
 			}
 			
+			if ("Y".equals(inconsistent_yn)) {
+				res = sCheduleMainListMapper.updateSigongAsInconsistent_yn(params);
+				
+				if (res < 1) {    				
+		        	txManager.rollback(status);
+		        	response.setResultCode("5001");
+		        	response.setResultMessage("updateSigongAsInconsistent_yn 오류");
+		        	return gson.toJson(response);
+				}
+			}
+			
 			
 			
 			

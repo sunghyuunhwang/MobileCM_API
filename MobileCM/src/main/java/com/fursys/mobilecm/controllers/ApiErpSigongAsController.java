@@ -31,6 +31,7 @@ import com.fursys.mobilecm.vo.erp.ERPBusinessTrip;
 import com.fursys.mobilecm.vo.erp.ERPBusinessTripDetail;
 import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPLoadingIssue;
+import com.fursys.mobilecm.vo.erp.ERPManualSearchList;
 import com.fursys.mobilecm.vo.erp.ERPMobileContent;
 import com.fursys.mobilecm.vo.erp.ERPMobileContentList;
 import com.fursys.mobilecm.vo.erp.ERPOrderItemLoadingIssueList;
@@ -68,7 +69,50 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	
+	@ApiOperation(value = "erp_selectManualTagList", notes = "태그검색 리스트")
+	@GetMapping("/erp_selectManualTagList")  
+	public String erp_selectManualTagList(
+			@ApiParam(value = "USER_ID", required=true, example = "SYSTEM")
+			@RequestParam(name="user_id", required=true) String user_id,
+			@ApiParam(value = "SEARCH_TAG", required=false, example = "재일정")
+			@RequestParam(name="search_tag", required=false) String search_tag			
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        params.put("user_id", user_id);
+        if (search_tag == null) {
+        	search_tag = "";
+        } 
+        params.put("search_tag", "%" + search_tag + "%");
+
+        ArrayList<ERPManualSearchList> allItems = erpsigongasMapper.selectManualTagList(params);
+        
+		return gson.toJson(allItems);
+	}
+		
+	@ApiOperation(value = "erp_selectManualSearchList", notes = "태그검색 리스트")
+	@GetMapping("/erp_selectManualSearchList")  
+	public String erp_selectManualSearchList(
+			@ApiParam(value = "MANUAL_STD", required=true, example = "C90001")
+			@RequestParam(name="manual_std", required=true) String manual_std,
+			@ApiParam(value = "SEARCH_TAG_ARR", required=true, example = "재일정,재일정관리")
+			@RequestParam(name="search_tag_arr", required=true) String search_tag_arr,
+			@ApiParam(value = "USER_ID", required=true, example = "SYSTEM")
+			@RequestParam(name="user_id", required=true) String user_id
+		) { 
+		HashMap<String,Object> params = new HashMap<String, Object>();
+        
+        params.put("manual_std", manual_std);
+        
+        search_tag_arr = "재일정,재일정관리";
+        
+        params.put("search_tag_arr", search_tag_arr);
+        params.put("user_id", user_id);
+        
+        ArrayList<ERPManualSearchList> allItems = erpsigongasMapper.selectManualSearchList(params);
+        
+		return gson.toJson(allItems);
+	}
+		
 	@ApiOperation(value = "erp_FcmSendCommand", notes = "FCM Command")
 	@GetMapping("/erp_FcmSendCommand")
 	@RequestMapping(value="/erp_FcmSendCommand",method=RequestMethod.POST)

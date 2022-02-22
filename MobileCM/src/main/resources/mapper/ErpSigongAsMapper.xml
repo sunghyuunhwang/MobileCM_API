@@ -3,6 +3,34 @@
 <mapper namespace="com.fursys.mobilecm.mapper.ErpSigongAsMapper">
 
 
+ <select id="selectManualTagList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPManualSearchList">
+<![CDATA[
+
+	SELECT 0 MANUAL_ID, '' MANUAL_STD, '' MANUAL_NAME, '' MANUAL_CONTENT, B.SEARCH_TAG, B.USR_CD, CONVERT(VARCHAR(16), B.SYS_DT, 120) SYS_DT
+	  FROM TC_MOBILECMMANUAL_DTL B WITH(NOLOCK)
+	 WHERE B.SEARCH_TAG LIKE #{search_tag}
+	     	  
+]]>
+</select>
+  
+ <select id="selectManualSearchList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPManualSearchList">
+<![CDATA[
+
+	SELECT A.MANUAL_ID, A.MANUAL_STD, A.MANUAL_NAME, A.MANUAL_CONTENT, B.SEARCH_TAG_ARR AS SEARCH_TAG, A.USR_CD, CONVERT(VARCHAR(16), A.SYS_DT, 120) SYS_DT
+	  FROM TC_MOBILECMMANUAL_MST A WITH(NOLOCK), (SELECT a.MANUAL_ID, STUFF((SELECT ',' + '#' + SEARCH_TAG
+	                                                                           FROM TC_MOBILECMMANUAL_DTL
+	                                                                          WHERE MANUAL_ID = a.MANUAL_ID
+	                                                                          FOR XML PATH('')
+		                                                                     ), 1, 1, '') AS SEARCH_TAG_ARR
+	                                                FROM TC_MOBILECMMANUAL_DTL AS A, dbo.fnSplit(#{search_tag_arr}) B
+	                                               WHERE A.SEARCH_TAG = B.data
+	                                               GROUP BY a.MANUAL_ID ) B
+	 WHERE A.MANUAL_ID = B.MANUAL_ID
+	   AND A.MANUAL_STD = #{manual_std}
+	 ORDER BY B.SEARCH_TAG_ARR, MANUAL_NAME
+	 	     	  
+]]>
+</select>
  
 <select id="selectOrderItemLoadingIssueList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPOrderItemLoadingIssueList">
 <![CDATA[

@@ -2520,6 +2520,17 @@ INSERT INTO TA_RPTREQ
 ]]>
 </select>
 
+
+<update id="updateSigongAsInconsistent_yn" parameterType="HashMap">
+<![CDATA[
+	UPDATE TC_PLANMST
+	   SET INCONSISTENT_YN = 'Y'
+	 WHERE PLM_NO = #{plm_no}
+
+]]>
+</update>
+
+
 <update id="updateSigongAsConfirmInform" parameterType="HashMap">
 <![CDATA[
 	UPDATE TC_PLANDTL SET COM_UNPSEC = 'C23A', SYS_DT = GETDATE()

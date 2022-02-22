@@ -17,6 +17,7 @@ import com.fursys.mobilecm.vo.erp.ERPDeliveryItemList;
 import com.fursys.mobilecm.vo.erp.ERPFcmNotify;
 import com.fursys.mobilecm.vo.erp.ERPHappyCall;
 import com.fursys.mobilecm.vo.erp.ERPLoadingIssue;
+import com.fursys.mobilecm.vo.erp.ERPManualSearchList;
 import com.fursys.mobilecm.vo.erp.ERPMobileContent;
 import com.fursys.mobilecm.vo.erp.ERPMobileContentList;
 import com.fursys.mobilecm.vo.erp.ERPOrderItemLoadingIssueList;
@@ -30,7 +31,9 @@ import com.fursys.mobilecm.vo.erp.ERPTtComcd;
 @Mapper
 public interface ErpSigongAsMapper {
 	
-
+	
+	public ArrayList<ERPManualSearchList> selectManualTagList(HashMap<String,Object> params);
+	public ArrayList<ERPManualSearchList> selectManualSearchList(HashMap<String,Object> params);
 	public ArrayList<ERPOrderItemLoadingIssueList> selectOrderItemLoadingIssueList(HashMap<String,Object> params);
 	public int deleteLoadingIssueInfo(HashMap<String,Object> params);
 	public ERPLoadingIssue selectLoadingIssue(HashMap<String,Object> params);

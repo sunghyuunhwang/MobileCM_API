@@ -106,6 +106,7 @@ public interface ScheduleMainListMapper {
 	public DataResult selectAsReqBasicInfomation(HashMap<String,Object> params);
 	public DataResult selectAsReqBasicInfomation2(HashMap<String,Object> params);
 	public DataResult selectExcuteAsTeamInfo(HashMap<String,Object> params);
+	public int updateSigongAsInconsistent_yn(HashMap<String,Object> params);
 	public int insertSigongMigeulAsRequest(HashMap<String,Object> params);
 	public DataResult executePraFaRptno(HashMap<String,Object> params);
 	public DataResult selectExcuteAsReqBasicInfo(HashMap<String,Object> params); 
