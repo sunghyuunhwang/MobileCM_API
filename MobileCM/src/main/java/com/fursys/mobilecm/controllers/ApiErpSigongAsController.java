@@ -69,15 +69,41 @@ public class ApiErpSigongAsController {
 	boolean	isDeBug = false;	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	@ApiOperation(value = "erp_selectAttachFileList", notes = "첨부파일리스트 조회")
+	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "첨부파일리스트 조회 실패 !!") })
+	@GetMapping("/erp_selectAttachFileList")
+	@RequestMapping(value = "/erp_selectAttachFileList", method = RequestMethod.GET)
+	public String erp_selectAttachFileList(
+			@ApiParam(value = "ATTCH_FILE_ID", required=true, example = "CMMANUAL1")
+			@RequestParam(name="attch_file_id", required=true) String attch_file_id,
+			@ApiParam(value = "ATTCH_DIV_CD", required=true, example = "A")
+			@RequestParam(name="attch_div_cd", required=true) String attch_div_cd,
+			@ApiParam(value = "USER_ID", required=true, example = "SYSTEM")
+			@RequestParam(name="user_id", required=true) String user_id
+			) {
+
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("attch_file_id", attch_file_id);
+        params.put("attch_div_cd", attch_div_cd);
+
+        ArrayList<ERPAttachFileList> allItems = erpsigongasMapper.selectSigongAttachFileList(params);
+        
+		return gson.toJson(allItems);
+		
+	}
+	
 	@ApiOperation(value = "erp_selectManualTagList", notes = "태그검색 리스트")
 	@GetMapping("/erp_selectManualTagList")  
 	public String erp_selectManualTagList(
-			@ApiParam(value = "USER_ID", required=true, example = "SYSTEM")
-			@RequestParam(name="user_id", required=true) String user_id,
+			@ApiParam(value = "MANUAL_STD", required=true, example = "C90001")
+			@RequestParam(name="manual_std", required=true) String manual_std,
 			@ApiParam(value = "SEARCH_TAG", required=false, example = "재일정")
-			@RequestParam(name="search_tag", required=false) String search_tag			
+			@RequestParam(name="search_tag", required=false) String search_tag,
+			@ApiParam(value = "USER_ID", required=true, example = "SYSTEM")
+			@RequestParam(name="user_id", required=true) String user_id
 		) { 
 		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("manual_std", manual_std);
         params.put("user_id", user_id);
         if (search_tag == null) {
         	search_tag = "";
@@ -102,9 +128,6 @@ public class ApiErpSigongAsController {
 		HashMap<String,Object> params = new HashMap<String, Object>();
         
         params.put("manual_std", manual_std);
-        
-        //search_tag_arr = "재일정,재일정관리";
-        
         params.put("search_tag_arr", search_tag_arr);
         params.put("user_id", user_id);
         
