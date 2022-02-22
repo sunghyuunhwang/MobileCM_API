@@ -411,7 +411,7 @@
        AND A.PLD_FQTY <> 0
 	   AND C.ITM_CD = A.ITM_CD
        AND C.COL_CD = A.COL_CD
- 	   AND C.COM_CMP = 'T01'+ LEFT(A.PLM_NO, 1 ) 
+ 	   AND C.COM_CMP = 'T01'+ LEFT(#{plm_no}, 1 ) 
      GROUP BY A.SET_CD, A.COL_SCD, A.PLM_NO, A.ITM_CD, A.COL_CD
 	 ORDER BY A.SET_CD, A.COL_SCD
 ]]>
