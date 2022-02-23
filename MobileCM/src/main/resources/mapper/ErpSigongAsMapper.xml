@@ -6,13 +6,15 @@
  <select id="selectManualTagList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPManualSearchList">
 <![CDATA[
 
-	SELECT 0 MANUAL_ID, '' MANUAL_STD, '' MANUAL_NAME, '' MANUAL_CONTENT, B.SEARCH_TAG, B.USR_CD, CONVERT(VARCHAR(16), B.SYS_DT, 120) SYS_DT
-	  FROM TC_MOBILECMMANUAL_DTL B WITH(NOLOCK)
-	 WHERE B.SEARCH_TAG LIKE #{search_tag}
+	SELECT 0 MANUAL_ID, A.MANUAL_STD, '' MANUAL_NAME, '' MANUAL_CONTENT, B.SEARCH_TAG, B.USR_CD, CONVERT(VARCHAR(16), B.SYS_DT, 120) SYS_DT
+	  FROM TC_MOBILECMMANUAL_MST A WITH(NOLOCK), TC_MOBILECMMANUAL_DTL B WITH(NOLOCK)
+	 WHERE A.MANUAL_ID = B.MANUAL_ID
+	   AND A.MANUAL_STD = #{manual_std}
+	   AND B.SEARCH_TAG LIKE #{search_tag}  
 	     	  
 ]]>
 </select>
-  
+   
  <select id="selectManualSearchList" parameterType="java.util.HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPManualSearchList">
 <![CDATA[
 
