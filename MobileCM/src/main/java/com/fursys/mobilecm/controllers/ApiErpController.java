@@ -107,6 +107,7 @@ import com.fursys.mobilecm.vo.erp.ERPConstructionMainPage;
 import com.fursys.mobilecm.vo.erp.ERPCooperationList;
 import com.fursys.mobilecm.vo.erp.ERPItemOrd;
 import com.fursys.mobilecm.vo.erp.ERPItemOrdSummary;
+import com.fursys.mobilecm.vo.erp.ERPLogisWorkerInfo;
 import com.fursys.mobilecm.vo.erp.ERPMigeulAverage;
 import com.fursys.mobilecm.vo.erp.ERPMigeulDetailList;
 import com.fursys.mobilecm.vo.erp.ERPOrdLdList;
@@ -6907,6 +6908,136 @@ public class ApiErpController {
 		
 	}	
 
+
+	@ApiOperation(value = "loaddingIssueSmsInsert", notes = "상차이슈발생 내용 문자 발송")
+	@GetMapping("/loaddingIssueSmsInsert")  
+	public String loaddingIssueSmsInsert (
+			@RequestParam(name="orm_no", required=true) String orm_no,
+			@RequestParam(name="orm_nm", required=true) String orm_nm,
+			@RequestParam(name="sti_nm", required=true) String sti_nm,
+			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			
+			@RequestParam(name="issue_text", required=true) String issue_text,
+			@RequestParam(name="worker_sec", required=true) String worker_sec,
+			@RequestParam(name="com_scd", required=true) String com_scd,
+			@RequestParam(name="com_agsec", required=true) String com_agsec,
+			@RequestParam(name="com_brand", required=true) String com_brand,
+			@RequestParam(name="itmcd_col", required=true) String itmcd_col
+			
+		) { 
+		
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
+		int res = 0;
+		AsResultResponse response = new AsResultResponse();
+		String res_msg = "";
+		DataResult dataResult = new DataResult(); 
+		
+		try {
+
+	    	JSONObject obj = new JSONObject();
+	    	JSONArray jArray = new JSONArray(); //배열이 필요할때
+	    	 
+	    	JSONObject api_token = new JSONObject();
+	    	JSONObject sendList = new JSONObject();	    	 
+	    	JSONObject sObject = new JSONObject();//배열 내에 들어갈 json
+	    	
+	    	String templateCode = "";
+	    	String senderkey = "";
+	    	String title = "";
+	    	String subject = "";
+	    	String from_no = "";
+	    	String message_type = "";
+	    	String message = "";
+	    	String logisworker_hp = "";
+	    	String com_scd_nm = "";
+	    	String com_agsec_nm = "";
+	    	String com_brand_nm = "";
+	    	
+	    	message = "TEST";	    	
+	    	title = "상차이슈발생";
+	    	subject = "상차이슈발생";
+	    	message_type = "TI4Z";
+	    	from_no = "02-3400-6439";
+	    	
+	    	sendList.put("authKey", "D62D413F25CD43B3BD06636F2B3F570ABFB5008BD727901E341F041448D22C3A6593D58D45C68E60171F7FB2B2C345459361A08D20298BAE6A3A1B74196A95C3");
+	    	
+			HashMap<String,Object> params = new HashMap<String, Object>();
+			params.put("worker_sec", worker_sec);		
+			params.put("com_scd",com_scd);
+	        params.put("com_agsec",com_agsec);	    	
+	        params.put("com_brand",com_brand);
+	    	
+	    	
+	    	ArrayList<ERPLogisWorkerInfo> allItems = sCheduleMainListMapper.selectLogisworkerInfo(params);
+	    	
+	    	
+	       	 for (int i = 0; i < allItems.size(); i++)//배열
+	       	 {
+		        	 
+	       		logisworker_hp = allItems.get(i).getLogisworker_hp();
+	       		com_scd_nm = allItems.get(i).getCom_scd_nm();
+	       		com_agsec_nm = allItems.get(i).getCom_agsec_nm();
+	       		com_brand_nm = allItems.get(i).getCom_brand_nm();
+	       				
+	       				
+	       		message = "상차이슈 발생 안내\r\n" +
+	       				  "요청자 : " + sti_nm +"\r\n"+
+	       				  "내용 : " + issue_text + "\r\n"+
+	       				  "회사정보 " + com_scd_nm +"/"+com_agsec_nm+"/"+com_brand_nm+"\r\n"+
+	       				  "이슈품목 " + itmcd_col ;
+
+		        sObject.put("sendDiv", "SMS" );
+		        sObject.put("title", title);
+		        sObject.put("subject", subject );		  
+		        sObject.put("message",message);
+		        sObject.put("fromNm", orm_nm );
+		        sObject.put("toNm", sti_nm );
+		        sObject.put("fromNo", from_no ); 
+		        sObject.put("toNo", logisworker_hp);
+		        sObject.put("companyCd", "T01B" );		        	 
+		        sObject.put("fstUsr", sti_cd );
+		        sObject.put("systemNm", "mobilecm" );
+		        sObject.put("sendType", "SMTP" );
+		        sObject.put("reserveDiv","I");
+		        sObject.put("reserveDt", "" );
+		        sObject.put("keyNo", orm_no);
+		        sObject.put("msgType", message_type );		        	 
+		        sObject.put("senderKey", "");
+		        sObject.put("templateCode", "" );
+		        sObject.put("bizTalkMessage", "" );
+		        sObject.put("comBrd", com_brand );
+		        jArray.add(sObject);
+		        
+	        	sendList.put("list" ,jArray);  
+	        	 
+	        	BaseResponse kakao_res = RestCall("https://msg-api.fursys.com/v1/api/message/SendMsg",sendList);	
+	        	if (!"200".equals(kakao_res.getResultCode())) {
+					txManager.rollback(status);
+					response.setResultCode("5001");
+					response.setResultMessage("알림톡전송결과 오류  [" + kakao_res.getResultMessage() + "]");
+					return gson.toJson(response);
+				}		        
+	       	 }        	 
+        	
+        			
+
+        	
+		}	
+		
+		catch (Exception e) {
+			txManager.rollback(status);
+			System.out.println(e.toString());
+			response.setResultCode("5001");
+			response.setResultMessage(e.toString());
+			return gson.toJson(response);
+		}				
+		
+		txManager.commit(status);
+		response.setResultCode("200");
+		System.out.println(response.toString());	
+		return gson.toJson(response);        
+        
+	}	
 	
 	
 	

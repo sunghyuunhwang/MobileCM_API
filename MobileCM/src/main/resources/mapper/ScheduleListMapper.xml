@@ -3137,4 +3137,24 @@ INSERT INTO TC_PLANDTL
 ]]>
 </select>
 
+
+<select id="selectLogisworkerInfo" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPLogisWorkerInfo">         
+<![CDATA[ 
+
+
+	SELECT
+		TCL.WORKER_HP AS LOGISWORKER_HP,
+		(SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = TCL.COM_SCD ) AS COM_SCD_NM,
+		(SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = TCL.COM_AGSEC ) AS COM_AGSEC_NM,
+		(SELECT TTC.CCD_NM FROM TT_COMCD TTC WITH (NOLOCK) WHERE TTC.CCD_CD = TCL.COM_BRAND ) AS COM_BRAND_NM
+	FROM TC_LOGISWORKER TCL WITH (NOLOCK)
+	WHERE TCL.WORKER_SEC = #{worker_sec}
+	    AND TCL.COM_SCD = #{com_scd}
+	    AND TCL.COM_AGSEC = #{com_agsec}
+	    AND TCL.COM_BRAND = #{com_brand}
+	    AND TCL.USE_YN = 'Y'
+
+]]>
+</select> 
+
 </mapper>

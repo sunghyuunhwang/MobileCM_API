@@ -15,6 +15,7 @@ import com.fursys.mobilecm.vo.erp.ERPSti;
 import com.fursys.mobilecm.vo.erp.ERPStiReqTimeSendList;
 import com.fursys.mobilecm.vo.erp.ERPStmInfo;
 import com.fursys.mobilecm.vo.erp.ERPGubbunInfo;
+import com.fursys.mobilecm.vo.erp.ERPLogisWorkerInfo;
 import com.fursys.mobilecm.vo.erp.ERPNetKmAllowance;
 import com.fursys.mobilecm.vo.erp.ERPPraNewRptNo;
 import com.fursys.mobilecm.vo.erp.ERPConstructionMainPage;
@@ -126,4 +127,6 @@ public interface ScheduleMainListMapper {
 	
 	public DataResult selectOriginalStiTeamGet(HashMap<String,Object> params);
 	public int insertNewTcResmst_org(HashMap<String,Object> params);	
+	
+	public ArrayList<ERPLogisWorkerInfo> selectLogisworkerInfo(HashMap<String,Object> params); 
 }
