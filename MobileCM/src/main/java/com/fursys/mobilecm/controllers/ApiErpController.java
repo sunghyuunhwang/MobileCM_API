@@ -6952,12 +6952,46 @@ public class ApiErpController {
 	    	String com_scd_nm = "";
 	    	String com_agsec_nm = "";
 	    	String com_brand_nm = "";
-	    	
-	    	message = "TEST";	    	
+	    	    	
 	    	title = "상차이슈발생";
 	    	subject = "상차이슈발생";
 	    	message_type = "TI4Z";
-	    	from_no = "02-3400-6439";
+	    	
+	    	if("T60F01".equals(com_brand)) {
+	    		from_no = "1588-1244";
+	    	}
+	    	
+	    	//일룸브랜드
+	    	if("T60I01".equals(com_brand)) {
+	    		from_no = "1577-5670";    		
+	    		
+	    	}	    	
+	    	
+	    	//데스커브랜드
+	    	if("T60I02".equals(com_brand)) {
+	    		from_no = "1588-1662";    		
+	    		
+	    	}	   
+	    	
+	    	//슬로우브랜드
+	    	if("T60I03".equals(com_brand)) {	    		
+	    		from_no = "1899-8588";
+	    	 		
+	    	}	    	
+	    	
+	    	//시디즈브랜드
+	    	if("T60P01".equals(com_brand)) {
+	    		
+	    		from_no = "1577-5674";    		
+	    	}	    	
+	    	
+	    	//알로소브랜드
+	    	if("T60P02".equals(com_brand)) {
+	    		
+	    		from_no = "1577-1641";
+	
+	    	}		    	
+
 	    	
 	    	sendList.put("authKey", "D62D413F25CD43B3BD06636F2B3F570ABFB5008BD727901E341F041448D22C3A6593D58D45C68E60171F7FB2B2C345459361A08D20298BAE6A3A1B74196A95C3");
 	    	
