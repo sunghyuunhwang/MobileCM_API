@@ -6912,17 +6912,17 @@ public class ApiErpController {
 	@ApiOperation(value = "loaddingIssueSmsInsert", notes = "상차이슈발생 내용 문자 발송")
 	@GetMapping("/loaddingIssueSmsInsert")  
 	public String loaddingIssueSmsInsert (
-			@RequestParam(name="orm_no", required=true) String orm_no,
-			@RequestParam(name="orm_nm", required=true) String orm_nm,
-			@RequestParam(name="sti_nm", required=true) String sti_nm,
-			@RequestParam(name="sti_cd", required=true) String sti_cd,
+			@RequestParam(name="orm_no", required=true) String orm_no,  //수주번호
+			@RequestParam(name="orm_nm", required=true) String orm_nm,  //수주건명
+			@RequestParam(name="sti_nm", required=true) String sti_nm,  //시공팀명
+			@RequestParam(name="sti_cd", required=true) String sti_cd,  //시공팀코드
 			
-			@RequestParam(name="issue_text", required=true) String issue_text,
-			@RequestParam(name="worker_sec", required=true) String worker_sec,
-			@RequestParam(name="com_scd", required=true) String com_scd,
-			@RequestParam(name="com_agsec", required=true) String com_agsec,
-			@RequestParam(name="com_brand", required=true) String com_brand,
-			@RequestParam(name="itmcd_col", required=true) String itmcd_col
+			@RequestParam(name="issue_text", required=true) String issue_text,  //이슈내용
+			@RequestParam(name="worker_sec", required=true) String worker_sec,  //시공건인 경우 C91001, AS건인경우 C91002 
+			@RequestParam(name="com_scd", required=true) String com_scd, //서비스센터
+			@RequestParam(name="com_agsec", required=true) String com_agsec, //회사코드 (C02로 시작함)
+			@RequestParam(name="com_brand", required=true) String com_brand, //브랜드코드 (T60으로 시작함
+			@RequestParam(name="itmcd_col", required=true) String itmcd_col //단품코드+"-"+단품색상
 			
 		) { 
 		
