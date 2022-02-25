@@ -6922,7 +6922,7 @@ public class ApiErpController {
 			@RequestParam(name="com_scd", required=true) String com_scd, //서비스센터
 			@RequestParam(name="com_agsec", required=true) String com_agsec, //회사코드 (C02로 시작함)
 			@RequestParam(name="com_brand", required=true) String com_brand, //브랜드코드 (T60으로 시작함
-			@RequestParam(name="itmcd_col", required=true) String itmcd_col //단품코드+"-"+단품색상
+			@RequestParam(name="itmcd_col", required=true) String itmcd_col //단품코드+"-"+단품색상 AAA-BB(2)
 			
 		) { 
 		
@@ -7012,13 +7012,12 @@ public class ApiErpController {
 	       		com_scd_nm = allItems.get(i).getCom_scd_nm();
 	       		com_agsec_nm = allItems.get(i).getCom_agsec_nm();
 	       		com_brand_nm = allItems.get(i).getCom_brand_nm();
-	       				
-	       				
+
 	       		message = "상차이슈 발생 안내\r\n" +
 	       				  "요청자 : " + sti_nm +"\r\n"+
 	       				  "내용 : " + issue_text + "\r\n"+
-	       				  "회사정보 " + com_scd_nm +"/"+com_agsec_nm+"/"+com_brand_nm+"\r\n"+
-	       				  "이슈품목 " + itmcd_col ;
+	       				  "회사정보 : " + com_scd_nm +"/"+com_agsec_nm+"/"+com_brand_nm+"\r\n"+
+	       				  "이슈품목 : " + itmcd_col ;	       			
 
 		        sObject.put("sendDiv", "SMS" );
 		        sObject.put("title", title);
@@ -7043,14 +7042,15 @@ public class ApiErpController {
 		        jArray.add(sObject);
 		        
 	        	sendList.put("list" ,jArray);  
-	        	 
+	        	 	        	
 	        	BaseResponse kakao_res = RestCall("https://msg-api.fursys.com/v1/api/message/SendMsg",sendList);	
 	        	if (!"200".equals(kakao_res.getResultCode())) {
 					txManager.rollback(status);
 					response.setResultCode("5001");
 					response.setResultMessage("알림톡전송결과 오류  [" + kakao_res.getResultMessage() + "]");
 					return gson.toJson(response);
-				}		        
+				}
+	        	
 	       	 }        	 
         	
         			

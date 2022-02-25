@@ -13,7 +13,10 @@ import lombok.ToString;
 @ToString
 public class ERPOrdLdList {
 	private String com_ssec;
+	private String com_brand;
+	private String com_agsec;
 	private String plm_no;
+	private String orm_no;
 	private String orm_nm;
 	private String michul_yn;
 	private int itm_qty;

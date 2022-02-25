@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fursys.mobilecm.mapper.LoadingOrmMapper">
-
+    
 <select id="getLoadingOrmList" parameterType="HashMap" resultType="com.fursys.mobilecm.vo.erp.ERPOrdLdList">         
 <![CDATA[ 
 	SELECT
 	'시공'   AS COM_SSEC,
+	A.COM_BRAND,
+	A.COM_AGSEC,
+	A.ORM_NO,
 	A.PLM_NO AS PLM_NO,
 	CASE ( SELECT TCR.REM_CSEC FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18C' ) WHEN 'R' THEN 
 	'[재일정]'+A.ORM_NM ELSE A.ORM_NM END AS ORM_NM,
@@ -43,6 +46,9 @@
 	
 	SELECT
 	'AS'     AS COM_SSEC,
+	A.COM_BRAND,
+	A.COM_AGSEC,
+	( SELECT TCR.ORM_NO FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) ORM_NO,
 	A.PLM_NO AS PLM_NO,
 	CASE ( SELECT TCR.REM_CSEC FROM TC_RESMST TCR WITH (NOLOCK) WHERE TCR.PLM_NO = A.PLM_NO AND TCR.COM_SSEC = 'C18A' ) WHEN 'R' THEN 
 	'[재일정]'+A.CTM_NM ELSE A.CTM_NM END AS ORM_NM,
