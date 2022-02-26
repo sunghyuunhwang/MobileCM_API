@@ -27,6 +27,8 @@ public class ERPItemOrd {
     private String loadingissue_std;
     private String loadingissue_std_nm;
     private String loadingissue_procstd;
+    private String delay_reason;
+    private String delay_qty;
+    private String delay_rmk;
   
-    
 }

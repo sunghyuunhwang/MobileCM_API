@@ -29,6 +29,8 @@ public class ERPLoadingIssue {
 	private String loadingissue_procstd;
 	private String loadingissue_procstd_nm;
 	private String loadingissue_procremark;
+	private String loadingissue_qty;
+	
 
 }
 

@@ -6535,9 +6535,10 @@ public class ApiErpController {
 			@RequestParam(name="seq_no", required=true) int seq_no,			
 			@RequestParam(name="loadingissue_std", required=true) String loadingissue_std,
 			@RequestParam(name="loadingissue_remark", required=true) String loadingissue_remark,
+			@RequestParam(name="loadingissue_qty", required=true) int loadingissue_qty,
 			@RequestParam(name="itm_cd", required=true) String itm_cd,
 			@RequestParam(name="col_cd", required=true) String col_cd,
-			@RequestParam(name="plm_no", required=true) String plm_no,
+			@RequestParam(name="plm_no", required=true) String plm_no,			
 			@RequestParam(name="sti_cd", required=true) String sti_cd
 		) { 
 		
@@ -6560,6 +6561,7 @@ public class ApiErpController {
 		        params.put("seq_no", seq_no);		        
 	        	params.put("loadingissue_std", loadingissue_std);
 		        params.put("loadingissue_remark", loadingissue_remark);
+		        params.put("loadingissue_qty", loadingissue_qty);
 		        params.put("sti_cd", sti_cd);
 		        
 		        res = lOADINGORMMapper.updateLoadingIssueInfo(params);	        
@@ -6585,6 +6587,7 @@ public class ApiErpController {
 		        params.put("orm_no", orm_no);
 		        params.put("loadingissue_std", loadingissue_std);
 		        params.put("loadingissue_remark", loadingissue_remark);
+		        params.put("loadingissue_qty", loadingissue_qty);
 		        params.put("itm_cd", itm_cd);
 		        params.put("col_cd", col_cd);
 		        params.put("sti_cd", sti_cd);

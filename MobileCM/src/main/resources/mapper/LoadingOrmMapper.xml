@@ -200,6 +200,7 @@
 		LOADINGISSUE_REMARK, 
 		LOADINGISSUE_PROCSTD, 
 		LOADINGISSUE_PROCREMARK, 
+		LOADINGISSUE_QTY,
 		FST_USR_CD, 
 		FST_SYS_DT, 
 		USR_CD, 
@@ -224,6 +225,7 @@
 		#{loadingissue_remark},
 		#{loadingissue_procstd},
 		#{loadingissue_procremark},
+		#{loadingissue_qty},
 		#{sti_cd},
 		GETDATE(),
 		#{sti_cd},
@@ -233,13 +235,14 @@
 
 ]]>
 </insert> 
-
+   
 <update id="updateLoadingIssueInfo" parameterType="HashMap">
 <![CDATA[
 
 	UPDATE TC_LOADINGISSUE
 	   SET LOADINGISSUE_STD = #{loadingissue_std},
 	       LOADINGISSUE_REMARK = #{loadingissue_remark},
+	       LOADINGISSUE_QTY = #{loadingissue_qty},
 	       SYS_DT = GETDATE(),
 	       USR_CD = #{sti_cd}
 	 WHERE REM_DT = #{rem_dt}
