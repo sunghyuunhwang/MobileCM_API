@@ -15,6 +15,7 @@ public class ERPOrderItemLoadingIssueList {
     private String orm_nm;
     private String loadingissue_std;
     private String loadingissue_std_nm;
+    private String loadingissue_qty;
     private String loadingissue_remark;
     private String loadingissue_procstd;
     private String loadingissue_procstd_nm;
