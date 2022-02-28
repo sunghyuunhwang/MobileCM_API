@@ -2863,8 +2863,6 @@ public class ApiErpController {
         params.put("plm_no", plm_no);
 		
 		ArrayList<ERPItemOrd> allItems = lOADINGORMDtlMapper.getLoadingOrmDtlList(params);
-		
-		System.out.println("allItems =" + allItems.get(0).getLoadingissue_std_nm());
 		   
 		return gson.toJson(allItems);
 	}	
