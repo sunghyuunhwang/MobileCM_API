@@ -87,7 +87,7 @@
 	<![CDATA[
 		UPDATE TC_RESMST
 		SET ARRIVAL_SEQ = B.ARRIVAL_SEQ
-		FROM TC_RESMST A WITH (NOLOCK), (
+		FROM TC_RESMST A, (
 							SELECT a.data REM_DT,
 								   b.data REM_SEQ,
 								   c.data ARRIVAL_SEQ 

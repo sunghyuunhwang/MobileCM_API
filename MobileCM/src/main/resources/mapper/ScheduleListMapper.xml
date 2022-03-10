@@ -1392,7 +1392,7 @@
 		FROM TC_RESMST A, (
 							SELECT ROW_NUMBER() OVER(ORDER BY ISNULL(A.REM_FTM, 'XXXXXX'), A.REM_SEQ) ARRIVAL_SEQ,
 							       A.REM_DT, A.REM_SEQ 
-							FROM TC_RESMST A
+							FROM TC_RESMST A WITH (NOLOCK)
 							WHERE A.REM_DT  = #{rem_dt}
 							AND A.STI_CD = #{sti_cd}
 							) B
