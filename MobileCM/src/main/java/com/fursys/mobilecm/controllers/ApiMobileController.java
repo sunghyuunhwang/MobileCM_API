@@ -233,7 +233,7 @@ public class ApiMobileController {
 	        	//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
 	        	res = erpsigongasMapper.deleteUsedPhoneID(params);
 	        	
-	        	if (res < 1){
+	        	if (res < 0){
 	        		txManager.rollback(status);
 	        		userInfoResponse.setResultCode("5001");
 	        		userInfoResponse.setResultMessage("PhoneId 변경에 실패하였습니다.(2)");

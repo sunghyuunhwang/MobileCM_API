@@ -1202,6 +1202,12 @@ public class ApiErpSigongAsController {
     		if (!db_phone_id.equals(phone_id)) {
     			//기존 테이블에 PhoneID가 없을수 있으므로, return check안함
     			res = erpsigongasMapper.deleteUsedPhoneID(params);
+            	if (res < 0){
+            		txManager.rollback(status);
+            		response.setResultCode("5001");
+            		response.setResultMessage("PhoneId 변경에 실패하였습니다.");
+            		return gson.toJson(response);
+            	}    			
     			res = erpsigongasMapper.updatePhoneID(params);
             	if (res < 1){
             		txManager.rollback(status);
