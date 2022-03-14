@@ -522,8 +522,17 @@ public class ApiTmsErpServiceImpl  implements ApiTmsErpService {
 			params.put("rem_seq_arr", rem_seq_arr.toString());
 			params.put("lat_arr", lat_arr.toString());
 			params.put("lon_arr", lon_arr.toString());
+			
 			int res = tmserpScheduling.updateOrderGeocoding(params);			
 			            
+			if(res < 1) {
+    			txManager.rollback(status);
+    			//System.out.println(geocoding.getResultMessage());        			
+    			response.setResultCode("5001");
+    			response.setResultMessage(geocoding.getResultMessage());
+    			return response;				
+			}
+
             response.setResultCount(""+res);
             response.setResultMessage(res + "개의 배송지 위치가 등록되었습니다.");
             //System.out.println("ERP 배송지 Geocoding수:" + res);
