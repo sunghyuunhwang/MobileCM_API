@@ -202,122 +202,152 @@
            .assgnLst li:nth-child(31n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl01 .fao > .crlclOn{background-color: #0B6BD6;}
            .crclLnds0::after{background-color: #0B6BD6;}
+           .crclLnds30::after{background-color: #0B6BD6;}
            .assgnLst li:nth-child(2) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(32n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl02 .fao > .crlclOn{background-color: #812DF4;}
            .crclLnds1::after{background-color: #812DF4;}
+           .crclLnds31::after{background-color: #812DF4;}
            .assgnLst li:nth-child(3) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(33n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl03 .fao > .crlclOn{background-color: #D62020;}
            .crclLnds2::after{background-color: #D62020;}
+           .crclLnds32::after{background-color: #D62020;}
            .assgnLst li:nth-child(4) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(34n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl04 .fao > .crlclOn{background-color: #399EA2;}
            .crclLnds3::after{background-color:#399EA2;}
+           .crclLnds33::after{background-color:#399EA2;}
            .assgnLst li:nth-child(5) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(35n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl05 .fao > .crlclOn{background-color: #81EF00;}
            .crclLnds4::after{background-color: #81EF00;}
+           .crclLnds34::after{background-color: #81EF00;}
            .assgnLst li:nth-child(6) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(36n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl06 .fao > .crlclOn{background-color: #FFA700;}
            .crclLnds5::after{background-color: #FFA700;}
+           .crclLnds35::after{background-color: #FFA700;}
            .assgnLst li:nth-child(7) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(37n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl07 .fao > .crlclOn{background-color: #E800A1;}
            .crclLnds6::after{background-color:#E800A1;}
+           .crclLnds36::after{background-color:#E800A1;}
            .assgnLst li:nth-child(8) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(38n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl08 .fao > .crlclOn{background-color: #83BDFF;}
            .crclLnds7::after{background-color: #83BDFF;}
+           .crclLnds37::after{background-color: #83BDFF;}
            .assgnLst li:nth-child(9) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(39n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl09 .fao > .crlclOn{background-color: #7B8452;}
            .crclLnds8::after{background-color: #7B8452;}
+           .crclLnds38::after{background-color: #7B8452;}
            .assgnLst li:nth-child(10) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(40n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl10 .fao > .crlclOn{background-color: #07E3E3;}
            .crclLnds9::after{background-color: #07E3E3;}
+           .crclLnds39::after{background-color: #07E3E3;}
            .assgnLst li:nth-child(11) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(41n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl11 .fao > .crlclOn{background-color: #A78F6C;}
            .crclLnds10::after{background-color: #A78F6C;}
+           .crclLnds40::after{background-color: #A78F6C;}
            .assgnLst li:nth-child(12) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(42n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl12 .fao > .crlclOn{background-color: #3A0089;}
            .crclLnds11::after{background-color: #3A0089;}
+           .crclLnds41::after{background-color: #3A0089;}
            .assgnLst li:nth-child(13) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(43n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl13 .fao > .crlclOn{background-color: #FFC3C3;}
            .crclLnds12::after{background-color: #FFC3C3;}
+           .crclLnds42::after{background-color: #FFC3C3;}
            .assgnLst li:nth-child(14) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(44n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl14 .fao > .crlclOn{background-color: #FFD800;}
            .crclLnds13::after{background-color: #FFD800;}
+           .crclLnds43::after{background-color: #FFD800;}
            .assgnLst li:nth-child(15) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(45n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl15 .fao > .crlclOn{background-color: #0009E5;}
            .crclLnds14::after{background-color: #0009E5;}
+           .crclLnds44::after{background-color: #0009E5;}           
            .assgnLst li:nth-child(16) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(46n) > .assgnB .fao > .crlclOn,
            .assgnSbInfBx._crcl16 .fao > .crlclOn{background-color: #005B5F;}
            .crclLnds15::after{background-color: #005B5F;}
+           .crclLnds45::after{background-color: #005B5F;}          
            .assgnLst li:nth-child(17) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(47n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl17 .fao > .crlclOn{background-color: #B2B8FF;}
            .crclLnds16::after{background-color: #B2B8FF;}
+           .crclLnds46::after{background-color: #B2B8FF;}            
            .assgnLst li:nth-child(18) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(48n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl18 .fao > .crlclOn{background-color: #FF7777;}
            .crclLnds17::after{background-color: #FF7777;}
+           .crclLnds47::after{background-color: #FF7777;}            
            .assgnLst li:nth-child(19) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(49n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl19 .fao > .crlclOn{background-color: #FFE4BC;}
            .crclLnds18::after{background-color: #FFE4BC;}
+           .crclLnds48::after{background-color: #FFE4BC;}           
            .assgnLst li:nth-child(20) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(50n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl20 .fao > .crlclOn{background-color: #004BB4;}
            .crclLnds19::after{background-color: #004BB4;}
+           .crclLnds49::after{background-color: #004BB4;}           
            .assgnLst li:nth-child(21) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(51n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl21 .fao > .crlclOn{background-color: #960D0D;}
            .crclLnds20::after{background-color: #960D0D;}
+           .crclLnds50::after{background-color: #960D0D;}           
            .assgnLst li:nth-child(22) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(52n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl22 .fao > .crlclOn{background-color: #009343;}
            .crclLnds21::after{background-color: #009343;}
+            .crclLnds51::after{background-color: #009343;}          
            .assgnLst li:nth-child(23) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(53n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl23 .fao > .crlclOn{background-color: #7698BE;}
            .crclLnds22::after{background-color: #7698BE;}
+           .crclLnds52::after{background-color: #7698BE;}           
            .assgnLst li:nth-child(24) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(54n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl24 .fao > .crlclOn{background-color: #A2A2A2;}
            .crclLnds23::after{background-color: #A2A2A2;}
+           .crclLnds53::after{background-color: #A2A2A2;}          
            .assgnLst li:nth-child(25) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(55n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl25 .fao > .crlclOn{background-color: #E8FFCC;}
            .crclLnds24::after{background-color: #E8FFCC;}
+           .crclLnds54::after{background-color: #E8FFCC;}           
            .assgnLst li:nth-child(26) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(56n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl26 .fao > .crlclOn{background-color: #568B71;}
            .crclLnds25::after{background-color: #568B71;}
+           .crclLnds55::after{background-color: #568B71;}           
            .assgnLst li:nth-child(27) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(57n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl27 .fao > .crlclOn{background-color: #4B4B4B;}
            .crclLnds26::after{background-color: #4B4B4B;}
+           .crclLnds56::after{background-color: #4B4B4B;}           
            .assgnLst li:nth-child(28) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(58n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl28 .fao > .crlclOn{background-color: #D3F0FF;}
            .crclLnds27::after{background-color: #D3F0FF;}
+           .crclLnds57::after{background-color: #D3F0FF;}           
            .assgnLst li:nth-child(29) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(59n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl29 .fao > .crlclOn{background-color: #674D26;}
            .crclLnds28::after{background-color: #674D26;}
+           .crclLnds58::after{background-color: #674D26;}           
            .assgnLst li:nth-child(30) > .assgnBx .fao > .crlclOn,
            .assgnLst li:nth-child(60n) > .assgnBx .fao > .crlclOn,
            .assgnSbInfBx._crcl30 .fao > .crlclOn{background-color: #CAA2FF;}
            .crclLnds29::after{background-color: #CAA2FF;}
+           .crclLnds59::after{background-color: #CAA2FF;}           
 
 
 .inSrchFtBx{position: relative;display: inline-block;float: left;width: 100%;height:calc(100% - 102px);}
@@ -329,6 +359,8 @@
 .hHrfBx._top{top: 0px;height:calc(50% - 10px);padding: 0 0 10px 0;margin: 0 0 10px 0; border-bottom: #ddd 1px dashed;}
 .hHrfBx._bttm{bottom:0px;height:50%;}
 .hHrfBx._hPr30,.hHrfBx._hPr30._bttm,.hHrfBx._hPr30._top{height:calc(100%/3);}
+.hHrfBx._hPr25,.hHrfBx._hPr25._bttm,.hHrfBx._hPr25._top{height:calc(100%/4);}
+.hHrfBx._hPr50,.hHrfBx._hPr50._bttm,.hHrfBx._hPr50._top{height:calc(100%/2);}
 .scrll{position: relative;display: inline-block;float: left;width: 100%;height:100%;overflow: auto;}
   .scrll._inTtl{height:calc(100% - 29px);box-sizing: border-box;}
   .scrll._x{overflow-x: auto;overflow-y:hidden;}
@@ -375,6 +407,7 @@
 .fileLst,.fileLst > li{display: inline-block;float: left;width: 100%;}
  .fileLst > li{padding: 0 10px;margin: 0 0 5px 0;border: #ddd 1px solid;border-radius: 3px;box-sizing: border-box;}
  .fileLst .icnDown {display: inline-block;float: left;width: 100%;padding: 8px 30px 8px 0px; box-sizing: border-box;background-position: right center;background-size: 15px;}
+ .fileLst .icnClose_Blck {display: inline-block;float: left;width: 100%;padding: 8px 30px 8px 0px; box-sizing: border-box;background-position: right center;background-size: 15px;}
 
 /*미결현황*/
 .migyeolReport{position: fixed;top: 0px;left: 0px;display: inline-block;float: left; width: 100%;height: 100%;}

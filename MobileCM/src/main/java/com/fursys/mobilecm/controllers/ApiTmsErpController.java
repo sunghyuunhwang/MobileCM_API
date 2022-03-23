@@ -37,6 +37,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fursys.mobilecm.config.TMapInfo;
+import com.fursys.mobilecm.lib.FileStore;
 import com.fursys.mobilecm.mapper.ErpCommMapper;
 import com.fursys.mobilecm.mapper.TMSERPSchedulingMapper;
 import com.fursys.mobilecm.mapper.UserMapper;
@@ -65,6 +67,7 @@ import com.fursys.mobilecm.vo.erp.ERPScheduleList;
 import com.fursys.mobilecm.vo.mobile.response.AsResultResponse;
 import com.fursys.mobilecm.vo.mobile.response.UserInfoResponse;
 import com.fursys.mobilecm.vo.tms.reponse.TmsGeocodingCoordinateInfoResponse;
+import com.fursys.mobilecm.vo.tmserp.DefectDetailForm;
 import com.fursys.mobilecm.vo.tmserp.TMSERPAllMigyeolRepo;
 import com.fursys.mobilecm.vo.tmserp.TMSERPComcd;
 import com.fursys.mobilecm.vo.tmserp.TMSERPDefectDetail;
@@ -104,6 +107,7 @@ public class ApiTmsErpController {
 	@Autowired private TMSERPSchedulingMapper tmserpScheduling;
 	@Autowired private ApiTmsController mApiTmsController;
 	@Autowired Environment environment; 
+	@Autowired private FileStore fileStore;
 	
 	@Autowired private PlatformTransactionManager txManager;
 	
@@ -1232,27 +1236,29 @@ public class ApiTmsErpController {
 	
 	@ApiOperation(value="/fileDelete", notes="tms첨부파일 삭제")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@PostMapping("/fileDelete")
+	@DeleteMapping("/fileDelete")
 	@RequestMapping(value="/fileDelete",method=RequestMethod.DELETE)
 	public void fileDelete(
-			//@AuthenticationPrincipal User user,
-			@ApiParam(value = "attch_file_snum", required = true, example = "1")
-			@RequestParam(name = "attch_file_snum", required = true) String attch_file_snum,
-			@ApiParam(value = "attch_file_id", required = true, example = "SC20220119251504")
-			@RequestParam(name = "attch_file_id", required = true) String attch_file_id
+			@AuthenticationPrincipal User user,
+			@ApiParam(value = "file_snum", required = true, example = "1")
+			@RequestParam(name = "file_snum", required = true) String file_snum,
+			@ApiParam(value = "file_id", required = true, example = "SC20220119251504")
+			@RequestParam(name = "file_id", required = true) String file_id
 			) throws Exception {
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
 		HashMap<String, Object> paramMap = new HashMap<String, Object>();
 		int res = 0;
 		try {
-			//if(user == null) {
-			//	throw new Exception();
-			//}
 			
-			paramMap.put("attch_file_id", attch_file_id);
-			paramMap.put("attch_file_snum", attch_file_snum);			
-			res = tmserpScheduling.deleteFile(paramMap);			
-			if (res < 0) {
+			if(user == null) {
+				throw new UsernameNotFoundException("login fail");
+			}
+			
+			paramMap.put("attch_file_id", file_id);
+			paramMap.put("attch_file_snum", file_snum);				
+			res = tmserpScheduling.deleteFile(paramMap);	
+			
+			if (res > 1) {
     			txManager.rollback(status);
         		return;					
 			}
@@ -1261,239 +1267,9 @@ public class ApiTmsErpController {
 			txManager.rollback(status);
     		return;				
 		}
+		
 		txManager.commit(status);
 		return;	
-	}	
-	
-	@ApiOperation(value="/diffFileUpload", notes="tms이의제기파일 업로드")
-	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@PostMapping("/diffFileUpload")
-	@RequestMapping(value="/diffFileUpload",method=RequestMethod.POST)
-	public void fileUpload(MultipartHttpServletRequest multiRequest,  
-			//@AuthenticationPrincipal User user,
-			@RequestParam(value="diff_file_id", required=false) String diff_file_id,
-			@RequestParam(value="rpt_no", required=true) String rpt_no,
-			@RequestParam(value="rpt_seq", required=true) String rpt_seq,
-			@RequestParam(value="bmt_item", required=true) String bmt_item,
-			@RequestParam(value="col_cd", required=true) String col_cd			
-			) throws Exception {
-		
-		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		int res = 0;
-		String user_id = "";
-		
-		try {
-			//if(user == null) {
-			//	throw new Exception();
-			//}
-			//user_id = user.getUsername();
-			user_id ="YA601";
-			fileUpload(multiRequest, diff_file_id, user_id);
-			params.put("user_id", user_id);
-			params.put("diff_file_id", diff_file_id);
-			params.put("rpt_no", rpt_no);
-			params.put("rpt_seq", rpt_seq);
-			params.put("bmt_item", bmt_item);
-			params.put("col_cd", col_cd);
-			res = tmserpScheduling.updateDiffFileId(params);
-			if(res < 0) {
-				txManager.rollback(status);
-				return;				
-			}
-		} catch (Exception e) {
-			txManager.rollback(status);
-			return;			
-		}
-		txManager.commit(status);
-		return;
-	}
-	
-	private void fileUpload(MultipartHttpServletRequest multiRequest, String attch_file_id, String user_id) {
-		
-		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		String attch_div_cd = "SCHEDUELING";
-		int res = 0;
-		
-		try {
-			
-			// 1. file id 채번
-			if(attch_file_id.equals("") || attch_file_id == null) {
-				params.put("attch_div_cd", attch_div_cd);	
-				attch_file_id = tmserpScheduling.getAttchFileId(params);
-				System.out.println("attch_file_id :" + attch_file_id);	
-			}
-			
-			if("".equals(attch_file_id)) {
-    			txManager.rollback(status);
-        		return;				
-			}
-			
-			// 2. file 저장
-			final Map<String, MultipartFile> files = multiRequest.getFileMap();					
-			if (files.size() > 0) {
-				System.out.println("file_size : " + files.size());
-				List list = new ArrayList();
-				String uploadBasePath =  environment.getProperty("file.upload.directory");
-				File saveFolder = new File(uploadBasePath);
-				// upload root folder create
-				if (!saveFolder.exists() || saveFolder.isFile()) {
-					saveFolder.mkdirs();
-				}			
-				Iterator<Entry<String, MultipartFile>> itr = files.entrySet().iterator();
-				MultipartFile file;
-				while (itr.hasNext()) {
-					Entry<String, MultipartFile> entry = itr.next();
-					System.out.println("client file upload object = [" + entry.getKey() + "]");
-					
-					file = entry.getValue();
-					System.out.println("original file name = [" + file.getOriginalFilename() + "]");
-					
-					String atchFilePath = makeNewFileName(file.getOriginalFilename(), attch_div_cd);
-					String atchFilePathOnly = "";
-					System.out.println("new file full path = [" + atchFilePath + "]");
-					String vtAtchFileNm = "";				
-					if (atchFilePath != null && !"".equals(atchFilePath)) {
-			
-						if (atchFilePath.indexOf("/") > -1) {
-							vtAtchFileNm = atchFilePath.substring(atchFilePath.lastIndexOf("/") + 1, atchFilePath.length());						
-							atchFilePathOnly = atchFilePath.substring(0, atchFilePath.lastIndexOf("/"));
-						} else {
-							vtAtchFileNm = atchFilePath.substring(atchFilePath.lastIndexOf("\\") + 1, atchFilePath.length());						
-							atchFilePathOnly = atchFilePath.substring(0, atchFilePath.lastIndexOf("\\"));
-						}					
-						System.out.println("vtAtchFileNm=" + vtAtchFileNm);
-						System.out.println("atchFileId=" + attch_file_id);
-						System.out.println("atchFilePathOnly=" + atchFilePathOnly);
-					}
-					
-					if (!"".equals(file.getOriginalFilename())) {
-						try {
-							file.transferTo(new File(uploadBasePath +  atchFilePath));
-						} catch (IllegalStateException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-				
-						HashMap<String, Object> map = new HashMap<String, Object>();
-						
-						map.put("attch_div_cd", attch_div_cd);
-						map.put("attch_file_id", attch_file_id);
-						map.put("attch_file_path", atchFilePathOnly);
-						map.put("attch_file_size", file.getSize());
-						map.put("real_attch_file_name", file.getOriginalFilename());
-						map.put("virtual_attch_file_name", vtAtchFileNm);
-						map.put("sti_cd", user_id);
-						
-						list.add(map);
-											
-					}
-			
-				}
-				
-				for (int i = 0; i < list.size(); i++) {
-					HashMap inMap = new HashMap<String, Object>();					
-					inMap = (HashMap) list.get(i);
-					res = tmserpScheduling.insertFile(inMap);
-		        	if (res < 1){
-		        		txManager.rollback(status);
-		        		return;
-		        	}					
-				}
-				
-			} else {
-				System.out.println("multi part data size zero!!!!!");
-    			txManager.rollback(status);
-        		return;		
-			}	     
-		} catch (Exception e) {
-			txManager.rollback(status);
-			return;			
-		}
-		txManager.commit(status);
-		return;		
-	}
-	
-	private String getShortDateString() {
-		java.text.SimpleDateFormat formatter =
-            new java.text.SimpleDateFormat ("yyyyMMdd", java.util.Locale.KOREA);
-		return formatter.format(new java.util.Date());
-	}
-	
-	private String makeNewFolderName(final String fileName, final String strAttchDivCd) throws Exception{
-		try{
-		String filePath = "";
-
-		if ("".equals(strAttchDivCd)) {
-			return "";
-		}
-		filePath = "/ERP"+filePath + "/" +strAttchDivCd+"/"+ getShortDateString();
-		
-		String basePath = environment.getProperty("file.upload.directory");
-		File checkFolder = new File(basePath + "/" + filePath);
-		if (!checkFolder.exists() || checkFolder.isFile()) {
-			checkFolder.mkdirs();
-		}
-
-		return filePath;
-		
-		}catch(Exception e){
-			throw new Exception();
-        }			
-	}
-	
-	private String makeNewFileName(final String originFileName, final String strAttchDivCd) throws Exception{
-		try{
-			String fileExt;
-			//final NumberFormat numberformat = new DecimalFormat("000000");
-			final NumberFormat numberformat = new DecimalFormat("000");
-			
-	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS"); //SSS가 밀리세컨드 표시
-	        Calendar calendar = Calendar.getInstance();
-	
-	        
-	        //vfilename = dateFormat.format(calendar.getTime())+String.format("%03d",kk)+filename.substring(filename.lastIndexOf(".")); 
-			
-			//String today = DateUtil.getCurrentDateTime(""); // yyyyMMddHHmmss
-			String today =  dateFormat.format(calendar.getTime());
-	
-			if (originFileName.indexOf(".") > -1) {
-				fileExt = originFileName.substring(originFileName.lastIndexOf(".") + 1);
-			} else {
-				fileExt = "";
-			}
-	
-			String filePath = makeNewFolderName(originFileName, strAttchDivCd);
-			if ("".equals(filePath)) {
-				System.out.println("file path unrecognized");
-				return "";
-			}
-	
-			int serial = 1;
-			String tempFileName;
-			String basePath = environment.getProperty("file.upload.directory");
-			//CDN경로
-			if("CDN".equals(strAttchDivCd)){
-				basePath = environment.getProperty("cdn.upload.path");
-			}
-			while (true) {
-				//tempFileName = today + "-" + numberformat.format(serial) + ("".equals(fileExt) ? "" : ("." + fileExt));
-				tempFileName = today + numberformat.format(serial) + ("".equals(fileExt) ? "" : ("." + fileExt));
-				File checkFile = new File(basePath + "/" + filePath + "/" + tempFileName);
-				if (checkFile.exists()) {
-					serial++;
-				} else {
-					break;
-				}
-			}
-			return filePath + "/" + tempFileName;
-		}catch(Exception e){
-			throw new Exception();
-		}
 	}	
 	
 	@ApiOperation(value="/fileDownload", notes="tms첨부파일 다운로드")
@@ -1911,7 +1687,6 @@ public class ApiTmsErpController {
 				defectDetailList = tmserpScheduling.selectDefectDetail(params);
 				return gson.toJson(defectDetailList);				
 			} else {
-				//throw new Exception();
 				throw new UsernameNotFoundException("login fail");
 			}			
 		} catch(Exception e) {
@@ -1925,43 +1700,51 @@ public class ApiTmsErpController {
 	
 	@ApiOperation(value="/saveOpinion", notes="이의제기 저장")
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK !!"), @ApiResponse(code = 5001, message = "") })
-	@PutMapping("/saveOpinion")
-	@RequestMapping(value="/saveOpinion",method=RequestMethod.PUT)
+	@PostMapping("/saveOpinion")
 	public String saveOpinion(
 			@AuthenticationPrincipal User user,
-			@RequestBody @ApiParam(value = "defectInfo", required = true) TMSERPDefectDetail defectDetailInfo
+			@ModelAttribute DefectDetailForm defectDetailForm
 			) throws Exception {  
+		
 		BaseResponse response = new BaseResponse();
 		HashMap<String,Object> params = new HashMap<String, Object>();
 		int res = 0;		
 		TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
-
+		String diff_file_id;
 		try {
-			if (user != null) {
+			
+			if(user == null) {
+				throw new UsernameNotFoundException("login fail");
+			}
+			// 파일저장
+			List<TMSERPFile> diffFiles = fileStore.storeFiles("Diff", defectDetailForm.diff_file_id, defectDetailForm.diff_files);
+					
+			if(diffFiles.isEmpty()) {
+				diff_file_id = defectDetailForm.diff_file_id;
+			} else {
+				diff_file_id = diffFiles.get(0).attch_file_id;
+			}
 				
-				params.put("rpt_no", defectDetailInfo.rpt_no);
-				params.put("rpt_seq", defectDetailInfo.rpt_seq);
-				params.put("bmt_item", defectDetailInfo.bmt_item);
-				params.put("col_cd", defectDetailInfo.col_cd);
-				params.put("opinion", defectDetailInfo.opinion);		
-
-		    	res = tmserpScheduling.updateOpinion(params);
-		    	
-				if (res < 1) {    				
-		        	txManager.rollback(status);
-		        	response.setResultCode("5001");
-		        	response.setResultMessage("saveOpinion 오류");
-		        	return gson.toJson(response);
-				}		
-			} else {	
-				txManager.rollback(status);
-				response.setResultCode("5001");
-				return gson.toJson(response);				
-			}		
+			params.put("rpt_no", defectDetailForm.rpt_no);
+			params.put("rpt_seq", defectDetailForm.rpt_seq);
+			params.put("bmt_item", defectDetailForm.bmt_item);
+			params.put("col_cd", defectDetailForm.col_cd);
+			params.put("opinion", defectDetailForm.opinion);
+			params.put("diff_file_id", diff_file_id);
+	
+			res = tmserpScheduling.updateOpinion(params);			   
+			if (res > 1) {    				
+			    	txManager.rollback(status);
+			    	response.setResultCode("5001");
+			    	response.setResultMessage("saveOpinion 오류");
+			    	return gson.toJson(response);
+			}
+			
 		} catch (Exception e) {	
 			txManager.rollback(status);
-			response.setResultCode("5001");
+			response.setResultCode("5002");
 			response.setResultMessage(e.toString());
+			e.printStackTrace();
 			return gson.toJson(response);
 		}
 		txManager.commit(status);

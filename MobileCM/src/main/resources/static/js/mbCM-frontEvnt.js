@@ -149,11 +149,15 @@ function vndFileDown() {//파일 다운로드
        var file_snum = $(this).closest('ul').find('input[name=file_snum]').val();
        fileDownload(file_id, file_snum);
      });
+     $('.icnClose_Blck').click(function() {
+       var file_id = $(this).closest('ul').find('input[name=file_id]').val();
+       var file_snum = $(this).closest('ul').find('input[name=file_snum]').val();
+       fileDelete(file_id, file_snum);
+     });     
 }
 
 function ulLftlst() {//리스트표시
       $('.ulLftlst').each(function() {
-      var ulLftlst = $(this);
       $(this).click(function() {
            if(!$(this).hasClass('_index')){
 	           $('.ulLftlst').removeClass('on');
@@ -164,7 +168,6 @@ function ulLftlst() {//리스트표시
 			   } else if ($('.migyeolReport').length > 0) {
 				   getMigyeolInfo(this);
 			   }
-          //}else if(! $(this).hasClass('_index') && $('.cnstrctLstBx').length > 0){
 		  } else if(! $(this).hasClass('_index')){
               $('.ulLftlst').removeClass('on');
               $(this).addClass('on');
@@ -173,7 +176,6 @@ function ulLftlst() {//리스트표시
     });
 }
 function resetUlLftlst() {
-    //$('#cnstrctLst .ulLftlst').each(function() {
     $('.ulLftlst').each(function() {
     	if(! $(this).hasClass('_index')){
  				$(this).remove();
@@ -189,7 +191,7 @@ function resetUlLftdtllst() {
 
 }
 function resetFilelst() {
-    $('.fileLst .ulLftlst').each(function() {
+    $('#getAttachFileList .ulLftlst').each(function() {
     	if(! $(this).hasClass('_index')){
  				$(this).remove();
            }

@@ -123,7 +123,7 @@
                 </div>
            </div>
            <div class="dfBx_x w500px _inSbPgBx _rghtPd">
-                <article class="hHrfBx _hPr30 _top nonAslt">
+                <article class="hHrfBx _hPr25 _top nonAslt">
                      <dl class="dfDl _scllDd">
                           <dt class="bldTtl">
                                조치결과 특이사항
@@ -132,7 +132,7 @@
                           </dd>
                      </dl>
                 </article>
-                <article class="hHrfBx _hPr30 nonAslt">
+                <article class="hHrfBx _hPr25 nonAslt">
                      <dl class="dfDl _scllDd">
                           <dt class="bldTtl">
                                서비스 요구내역
@@ -142,14 +142,23 @@
                           </dd>
                      </dl>
                 </article>
-                <article class="hHrfBx _hPr30 _bttm nonAslt">
+                <article class="hHrfBx _hPr50 _bttm nonAslt">
                      <dl class="dfDl _scllDd">
                           <dt class="bldTtl">
                                이의제기 내용
                           </dt>
                           <dd class="saveOpnnBox">
-                               <textarea class="dfTxtAra" id="opinion"></textarea>
-                               <button class="btn btnSzSmll btnBlck w60px fltRght mTop10px saveOpnnBtn">제출</button>
+                          <form method="post" enctype="multipart/form-data" id="diffUploadForm">
+                               <textarea class="dfTxtAra" rows="5" name ="opinion" id="opinion"></textarea>
+                               <input type ="file" name="diff_files" id="diff_files" multiple="multiple" onchange="fileUploadCheck(this.value)">
+                               <input type="hidden" name="diff_file_id" id="diff_file_id">
+                               <input type="hidden" name="rpt_no" id="rpt_no">
+                               <input type="hidden" name="rpt_seq" id="rpt_seq">
+                               <input type="hidden" name="bmt_item" id="bmt_item">
+                               <input type="hidden" name="col_cd" id="col_cd">
+                               <input type="submit" value="제출" class="btn btnSzSmll btnBlck w60px fltRght mTop10px saveOpnnBtn"/>
+                          </form>
+                          <div class="fileLst" id="getDiffFileList"></div>
                           </dd>
                      </dl>
                 </article>

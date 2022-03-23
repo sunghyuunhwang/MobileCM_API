@@ -105,8 +105,8 @@ public interface TMSERPSchedulingMapper {
 	public ArrayList<TMSERPComcd> selectComcdList(HashMap<String,Object> params);
 	public int updateOpinion(HashMap<String,Object> params);
 	public ArrayList<TMSERPStiPerformInfo> selectStiPerformInfo(HashMap<String,Object> params);
-	public int insertFile(HashMap<String, Object> params);
-	public String getAttchFileId(HashMap<String, Object> params);
+	public int insertFile(TMSERPFile params);
+	public String getAttchFileId(String attch_div_cd);
 	public int deleteFile(HashMap<String, Object> params);
 	public int updateDiffFileId(HashMap<String, Object> params);
 }

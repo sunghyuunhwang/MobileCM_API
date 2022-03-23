@@ -1,5 +1,9 @@
 package com.fursys.mobilecm.vo.tmserp;
 
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -12,7 +16,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @ApiModel(value = "하자내역상세", description = "")
-public class TMSERPDefectDetail{
+public class DefectDetailForm{
 	@ApiModelProperty(value = "접수번호", example="I202109130403")
 	public String rpt_no; /*접수번호*/
 	@ApiModelProperty(value = "순번", example="01")
@@ -33,6 +37,8 @@ public class TMSERPDefectDetail{
 	public String ast_rtnyn; /*회수여부*/
 	@ApiModelProperty(value = "이의제기", example="이의제기내용입니다.")
 	public String opinion; /*이의제기*/
+	@ApiModelProperty(value="이의제기파일", required=false)
+	public List<MultipartFile> diff_files;
 	@ApiModelProperty(value = "이의제기파일ID", example="SC20220119251507")
 	public String diff_file_id; /*이의제기파일*/
 }

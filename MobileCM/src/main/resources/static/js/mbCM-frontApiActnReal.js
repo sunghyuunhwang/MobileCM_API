@@ -1396,42 +1396,120 @@ function getMigyeolReportInfo() {//미결현황요약정보
 	}
 
 }
+
+function fileDelete(file_no, file_snum) { // 파일 다운로드
+	if(confirm("파일을 삭제하시겠습니까?")) {
+		$.ajax({
+	        url: "/v1/api/tmserp/fileDelete",
+	        type: "DELETE",	
+	        data: {
+				file_id: file_no,
+				file_snum: file_snum
+	        },	
+	        success: function(){
+				alert("파일이 삭제되었습니다.");
+                getDfctDetail($('#getDfctInf').find('.ulLftlst.on'));
+	        },
+	        error: function(e) {
+				alert("fail");
+				console.log("error : ",e);		
+			}
+		});		
+	}
+}
+function fileUploadCheck(fileVal) {
+	// 파일명 길이
+/*	let fileLength = fileVal.length;
+	let fileDot = fileVal.lastIndexOf(".");
+	let fileType = fileVal.substring(fileDot+1, fileLength).toLowercase();*/
+	
+	var fileName = $("#diff_files").val();
+	fileName = fileName.slice(fileName.indexOf(".")+1).toLowerCase();
+	
+	if(fileName != "jpg" && fileName != "png" && fileName != "gif" && fileName != "bmp") {
+		alert("이미지파일(jpg, png, gif, bmp)만 업로드 가능합니다.");
+		$("#diff_files").val("");
+	}
+}
 function saveOpinion() {//이의제기 저장
-     $(document).on("click",".saveOpnnBtn",function(){
-           var rpt_no = $('.getDfctInfLst.on').find('._rpt_no').text();
-           var rpt_seq = $('.getDfctInfLst.on').find('._rpt_seq').text();
-           var bmt_item = $('.getDfctDetail.on').find('._bmt_item').text();
-           var col_cd = $('.getDfctDetail.on').find('._col_cd').text();
-           var opinion = $('#opinion').val();
-         $.ajax({
+     $(document).on("click",".saveOpnnBtn",function(event){
+		event.preventDefault();
+		var form = $("#diffUploadForm")[0];
+		var data = new FormData(form);
+		$(".saveOpnnBtn").prop("disabled", true);
+        $.ajax({
                url: "/v1/api/tmserp/saveOpinion",
-               type: "PUT",
+               type: "POST",
                cache: false,
-               dataType: "json",
-               contentType: 'application/json',
-               data:JSON.stringify ({
-                    rpt_no: rpt_no,
-                    rpt_seq: rpt_seq,
-                    bmt_item: bmt_item,
-                    col_cd: col_cd,                   
-                    opinion: opinion
-               }),
-               success : function(data){   //파일 주고받기가 성공했을 경우. data 변수 안에 값을 담아온다.
+               enctype: 'multipart/form-data',
+               processData: false,
+               contentType: false,
+               data:data,
+               success : function(){   //파일 주고받기가 성공했을 경우. data 변수 안에 값을 담아온다.
                     alert("이의제기 내용이 저장되었습니다.");
-                    $('.getDfctDetail.on').find('._opinion').text(opinion);
-              }
-         });
+                    getDfctDetail($('#getDfctInf').find('.ulLftlst.on'));
+                    $('input[name=diff_files]').val('');
+               },
+               error: function(e){
+				 alert("fail");
+				 console.log("error : ",e);
+			   },
+			   complete: function(){
+				 $(".saveOpnnBtn").prop("disabled", false);				
+			   }
+        });
      });
+}
 
+function getDiffFiles(_this) {
 
+	$('#getDiffFileList').find('.ulLftlst').remove();
+	var target  = $('#getDfctInf').find('.ulLftlst.on');
+	var rpt_no = target.find('._rpt_no').text();
+	var rpt_seq =target.find('._rpt_seq').text();
+	var bmt_item = $(_this).find('._bmt_item').text();
+	var col_cd = $(_this).find('._col_cd').text();		
+	var file_id = $(_this).find('._diff_file_id').val();
+	$("#diffUploadForm").find("#rpt_no").val(rpt_no);
+	$("#diffUploadForm").find("#rpt_seq").val(rpt_seq);
+	$("#diffUploadForm").find("#bmt_item").val(bmt_item);
+	$("#diffUploadForm").find("#col_cd").val(col_cd);
+	$("#diffUploadForm").find("#diff_file_id").val(file_id);
+		
+ 	if(file_id.length > 0 ) {
+	    $.ajax({
+	       url: "/v1/api/tmserp/getAttachFileList",
+	       type: "GET",
+	       cache: false,
+	       dataType: "json",
+	       data: {
+			file_id : file_id
+	       },
+	       success: function(list){
+	           $.each(list, function(idx, response) {
+	                 var getFileList = "<ul class='ulLftlst'>";
+	                 	 getFileList += "<li><button class='bfafNn icnDown'>"+response.real_attch_file_name+"</button></li>";
+						 getFileList += "<li><button class='bfafNn icnClose_Blck'></button></li>";                 	 
+		                 getFileList += "<input type='hidden' name = 'file_id' value='"+response.attch_file_id+"'/>";
+		                 getFileList += "<input type='hidden' name = 'file_snum' value='"+response.attch_file_snum+"'/>";
+		                 getFileList += "</ul>";
+	                 $('#getDiffFileList').append(getFileList);
+	             });
+	             vndFileDown();
+	       },
+	       error: function (request, status, error){
+	             console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+	             alert('데이터를 불러올수 없습니다.');
+	       }
+	     });	
+	}
 }
 function getDfctDetail(_this) {//하자내역상새조회
      $('#getDfctDetail').find('.ulLftlst._data').remove();
    	 $('.ulLftlst').removeClass('on');
 	 $(_this).addClass('on');
-	 var $selected_to = $(_this);
-	 var $selected_rpt_no = $selected_to.find('input[name=rpt_no]').val();
- 	 var $selected_rpt_seq = $selected_to.find('input[name=rpt_seq]').val();
+	 var $selected_rpt_no = $(_this).find('input[name=rpt_no]').val();
+ 	 var $selected_rpt_seq = $(_this).find('input[name=rpt_seq]').val();
      $.ajax({
        url: "/v1/api/tmserp/getDefectDetail",
        type: "GET",
@@ -1443,7 +1521,7 @@ function getDfctDetail(_this) {//하자내역상새조회
        },
        success: function(list){
             $.each(list, function(idx, response) {
-               var getDfctDetail = "<ul class='ulLftlst _indefectInf _data getDfctDetail'>";
+               var getDfctDetail = "<ul class='ulLftlst _indefectInf _data getDfctDetail' onclick='getDiffFiles(this);'>";
                    getDfctDetail += "<li class='w150px'>"+response.itm_cd+"</li>";
                    getDfctDetail += "<li class='w200px _bmt_item'>"+response.bmt_item+"</li>";
                    getDfctDetail += "<li class='w200px tAlgnCntr _col_cd'>"+response.col_cd+"</li>";
@@ -1451,30 +1529,30 @@ function getDfctDetail(_this) {//하자내역상새조회
                    getDfctDetail += "<li class='w100px tAlgnCntr'>"+response.ast_rtnyn+"</li>";
                    getDfctDetail += "<li class='dsplyNon _opinion'>"+response.opinion+"</li>";
                    getDfctDetail += "<li class='wCal550px'><button class='inFileBtn' onclick='inFileBtnPop(this)'>"+response.file_yn+"</button></li>";
-	               getDfctDetail += "<input type='hidden' name ='file_id' value='"+response.final_file_id+"'/>";		                                   
+	               getDfctDetail += "<input type='hidden' name ='file_id' value='"+response.final_file_id+"'/>";
+	               getDfctDetail += "<input type='hidden' class = '_diff_file_id' name ='diff_file_id' value='"+response.diff_file_id+"'/>";		                                   
                    getDfctDetail += "</ul>";
                 $('#getDfctDetail').append(getDfctDetail);
             });
-
-			var datalist = $('#getDfctDetail ul.ulLftlst').not('._index');
-			$(datalist[0]).addClass('on');
-		    var opinion = list[0].opinion;
-		    if(opinion.length > 0){
-		       $('#opinion').val(opinion);
-		    }else{
-		       $('#opinion').val('이의 제기내용이 없습니다.');
-		    }
+	       if(list.length > 0){
+				var datalist = $('#getDfctDetail ul.ulLftlst').not('._index');
+				$(datalist[0]).addClass('on');
+				
+			    var opinion = list[0].opinion;
+			    if(opinion.length > 0){
+			       $('#opinion').val(opinion);
+			    }else{
+			       $('#opinion').val('이의 제기내용이 없습니다.');
+			    }				
+				getDiffFiles(datalist[0]);
+			}
 			defectinfStl();
-
-		    /*inFileBtnPop();*/
        },
        error: function (request, status, error){
             console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
             alert('데이터를 불러올수 없습니다.');
        }
    });
-
-
 }
 function getDfctInf() {//하자내역조회
 	var from_dt = $('.defectInfo #nmldate1').val();//시작일
@@ -1545,11 +1623,6 @@ function getDfctInf() {//하자내역조회
 	                }else{
 	                   $('#rpt_desc').text('요구 내역이 없습니다.');
 	                }
-/*	                if(opinion.length > 0){
-	                   $('#opinion').text(opinion);
-	                }else{
-	                   $('#opinion').text('이의 제기내용이 없습니다.');
-	                }*/
 	             $(this).addClass('on');
 	           });	
 	           dateformatting();			

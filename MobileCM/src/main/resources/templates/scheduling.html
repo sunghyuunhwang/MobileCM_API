@@ -43,6 +43,9 @@
                  lonlat =  new Tmapv2.LatLng(list[0].latitude,list[0].longitude);
                  map.setCenter(lonlat);
                  var idxNbr = $('#assgn_lst li').index($('#assgn_lst li[class="clck"]'));
+                 if(idxNbr > 29) {
+                	 idxNbr %= 30;
+                 }
                  var marker = new Tmapv2.Marker({
                      position: new Tmapv2.LatLng(strLat, strLng), //Marker의 중심좌표 설정.
                      icon: "/img/mrk_"+idxNbr+".svg", //Marker의 아이콘.

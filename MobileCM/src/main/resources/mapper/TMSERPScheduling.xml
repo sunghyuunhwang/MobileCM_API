@@ -19,7 +19,7 @@
     AND ATTCH_FILE_SNUM = #{attch_file_snum}
     </delete>
 
-    <insert id="insertFile" parameterType="HashMap">
+    <insert id="insertFile" parameterType="com.fursys.mobilecm.vo.tmserp.TMSERPFile">
     INSERT INTO TY_ATTCHFILE
     (
           ATTCH_DIV_CD
@@ -41,13 +41,13 @@
         , #{virtual_attch_file_name}
         , #{attch_file_path}
         , #{attch_file_size}
-        , #{sti_cd}
+        , 'MOBILECM'
         , GETDATE()
-        , #{sti_cd}
+        , 'MOBILECM'
         , GETDATE()        
     )    
     </insert>
-    <select id="getAttchFileId" parameterType="HashMap" resultType="java.lang.String">
+    <select id="getAttchFileId" parameterType="java.lang.String" resultType="java.lang.String">
         <![CDATA[
            DECLARE @p_RTN VARCHAR (16)
            EXECUTE dbo.SP_GET_FILEKEY #{attch_div_cd}, @p_RTN = @p_RTN OUTPUT
@@ -2937,8 +2937,7 @@
 		       final_file_id,
 		       ast_rtnyn,
 		       isnull(diff_opinion,'') as opinion,
-		       diff_file_id,
-		       (select count(*) from ty_attchfile with (nolock) where attch_file_id = diff_file_id) as diff_file_cnt
+		       isnull(diff_file_id,'') as diff_file_id
 		FROM   ta_astitem WITH (nolock)
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 
@@ -3152,6 +3151,7 @@
 	<![CDATA[
 		UPDATE ta_astitem
 		SET    diff_opinion = #{opinion}
+			  ,diff_file_id = #{diff_file_id}
 		WHERE  rpt_no = #{rpt_no}
 		       AND rpt_seq = #{rpt_seq} 
 		       AND bmt_item = #{bmt_item} 

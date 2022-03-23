@@ -148,7 +148,7 @@ input:focus:-ms-input-placeholder,textarea:focus:-ms-input-placeholder,.inptBx:f
 .icnWidBx::before{background-image: url('/img/icnWidBx.svg');}/*박스 넓게*/
 .icnNrrwBx::before{background-image: url('/img/icnNrrwBx.svg');}/*박스 좁게*/
 .icnTopMenuOpn::before{background-image: url('/img/icnTopMenuOpn.svg');}
-.icnClose_Blck::before{background-image: url('/img/icn_close_Blck.svg');}
+.icnClose_Blck::before,.icnClose_Blck{background-image: url('/img/icn_close_Blck.svg');}
 .icnDown::before,.icnDown{background-image: url('/img/icn_down.svg');}
 
 .nrrwBtn,.widBtn{background-repeat: no-repeat;background-size: 100% auto;background-position: center;}
