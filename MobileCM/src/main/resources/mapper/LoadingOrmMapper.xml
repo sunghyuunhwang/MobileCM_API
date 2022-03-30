@@ -204,7 +204,8 @@
 		FST_USR_CD, 
 		FST_SYS_DT, 
 		USR_CD, 
-		SYS_DT
+		SYS_DT,
+		ORM_NO_CUT
 	)
 	VALUES
 	(
@@ -229,7 +230,8 @@
 		#{sti_cd},
 		GETDATE(),
 		#{sti_cd},
-		GETDATE()
+		GETDATE(),
+		LEFT(#{orm_no}, 13)
 	)
 	
 
