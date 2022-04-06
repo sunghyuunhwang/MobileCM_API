@@ -1700,8 +1700,8 @@ function insrtstimmbrinf() {//시공팀원정보등록
      car_no:car_no,
      stm_jdt:stm_jdt
      }
-     if(stm_nm.length < 1 || (stm_jdt.length < 1 || isNaN(stm_jdt))){
-          alert('팀원 이름/입사일은 필수입력 사항입니다. 입사일은 숫자 8자리로 입력해주세요. (예 : 20200909)');
+     if(stm_nm.length < 1 || (stm_jdt.length < 1 || isNaN(stm_jdt)) || com_pos.length < 1 || stm_hp.length < 1){
+          alert('팀원 이름/입사일/직책/핸드폰번호는 필수입력 사항입니다. 입사일은 숫자 8자리로 입력해주세요. (예 : 20200909)');
           if(stm_nm.length < 1){
                mmbrpop.find('._stm_nm').addClass('wrng');
           }
