@@ -2887,7 +2887,7 @@
 		        WHERE  1 = 1
 		               AND b.com_scd = #{com_scd}
 		               AND a.com_rsfsec = 'A6434'
-		               AND a.com_rsftyp in ('642003', '642022')
+		               AND a.com_rsftyp in ('642003', '642022', '642023')
 		               /*AND a.defect_typ = 'A6639'*/
 		               AND b.rpt_enddt 	<![CDATA[>=]]> #{from_dt}
 		               AND b.rpt_enddt 	<![CDATA[<=]]> #{to_dt}
@@ -3233,7 +3233,7 @@
 											 AND TAR.RPT_SEQ = TAA.RPT_SEQ
 											 AND TAR.COM_SPROG = 'A17008'
 											 AND TAA.COM_RSFSEC = 'A6434'
-											 AND TAA.COM_RSFTYP in ('642003', '642022')						    
+											 AND TAA.COM_RSFTYP in ('642003', '642022', '642023')						    
 										) AS SIGONGHAJA_CNT
 										,(SELECT COUNT(*)
 										  FROM TC_PLANMST TCP WITH (NOLOCK)

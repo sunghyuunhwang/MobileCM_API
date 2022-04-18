@@ -400,9 +400,10 @@
 			   				 ,c929		    /*근무지외*/		   
 			   				 ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
 			   				 ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
-			   				 ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+                             /*,c928          2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
 			   				 ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
 			   				 ,c942		    /*제품반입비*/
+							 ,c928 + ADDREQ + ADDTIME + SOFA + OUTSOURCE AS c928 /*추가지급비용 임시로 기타지원에 집계, 2022-04-15, HONG*/			   				 
 						FROM(
 						  SELECT A.COM_SCD								
 								,A.COM_CTSEC   						
@@ -456,14 +457,20 @@
 								,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
 								,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932		
 								,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942
-							FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
-								   TC_PLANMST AS B WITH (NOLOCK),
-								   TC_STINF  AS C WITH (NOLOCK)			
-						   WHERE   A.PLM_NO = B.PLM_NO				
-							 AND   B.STI_CD = C.STI_CD					
-							 AND   B.COM_SCD   = C.COM_SCD
-							 AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
-							 AND   A.COM_VTSEC  = 'C2501'
+								,SUM(CASE WHEN D.REF_1 = 'Y' THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDREQ
+								,SUM(CASE WHEN ISNULL(D.REF_3,'') > ''  THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDTIME
+								,SUM(CASE WHEN A.COM_ASEC = 'C0956' THEN ISNULL(ACL_AMT,0) ELSE 0 END) SOFA /*소파추가*/
+								,SUM(CASE WHEN A.COM_ASEC = 'C0957' THEN ISNULL(ACL_AMT,0) ELSE 0 END) OUTSOURCE /*외주추가*/													
+						   FROM   TC_ACTLIST AS A WITH (NOLOCK)
+						   INNER JOIN TC_PLANMST AS B WITH (NOLOCK)
+								   ON A.PLM_NO = B.PLM_NO
+						   INNER JOIN TC_STINF  AS C WITH (NOLOCK)
+								   ON C.STI_CD = B.STI_CD
+								   AND C.COM_SCD = B.COM_SCD
+						   INNER JOIN TT_COMCD D WITH (NOLOCK)
+								   ON D.CCD_CD = A.COM_ASEC	
+						   WHERE A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+							 /*AND   A.COM_VTSEC  = 'C2501'*/
 							 AND   A.COM_DPSEC = 'C07P'   														
 							 AND   B.COM_PLMFG = 'C104' 
 		   					 AND   A.PLM_CDT LIKE #{fr_year}
@@ -526,9 +533,10 @@
 			   				 ,c929		    /*근무지외*/		   
 			   				 ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
 			   				 ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
-			   				 ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+                             /*,c928          2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
 			   				 ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
 			   				 ,c942		    /*제품반입비*/
+							 ,c928 + ADDREQ + ADDTIME + SOFA + OUTSOURCE AS c928 /*추가지급비용 임시로 기타지원에 집계, 2022-04-15, HONG*/			   				 
 						FROM(
 						  SELECT A.COM_SCD								
 								,A.COM_CTSEC   						
@@ -582,14 +590,20 @@
 								,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
 								,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932
 								,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942		
-							FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
-								   TC_PLANMST AS B WITH (NOLOCK),
-								   TC_STINF  AS C WITH (NOLOCK)			
-						   WHERE   A.PLM_NO = B.PLM_NO				
-							 AND   B.STI_CD = C.STI_CD					
-							 AND   B.COM_SCD   = C.COM_SCD
-							 AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
-							 AND   A.COM_VTSEC  = 'C2501'
+								,SUM(CASE WHEN D.REF_1 = 'Y' THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDREQ
+								,SUM(CASE WHEN ISNULL(D.REF_3,'') > ''  THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDTIME
+								,SUM(CASE WHEN A.COM_ASEC = 'C0956' THEN ISNULL(ACL_AMT,0) ELSE 0 END) SOFA /*소파추가*/
+								,SUM(CASE WHEN A.COM_ASEC = 'C0957' THEN ISNULL(ACL_AMT,0) ELSE 0 END) OUTSOURCE /*외주추가*/
+						   FROM   TC_ACTLIST AS A WITH (NOLOCK)
+						   INNER JOIN TC_PLANMST AS B WITH (NOLOCK)
+								   ON A.PLM_NO = B.PLM_NO
+						   INNER JOIN TC_STINF  AS C WITH (NOLOCK)
+								   ON C.STI_CD = B.STI_CD
+								  AND C.COM_SCD = B.COM_SCD
+						   INNER JOIN TT_COMCD D WITH (NOLOCK)
+								   ON D.CCD_CD = A.COM_ASEC		
+						   WHERE A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+							 /*AND   A.COM_VTSEC  = 'C2501'*/
 							 AND   A.COM_DPSEC = 'C07P'   														
 							 AND   B.COM_PLMFG = 'C104' 
 		   					 --AND   A.PLM_CDT BETWEEN '20200101' AND '20201131'
@@ -654,9 +668,10 @@
 			   				 ,c929		    /*근무지외*/		   
 			   				 ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
 			   				 ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
-			   				 ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+                             /*,c928          2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
 			   				 ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
 			   				 ,c942		    /*제품반입비*/
+							 ,c928 + ADDREQ + ADDTIME + SOFA + OUTSOURCE AS c928 /*추가지급비용 임시로 기타지원에 집계, 2022-04-15, HONG*/			   				 
 						FROM(
 						  SELECT A.COM_SCD								
 								,A.COM_CTSEC   						
@@ -710,14 +725,20 @@
 								,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
 								,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932
 								,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942		
-							FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
-								   TC_PLANMST AS B WITH (NOLOCK),
-								   TC_STINF  AS C WITH (NOLOCK)			
-						   WHERE   A.PLM_NO = B.PLM_NO				
-							 AND   B.STI_CD = C.STI_CD					
-							 AND   B.COM_SCD   = C.COM_SCD
-							 AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
-							 AND   A.COM_VTSEC  = 'C2501'
+								,SUM(CASE WHEN D.REF_1 = 'Y' THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDREQ
+								,SUM(CASE WHEN ISNULL(D.REF_3,'') > ''  THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDTIME
+								,SUM(CASE WHEN A.COM_ASEC = 'C0956' THEN ISNULL(ACL_AMT,0) ELSE 0 END) SOFA /*소파추가*/
+								,SUM(CASE WHEN A.COM_ASEC = 'C0957' THEN ISNULL(ACL_AMT,0) ELSE 0 END) OUTSOURCE /*외주추가*/
+						   FROM   TC_ACTLIST AS A WITH (NOLOCK)
+						   INNER JOIN TC_PLANMST AS B WITH (NOLOCK)
+								   ON A.PLM_NO = B.PLM_NO
+						   INNER JOIN TC_STINF  AS C WITH (NOLOCK)
+								   ON C.STI_CD = B.STI_CD
+								  AND C.COM_SCD = B.COM_SCD
+						   INNER JOIN TT_COMCD D WITH (NOLOCK)
+								   ON D.CCD_CD = A.COM_ASEC			
+						   WHERE A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+							 /*AND   A.COM_VTSEC  = 'C2501'*/
 							 AND   A.COM_DPSEC = 'C07P'   														
 							 AND   B.COM_PLMFG = 'C104' 
 		   					 --AND   A.PLM_CDT BETWEEN '20201201' AND '20201231'
@@ -808,7 +829,7 @@
 			   ,C922 AS MINUS_AMT_4 /*식대*/
 			   ,C938 AS MINUS_AMT_5 /*기타*/
 		       ,c927 AS SHARE_AMT /*공동시공분할합계*/
-		       ,COMPUTE6 + (c92+c93+c94+c95+c96+c97+c933) + (c98+c99+c914+c921+c936+c929+c932+c928+c9A) + (c923+c924+c925+c922+c938) + c927 AS AMT_TOTAL /*전체합계*/
+		       ,COMPUTE6 + (c92+c93+c94+c95+c96+c97+c933) + (c98+c99+c914+c921+c936+c929+c932+c928+c9A) + (c923+c924+c925+c922+c938) + c927 + (c934 + c942) AS AMT_TOTAL /*전체합계*/
 		FROM (
 		         SELECT  COM_SCD, STI_CD
 					     ,COM_CTSEC
@@ -854,9 +875,10 @@
 				   	     ,c929		    /*근무지외*/		   
 				   	     ,(c93  +  c91  +  c94  +  c92  +  c95  +  c96  +  c97  +  c98  + c99  + c914  + c920 + c921 + c922 + c923 + c924 + c925 + c926 + c927 + c928 + c929 + c930 + c931 + c938 + c937 + c939 + c933 + c936 + c941 + c935 + c917 + c932 + c9A)AS ECTSIGOUNGSUM	/*시공외지급비용합계*/
 				   	     ,c9A           /* 2018.05.22 |주요한| 폐기물 항목 추가*/
-				   	     ,c928          /*2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
+                         /*,c928          2018.06.04 |주요한| 기타지원 항목 추가  노현준님 요청사항*/
 				   	     ,c934		    /*관계사(청)* 2018.08.07 이재환 대리 요청, 시공외지급에서 빠져야 한다는 요청*/
 				   	     ,c942		    /*관계사제품반입비*/
+						 ,c928 + ADDREQ + ADDTIME + SOFA + OUTSOURCE AS c928 /*추가지급비용 임시로 기타지원에 집계, 2022-04-15, HONG*/
 				    FROM(
 					  SELECT A.COM_SCD								
 					        ,A.COM_CTSEC   						
@@ -910,14 +932,20 @@
 				            ,SUM(CASE WHEN A.COM_ASEC = 'C0917' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c917		
 				            ,SUM(CASE WHEN A.COM_ASEC = 'C0932' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c932
 				            ,SUM(CASE WHEN A.COM_ASEC = 'C0942' THEN ISNULL(ACL_AMT,0) ELSE 0 END ) c942
-					    FROM   TC_ACTLIST AS A WITH (NOLOCK),      									
-					           TC_PLANMST AS B WITH (NOLOCK),
-					           TC_STINF  AS C WITH (NOLOCK)			
-					   WHERE   A.PLM_NO = B.PLM_NO				
-					     AND   B.STI_CD = C.STI_CD					
-					     AND   B.COM_SCD   = C.COM_SCD
-					     AND   A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
-					     AND   A.COM_VTSEC  = 'C2501'
+							,SUM(CASE WHEN D.REF_1 = 'Y' THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDREQ
+							,SUM(CASE WHEN ISNULL(D.REF_3,'') > ''  THEN ISNULL(ACL_AMT,0) ELSE 0 END) ADDTIME
+							,SUM(CASE WHEN A.COM_ASEC = 'C0956' THEN ISNULL(ACL_AMT,0) ELSE 0 END) SOFA /*소파추가*/
+							,SUM(CASE WHEN A.COM_ASEC = 'C0957' THEN ISNULL(ACL_AMT,0) ELSE 0 END) OUTSOURCE /*외주추가*/
+                                    FROM   TC_ACTLIST AS A WITH (NOLOCK)
+							INNER JOIN TC_PLANMST AS B WITH (NOLOCK)
+									ON A.PLM_NO = B.PLM_NO
+                                    INNER JOIN TC_STINF  AS C WITH (NOLOCK)
+									ON C.STI_CD = B.STI_CD
+									AND C.COM_SCD = B.COM_SCD
+							INNER JOIN TT_COMCD D WITH (NOLOCK)
+									ON D.CCD_CD = A.COM_ASEC		
+					   WHERE A.COM_VFSEC  IN ( 'C2402', 'C2403','C2404')
+					     /*AND   A.COM_VTSEC  = 'C2501'*/
 					     AND   A.COM_DPSEC = 'C07P'   														
 					     AND   B.COM_PLMFG = 'C104' 	  			  
 			   			 AND   A.PLM_CDT BETWEEN CAST( #{fr_dt} AS VARCHAR) AND CAST( #{to_dt} AS VARCHAR)
