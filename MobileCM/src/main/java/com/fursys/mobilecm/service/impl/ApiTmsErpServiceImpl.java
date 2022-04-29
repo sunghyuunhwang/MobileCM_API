@@ -485,8 +485,8 @@ public class ApiTmsErpServiceImpl  implements ApiTmsErpService {
     	        			//response.setResultCode("5001");
     	        			//response.setResultMessage(geocoding.getResultMessage());
     	        			//return response;
-    	        			arErpOrderList.get(i).setLongitude("-");	
-    	        			arErpOrderList.get(i).setLatitude("-");
+    	        			arErpOrderList.get(i).setLongitude("");	
+    	        			arErpOrderList.get(i).setLatitude("");
             			} else {
             				if (geocoding.getCoordinateInfo().getTotalCount() > 0) {        			
         	        			arErpOrderList.get(i).setLongitude(geocoding.getCoordinateInfo().getCoordinate().get(0).getLon());	
@@ -500,8 +500,8 @@ public class ApiTmsErpServiceImpl  implements ApiTmsErpService {
 	        			//response.setResultCode("5001");
 	        			//response.setResultMessage(geocoding.getResultMessage());
 	        			//return response;
-	        			arErpOrderList.get(i).setLongitude("-");	
-	        			arErpOrderList.get(i).setLatitude("-");
+	        			arErpOrderList.get(i).setLongitude("");	
+	        			arErpOrderList.get(i).setLatitude("");
             		}
             	} else {            	
 	        		if (geocoding.getCoordinateInfo().getTotalCount() > 0) {        			
